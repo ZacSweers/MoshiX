@@ -48,7 +48,10 @@ Reflection works via `MoshiSealedJsonAdapterFactory`. Just add this in moshi bef
 `KotlinJsonAdapterFactory` in your Moshi instance construction.
 
 ```kotlin
-val moshi = Moshi.Builder().add(MoshiSealedJsonAdapterFactory()).add(KotlinJsonAdapterFactory()).build()
+val moshi = Moshi.Builder()
+    .add(MoshiSealedJsonAdapterFactory())
+    .add(KotlinJsonAdapterFactory())
+    .build()
 ```
 
 Gradle dependency:
