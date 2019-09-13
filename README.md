@@ -60,39 +60,6 @@ Gradle dependency:
 implementation "io.sweers.moshisealed:moshi-sealed-reflect:{version}"
 ```
 
-#### Using both
-
-For faster build times on IDE debug builds, you can use both reflection and code gen in tandem. This
-affords the benefit of avoiding annotation processing overhead during builds while continuing to use 
-it for CI and production builds. Code gen _should_ be the preferred option for runtime performance 
-and binary size, as the reflect artifact uses `kotlin-reflect`.
-
-Kotlin modules:
-
-```gradle
-dependencies {
-  if (properties.containsKey('android.injected.invoked.from.ide')) {
-    implementation 'io.sweers.moshisealed:moshi-sealed-reflect:<version>'
-  } else {
-    implementation 'io.sweers.moshisealed:moshi-sealed:<version>'
-    kapt 'io.sweers.moshisealed:moshi-sealed-codegen:<version>'
-  }
-}
-```
-
-Java modules:
-
-```gradle
-dependencies {
-  if (properties.containsKey('android.injected.invoked.from.ide')) {
-    implementation 'io.sweers.moshisealed:moshi-sealed-reflect:<version>'
-  } else {
-    implementation 'io.sweers.moshisealed:moshi-sealed:<version>'
-    annotationProcessor 'io.sweers.moshisealed:moshi-sealed-codegen:<version>'
-  }
-}
-```
-
 License
 -------
 
