@@ -80,8 +80,3 @@ class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
     return null
   }
 }
-
-// TODO use moshi 1.9.0
-fun <T> PolymorphicJsonAdapterFactory<T>.withDefaultValue(defaultValue: T?): PolymorphicJsonAdapterFactory<T> {
-  TODO()
-}
