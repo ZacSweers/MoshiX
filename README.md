@@ -3,6 +3,8 @@ Moshi-sealed
 
 ## 🚧 WIP 🚧
 
+_This currently uses unrelated KotlinPoet and Moshi APIs_
+
 Reflective and code gen implementations for serializing Kotlin sealed classes via Moshi polymorphic adapters.
 
 Simple add `sealed:{typeLabel}` where `{typeLabel}` is the value of the type label that should be
