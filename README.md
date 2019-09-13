@@ -27,14 +27,11 @@ sealed class Message {
 }
 ```
 
-### Reflection and code gen
+### Installation
 
-Reflection works via `MoshiSealedJsonAdapterFactory`. Just add this in moshi before 
-`KotlinJsonAdapterFactory` in your Moshi instance construction.
+Moshi-sealed can be used via reflection or code generation.
 
-```kotlin
-val moshi = Moshi.Builder().add(MoshiSealedJsonAdapterFactory()).add(KotlinJsonAdapterFactory()).build()
-```
+#### Code gen
 
 Code gen works via annotation processor, and only requires adding the kapt dependency:
 
@@ -44,6 +41,54 @@ kapt "io.sweers.moshisealed:moshi-sealed-codegen:{version}"
 
 No runtime configuration is needed, code gen will generate `JsonAdapter`s in a way that Moshi understands
 natively.
+
+#### Reflection
+
+Reflection works via `MoshiSealedJsonAdapterFactory`. Just add this in moshi before 
+`KotlinJsonAdapterFactory` in your Moshi instance construction.
+
+```kotlin
+val moshi = Moshi.Builder().add(MoshiSealedJsonAdapterFactory()).add(KotlinJsonAdapterFactory()).build()
+```
+
+Gradle dependency:
+
+```gradle
+implementation "io.sweers.moshisealed:moshi-sealed-reflect:{version}"
+```
+
+#### Using both
+
+For faster build times on IDE debug builds, you can use both reflection and code gen in tandem. This
+affords the benefit of avoiding annotation processing overhead during builds while continuing to use 
+it for CI and production builds. Code gen _should_ be the preferred option for runtime performance 
+and binary size, as the reflect artifact uses `kotlin-reflect`.
+
+Kotlin modules:
+
+```gradle
+dependencies {
+  if (properties.containsKey('android.injected.invoked.from.ide')) {
+    implementation 'io.sweers.moshisealed:moshi-sealed-reflect:<version>'
+  } else {
+    implementation 'io.sweers.moshisealed:moshi-sealed:<version>'
+    kapt 'io.sweers.moshisealed:moshi-sealed-codegen:<version>'
+  }
+}
+```
+
+Java modules:
+
+```gradle
+dependencies {
+  if (properties.containsKey('android.injected.invoked.from.ide')) {
+    implementation 'io.sweers.moshisealed:moshi-sealed-reflect:<version>'
+  } else {
+    implementation 'io.sweers.moshisealed:moshi-sealed:<version>'
+    annotationProcessor 'io.sweers.moshisealed:moshi-sealed-codegen:<version>'
+  }
+}
+```
 
 License
 -------
