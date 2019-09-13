@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 plugins {
-  id 'com.github.johnrengelman.shadow' version '5.1.0'
+//  id 'com.github.johnrengelman.shadow' version '5.1.0'
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.kapt'
   id 'org.jetbrains.dokka'
@@ -22,24 +22,24 @@ plugins {
 
 //<editor-fold desc="ShadowJar configuration">
 // disable default jar tasks
-configurations.runtimeOnly.artifacts.removeAll { it.archiveTask.is jar }
-tasks.getByName('jar').enabled = false
-// create extra configuration for shaded dependencies, so they're not included in the pom
-def shadedConfig = configurations.create('implementationShaded')
-configurations.compileOnly.extendsFrom(shadedConfig)
-shadowJar {
-  minimize()
-  archiveClassifier.set('')
-  configurations = [shadedConfig]
-  relocate 'com.google', 'moshisealed.shaded.com.google'
-  relocate 'afu', 'moshisealed.shaded.afu'
-  relocate 'org', 'moshisealed.shaded.org'
-  exclude 'javax/**'
-}
-artifacts {
-  runtime shadowJar
-  archives shadowJar
-}
+//configurations.runtimeOnly.artifacts.removeAll { it.archiveTask.is jar }
+//tasks.getByName('jar').enabled = false
+//// create extra configuration for shaded dependencies, so they're not included in the pom
+//def shadedConfig = configurations.create('implementationShaded')
+//configurations.compileOnly.extendsFrom(shadedConfig)
+//shadowJar {
+//  minimize()
+//  archiveClassifier.set('')
+//  configurations = [shadedConfig]
+//  relocate 'com.google', 'moshisealed.shaded.com.google'
+//  relocate 'afu', 'moshisealed.shaded.afu'
+//  relocate 'org', 'moshisealed.shaded.org'
+//  exclude 'javax/**'
+//}
+//artifacts {
+//  runtime shadowJar
+//  archives shadowJar
+//}
 //</editor-fold>
 
 dependencies {
@@ -48,8 +48,7 @@ dependencies {
   kapt deps.apt.incapProcessor
   compileOnly deps.apt.incap
 
-  implementationShaded deps.apt.autoCommon
-
+  implementation deps.apt.autoCommon
   implementation "com.squareup:kotlinpoet-metadata:1.4.0-SNAPSHOT"
   implementation "com.squareup:kotlinpoet-elementhandler-elements:1.4.0-SNAPSHOT"
   implementation "com.squareup:kotlinpoet-metadata-specs:1.4.0-SNAPSHOT"
@@ -57,7 +56,6 @@ dependencies {
   implementation "com.squareup.moshi:moshi-adapters:1.9.0-SNAPSHOT"
   implementation project(':moshi-sealed-annotations')
   implementation deps.misc.kotlinpoet
-//  implementation deps.kotlin.reflect
   implementation deps.kotlin.stdlibjdk8
 }
 
