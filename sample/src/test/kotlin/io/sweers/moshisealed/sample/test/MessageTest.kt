@@ -1,24 +1,37 @@
 package io.sweers.moshisealed.sample.test
 
 import com.google.common.truth.Truth.assertThat
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import io.sweers.moshisealed.reflect.MoshiSealedJsonAdapterFactory
 import io.sweers.moshisealed.sample.Message
 import org.junit.Test
 import java.util.Collections
 
 class MessageTest {
 
-  // TODO failure cases, likely need to run in moshi-kotlin/test directly because code gen could
-  // report failures at compile time, and we want to catch both
   @Test
-  fun polymorphic() {
+  fun polymorphic_reflect() {
     val moshi = Moshi.Builder()
-//        .add(MoshiSealedJsonAdapterFactory())
-//        .add(KotlinJsonAdapterFactory())
+        .add(MoshiSealedJsonAdapterFactory())
+        .add(KotlinJsonAdapterFactory())
         .build()
 
     val adapter = moshi.adapter<Message>(Message::class.java)
+    assertPolymorphicBehavior(adapter)
+  }
 
+  @Test
+  fun polymorphic_codegen() {
+    val moshi = Moshi.Builder()
+        .build()
+
+    val adapter = moshi.adapter<Message>(Message::class.java)
+    assertPolymorphicBehavior(adapter)
+  }
+
+  private fun assertPolymorphicBehavior(adapter: JsonAdapter<Message>) {
     assertThat(adapter.fromJson("{\"type\":\"success\",\"value\":\"Okay!\"}"))
         .isEqualTo(Message.Success("Okay!"))
     assertThat(adapter.fromJson("{\"type\":\"error\",\"error_logs\":{\"order\":66}}"))
