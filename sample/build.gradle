@@ -19,10 +19,6 @@ plugins {
   id 'org.jetbrains.kotlin.kapt'
 }
 
-repositories {
-  mavenLocal()
-}
-
 dependencies {
   kapt project(':moshi-sealed-codegen')
   kapt "com.squareup.moshi:moshi-kotlin-codegen:1.9.0-SNAPSHOT"
