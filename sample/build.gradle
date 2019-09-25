@@ -51,3 +51,10 @@ compileKotlin {
     freeCompilerArgs = ['-Xjsr305=strict', '-progressive']
   }
 }
+
+compileTestKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+    freeCompilerArgs = ['-Xjsr305=strict', '-progressive', '-Xjvm-default=enable', '-Xuse-experimental=kotlin.Experimental']
+  }
+}
