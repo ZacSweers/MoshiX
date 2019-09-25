@@ -149,8 +149,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
           it.getAnnotation(Metadata::class.java).toImmutableKmClass()
         }
     val defaultCodeBlockBuilder = CodeBlock.builder()
-    val adapterName = com.squareup.moshi.Types.generatedJsonAdapterName(
-        element.simpleName.toString())
+    val adapterName = "${element.asClassName().simpleNames.joinToString(separator = "_")}JsonAdapter"
     val allocator = NameAllocator()
 
     val targetType = element.asClassName()
