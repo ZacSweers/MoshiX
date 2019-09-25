@@ -3,7 +3,7 @@ Moshi-sealed
 
 ## 🚧 WIP 🚧
 
-_This currently uses unreleased KotlinPoet and Moshi APIs_
+_This currently uses unreleased Moshi APIs_
 
 Reflective and code gen implementations for serializing Kotlin sealed classes via Moshi polymorphic adapters.
 
