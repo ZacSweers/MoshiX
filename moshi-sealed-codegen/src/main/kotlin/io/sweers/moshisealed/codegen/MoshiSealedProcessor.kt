@@ -173,13 +173,25 @@ class MoshiSealedProcessor : AbstractProcessor() {
             typeLabel
         )
 
-    if (defaultCodeBlockBuilder.isNotEmpty()) {
-      runtimeAdapterInitializer.add("    .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
+    val useDefaultNull = element.getAnnotation(DefaultNull::class.java) != null
+    if (useDefaultNull) {
+      defaultCodeBlockBuilder.add("null")
     }
 
     for ((type, kmData) in sealedSubtypes) {
-      // TODO ignore default
       if (kmData.isObject) {
+        val isDefaultObject = type.getAnnotation(DefaultObject::class.java) != null
+        if (isDefaultObject) {
+          if (useDefaultNull) {
+            // TODO error message
+            return
+          } else {
+            defaultCodeBlockBuilder.add("%T", type)
+          }
+        } else if (!useDefaultNull) {
+          // TODO error because we don't know what to do with this type
+          return
+        }
         continue
       }
       classBuilder.addOriginatingElement(type)
@@ -188,6 +200,10 @@ class MoshiSealedProcessor : AbstractProcessor() {
           type.asClassName(),
           labelAnnotation.value
       )
+    }
+
+    if (defaultCodeBlockBuilder.isNotEmpty()) {
+      runtimeAdapterInitializer.add("    .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
     }
 
     runtimeAdapterInitializer.add("    .create(%T::class.java, %M(), %N)·as·%T\n»",
