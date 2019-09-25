@@ -57,6 +57,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
+import javax.tools.Diagnostic
 
 @KotlinPoetMetadataPreview
 @IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.AGGREGATING)
@@ -129,7 +130,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
           val typeLabel = generator.removePrefix("sealed:")
           val kmClass = type.getAnnotation(Metadata::class.java).toImmutableKmClass()
           if (!kmClass.isSealed) {
-            // TODO error
+            messager.printMessage(Diagnostic.Kind.ERROR, "Must be a sealed class!", type)
             return@forEach
           }
           createType(type, typeLabel, kmClass)
@@ -149,8 +150,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
           it.getAnnotation(Metadata::class.java).toImmutableKmClass()
         }
     val defaultCodeBlockBuilder = CodeBlock.builder()
-    val adapterName = com.squareup.moshi.Types.generatedJsonAdapterName(
-        element.simpleName.toString())
+    val adapterName = "${element.asClassName().simpleNames.joinToString(separator = "_")}JsonAdapter"
     val allocator = NameAllocator()
 
     val targetType = element.asClassName()
@@ -174,21 +174,42 @@ class MoshiSealedProcessor : AbstractProcessor() {
             typeLabel
         )
 
-    if (defaultCodeBlockBuilder.isNotEmpty()) {
-      runtimeAdapterInitializer.add("    .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
+    val useDefaultNull = element.getAnnotation(DefaultNull::class.java) != null
+    if (useDefaultNull) {
+      defaultCodeBlockBuilder.add("null")
     }
 
     for ((type, kmData) in sealedSubtypes) {
-      // TODO ignore default
       if (kmData.isObject) {
+        val isDefaultObject = type.getAnnotation(DefaultObject::class.java) != null
+        if (isDefaultObject) {
+          if (useDefaultNull) {
+            // Print both for reference
+            messager.printMessage(Diagnostic.Kind.ERROR, "Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type.", type)
+            messager.printMessage(Diagnostic.Kind.ERROR, "Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type.", element)
+            return
+          } else {
+            defaultCodeBlockBuilder.add("%T", type)
+          }
+        } else if (!useDefaultNull) {
+          messager.printMessage(Diagnostic.Kind.ERROR, "Unhandled object type, cannot serialize this.", type)
+          return
+        }
         continue
       }
       classBuilder.addOriginatingElement(type)
-      val labelAnnotation = type.getAnnotation(TypeLabel::class.java) ?: TODO("error")
+      val labelAnnotation = type.getAnnotation(TypeLabel::class.java) ?: run {
+        messager.printMessage(Diagnostic.Kind.ERROR, "Missing @TypeLabel.", type)
+        return
+      }
       runtimeAdapterInitializer.add("    .withSubtype(%T::class.java, %S)\n",
           type.asClassName(),
           labelAnnotation.value
       )
+    }
+
+    if (defaultCodeBlockBuilder.isNotEmpty()) {
+      runtimeAdapterInitializer.add("    .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
     }
 
     runtimeAdapterInitializer.add("    .create(%T::class.java, %M(), %N)·as·%T\n»",
