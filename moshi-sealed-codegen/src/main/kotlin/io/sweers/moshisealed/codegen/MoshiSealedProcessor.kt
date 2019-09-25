@@ -57,6 +57,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
+import javax.tools.Diagnostic
 
 @KotlinPoetMetadataPreview
 @IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.AGGREGATING)
@@ -129,7 +130,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
           val typeLabel = generator.removePrefix("sealed:")
           val kmClass = type.getAnnotation(Metadata::class.java).toImmutableKmClass()
           if (!kmClass.isSealed) {
-            // TODO error
+            messager.printMessage(Diagnostic.Kind.ERROR, "Must be a sealed class!", type)
             return@forEach
           }
           createType(type, typeLabel, kmClass)
@@ -183,19 +184,24 @@ class MoshiSealedProcessor : AbstractProcessor() {
         val isDefaultObject = type.getAnnotation(DefaultObject::class.java) != null
         if (isDefaultObject) {
           if (useDefaultNull) {
-            // TODO error message
+            // Print both for reference
+            messager.printMessage(Diagnostic.Kind.ERROR, "Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type.", type)
+            messager.printMessage(Diagnostic.Kind.ERROR, "Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type.", element)
             return
           } else {
             defaultCodeBlockBuilder.add("%T", type)
           }
         } else if (!useDefaultNull) {
-          // TODO error because we don't know what to do with this type
+          messager.printMessage(Diagnostic.Kind.ERROR, "Unhandled object type, cannot serialize this.", type)
           return
         }
         continue
       }
       classBuilder.addOriginatingElement(type)
-      val labelAnnotation = type.getAnnotation(TypeLabel::class.java) ?: TODO("error")
+      val labelAnnotation = type.getAnnotation(TypeLabel::class.java) ?: run {
+        messager.printMessage(Diagnostic.Kind.ERROR, "Missing @TypeLabel.", type)
+        return
+      }
       runtimeAdapterInitializer.add("    .withSubtype(%T::class.java, %S)\n",
           type.asClassName(),
           labelAnnotation.value
