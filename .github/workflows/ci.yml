@@ -13,11 +13,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-    - name: Install JDK ${{ matrix.java_version }}
+    - name: Install JDK
       uses: actions/setup-java@v1
       with:
         java-version: ${{ matrix.java_version }}
-    - name: Configure Gradle
+    - name: Configure Gradle ${{ matrix.java_version }}
       # Initial gradle configuration, install dependencies, etc
       run: ./gradlew help
     - name: Build project
