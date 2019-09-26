@@ -49,9 +49,8 @@ dependencies {
   compileOnly deps.apt.incap
 
   implementation deps.apt.autoCommon
-  implementation "com.squareup:kotlinpoet-metadata:1.4.0-SNAPSHOT"
-  implementation "com.squareup:kotlinpoet-elementhandler-elements:1.4.0-SNAPSHOT"
-  implementation "com.squareup:kotlinpoet-metadata-specs:1.4.0-SNAPSHOT"
+  implementation "com.squareup:kotlinpoet-metadata:${deps.versions.kotlinpoet}"
+  implementation "com.squareup:kotlinpoet-metadata-specs:${deps.versions.kotlinpoet}"
   implementation "com.squareup.moshi:moshi:1.9.0-SNAPSHOT"
   implementation "com.squareup.moshi:moshi-adapters:1.9.0-SNAPSHOT"
   implementation project(':moshi-sealed-annotations')
