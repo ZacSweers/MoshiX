@@ -19,9 +19,7 @@ jobs:
     - name: Build with Gradle
       # Initial gradle configuration, install dependencies, etc
       run: ./gradlew build check --stacktrace
-    - name: Required JDK check
-      run: echo "Skipping status report on non-1.8 JDKs"
-      if: failure() && matrix.java_version != '1.8'
+      shell: bash {0} || ${{ matrix.java_version }} == "1.8"
 #     - name: Upload snapshot (master only)
 #       run: ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
 #       if: success() && github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
