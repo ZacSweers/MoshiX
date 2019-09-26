@@ -25,6 +25,9 @@ jobs:
       run: ./gradlew test --stacktrace
     - name: Final checks
       run: ./gradlew check --stacktrace
+    - name: Required JDK check
+      run: echo "Skipping status report on non-1.8 JDKs"
+      if: ${{ matrix.java_version }} != '1.8
 #     - name: Upload snapshot (master only)
 #       run: ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
 #       if: success() && github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
