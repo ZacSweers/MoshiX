@@ -1,4 +1,4 @@
-name: Moshi-sealed CI
+name: CI
 
 on: [push]
 
