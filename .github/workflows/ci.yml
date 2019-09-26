@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    name: Build for JDK ${{ matrix.java_version }}
+    name: JDK ${{ matrix.java_version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-    - name: Install JDK
+    - name: Install JDK ${{ matrix.java_version }}
       uses: actions/setup-java@v1
       with:
         java-version: ${{ matrix.java_version }}
