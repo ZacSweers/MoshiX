@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java_version: [1.8, 9, 11, 12]
+        java_version: [1.8, 12] # 9, 11 once kapt supports them or github supports neutral exit codes
       fail-fast: false
     steps:
     - name: Checkout
