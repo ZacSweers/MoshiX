@@ -39,7 +39,7 @@ Moshi-sealed can be used via reflection or code generation.
 Code gen works via annotation processor, and only requires adding the kapt dependency:
 
 ```gradle
-kapt "io.sweers.moshisealed:moshi-sealed-codegen:{version}"
+kapt "dev.zacsweers.moshisealed:moshi-sealed-codegen:{version}"
 ```
 
 No runtime configuration is needed, code gen will generate `JsonAdapter`s in a way that Moshi understands
@@ -60,7 +60,7 @@ val moshi = Moshi.Builder()
 Gradle dependency:
 
 ```gradle
-implementation "io.sweers.moshisealed:moshi-sealed-reflect:{version}"
+implementation "dev.zacsweers.moshisealed:moshi-sealed-reflect:{version}"
 ```
 
 License

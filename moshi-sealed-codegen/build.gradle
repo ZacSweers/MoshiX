@@ -31,9 +31,9 @@ plugins {
 //  minimize()
 //  archiveClassifier.set('')
 //  configurations = [shadedConfig]
-//  relocate 'com.google', 'moshisealed.shaded.com.google'
-//  relocate 'afu', 'moshisealed.shaded.afu'
-//  relocate 'org', 'moshisealed.shaded.org'
+//  relocate 'com.google', 'dev.zacsweers.moshisealed.codegen.shaded.com.google'
+//  relocate 'afu', 'dev.zacsweers.moshisealed.codegen.shaded.afu'
+//  relocate 'org', 'dev.zacsweers.moshisealed.codegen.shaded.org'
 //  exclude 'javax/**'
 //}
 //artifacts {

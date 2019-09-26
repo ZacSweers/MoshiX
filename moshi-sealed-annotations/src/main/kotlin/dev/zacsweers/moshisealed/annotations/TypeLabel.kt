@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package io.sweers.moshisealed.annotations
+package dev.zacsweers.moshisealed.annotations
 
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
 
-/**
- * Use this annotation to specify that a given sealed type's deserialization should default to null.
- */
+/** Use this annotation to specify the type label of a subtype. */
 @Target(CLASS)
 @Retention(RUNTIME)
-annotation class DefaultNull
+annotation class TypeLabel(val value: String)

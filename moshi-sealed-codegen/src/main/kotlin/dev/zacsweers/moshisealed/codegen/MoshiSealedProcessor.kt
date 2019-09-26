@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sweers.moshisealed.codegen
+package dev.zacsweers.moshisealed.codegen
 
 import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.AnnotationSpec
@@ -40,10 +40,10 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
-import io.sweers.moshisealed.annotations.DefaultNull
-import io.sweers.moshisealed.annotations.DefaultObject
-import io.sweers.moshisealed.annotations.TypeLabel
-import io.sweers.moshisealed.codegen.MoshiSealedProcessor.Companion.OPTION_GENERATED
+import dev.zacsweers.moshisealed.annotations.DefaultNull
+import dev.zacsweers.moshisealed.annotations.DefaultObject
+import dev.zacsweers.moshisealed.annotations.TypeLabel
+import dev.zacsweers.moshisealed.codegen.MoshiSealedProcessor.Companion.OPTION_GENERATED
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType
 import javax.annotation.processing.AbstractProcessor

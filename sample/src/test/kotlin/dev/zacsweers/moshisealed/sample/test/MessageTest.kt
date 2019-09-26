@@ -1,4 +1,4 @@
-package io.sweers.moshisealed.sample.test
+package dev.zacsweers.moshisealed.sample.test
 
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonAdapter
@@ -6,10 +6,10 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.squareup.moshi.kotlin.reflect.adapter
-import io.sweers.moshisealed.annotations.DefaultNull
-import io.sweers.moshisealed.annotations.TypeLabel
-import io.sweers.moshisealed.reflect.MoshiSealedJsonAdapterFactory
-import io.sweers.moshisealed.sample.Message
+import dev.zacsweers.moshisealed.annotations.DefaultNull
+import dev.zacsweers.moshisealed.annotations.TypeLabel
+import dev.zacsweers.moshisealed.reflect.MoshiSealedJsonAdapterFactory
+import dev.zacsweers.moshisealed.sample.Message
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized

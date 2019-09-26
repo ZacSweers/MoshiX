@@ -1,13 +1,13 @@
-package io.sweers.moshisealed.reflect
+package dev.zacsweers.moshisealed.reflect
 
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
-import io.sweers.moshisealed.annotations.DefaultNull
-import io.sweers.moshisealed.annotations.DefaultObject
-import io.sweers.moshisealed.annotations.TypeLabel
+import dev.zacsweers.moshisealed.annotations.DefaultNull
+import dev.zacsweers.moshisealed.annotations.DefaultObject
+import dev.zacsweers.moshisealed.annotations.TypeLabel
 import java.lang.reflect.Type
 import kotlin.reflect.full.findAnnotation
 

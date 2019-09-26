@@ -1,8 +1,8 @@
-package io.sweers.moshisealed.sample
+package dev.zacsweers.moshisealed.sample
 
 import com.squareup.moshi.JsonClass
-import io.sweers.moshisealed.annotations.DefaultObject
-import io.sweers.moshisealed.annotations.TypeLabel
+import dev.zacsweers.moshisealed.annotations.DefaultObject
+import dev.zacsweers.moshisealed.annotations.TypeLabel
 
 @JsonClass(generateAdapter = true, generator = "sealed:type")
 sealed class Message {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sweers.moshisealed.annotations
+package dev.zacsweers.moshisealed.annotations
 
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
