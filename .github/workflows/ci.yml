@@ -1,18 +1,19 @@
-name: Moshi-sealed CI
+name: CI
 
 on: [push]
 
 jobs:
   build:
+    name: JDK ${{ matrix.java_version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java_version: [1.8, 9, 11, 12]
-    fail-fast: false
+        java_version: [1.8, 12] # 9, 11 once kapt supports them or github supports neutral exit codes
+      fail-fast: false
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-    - name: Install JDK ${{ matrix.java_version }}
+    - name: Install JDK
       uses: actions/setup-java@v1
       with:
         java-version: ${{ matrix.java_version }}
@@ -25,6 +26,6 @@ jobs:
       run: ./gradlew test --stacktrace
     - name: Final checks
       run: ./gradlew check --stacktrace
-#     - name: Upload snapshot (master only)
-#       run: ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
-#       if: success() && github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    - name: Upload snapshot (master only)
+      run: ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
+      if: success() && github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
