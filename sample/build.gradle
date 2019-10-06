@@ -35,7 +35,7 @@ dependencies {
 
 kapt {
   arguments {
-    arg("moshisealed.generated", "javax.annotation.Generated")
+    arg("moshi.generated", "javax.annotation.Generated")
   }
 }
 

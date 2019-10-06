@@ -74,8 +74,10 @@ class MoshiSealedProcessor : AbstractProcessor() {
      * Note that this can only be one of the following values:
      *   * `"javax.annotation.processing.Generated"` (JRE 9+)
      *   * `"javax.annotation.Generated"` (JRE <9)
+     *
+     * We reuse Moshi's option for convenience so you don't have to declare multiple options.
      */
-    const val OPTION_GENERATED = "moshisealed.generated"
+    const val OPTION_GENERATED = "moshi.generated"
     private val POSSIBLE_GENERATED_NAMES = setOf(
         "javax.annotation.processing.Generated",
         "javax.annotation.Generated"
