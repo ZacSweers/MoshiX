@@ -34,6 +34,10 @@ def build = [
     gradlePlugins: [
         dokka: "org.jetbrains.dokka:dokka-gradle-plugin:${versions.dokka}",
         kotlin: "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
+    ],
+    kotlin: [
+        jvmTarget: "1.8",
+        freeCompilerArgs: ['-Xjsr305=strict', '-progressive']
     ]
 ]
 
