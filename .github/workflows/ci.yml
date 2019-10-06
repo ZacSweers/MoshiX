@@ -17,15 +17,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: ${{ matrix.java_version }}
-    - name: Configure Gradle
-      # Initial gradle configuration, install dependencies, etc
-      run: ./gradlew help
-    - name: Build project
-      run: ./gradlew assemble --stacktrace
-    - name: Run tests
-      run: ./gradlew test --stacktrace
-    - name: Final checks
-      run: ./gradlew check --stacktrace
+    - name: Build with Gradle
+      run: ./gradlew build check --stacktrace
     - name: Upload snapshot (master only)
       run: ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
       if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && matrix.java_version == '1.8'
