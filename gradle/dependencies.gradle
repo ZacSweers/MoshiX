@@ -37,7 +37,7 @@ def build = [
     ],
     kotlin: [
         jvmTarget: "1.8",
-        freeCompilerArgs: ['-Xjsr305=strict', '-progressive']
+        defaultFreeCompilerArgs: ['-Xjsr305=strict', '-progressive']
     ]
 ]
 
