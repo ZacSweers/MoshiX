@@ -37,24 +37,10 @@ kapt {
   arguments {
     arg("moshisealed.generated", "javax.annotation.Generated")
   }
-
-  // Compiling with JDK 11+, but kapt doesn't forward source/target versions.
-  javacOptions {
-    option("-source", "8")
-    option("-target", "8")
-  }
-}
-
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-    freeCompilerArgs = ['-Xjsr305=strict', '-progressive']
-  }
 }
 
 compileTestKotlin {
   kotlinOptions {
-    jvmTarget = "1.8"
-    freeCompilerArgs = ['-Xjsr305=strict', '-progressive', '-Xjvm-default=enable', '-Xuse-experimental=kotlin.Experimental']
+    freeCompilerArgs += ['-Xuse-experimental=kotlin.ExperimentalStdlibApi']
   }
 }

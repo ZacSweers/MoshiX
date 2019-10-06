@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
-@UseExperimental(ExperimentalStdlibApi::class)
+@ExperimentalStdlibApi
 class MessageTest(type: Type) {
 
   enum class Type(val moshi: Moshi = Moshi.Builder().build()) {
