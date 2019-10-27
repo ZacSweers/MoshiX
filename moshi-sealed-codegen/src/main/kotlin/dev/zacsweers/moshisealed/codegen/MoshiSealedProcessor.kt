@@ -18,6 +18,7 @@ package dev.zacsweers.moshisealed.codegen
 
 import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -39,6 +40,7 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types.generatedJsonAdapterName
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import dev.zacsweers.moshisealed.annotations.DefaultNull
 import dev.zacsweers.moshisealed.annotations.DefaultObject
@@ -152,7 +154,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
           it.getAnnotation(Metadata::class.java).toImmutableKmClass()
         }
     val defaultCodeBlockBuilder = CodeBlock.builder()
-    val adapterName = "${element.asClassName().simpleNames.joinToString(separator = "_")}JsonAdapter"
+    val adapterName = ClassName.bestGuess(generatedJsonAdapterName(element.asClassName().reflectionName())).simpleName
     val allocator = NameAllocator()
 
     val targetType = element.asClassName()
