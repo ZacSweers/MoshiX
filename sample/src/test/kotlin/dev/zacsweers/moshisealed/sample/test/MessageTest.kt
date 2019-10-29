@@ -5,7 +5,6 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.squareup.moshi.kotlin.reflect.adapter
 import dev.zacsweers.moshisealed.annotations.DefaultNull
 import dev.zacsweers.moshisealed.annotations.TypeLabel
 import dev.zacsweers.moshisealed.reflect.MoshiSealedJsonAdapterFactory
@@ -44,7 +43,7 @@ class MessageTest(type: Type) {
 
   @Test
   fun assertDefaultBehavior() {
-    val adapter = moshi.adapter<Message>()
+    val adapter = moshi.adapter(Message::class.java)
     assertPolymorphicBehavior(
         adapter,
         Message.Success("Okay!"),
@@ -55,7 +54,7 @@ class MessageTest(type: Type) {
 
   @Test
   fun assertDefaultNullBehavior() {
-    val adapter = moshi.adapter<MessageWithNullDefault>()
+    val adapter = moshi.adapter(MessageWithNullDefault::class.java)
     assertPolymorphicBehavior(
         adapter,
         MessageWithNullDefault.Success("Okay!"),
@@ -66,7 +65,7 @@ class MessageTest(type: Type) {
 
   @Test
   fun assertNoDefaultBehavior() {
-    val adapter = moshi.adapter<MessageWithNoDefault>()
+    val adapter = moshi.adapter(MessageWithNoDefault::class.java)
     assertPolymorphicBehavior(
         adapter,
         MessageWithNoDefault.Success("Okay!"),

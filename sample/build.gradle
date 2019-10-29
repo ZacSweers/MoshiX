@@ -21,11 +21,11 @@ plugins {
 
 dependencies {
   kapt project(':moshi-sealed-codegen')
-  kapt "com.squareup.moshi:moshi-kotlin-codegen:1.9.0-SNAPSHOT"
+  kapt deps.moshi.kotlinCodeGen
 
   implementation project(':moshi-sealed-annotations')
   implementation deps.kotlin.stdlibjdk8
-  implementation "com.squareup.moshi:moshi-kotlin:1.9.0-SNAPSHOT"
+  implementation deps.moshi.kotlin
   implementation project(':moshi-sealed-reflect')
 
   kaptTest project(':moshi-sealed-codegen')
