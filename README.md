@@ -1,8 +1,6 @@
 Moshi-sealed
 ============
 
-## 🚧 WIP 🚧
-
 Reflective and code gen implementations for serializing Kotlin sealed classes via Moshi polymorphic adapters.
 
 Simple annotated a sealed class with `@JsonClass` with a `generator` value of `sealed:{typeLabel}`.
