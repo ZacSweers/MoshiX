@@ -28,7 +28,9 @@ sealed class Message {
 
 ### Installation
 
-Moshi-sealed can be used via reflection or code generation.
+Moshi-sealed can be used via reflection or code generation. Note that you must include the 
+`moshi-adapters` artifact as a dependency, as that's where the `PolymorphicJsonAdapter` implementation
+lives.
 
 #### Code gen
 
