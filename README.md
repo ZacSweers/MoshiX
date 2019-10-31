@@ -32,15 +32,23 @@ Moshi-sealed can be used via reflection or code generation. Note that you must i
 `moshi-adapters` artifact as a dependency, as that's where the `PolymorphicJsonAdapter` implementation
 lives.
 
+`@TypeLabel` and default indicator annotations are available in the `moshi-sealed-annotations` artifact.
+
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshisealed/moshi-sealed-annotations.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshisealed/moshi-sealed-annotations)
+```gradle
+kapt "dev.zacsweers.moshisealed:moshi-sealed-annotations:{version}"
+```
+
 #### Code gen
 
 Code gen works via annotation processor, and only requires adding the kapt dependency:
 
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshisealed/moshi-sealed-codegen.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshisealed/moshi-sealed-codegen)
 ```gradle
 kapt "dev.zacsweers.moshisealed:moshi-sealed-codegen:{version}"
 ```
 
-No runtime configuration is needed, code gen will generate `JsonAdapter`s in a way that Moshi understands
+No runtime Moshi instance configuration is needed, code gen will generate `JsonAdapter`s in a way that Moshi understands
 natively.
 
 #### Reflection
@@ -57,6 +65,7 @@ val moshi = Moshi.Builder()
 
 Gradle dependency:
 
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshisealed/moshi-sealed-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshisealed/moshi-sealed-reflect)
 ```gradle
 implementation "dev.zacsweers.moshisealed:moshi-sealed-reflect:{version}"
 ```
