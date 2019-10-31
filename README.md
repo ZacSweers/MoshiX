@@ -70,6 +70,8 @@ Gradle dependency:
 implementation "dev.zacsweers.moshisealed:moshi-sealed-reflect:{version}"
 ```
 
+Snapshots of the development version are available in [Sonatype's snapshots repository][snapshots].
+
 License
 -------
 
@@ -86,3 +88,5 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+ [snapshots]: https://oss.sonatype.org/content/repositories/snapshots/dev/zacsweers/moshisealed/
