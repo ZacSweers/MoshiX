@@ -36,7 +36,7 @@ lives.
 
 [![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshisealed/moshi-sealed-annotations.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshisealed/moshi-sealed-annotations)
 ```gradle
-kapt "dev.zacsweers.moshisealed:moshi-sealed-annotations:{version}"
+implementation "dev.zacsweers.moshisealed:moshi-sealed-annotations:{version}"
 ```
 
 #### Code gen
