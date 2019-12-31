@@ -16,10 +16,10 @@
 
 def versions = [
     dokka: '0.9.18',
-    kotlin: '1.3.50',
-    kotlinpoet: '1.4.2',
+    kotlin: '1.3.61',
+    kotlinpoet: '1.4.4',
     incap: '0.2',
-    moshi: '1.9.1'
+    moshi: '1.9.3'
 ]
 
 def apt = [
