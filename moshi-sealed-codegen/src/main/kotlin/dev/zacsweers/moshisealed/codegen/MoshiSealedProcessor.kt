@@ -32,6 +32,7 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.metadata.ImmutableKmClass
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
+import com.squareup.kotlinpoet.metadata.isInternal
 import com.squareup.kotlinpoet.metadata.isObject
 import com.squareup.kotlinpoet.metadata.isSealed
 import com.squareup.kotlinpoet.metadata.toImmutableKmClass
@@ -56,6 +57,7 @@ import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
 import javax.annotation.processing.SupportedOptions
 import javax.lang.model.SourceVersion
+import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
@@ -155,6 +157,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
         }
     val defaultCodeBlockBuilder = CodeBlock.builder()
     val adapterName = ClassName.bestGuess(generatedJsonAdapterName(element.asClassName().reflectionName())).simpleName
+    val visibilityModifier = if (element.toImmutableKmClass().flags.isInternal) KModifier.INTERNAL else KModifier.PUBLIC
     val allocator = NameAllocator()
 
     val targetType = element.asClassName()
@@ -163,6 +166,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
     val jsonAdapterType = JsonAdapter::class.asClassName().parameterizedBy(targetType)
 
     val classBuilder = TypeSpec.classBuilder(adapterName)
+        .addModifiers(visibilityModifier)
         .superclass(jsonAdapterType)
         .primaryConstructor(FunSpec.constructorBuilder().addParameter(moshiParam).build())
         .addOriginatingElement(element)
