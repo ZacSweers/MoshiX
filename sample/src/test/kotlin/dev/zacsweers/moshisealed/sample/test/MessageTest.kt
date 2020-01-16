@@ -113,4 +113,17 @@ class MessageTest(type: Type) {
     @JsonClass(generateAdapter = true)
     data class Error(val error_logs: Map<String, Any>) : MessageWithNoDefault()
   }
+
+  @DefaultNull
+  @JsonClass(generateAdapter = true, generator = "sealed:type")
+  internal sealed class MessageWithInternalVisibilityModifier {
+
+    @TypeLabel("success")
+    @JsonClass(generateAdapter = true)
+    internal data class Success(val value: String) : MessageWithInternalVisibilityModifier()
+
+    @TypeLabel("error")
+    @JsonClass(generateAdapter = true)
+    internal data class Error(val error_logs: Map<String, Any>) : MessageWithInternalVisibilityModifier()
+  }
 }
