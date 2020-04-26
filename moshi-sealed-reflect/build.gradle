@@ -22,7 +22,7 @@ plugins {
 dependencies {
   implementation project(':moshi-sealed-annotations')
   api deps.moshi.moshi
-  implementation deps.moshi.adapters
+  api deps.moshi.adapters
   implementation deps.misc.kotlinpoet
   implementation deps.kotlin.reflect
   implementation deps.kotlin.stdlibjdk8
