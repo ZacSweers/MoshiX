@@ -16,16 +16,14 @@
 plugins {
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.kapt'
-  id 'org.jetbrains.dokka'
+  id "com.vanniktech.maven.publish"
 }
 
 dependencies {
   implementation project(':moshi-sealed-annotations')
-  api "com.squareup.moshi:moshi:1.9.0-SNAPSHOT"
-  api "com.squareup.moshi:moshi-adapters:1.9.0-SNAPSHOT"
+  api deps.moshi.moshi
+  api deps.moshi.adapters
   implementation deps.misc.kotlinpoet
   implementation deps.kotlin.reflect
   implementation deps.kotlin.stdlibjdk8
 }
-
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

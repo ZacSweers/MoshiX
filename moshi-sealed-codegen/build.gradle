@@ -17,7 +17,7 @@ plugins {
 //  id 'com.github.johnrengelman.shadow' version '5.1.0'
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.kapt'
-  id 'org.jetbrains.dokka'
+  id "com.vanniktech.maven.publish"
 }
 
 //<editor-fold desc="ShadowJar configuration">
@@ -57,5 +57,3 @@ dependencies {
   implementation deps.misc.kotlinpoet
   implementation deps.kotlin.stdlibjdk8
 }
-
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

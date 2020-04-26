@@ -16,11 +16,9 @@
 
 plugins {
   id 'org.jetbrains.kotlin.jvm'
-  id 'org.jetbrains.dokka'
+  id "com.vanniktech.maven.publish"
 }
 
 dependencies {
   compile deps.kotlin.stdlibjdk7
 }
-
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
