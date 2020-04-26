@@ -16,7 +16,7 @@
 plugins {
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.kapt'
-  id 'org.jetbrains.dokka'
+  id "com.vanniktech.maven.publish"
 }
 
 dependencies {
@@ -27,5 +27,3 @@ dependencies {
   implementation deps.kotlin.reflect
   implementation deps.kotlin.stdlibjdk8
 }
-
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
