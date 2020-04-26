@@ -41,16 +41,6 @@ subprojects {
       }
     }
   }
-  pluginManager.withPlugin("org.jetbrains.kotlin.kapt") {
-    kapt {
-      // Compiling with JDK 11+, but kapt doesn"t forward source/target versions.
-      // TODO fixed in Kotlin 1.3.60
-      javacOptions {
-        option("-source", "8")
-        option("-target", "8")
-      }
-    }
-  }
 }
 
 apply from: "gradle/dependencies.gradle"
