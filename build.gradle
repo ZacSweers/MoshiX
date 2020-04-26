@@ -41,6 +41,14 @@ subprojects {
       }
     }
   }
+  pluginManager.withPlugin("com.vanniktech.maven.publish") {
+    mavenPublish {
+      useLegacyMode = false
+      nexus {
+        groupId = "dev.zacsweers"
+      }
+    }
+  }
 }
 
 apply from: "gradle/dependencies.gradle"
