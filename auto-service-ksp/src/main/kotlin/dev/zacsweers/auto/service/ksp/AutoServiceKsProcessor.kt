@@ -59,7 +59,7 @@ class AutoServiceKsProcessor : SymbolProcessor {
               .find { it.name?.getShortName() == "value" }!!
               .value
 
-          // Bug - this comes back as an empty list
+          // Bug - this comes back as an empty list: https://github.com/android/kotlin/issues/5
           println(providerInterfaces)
         }
   }
