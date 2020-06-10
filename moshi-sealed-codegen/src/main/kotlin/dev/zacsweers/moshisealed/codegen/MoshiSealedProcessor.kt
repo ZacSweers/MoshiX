@@ -18,17 +18,6 @@ package dev.zacsweers.moshisealed.codegen
 
 import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.NameAllocator
-import com.squareup.kotlinpoet.ParameterSpec
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.metadata.ImmutableKmClass
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
@@ -36,13 +25,7 @@ import com.squareup.kotlinpoet.metadata.isInternal
 import com.squareup.kotlinpoet.metadata.isObject
 import com.squareup.kotlinpoet.metadata.isSealed
 import com.squareup.kotlinpoet.metadata.toImmutableKmClass
-import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types.generatedJsonAdapterName
-import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import dev.zacsweers.moshisealed.annotations.DefaultNull
 import dev.zacsweers.moshisealed.annotations.DefaultObject
 import dev.zacsweers.moshisealed.annotations.TypeLabel
@@ -154,115 +137,52 @@ class MoshiSealedProcessor : AbstractProcessor() {
         .associateWithTo(LinkedHashMap()) {
           it.getAnnotation(Metadata::class.java).toImmutableKmClass()
         }
-    val defaultCodeBlockBuilder = CodeBlock.builder()
-    val adapterName = ClassName.bestGuess(generatedJsonAdapterName(element.asClassName().reflectionName())).simpleName
-    val visibilityModifier = if (element.toImmutableKmClass().flags.isInternal) KModifier.INTERNAL else KModifier.PUBLIC
-    val allocator = NameAllocator()
-
-    val targetType = element.asClassName()
-    val moshiParam = ParameterSpec.builder(allocator.newName("moshi"), Moshi::class)
-        .build()
-    val jsonAdapterType = JsonAdapter::class.asClassName().parameterizedBy(targetType)
-
-    val classBuilder = TypeSpec.classBuilder(adapterName)
-        .addModifiers(visibilityModifier)
-        .superclass(jsonAdapterType)
-        .primaryConstructor(FunSpec.constructorBuilder().addParameter(moshiParam).build())
-        .addOriginatingElement(element)
-
-    generatedAnnotation?.let {
-      classBuilder.addAnnotation(it)
-    }
-
-    val runtimeAdapterInitializer = CodeBlock.builder()
-        .add("%T.of(%T::class.java, %S)«\n",
-            PolymorphicJsonAdapterFactory::class,
-            targetType,
-            typeLabel
-        )
 
     val useDefaultNull = element.getAnnotation(DefaultNull::class.java) != null
-    if (useDefaultNull) {
-      defaultCodeBlockBuilder.add("null")
-    }
-
+    val subtypes = mutableSetOf<Subtype>()
     for ((type, kmData) in sealedSubtypes) {
+      val className = type.asClassName()
       if (kmData.isObject) {
         val isDefaultObject = type.getAnnotation(DefaultObject::class.java) != null
         if (isDefaultObject) {
           if (useDefaultNull) {
             // Print both for reference
-            messager.printMessage(Diagnostic.Kind.ERROR, "Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type.", type)
-            messager.printMessage(Diagnostic.Kind.ERROR, "Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type.", element)
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                "Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type.", type)
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                "Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type.", element)
             return
           } else {
-            defaultCodeBlockBuilder.add("%T", type)
+            subtypes += Subtype(
+                className = className,
+                isDefaultObject = true,
+                typeLabelType = null,
+                originatingElement = null
+            )
           }
         } else if (!useDefaultNull) {
-          messager.printMessage(Diagnostic.Kind.ERROR, "Unhandled object type, cannot serialize this.", type)
+          messager.printMessage(Diagnostic.Kind.ERROR,
+              "Unhandled object type, cannot serialize this.", type)
           return
         }
         continue
       }
-      classBuilder.addOriginatingElement(type)
       val labelAnnotation = type.getAnnotation(TypeLabel::class.java) ?: run {
         messager.printMessage(Diagnostic.Kind.ERROR, "Missing @TypeLabel.", type)
         return
       }
-      runtimeAdapterInitializer.add("    .withSubtype(%T::class.java, %S)\n",
-          type.asClassName(),
-          labelAnnotation.value
-      )
+      subtypes += Subtype(className, false, labelAnnotation.value, type)
     }
 
-    if (defaultCodeBlockBuilder.isNotEmpty()) {
-      runtimeAdapterInitializer.add("    .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
-    }
-
-    runtimeAdapterInitializer.add("    .create(%T::class.java, %M(), %N)·as·%T\n»",
-        targetType,
-        MemberName("kotlin.collections", "emptySet"),
-        moshiParam,
-        jsonAdapterType
+    createType(
+        targetType = element.asClassName(),
+        isInternal = kmClass.flags.isInternal,
+        typeLabel = typeLabel,
+        useDefaultNull = useDefaultNull,
+        originatingElement = element,
+        generatedAnnotation = generatedAnnotation,
+        subtypes = subtypes
     )
-
-    val runtimeAdapterProperty = PropertySpec.builder(
-        allocator.newName("runtimeAdapter"),
-        jsonAdapterType,
-        KModifier.PRIVATE
-    )
-        .addAnnotation(
-            AnnotationSpec.builder(Suppress::class)
-                .addMember("%S", "UNCHECKED_CAST")
-                .build()
-        )
-        .initializer(runtimeAdapterInitializer.build())
-        .build()
-
-    val nullableTargetType = targetType.copy(nullable = true)
-    val readerParam = ParameterSpec(allocator.newName("reader"), JsonReader::class.asClassName())
-    val writerParam = ParameterSpec(allocator.newName("writer"), JsonWriter::class.asClassName())
-    val valueParam = ParameterSpec(allocator.newName("value"), nullableTargetType)
-    classBuilder.addProperty(runtimeAdapterProperty)
-        .addFunction(FunSpec.builder("fromJson")
-            .addModifiers(KModifier.OVERRIDE)
-            .addParameter(readerParam)
-            .returns(nullableTargetType)
-            .addStatement("return %N.fromJson(%N)", runtimeAdapterProperty, readerParam)
-            .build())
-        .addFunction(FunSpec.builder("toJson")
-            .addModifiers(KModifier.OVERRIDE)
-            .addParameter(writerParam)
-            .addParameter(valueParam)
-            .addStatement("%N.toJson(%N, %N)", runtimeAdapterProperty, writerParam, valueParam)
-            .build())
-
-    // TODO how do generics work?
-    FileSpec.builder(targetType.packageName, adapterName)
-        .indent("  ")
-        .addComment("Code generated by moshi-sealed. Do not edit.")
-        .addType(classBuilder.build())
-        .build()
         .writeTo(filer)
   }
 }
