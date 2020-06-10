@@ -15,7 +15,7 @@
  */
 
 plugins {
-  id "kotlin-ksp" version "1.4-M1-dev-experimental-20200610"
+  id "org.jetbrains.kotlin.kotlin-ksp" version "1.4-M1-dev-experimental-20200610"
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.kapt'
 }
@@ -28,6 +28,9 @@ dependencies {
   implementation deps.kotlin.stdlibjdk8
   implementation deps.moshi.kotlin
   implementation project(':moshi-sealed-reflect')
+
+  implementation(project(":moshi-sealed-codegen"))
+  ksp(project(":moshi-sealed-codegen"))
 
   kaptTest project(':moshi-sealed-codegen')
   testCompile deps.test.junit

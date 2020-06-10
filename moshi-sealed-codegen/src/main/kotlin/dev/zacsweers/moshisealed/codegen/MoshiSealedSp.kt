@@ -1,11 +1,15 @@
 package dev.zacsweers.moshisealed.codegen
 
+import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.moshi.JsonClass
 import org.jetbrains.kotlin.ksp.processing.CodeGenerator
 import org.jetbrains.kotlin.ksp.processing.Resolver
 import org.jetbrains.kotlin.ksp.processing.SymbolProcessor
+import org.jetbrains.kotlin.ksp.symbol.KSClassDeclaration
 
+@AutoService(SymbolProcessor::class)
 class MoshiSealedSp : SymbolProcessor {
 
   companion object {
@@ -25,6 +29,8 @@ class MoshiSealedSp : SymbolProcessor {
         "javax.annotation.processing.Generated",
         "javax.annotation.Generated"
     )
+
+    val JSON_CLASS_NAME = JsonClass::class.qualifiedName!!
   }
 
   lateinit var codeGenerator: CodeGenerator
@@ -48,7 +54,28 @@ class MoshiSealedSp : SymbolProcessor {
   }
 
   override fun process(resolver: Resolver) {
+    val jsonClassType = resolver.getClassDeclarationByName(resolver.getKSNameFromString(JSON_CLASS_NAME))
+        ?.asType(emptyList())
+        ?: error("JsonClass type not found on the classpath.")
+    resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME)
+        .asSequence()
+        .forEach { type ->
+          check(type is KSClassDeclaration) {
+            "@JsonClass is only applicable to classes!"
+          }
 
+          val generator = type.annotations.find { it.annotationType.resolve() == jsonClassType }
+              ?.arguments
+              ?.find { it.name?.getShortName() == "generator" }
+              ?.value as? String
+              ?: return@forEach
+
+          if (!generator.startsWith("sealed:")) {
+            return@forEach
+          }
+
+          val typeLabel = generator.removePrefix("sealed:")
+        }
   }
 
   override fun finish() {
