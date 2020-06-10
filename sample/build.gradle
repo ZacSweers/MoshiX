@@ -15,6 +15,7 @@
  */
 
 plugins {
+  id "kotlin-ksp" version "1.4-M1-dev-experimental-20200610"
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.kapt'
 }

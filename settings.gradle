@@ -25,6 +25,10 @@ pluginManagement {
         case 'org.jetbrains.kotlin.kapt':
           useModule(deps.build.gradlePlugins.kotlin)
           break
+        case "org.jetbrains.kotlin.kotlin-ksp":
+        case "org.jetbrains.kotlin.ksp":
+          useModule("org.jetbrains.kotlin:kotlin-ksp:${requested.version}")
+          break
       }
     }
   }
@@ -32,6 +36,9 @@ pluginManagement {
     jcenter()
     google()
     gradlePluginPortal()
+    maven {
+      url "https://dl.bintray.com/kotlin/kotlin-eap"
+    }
   }
 }
 
