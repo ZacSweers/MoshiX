@@ -16,7 +16,7 @@
 
 def versions = [
     kotlin: '1.4-M1',
-    kotlinpoet: '1.5.0',
+    kotlinpoet: '1.6.0',
     incap: '0.2',
     moshi: '1.9.2'
 ]
