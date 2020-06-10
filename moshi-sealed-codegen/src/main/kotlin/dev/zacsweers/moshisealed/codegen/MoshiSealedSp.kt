@@ -2,7 +2,6 @@ package dev.zacsweers.moshisealed.codegen
 
 import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.moshi.JsonClass
 import org.jetbrains.kotlin.ksp.processing.CodeGenerator
 import org.jetbrains.kotlin.ksp.processing.Resolver
@@ -34,27 +33,31 @@ class MoshiSealedSp : SymbolProcessor {
   }
 
   lateinit var codeGenerator: CodeGenerator
-  private var generatedAnnotation: AnnotationSpec? = null
+  private var generatedOption: String? = null
 
   override fun init(options: Map<String, String>, kotlinVersion: KotlinVersion,
       codeGenerator: CodeGenerator) {
     this.codeGenerator = codeGenerator
 
-    generatedAnnotation = options[OPTION_GENERATED]?.let {
+    generatedOption = options[OPTION_GENERATED]?.also {
       require(it in POSSIBLE_GENERATED_NAMES) {
         "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
       }
-      ClassName.bestGuess(it)
-    }?.let {
-      AnnotationSpec.builder(it)
-          .addMember("value = [%S]", MoshiSealedSp::class.java.canonicalName)
-          .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
-          .build()
     }
   }
 
   override fun process(resolver: Resolver) {
-    val jsonClassType = resolver.getClassDeclarationByName(resolver.getKSNameFromString(JSON_CLASS_NAME))
+    val generatedAnnotation = generatedOption?.let {
+      val annotationType = resolver.getClassDeclarationByName(resolver.getKSNameFromString(it))
+          ?: error("Generated annotation type doesn't exist: $it")
+      AnnotationSpec.builder(annotationType.toClassName())
+          .addMember("value = [%S]", MoshiSealedSp::class.java.canonicalName)
+          .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
+          .build()
+    }
+
+    val jsonClassType = resolver.getClassDeclarationByName(
+        resolver.getKSNameFromString(JSON_CLASS_NAME))
         ?.asType(emptyList())
         ?: error("JsonClass type not found on the classpath.")
     resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME)
