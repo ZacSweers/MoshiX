@@ -23,6 +23,7 @@ def versions = [
 
 def apt = [
     autoService: "com.google.auto.service:auto-service:1.0-rc7",
+    autoServiceAnnotations: "com.google.auto.service:auto-service-annotations:1.0-rc7",
     autoCommon: 'com.google.auto:auto-common:0.10',
     incap: "net.ltgt.gradle.incap:incap:$versions.incap",
     incapProcessor: "net.ltgt.gradle.incap:incap-processor:$versions.incap"

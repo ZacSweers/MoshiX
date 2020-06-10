@@ -43,6 +43,7 @@ pluginManagement {
 }
 
 rootProject.name = 'moshi-sealed-root'
+include 'auto-service-ksp'
 include 'moshi-sealed-reflect'
 include 'moshi-sealed-annotations'
 include 'moshi-sealed-codegen'
