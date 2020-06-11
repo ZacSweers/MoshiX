@@ -20,6 +20,19 @@ plugins {
   id 'org.jetbrains.kotlin.kapt'
 }
 
+sourceSets {
+  main {
+    java {
+      srcDir(file("build/generated/ksp/src/main"))
+    }
+  }
+  test {
+    java {
+      srcDir(file("build/generated/ksp/src/test"))
+    }
+  }
+}
+
 dependencies {
   kapt project(':moshi-sealed-codegen')
   kapt deps.moshi.kotlinCodeGen
