@@ -14,48 +14,20 @@
  * limitations under the License.
  */
 plugins {
-//  id 'com.github.johnrengelman.shadow' version '5.1.0'
   id "org.jetbrains.kotlin.kotlin-ksp" version "1.4-M1-dev-experimental-20200610"
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.kapt'
   id "com.vanniktech.maven.publish"
 }
 
-//<editor-fold desc="ShadowJar configuration">
-// disable default jar tasks
-//configurations.runtimeOnly.artifacts.removeAll { it.archiveTask.is jar }
-//tasks.getByName('jar').enabled = false
-//// create extra configuration for shaded dependencies, so they're not included in the pom
-//def shadedConfig = configurations.create('implementationShaded')
-//configurations.compileOnly.extendsFrom(shadedConfig)
-//shadowJar {
-//  minimize()
-//  archiveClassifier.set('')
-//  configurations = [shadedConfig]
-//  relocate 'com.google', 'dev.zacsweers.moshisealed.codegen.shaded.com.google'
-//  relocate 'afu', 'dev.zacsweers.moshisealed.codegen.shaded.afu'
-//  relocate 'org', 'dev.zacsweers.moshisealed.codegen.shaded.org'
-//  exclude 'javax/**'
-//}
-//artifacts {
-//  runtime shadowJar
-//  archives shadowJar
-//}
-//</editor-fold>
-
 dependencies {
   kapt deps.apt.autoService
   compileOnly deps.apt.autoService
-  kapt deps.apt.incapProcessor
-  compileOnly deps.apt.incap
 
-  implementation(project(":auto-service-ksp"))
+  compileOnly(project(":auto-service-ksp"))
   ksp(project(":auto-service-ksp"))
 
   implementation("org.jetbrains.kotlin:kotlin-symbol-processing-api:1.4-M1-dev-experimental-20200610")
-  implementation deps.apt.autoCommon
-  implementation "com.squareup:kotlinpoet-metadata:${deps.versions.kotlinpoet}"
-  implementation "com.squareup:kotlinpoet-metadata-specs:${deps.versions.kotlinpoet}"
   implementation deps.moshi.adapters
   implementation deps.moshi.moshi
   implementation project(':moshi-sealed-annotations')
