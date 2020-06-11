@@ -17,7 +17,6 @@ import org.jetbrains.kotlin.ksp.symbol.Variance.CONTRAVARIANT
 import org.jetbrains.kotlin.ksp.symbol.Variance.COVARIANT
 import org.jetbrains.kotlin.ksp.symbol.Variance.STAR
 import java.io.OutputStreamWriter
-import java.nio.charset.StandardCharsets
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
 import com.squareup.kotlinpoet.STAR as KpStar
