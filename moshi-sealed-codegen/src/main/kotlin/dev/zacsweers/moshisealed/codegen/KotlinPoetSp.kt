@@ -1,10 +1,12 @@
 package dev.zacsweers.moshisealed.codegen
 
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeVariableName
+import org.jetbrains.kotlin.ksp.processing.CodeGenerator
 import org.jetbrains.kotlin.ksp.symbol.KSAnnotation
 import org.jetbrains.kotlin.ksp.symbol.KSClassDeclaration
 import org.jetbrains.kotlin.ksp.symbol.KSType
@@ -14,6 +16,10 @@ import org.jetbrains.kotlin.ksp.symbol.Nullability.NULLABLE
 import org.jetbrains.kotlin.ksp.symbol.Variance.CONTRAVARIANT
 import org.jetbrains.kotlin.ksp.symbol.Variance.COVARIANT
 import org.jetbrains.kotlin.ksp.symbol.Variance.STAR
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
+import java.nio.charset.StandardCharsets.UTF_8
+import java.nio.file.Files
 import com.squareup.kotlinpoet.STAR as KpStar
 
 fun KSType.toTypeName(): TypeName {
@@ -43,7 +49,8 @@ fun KSClassDeclaration.toTypeName(
 }
 
 fun KSClassDeclaration.toClassName(): ClassName {
-  return ClassName(qualifiedName!!.getQualifier(), qualifiedName!!.getShortName())
+  // Not ideal to be using bestGuess - https://github.com/android/kotlin/issues/23
+  return ClassName.bestGuess(qualifiedName!!.asString())
 }
 
 fun KSTypeParameter.toTypeName(): TypeName {
@@ -65,4 +72,11 @@ fun KSTypeReference.toTypeName(): TypeName {
 
 fun KSAnnotation.toTypeName(): TypeName {
   return annotationType.resolve()?.toTypeName() ?: error("Could not resolve annotation $this")
+}
+
+fun FileSpec.writeTo(codeGenerator: CodeGenerator) {
+  val file = codeGenerator.createNewFile(packageName, name)
+  // Don't use writeTo(file) because that tries to handle directories under the hood
+  OutputStreamWriter(Files.newOutputStream(file.toPath()), UTF_8)
+      .use(::writeTo)
 }
