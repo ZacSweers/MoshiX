@@ -90,6 +90,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
       }
       elements.getTypeElement(it)
     }?.let {
+      @Suppress("DEPRECATION")
       AnnotationSpec.builder(it.asClassName())
           .addMember("value = [%S]", MoshiSealedProcessor::class.java.canonicalName)
           .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
@@ -141,6 +142,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
     val useDefaultNull = element.getAnnotation(DefaultNull::class.java) != null
     val subtypes = mutableSetOf<Subtype>()
     for ((type, kmData) in sealedSubtypes) {
+      @Suppress("DEPRECATION")
       val className = type.asClassName()
       if (kmData.isObject) {
         val isDefaultObject = type.getAnnotation(DefaultObject::class.java) != null
@@ -174,6 +176,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
       subtypes += Subtype(className, false, labelAnnotation.value, type)
     }
 
+    @Suppress("DEPRECATION")
     createType(
         targetType = element.asClassName(),
         isInternal = kmClass.flags.isInternal,
@@ -183,6 +186,6 @@ class MoshiSealedProcessor : AbstractProcessor() {
         generatedAnnotation = generatedAnnotation,
         subtypes = subtypes
     )
-        .writeTo(filer)
+//        .writeTo(filer)
   }
 }
