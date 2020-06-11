@@ -46,7 +46,7 @@ class AutoServiceKsProcessor : SymbolProcessor {
     val autoServiceType = resolver.getClassDeclarationByName(
         resolver.getKSNameFromString(AUTO_SERVICE_NAME))
         ?.asType(emptyList())
-        ?: error("JsonClass type not found on the classpath.")
+        ?: error("@AutoService type not found on the classpath.")
 
     resolver.getSymbolsWithAnnotation(AUTO_SERVICE_NAME)
         .asSequence()
