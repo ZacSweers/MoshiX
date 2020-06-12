@@ -73,10 +73,8 @@ class MoshiSealedKsProcessor : SymbolProcessor {
             "@JsonClass is only applicable to classes!"
           }
 
-          val generator = type.annotations.find { it.annotationType.resolve() == jsonClassType }
-              ?.arguments
-              ?.find { it.name?.getShortName() == "generator" }
-              ?.value as? String
+          val generator = type.findAnnotationWithType(jsonClassType)
+              ?.getMember<String>("generator")
               ?: return@forEach
 
           if (!generator.startsWith("sealed:")) {

@@ -27,3 +27,9 @@ internal fun KSAnnotated.hasAnnotation(target: KSType): Boolean {
 internal fun KSAnnotated.findAnnotationWithType(target: KSType): KSAnnotation? {
   return annotations.find { it.annotationType.resolve() == target }
 }
+
+internal inline fun <reified T> KSAnnotation.getMember(name: String): T {
+  return arguments.find { it.name?.getShortName() == name }
+      ?.value as? T
+      ?: error("No member name found for $name.")
+}
