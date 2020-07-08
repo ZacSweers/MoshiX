@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 plugins {
-  id "org.jetbrains.kotlin.kotlin-ksp" version "1.4-M1-dev-experimental-20200610"
+  id "org.jetbrains.kotlin.kotlin-ksp" version "1.4-M1-dev-experimental-20200626"
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.kapt'
   id "com.vanniktech.maven.publish"
@@ -27,7 +27,8 @@ dependencies {
   compileOnly(project(":auto-service-ksp"))
   ksp(project(":auto-service-ksp"))
 
-  implementation("org.jetbrains.kotlin:kotlin-symbol-processing-api:1.4-M1-dev-experimental-20200610")
+  implementation("org.jetbrains.kotlin:kotlin-symbol-processing-api:1.4-M1-dev-experimental-20200626")
+  implementation deps.moshi.kotlinCodeGen
   implementation deps.moshi.adapters
   implementation deps.moshi.moshi
   implementation project(':moshi-sealed-annotations')
