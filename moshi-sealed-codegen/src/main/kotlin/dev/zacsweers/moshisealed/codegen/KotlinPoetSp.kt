@@ -18,7 +18,6 @@ import org.jetbrains.kotlin.ksp.symbol.Variance.COVARIANT
 import org.jetbrains.kotlin.ksp.symbol.Variance.STAR
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets.UTF_8
-import java.nio.file.Files
 import com.squareup.kotlinpoet.STAR as KpStar
 
 fun KSType.toTypeName(): TypeName {
@@ -76,6 +75,6 @@ fun KSAnnotation.toTypeName(): TypeName {
 fun FileSpec.writeTo(codeGenerator: CodeGenerator) {
   val file = codeGenerator.createNewFile(packageName, name)
   // Don't use writeTo(file) because that tries to handle directories under the hood
-  OutputStreamWriter(Files.newOutputStream(file.toPath()), UTF_8)
+  OutputStreamWriter(file, UTF_8)
       .use(::writeTo)
 }
