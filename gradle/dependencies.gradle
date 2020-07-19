@@ -18,7 +18,8 @@ def versions = [
     kotlin: '1.4-M1',
     kotlinpoet: '1.6.0',
     incap: '0.3',
-    moshi: '1.9.2'
+//    moshi: '1.10.0-LOCAL2',
+    moshi: '1.9.3'
 ]
 
 def apt = [

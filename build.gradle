@@ -26,6 +26,7 @@ subprojects {
     mavenCentral()
     jcenter()
     google()
+    mavenLocal()
     maven {
       url "https://dl.bintray.com/kotlin/kotlin-eap"
     }
