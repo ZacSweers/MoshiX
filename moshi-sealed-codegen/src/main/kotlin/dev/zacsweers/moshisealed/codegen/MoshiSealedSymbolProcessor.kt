@@ -15,7 +15,7 @@ import org.jetbrains.kotlin.ksp.symbol.KSDeclarationContainer
 import org.jetbrains.kotlin.ksp.symbol.Modifier
 
 @AutoService(SymbolProcessor::class)
-class MoshiSealedKsProcessor : SymbolProcessor {
+class MoshiSealedSymbolProcessor : SymbolProcessor {
 
   companion object {
     /**
@@ -57,7 +57,7 @@ class MoshiSealedKsProcessor : SymbolProcessor {
       val annotationType = resolver.getClassDeclarationByName(resolver.getKSNameFromString(it))
           ?: error("Generated annotation type doesn't exist: $it")
       AnnotationSpec.builder(annotationType.toClassName())
-          .addMember("value = [%S]", MoshiSealedKsProcessor::class.java.canonicalName)
+          .addMember("value = [%S]", MoshiSealedSymbolProcessor::class.java.canonicalName)
           .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
           .build()
     }
