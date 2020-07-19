@@ -29,5 +29,8 @@ dependencies {
 
   testImplementation deps.test.junit
   testImplementation deps.test.truth
+  // Define these before kotlin-compile-testing to force their newer versions
+  implementation "org.jetbrains.kotlin:kotlin-symbol-processing-api:${deps.versions.ksp}"
+  implementation "org.jetbrains.kotlin:kotlin-ksp:${deps.versions.ksp}"
   testImplementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.2.9"
 }

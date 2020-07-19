@@ -141,11 +141,7 @@ class AutoServiceSymbolProcessor : SymbolProcessor {
 //        }
         allServices.addAll(newServices)
         log("New service file contents: $allServices")
-        // Fake an extension here for this to work correctly
-        // TODO https://github.com/android/kotlin/issues/70
-        val first = resourceFile.substringBeforeLast(".")
-        val fakeExtension = resourceFile.substringAfterLast(".")
-        codeGenerator.createNewFile("", first, fakeExtension).bufferedWriter().use { writer ->
+        codeGenerator.createNewFile("", resourceFile, "").bufferedWriter().use { writer ->
           for (service in allServices) {
             writer.write(service)
             writer.newLine()

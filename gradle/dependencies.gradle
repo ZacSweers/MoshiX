@@ -16,6 +16,7 @@
 
 def versions = [
     kotlin: '1.4-M1',
+    ksp: "1.4-M1-dev-experimental-20200716",
     kotlinpoet: '1.6.0',
     incap: '0.3',
 //    moshi: '1.10.0-LOCAL2',
