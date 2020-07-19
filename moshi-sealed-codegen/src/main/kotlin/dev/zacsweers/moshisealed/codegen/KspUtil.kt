@@ -41,9 +41,9 @@ internal fun KSAnnotated.findAnnotationWithType(target: KSType): KSAnnotation? {
 }
 
 internal inline fun <reified T> KSAnnotation.getMember(name: String): T {
-  return arguments.find { it.name?.getShortName() == name }
-      ?.value as? T
-      ?: error("No member name found for $name.")
+  val matchingArg = arguments.find { it.name?.asString() == name }
+      ?: error("No member name found for '$name'. All arguments: ${arguments.map { it.name?.asString() }}")
+  return matchingArg.value as? T ?: error("No value found for $name. Was ${matchingArg.value}")
 }
 
 internal fun Visibility.asKModifier(): KModifier {
