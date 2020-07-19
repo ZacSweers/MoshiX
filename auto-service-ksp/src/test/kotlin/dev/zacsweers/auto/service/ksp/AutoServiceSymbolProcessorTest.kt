@@ -26,7 +26,7 @@ class AutoServiceSymbolProcessorTest {
     val compilation = KotlinCompilation().apply {
       sources = listOf(source)
       inheritClassPath = true
-      symbolProcessors = listOf(AutoServiceKsProcessor())
+      symbolProcessors = listOf(AutoServiceSymbolProcessor())
     }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)

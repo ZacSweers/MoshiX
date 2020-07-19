@@ -18,7 +18,7 @@ import java.io.IOException
 import java.util.SortedSet
 
 @AutoService(SymbolProcessor::class)
-class AutoServiceKsProcessor : SymbolProcessor {
+class AutoServiceSymbolProcessor : SymbolProcessor {
 
   companion object {
     val AUTO_SERVICE_NAME = AutoService::class.qualifiedName!!
