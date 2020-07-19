@@ -41,4 +41,8 @@ dependencies {
   implementation project(':moshi-sealed-annotations')
   implementation deps.misc.kotlinpoet
   implementation deps.kotlin.stdlibjdk8
+
+  testImplementation deps.test.junit
+  testImplementation deps.test.truth
+  testImplementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.2.9"
 }
