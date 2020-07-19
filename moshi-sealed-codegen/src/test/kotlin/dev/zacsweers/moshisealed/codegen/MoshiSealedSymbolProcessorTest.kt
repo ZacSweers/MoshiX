@@ -6,10 +6,18 @@ import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessors
+import org.jetbrains.kotlin.ksp.processing.SymbolProcessor
 import org.junit.Test
 import java.io.File
+import java.util.ServiceLoader
 
 class MoshiSealedSymbolProcessorTest {
+  @Test
+  fun checkServiceLoader() {
+    val processors = ServiceLoader.load(SymbolProcessor::class.java).iterator().asSequence().toSet()
+    assertThat(processors.any { it is MoshiSealedSymbolProcessor }).isTrue()
+  }
+
   @Test
   fun smokeTest() {
     val source = SourceFile.kotlin("CustomCallable.kt", """
