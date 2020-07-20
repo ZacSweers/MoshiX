@@ -29,7 +29,7 @@ sourceSets {
 }
 
 dependencies {
-  implementation deps.apt.autoServiceAnnotations
+  compileOnly deps.apt.autoServiceAnnotations
   compileOnly(project(":auto-service-ksp"))
   ksp(project(":auto-service-ksp"))
 
