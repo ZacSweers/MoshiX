@@ -7,6 +7,7 @@ import com.google.common.collect.Sets
 import com.squareup.kotlinpoet.ClassName
 import org.jetbrains.kotlin.ksp.closestClassDeclaration
 import org.jetbrains.kotlin.ksp.getAllSuperTypes
+import org.jetbrains.kotlin.ksp.isLocal
 import org.jetbrains.kotlin.ksp.processing.CodeGenerator
 import org.jetbrains.kotlin.ksp.processing.KSPLogger
 import org.jetbrains.kotlin.ksp.processing.Resolver
@@ -114,33 +115,8 @@ class AutoServiceSymbolProcessor : SymbolProcessor {
       val resourceFile = "resources/META-INF/services/$providerInterface"
       log("Working on resource file: $resourceFile")
       try {
-        // TODO read all existing files?
         val allServices: SortedSet<String> = Sets.newTreeSet()
-//        try {
-//          // would like to be able to print the full path
-//          // before we attempt to get the resource in case the behavior
-//          // of filer.getResource does change to match the spec, but there's
-//          // no good way to resolve CLASS_OUTPUT without first getting a resource.
-//          val existingFile: FileObject = filer.getResource(CLASS_OUTPUT, "",
-//              resourceFile)
-//          log("Looking for existing resource file at " + existingFile.toUri())
-//          val oldServices: Set<String> = ServicesFiles.readServiceFile(
-//              existingFile.openInputStream())
-//          log("Existing service entries: $oldServices")
-//          allServices.addAll(oldServices)
-//        } catch (e: IOException) {
-//          // According to the javadoc, Filer.getResource throws an exception
-//          // if the file doesn't already exist.  In practice this doesn't
-//          // appear to be the case.  Filer.getResource will happily return a
-//          // FileObject that refers to a non-existent file but will throw
-//          // IOException if you try to open an input stream for it.
-//          log("Resource file did not already exist.")
-//        }
         val newServices: Set<String> = HashSet(providers[providerInterface])
-//        if (allServices.containsAll(newServices)) {
-//          log("No new service entries being added.")
-//          return
-//        }
         allServices.addAll(newServices)
         log("New service file contents: $allServices")
         codeGenerator.createNewFile("", resourceFile, "").bufferedWriter().use { writer ->
@@ -186,21 +162,15 @@ class AutoServiceSymbolProcessor : SymbolProcessor {
   }
 
   private fun KSClassDeclaration.toClassName(): ClassName {
-    // This doesn't work if your package name has capitals.
-    // https://github.com/android/kotlin/issues/23
-    val qualifierSplit = qualifiedName!!.getQualifier().split(".")
-    val simple = simpleName.asString()
-    val nameStart = qualifierSplit.indexOfFirst { it[0].isUpperCase() }
-    val packageName = qualifierSplit.subList(0,
-        if (nameStart != -1) nameStart else qualifierSplit.size)
-        .joinToString(".")
-    val intermediaryNames = if (nameStart == -1) {
-      emptyList()
-    } else {
-      qualifierSplit.subList(nameStart, qualifierSplit.size)
+    require(!isLocal()) {
+      "Local/anonymous classes are not supported!"
     }
-    val allNames = intermediaryNames + simple
-    return ClassName(packageName, allNames)
+    val pkgName = packageName.asString()
+    val typesString = qualifiedName!!.asString().removePrefix("$pkgName.")
+
+    val simpleNames = typesString
+      .split(".")
+    return ClassName(pkgName, simpleNames)
   }
 
   override fun finish() {

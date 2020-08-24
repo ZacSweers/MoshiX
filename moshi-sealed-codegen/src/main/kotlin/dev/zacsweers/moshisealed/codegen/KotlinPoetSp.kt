@@ -6,6 +6,7 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeVariableName
+import org.jetbrains.kotlin.ksp.isLocal
 import org.jetbrains.kotlin.ksp.processing.CodeGenerator
 import org.jetbrains.kotlin.ksp.symbol.KSAnnotation
 import org.jetbrains.kotlin.ksp.symbol.KSClassDeclaration
@@ -47,8 +48,15 @@ fun KSClassDeclaration.toTypeName(
 }
 
 fun KSClassDeclaration.toClassName(): ClassName {
-  // Not ideal to be using bestGuess - https://github.com/android/kotlin/issues/23
-  return ClassName.bestGuess(qualifiedName!!.asString())
+  require(!isLocal()) {
+    "Local/anonymous classes are not supported!"
+  }
+  val pkgName = packageName.asString()
+  val typesString = qualifiedName!!.asString().removePrefix("$pkgName.")
+
+  val simpleNames = typesString
+    .split(".")
+  return ClassName(pkgName, simpleNames)
 }
 
 fun KSTypeParameter.toTypeName(): TypeName {
