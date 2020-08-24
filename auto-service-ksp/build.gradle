@@ -23,7 +23,7 @@ dependencies {
   kapt deps.apt.autoService
   implementation deps.apt.autoServiceAnnotations
   implementation deps.misc.kotlinpoet
-  implementation("org.jetbrains.kotlin:kotlin-symbol-processing-api:1.4-M1-dev-experimental-20200716")
+  implementation("org.jetbrains.kotlin:kotlin-symbol-processing-api:1.4.0-rc-dev-experimental-20200814")
   implementation deps.kotlin.stdlibjdk8
   implementation "com.google.guava:guava:29.0-android"
 

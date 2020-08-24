@@ -7,6 +7,7 @@ import dev.zacsweers.moshisealed.annotations.DefaultNull
 import dev.zacsweers.moshisealed.annotations.DefaultObject
 import dev.zacsweers.moshisealed.annotations.TypeLabel
 import org.jetbrains.kotlin.ksp.processing.CodeGenerator
+import org.jetbrains.kotlin.ksp.processing.KSPLogger
 import org.jetbrains.kotlin.ksp.processing.Resolver
 import org.jetbrains.kotlin.ksp.processing.SymbolProcessor
 import org.jetbrains.kotlin.ksp.symbol.ClassKind.OBJECT
@@ -41,8 +42,12 @@ class MoshiSealedSymbolProcessor : SymbolProcessor {
   private lateinit var codeGenerator: CodeGenerator
   private var generatedOption: String? = null
 
-  override fun init(options: Map<String, String>, kotlinVersion: KotlinVersion,
-      codeGenerator: CodeGenerator) {
+  override fun init(
+    options: Map<String, String>,
+    kotlinVersion: KotlinVersion,
+    codeGenerator: CodeGenerator,
+    logger: KSPLogger
+  ) {
     this.codeGenerator = codeGenerator
 
     generatedOption = options[OPTION_GENERATED]?.also {

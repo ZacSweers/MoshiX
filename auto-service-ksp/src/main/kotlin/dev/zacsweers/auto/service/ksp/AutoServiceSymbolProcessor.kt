@@ -8,6 +8,7 @@ import com.squareup.kotlinpoet.ClassName
 import org.jetbrains.kotlin.ksp.closestClassDeclaration
 import org.jetbrains.kotlin.ksp.getAllSuperTypes
 import org.jetbrains.kotlin.ksp.processing.CodeGenerator
+import org.jetbrains.kotlin.ksp.processing.KSPLogger
 import org.jetbrains.kotlin.ksp.processing.Resolver
 import org.jetbrains.kotlin.ksp.processing.SymbolProcessor
 import org.jetbrains.kotlin.ksp.symbol.KSClassDeclaration
@@ -40,9 +41,10 @@ class AutoServiceSymbolProcessor : SymbolProcessor {
   private var verbose = false
 
   override fun init(
-      options: Map<String, String>,
-      kotlinVersion: KotlinVersion,
-      codeGenerator: CodeGenerator
+    options: Map<String, String>,
+    kotlinVersion: KotlinVersion,
+    codeGenerator: CodeGenerator,
+    logger: KSPLogger
   ) {
     this.codeGenerator = codeGenerator
     verify = options["autoserviceKsp.verify"]?.toBoolean() == true
