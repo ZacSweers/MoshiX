@@ -24,6 +24,7 @@ dependencies {
   kapt(project(":moshi-sealed:codegen"))
   kapt(Dependencies.Moshi.codegen)
 
+  implementation(project(":moshi-ktx"))
   implementation(project(":moshi-sealed:annotations"))
   implementation(Dependencies.Moshi.kotlin)
   implementation(project(":moshi-sealed:reflect"))

@@ -12,6 +12,7 @@ import dev.zacsweers.moshisealed.sample.Message
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import dev.zacsweers.moshi.adapter
 
 @RunWith(Parameterized::class)
 @ExperimentalStdlibApi
@@ -43,7 +44,7 @@ class MessageTest(type: Type) {
 
   @Test
   fun assertDefaultBehavior() {
-    val adapter = moshi.adapter(Message::class.java)
+    val adapter = moshi.adapter<Message>()
     assertPolymorphicBehavior(
         adapter,
         Message.Success("Okay!"),
@@ -54,7 +55,7 @@ class MessageTest(type: Type) {
 
   @Test
   fun assertDefaultNullBehavior() {
-    val adapter = moshi.adapter(MessageWithNullDefault::class.java)
+    val adapter = moshi.adapter<MessageWithNullDefault>()
     assertPolymorphicBehavior(
         adapter,
         MessageWithNullDefault.Success("Okay!"),
@@ -65,7 +66,7 @@ class MessageTest(type: Type) {
 
   @Test
   fun assertNoDefaultBehavior() {
-    val adapter = moshi.adapter(MessageWithNoDefault::class.java)
+    val adapter = moshi.adapter<MessageWithNoDefault>()
     assertPolymorphicBehavior(
         adapter,
         MessageWithNoDefault.Success("Okay!"),
