@@ -5,9 +5,11 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.kspSourcesDir
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 
+@Ignore("Disabled until kotlin-compile-testing updates")
 class AutoServiceSymbolProcessorTest {
   @Test
   fun smokeTest() {
