@@ -34,6 +34,12 @@ subprojects {
     mavenCentral()
     jcenter()
   }
+  pluginManager.withPlugin("java") {
+    configure<JavaPluginExtension> {
+      sourceCompatibility = JavaVersion.VERSION_1_8
+      targetCompatibility = JavaVersion.VERSION_1_8
+    }
+  }
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
     tasks.withType<KotlinCompile>().configureEach {
       kotlinOptions {
