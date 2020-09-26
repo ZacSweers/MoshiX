@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Zac Sweers
+ * Copyright (c) 2020 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-pluginManagement {
-  repositories {
-    mavenCentral()
-    gradlePluginPortal()
-    jcenter()
-    google()
+plugins {
+  kotlin("jvm")
+}
+
+tasks.named<KotlinCompile>("compileTestKotlin") {
+  kotlinOptions {
+    @Suppress("SuspiciousCollectionReassignment")
+    freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
   }
 }
 
-rootProject.name = "moshix-root"
-include("moshi-ktx")
-include("moshi-sealed:reflect")
-include("moshi-sealed:annotations")
-include("moshi-sealed:codegen")
-include("moshi-sealed:sample")
+dependencies {
+  implementation(Dependencies.Moshi.moshi)
+  testImplementation(Dependencies.Testing.junit)
+  testImplementation(Dependencies.Testing.truth)
+}

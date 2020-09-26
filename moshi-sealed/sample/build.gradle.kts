@@ -42,6 +42,6 @@ kapt {
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-Xuse-experimental=kotlin.ExperimentalStdlibApi"
+    freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
   }
 }
