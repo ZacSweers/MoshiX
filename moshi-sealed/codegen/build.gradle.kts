@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 plugins {
-  id 'org.jetbrains.kotlin.jvm'
-  id 'org.jetbrains.kotlin.kapt'
-  id "com.vanniktech.maven.publish"
+  kotlin("jvm")
+  kotlin("kapt")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
-  implementation project(':moshi-sealed-annotations')
-  api deps.moshi.moshi
-  api deps.moshi.adapters
-  implementation deps.misc.kotlinpoet
-  implementation deps.kotlin.reflect
-  implementation deps.kotlin.stdlibjdk8
+  kapt(Dependencies.AutoService.processor)
+  compileOnly(Dependencies.AutoService.annotations)
+  kapt(Dependencies.Incap.processor)
+  compileOnly(Dependencies.Incap.annotations)
+
+  implementation(Dependencies.autoCommon)
+  implementation(Dependencies.KotlinPoet.kotlinPoet)
+  implementation(Dependencies.KotlinPoet.metadata)
+  implementation(Dependencies.KotlinPoet.metadataSpecs)
+  implementation(Dependencies.Moshi.adapters)
+  implementation(Dependencies.Moshi.moshi)
+  implementation(project(":moshi-sealed:annotations"))
 }

@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 plugins {
-  id 'org.jetbrains.kotlin.jvm'
-  id "com.vanniktech.maven.publish"
+  kotlin("jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
-  compile deps.kotlin.stdlibjdk7
+  implementation(project(":moshi-sealed:annotations"))
+  api(Dependencies.Moshi.moshi)
+  api(Dependencies.Moshi.adapters)
+  implementation(Dependencies.KotlinPoet.kotlinPoet)
+  implementation(Dependencies.Kotlin.reflect)
 }

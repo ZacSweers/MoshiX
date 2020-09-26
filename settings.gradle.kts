@@ -15,28 +15,16 @@
  */
 
 pluginManagement {
-  apply from: file('gradle/dependencies.gradle')
-  resolutionStrategy {
-    eachPlugin {
-      switch (requested.id.id) {
-        case 'org.jetbrains.kotlin.jvm':
-          useModule(deps.build.gradlePlugins.kotlin)
-          break
-        case 'org.jetbrains.kotlin.kapt':
-          useModule(deps.build.gradlePlugins.kotlin)
-          break
-      }
-    }
-  }
   repositories {
+    mavenCentral()
+    gradlePluginPortal()
     jcenter()
     google()
-    gradlePluginPortal()
   }
 }
 
-rootProject.name = 'moshi-sealed-root'
-include 'moshi-sealed-reflect'
-include 'moshi-sealed-annotations'
-include 'moshi-sealed-codegen'
-include 'sample'
+rootProject.name = "moshix-root"
+include("moshi-sealed:reflect")
+include("moshi-sealed:annotations")
+include("moshi-sealed:codegen")
+include("moshi-sealed:sample")

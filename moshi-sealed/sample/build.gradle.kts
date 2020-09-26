@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id 'org.jetbrains.kotlin.jvm'
-  id 'org.jetbrains.kotlin.kapt'
+  kotlin("jvm")
+  kotlin("kapt")
 }
 
 dependencies {
-  kapt project(':moshi-sealed-codegen')
-  kapt deps.moshi.kotlinCodeGen
+  kapt(project(":moshi-sealed:codegen"))
+  kapt(Dependencies.Moshi.codegen)
 
-  implementation project(':moshi-sealed-annotations')
-  implementation deps.kotlin.stdlibjdk8
-  implementation deps.moshi.kotlin
-  implementation project(':moshi-sealed-reflect')
+  implementation(project(":moshi-sealed:annotations"))
+  implementation(Dependencies.Moshi.kotlin)
+  implementation(project(":moshi-sealed:reflect"))
 
-  kaptTest project(':moshi-sealed-codegen')
-  testCompile deps.test.junit
-  testCompile deps.test.truth
+  kaptTest(project(":moshi-sealed:codegen"))
+  testImplementation(Dependencies.Testing.junit)
+  testImplementation(Dependencies.Testing.truth)
 }
 
 kapt {
@@ -39,8 +39,9 @@ kapt {
   }
 }
 
-compileTestKotlin {
+tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
-    freeCompilerArgs += ['-Xuse-experimental=kotlin.ExperimentalStdlibApi']
+    @Suppress("SuspiciousCollectionReassignment")
+    freeCompilerArgs += "-Xuse-experimental=kotlin.ExperimentalStdlibApi"
   }
 }
