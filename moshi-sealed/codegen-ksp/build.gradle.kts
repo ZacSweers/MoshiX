@@ -35,7 +35,7 @@ tasks.named<ProcessResources>("processResources").configure {
 
 dependencies {
   ksp(project(":misc:auto-service-ksp"))
-  compileOnly(Dependencies.AutoService.annotations)
+  implementation(Dependencies.AutoService.annotations)
   compileOnly(Dependencies.Kotlin.Ksp.api)
 
   implementation(Dependencies.KotlinPoet.kotlinPoet)

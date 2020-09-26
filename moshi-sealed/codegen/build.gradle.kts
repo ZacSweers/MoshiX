@@ -36,7 +36,7 @@ tasks.named<ProcessResources>("processResources").configure {
 
 dependencies {
   ksp(project(":misc:auto-service-ksp"))
-  compileOnly(Dependencies.AutoService.annotations)
+  implementation(Dependencies.AutoService.annotations)
   kapt(Dependencies.Incap.processor)
   compileOnly(Dependencies.Incap.annotations)
 
