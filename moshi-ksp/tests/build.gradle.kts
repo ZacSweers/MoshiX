@@ -26,11 +26,21 @@ val generatedAnnotation = if (JavaVersion.current().isJava10Compatible) {
   "javax.annotation.Generated"
 }
 
+sourceSets {
+  test {
+    java {
+      srcDir("build/generated/ksp/src/test/kotlin")
+    }
+  }
+}
+
 dependencies {
   ksp(project(":moshi-ksp:moshi-ksp"))
+  testImplementation(Dependencies.Moshi.moshi)
   testImplementation(project(":moshi-ktx"))
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)
+  testImplementation(Dependencies.Kotlin.reflect)
 }
 
 ksp {
