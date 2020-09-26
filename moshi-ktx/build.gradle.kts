@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Zac Sweers
+ * Copyright (c) 2020 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,32 +17,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm")
-  kotlin("kapt")
 }
 
-dependencies {
-  kapt(project(":moshi-sealed:codegen"))
-  kapt(Dependencies.Moshi.codegen)
-
-  implementation(project(":moshi-ktx"))
-  implementation(project(":moshi-sealed:annotations"))
-  implementation(Dependencies.Moshi.kotlin)
-  implementation(project(":moshi-sealed:reflect"))
-
-  kaptTest(project(":moshi-sealed:codegen"))
-  testImplementation(Dependencies.Testing.junit)
-  testImplementation(Dependencies.Testing.truth)
-}
-
-kapt {
-  arguments {
-    arg("moshi.generated", "javax.annotation.Generated")
-  }
-}
-
-tasks.withType<KotlinCompile>().configureEach {
+tasks.named<KotlinCompile>("compileTestKotlin") {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
     freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
   }
+}
+
+dependencies {
+  implementation(Dependencies.Moshi.moshi)
+  testImplementation(Dependencies.Testing.junit)
+  testImplementation(Dependencies.Testing.truth)
 }

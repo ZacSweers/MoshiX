@@ -24,6 +24,7 @@ pluginManagement {
 }
 
 rootProject.name = "moshix-root"
+include("moshi-ktx")
 include("moshi-sealed:reflect")
 include("moshi-sealed:annotations")
 include("moshi-sealed:codegen")
