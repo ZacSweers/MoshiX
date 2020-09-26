@@ -16,9 +16,9 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 
 @AutoService(SymbolProcessor::class)
-class MoshiSealedSymbolProcessor : SymbolProcessor {
+public class MoshiSealedSymbolProcessor : SymbolProcessor {
 
-  companion object {
+  public companion object {
     /**
      * This annotation processing argument can be specified to have a `@Generated` annotation
      * included in the generated code. It is not encouraged unless you need it for static analysis
@@ -30,13 +30,14 @@ class MoshiSealedSymbolProcessor : SymbolProcessor {
      *
      * We reuse Moshi's option for convenience so you don't have to declare multiple options.
      */
-    const val OPTION_GENERATED = "moshi.generated"
+    public const val OPTION_GENERATED: String = "moshi.generated"
+
     private val POSSIBLE_GENERATED_NAMES = setOf(
       "javax.annotation.processing.Generated",
       "javax.annotation.Generated"
     )
 
-    val JSON_CLASS_NAME = JsonClass::class.qualifiedName!!
+    private val JSON_CLASS_NAME = JsonClass::class.qualifiedName!!
   }
 
   private lateinit var codeGenerator: CodeGenerator

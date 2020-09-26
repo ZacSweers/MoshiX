@@ -22,4 +22,4 @@ import kotlin.annotation.AnnotationTarget.CLASS
 /** Use this annotation to specify specific `object` subtype to be the default instance. */
 @Target(CLASS)
 @Retention(RUNTIME)
-annotation class DefaultObject
+public annotation class DefaultObject

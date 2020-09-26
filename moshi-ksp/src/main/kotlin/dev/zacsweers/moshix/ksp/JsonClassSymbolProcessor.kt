@@ -16,9 +16,9 @@ import java.lang.RuntimeException
 import java.nio.charset.StandardCharsets
 
 @AutoService(SymbolProcessor::class)
-class JsonClassSymbolProcessor : SymbolProcessor {
+public class JsonClassSymbolProcessor : SymbolProcessor {
 
-  companion object {
+  public companion object {
     /**
      * This annotation processing argument can be specified to have a `@Generated` annotation
      * included in the generated code. It is not encouraged unless you need it for static analysis
@@ -28,13 +28,14 @@ class JsonClassSymbolProcessor : SymbolProcessor {
      *   * `"javax.annotation.processing.Generated"` (JRE 9+)
      *   * `"javax.annotation.Generated"` (JRE <9)
      */
-    const val OPTION_GENERATED = "moshi.generated"
+    public const val OPTION_GENERATED: String = "moshi.generated"
+
     private val POSSIBLE_GENERATED_NAMES = setOf(
       "javax.annotation.processing.Generated",
       "javax.annotation.Generated"
     )
 
-    val JSON_CLASS_NAME = JsonClass::class.qualifiedName!!
+    private val JSON_CLASS_NAME = JsonClass::class.qualifiedName!!
   }
 
   private lateinit var codeGenerator: CodeGenerator
