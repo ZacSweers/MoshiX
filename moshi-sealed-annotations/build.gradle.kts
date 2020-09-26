@@ -15,10 +15,6 @@
  */
 
 plugins {
-  id 'org.jetbrains.kotlin.jvm'
-  id "com.vanniktech.maven.publish"
-}
-
-dependencies {
-  compile deps.kotlin.stdlibjdk7
+  kotlin("jvm")
+  id("com.vanniktech.maven.publish")
 }

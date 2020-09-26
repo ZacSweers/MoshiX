@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-plugins {
-  id 'org.jetbrains.kotlin.jvm'
-  id 'org.jetbrains.kotlin.kapt'
-  id "com.vanniktech.maven.publish"
+
+pluginManagement {
+  repositories {
+    mavenCentral()
+    gradlePluginPortal()
+    jcenter()
+    google()
+  }
 }
 
-dependencies {
-  implementation project(':moshi-sealed-annotations')
-  api deps.moshi.moshi
-  api deps.moshi.adapters
-  implementation deps.misc.kotlinpoet
-  implementation deps.kotlin.reflect
-  implementation deps.kotlin.stdlibjdk8
-}
+rootProject.name = "moshix-root"
+include("moshi-sealed-reflect")
+include("moshi-sealed-annotations")
+include("moshi-sealed-codegen")
+include("sample")
