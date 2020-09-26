@@ -24,4 +24,4 @@ import kotlin.annotation.AnnotationTarget.CLASS
  */
 @Target(CLASS)
 @Retention(RUNTIME)
-annotation class DefaultNull
+public annotation class DefaultNull

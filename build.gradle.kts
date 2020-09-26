@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
 
@@ -47,6 +48,11 @@ subprojects {
         jvmTarget = Dependencies.Kotlin.jvmTarget
         @Suppress("SuspiciousCollectionReassignment")
         freeCompilerArgs += Dependencies.Kotlin.defaultFreeCompilerArgs
+      }
+    }
+    if (project.name != "sample") {
+      configure<KotlinProjectExtension> {
+        explicitApi()
       }
     }
   }

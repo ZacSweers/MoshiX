@@ -13,7 +13,7 @@ import kotlin.reflect.full.findAnnotation
 
 private object UNSET
 
-class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
+public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
   override fun create(type: Type,
       annotations: MutableSet<out Annotation>,
       moshi: Moshi): JsonAdapter<*>? {
@@ -42,7 +42,7 @@ class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         defaultObjectInstance = null
       } else {
         rawTypeKotlin.sealedSubclasses
-            .firstOrNull { it.annotations.any { it is DefaultObject } }
+            .firstOrNull { subclass -> subclass.annotations.any { it is DefaultObject } }
             ?.let {
               it.objectInstance ?: error("Must be an object type to use as a @DefaultObject")
             }
@@ -57,7 +57,7 @@ class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       }
 
       @Suppress("UNCHECKED_CAST")
-      val polymorphicFactory = PolymorphicJsonAdapterFactory.of<Any>(rawType as Class<Any>?, typeLabel)
+      val polymorphicFactory = PolymorphicJsonAdapterFactory.of(rawType as Class<Any>?, typeLabel)
           .let {
             if (defaultObjectInstance != UNSET) {
               it.withDefaultValue(defaultObjectInstance)
@@ -67,7 +67,7 @@ class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
           }
           .let {
             rawTypeKotlin.sealedSubclasses
-                .filter { it.objectInstance == null }
+                .filter { subclass -> subclass.objectInstance == null }
                 .fold(it) { factory, sealedSubclass ->
               val label = sealedSubclass.findAnnotation<TypeLabel>()?.value
                   ?: throw IllegalArgumentException("Sealed subtypes must be annotated with @TypeLabel to define their label ${sealedSubclass.qualifiedName}")

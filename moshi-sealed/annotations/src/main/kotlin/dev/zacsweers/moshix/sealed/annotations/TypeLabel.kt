@@ -22,4 +22,4 @@ import kotlin.annotation.AnnotationTarget.CLASS
 /** Use this annotation to specify the type label of a subtype. */
 @Target(CLASS)
 @Retention(RUNTIME)
-annotation class TypeLabel(val value: String)
+public annotation class TypeLabel(val value: String)

@@ -66,9 +66,9 @@ import javax.tools.Diagnostic
 @IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.AGGREGATING)
 @SupportedOptions(OPTION_GENERATED)
 @AutoService(Processor::class)
-class MoshiSealedProcessor : AbstractProcessor() {
+public class MoshiSealedProcessor : AbstractProcessor() {
 
-  companion object {
+  public companion object {
     /**
      * This annotation processing argument can be specified to have a `@Generated` annotation
      * included in the generated code. It is not encouraged unless you need it for static analysis
@@ -80,7 +80,8 @@ class MoshiSealedProcessor : AbstractProcessor() {
      *
      * We reuse Moshi's option for convenience so you don't have to declare multiple options.
      */
-    const val OPTION_GENERATED = "moshi.generated"
+    public const val OPTION_GENERATED: String = "moshi.generated"
+
     private val POSSIBLE_GENERATED_NAMES = setOf(
         "javax.annotation.processing.Generated",
         "javax.annotation.Generated"

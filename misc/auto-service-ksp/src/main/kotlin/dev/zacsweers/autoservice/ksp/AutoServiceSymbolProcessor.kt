@@ -18,9 +18,9 @@ import java.io.IOException
 import java.util.SortedSet
 
 @AutoService(SymbolProcessor::class)
-class AutoServiceSymbolProcessor : SymbolProcessor {
+public class AutoServiceSymbolProcessor : SymbolProcessor {
 
-  companion object {
+  private companion object {
     val AUTO_SERVICE_NAME = AutoService::class.qualifiedName!!
   }
 
