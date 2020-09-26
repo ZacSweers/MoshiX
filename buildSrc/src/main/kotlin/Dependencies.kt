@@ -40,6 +40,12 @@ object Dependencies {
     const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.1.0"
     val jvmTarget = "1.8"
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
+
+    object Ksp {
+      const val version = "1.4.10-dev-experimental-20200924"
+      const val api = "com.google.devtools.ksp:symbol-processing-api:$version"
+      const val ksp = "com.google.devtools.ksp:symbol-processing:$version"
+    }
   }
 
   object KotlinPoet {
@@ -60,6 +66,7 @@ object Dependencies {
 
   object Testing {
     const val compileTesting = "com.github.tschuchortdev:kotlin-compile-testing:1.2.10"
+    const val kspCompileTesting = "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.2.10"
     const val junit = "junit:junit:4.12"
     const val truth = "com.google.truth:truth:1.0"
   }

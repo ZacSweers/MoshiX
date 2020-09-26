@@ -107,6 +107,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
       }
       elements.getTypeElement(it)
     }?.let {
+      @Suppress("DEPRECATION")
       AnnotationSpec.builder(it.asClassName())
           .addMember("value = [%S]", MoshiSealedProcessor::class.java.canonicalName)
           .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
@@ -155,10 +156,12 @@ class MoshiSealedProcessor : AbstractProcessor() {
           it.getAnnotation(Metadata::class.java).toImmutableKmClass()
         }
     val defaultCodeBlockBuilder = CodeBlock.builder()
+    @Suppress("DEPRECATION")
     val adapterName = ClassName.bestGuess(generatedJsonAdapterName(element.asClassName().reflectionName())).simpleName
     val visibilityModifier = if (element.toImmutableKmClass().flags.isInternal) KModifier.INTERNAL else KModifier.PUBLIC
     val allocator = NameAllocator()
 
+    @Suppress("DEPRECATION")
     val targetType = element.asClassName()
     val moshiParam = ParameterSpec.builder(allocator.newName("moshi"), Moshi::class)
         .build()
@@ -209,6 +212,7 @@ class MoshiSealedProcessor : AbstractProcessor() {
         messager.printMessage(Diagnostic.Kind.ERROR, "Missing @TypeLabel.", type)
         return
       }
+      @Suppress("DEPRECATION")
       runtimeAdapterInitializer.add("    .withSubtype(%T::class.java, %S)\n",
           type.asClassName(),
           labelAnnotation.value

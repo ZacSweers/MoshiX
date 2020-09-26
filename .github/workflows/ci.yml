@@ -1,18 +1,30 @@
 name: CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
-    name: JDK ${{ matrix.java_version }}
+    name: JDK ${{ matrix.java_version }} - KSP ${{ matrix.ksp_enabled }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java_version: [1.8, 12, 13, 14, 15]
+        # No 9, 10, or 12 because Kapt
+        java_version: [1.8, 11, 13, 14, 15]
+        ksp_enabled: [true, false]
       fail-fast: false
     steps:
     - name: Checkout
       uses: actions/checkout@v1
+    - name: Gradle Wrapper Validation
+      uses: gradle/wrapper-validation-action@v1
+    - name: Generate cache key
+      run: ./checksum.sh checksum.txt
+    - uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ matrix.java_version }}-${{ matrix.job }}-${{ hashFiles('checksum.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-${{ matrix.java_version }}-${{ matrix.job }}-
     - name: Install JDK
       uses: actions/setup-java@v1
       with:
@@ -21,11 +33,7 @@ jobs:
       # Initial gradle configuration, install dependencies, etc
       run: ./gradlew help
     - name: Build project
-      run: ./gradlew assemble --stacktrace
-    - name: Run tests
-      run: ./gradlew test --stacktrace
-    - name: Final checks
-      run: ./gradlew check --stacktrace
+      run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} --stacktrace
     - name: Upload snapshot (main only)
-      run: ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
-      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.java_version == '1.8'
+      run: ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SONATYPE_USERNAME }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SONATYPE_PASSWORD }}
+      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.java_version == '1.8' && matrix.ksp_enabled == 'false'

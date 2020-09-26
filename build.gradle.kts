@@ -32,6 +32,7 @@ plugins {
 subprojects {
   repositories {
     mavenCentral()
+    google()
     jcenter()
   }
   pluginManager.withPlugin("java") {

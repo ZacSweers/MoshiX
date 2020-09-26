@@ -16,7 +16,6 @@
 plugins {
   id("symbol-processing") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
-  kotlin("kapt")
   id("com.vanniktech.maven.publish")
 }
 
@@ -37,14 +36,15 @@ tasks.named<ProcessResources>("processResources").configure {
 dependencies {
   ksp(project(":misc:auto-service-ksp"))
   implementation(Dependencies.AutoService.annotations)
-  kapt(Dependencies.Incap.processor)
-  compileOnly(Dependencies.Incap.annotations)
+  compileOnly(Dependencies.Kotlin.Ksp.api)
 
-  implementation(Dependencies.autoCommon)
   implementation(Dependencies.KotlinPoet.kotlinPoet)
-  implementation(Dependencies.KotlinPoet.metadata)
-  implementation(Dependencies.KotlinPoet.metadataSpecs)
   implementation(Dependencies.Moshi.adapters)
   implementation(Dependencies.Moshi.moshi)
   implementation(project(":moshi-sealed:annotations"))
+
+  testImplementation(Dependencies.Kotlin.Ksp.api)
+  testImplementation(Dependencies.Testing.truth)
+  testImplementation(Dependencies.Testing.junit)
+  testImplementation(Dependencies.Testing.kspCompileTesting)
 }

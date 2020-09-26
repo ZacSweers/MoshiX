@@ -13,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import dev.zacsweers.moshi.adapter
+import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)
 @ExperimentalStdlibApi
@@ -31,7 +32,7 @@ class MessageTest(type: Type) {
 
   companion object {
     @JvmStatic
-    @Parameterized.Parameters(name = "{0}")
+    @Parameters(name = "{0}")
     fun data(): Collection<Array<*>> {
       return listOf(
           arrayOf(Type.REFLECT),
