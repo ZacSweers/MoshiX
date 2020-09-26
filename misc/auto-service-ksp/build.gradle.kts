@@ -27,6 +27,7 @@ dependencies {
   implementation(Dependencies.KotlinPoet.kotlinPoet)
   implementation("com.google.guava:guava:29.0-jre")
 
+  testImplementation(Dependencies.Kotlin.Ksp.api)
   testImplementation(Dependencies.Testing.truth)
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.kspCompileTesting)

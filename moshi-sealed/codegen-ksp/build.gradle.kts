@@ -43,6 +43,7 @@ dependencies {
   implementation(Dependencies.Moshi.moshi)
   implementation(project(":moshi-sealed:annotations"))
 
+  testImplementation(Dependencies.Kotlin.Ksp.api)
   testImplementation(Dependencies.Testing.truth)
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.kspCompileTesting)
