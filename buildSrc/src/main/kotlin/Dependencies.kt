@@ -18,8 +18,6 @@ object Dependencies {
 
   const val autoCommon = "com.google.auto:auto-common:0.11"
   const val asm = "org.ow2.asm:asm:7.1"
-  const val ktlintVersion = "0.39.0"
-  const val okio2 = "com.squareup.okio:okio:2.8.0"
 
   object AutoService {
     private const val version = "1.0-rc7"
@@ -38,7 +36,7 @@ object Dependencies {
     const val dokkaVersion = "1.4.10"
     const val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
     const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.1.0"
-    val jvmTarget = "1.8"
+    const val jvmTarget = "1.8"
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
 
     object Ksp {
@@ -53,7 +51,6 @@ object Dependencies {
     const val kotlinPoet = "com.squareup:kotlinpoet:$version"
     const val metadata = "com.squareup:kotlinpoet-metadata-specs:$version"
     const val metadataSpecs = "com.squareup:kotlinpoet-metadata-specs:$version"
-    const val elementsClassInspector = "com.squareup:kotlinpoet-classinspector-elements:$version"
   }
 
   object Moshi {
