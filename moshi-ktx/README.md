@@ -8,3 +8,5 @@ val simpleIntAdapter = moshi.adapter<Int>()
 val intListAdapter = moshi.adapter<List<Int>>()
 val complexAdapter = moshi.adapter<Map<String, List<Map<String, Int>>>>()
 ```
+
+This will eventually live in Moshi directly: https://github.com/square/moshi/pull/1202
