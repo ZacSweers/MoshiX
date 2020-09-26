@@ -31,7 +31,9 @@ sourceSets {
 dependencies {
   implementation deps.apt.autoServiceAnnotations
   compileOnly(project(":auto-service-ksp"))
-  ksp(project(":auto-service-ksp"))
+
+  // TODO resources above are not factored in local projects
+//  ksp(project(":auto-service-ksp"))
 
   implementation("org.jetbrains.kotlin:kotlin-symbol-processing-api:1.4.0-dev-experimental-20200914")
   implementation deps.moshi.kotlinCodeGen
@@ -46,5 +48,5 @@ dependencies {
   // Define these before kotlin-compile-testing to force their newer versions
   implementation "org.jetbrains.kotlin:kotlin-symbol-processing-api:${deps.versions.ksp}"
   implementation "org.jetbrains.kotlin:kotlin-ksp:${deps.versions.ksp}"
-  testImplementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.2.9"
+  testImplementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.2.11"
 }

@@ -17,25 +17,22 @@
 plugins {
   id "org.jetbrains.kotlin.kotlin-ksp" version "1.4.0-dev-experimental-20200914"
   id 'org.jetbrains.kotlin.jvm'
-  id 'org.jetbrains.kotlin.kapt'
 }
 
 sourceSets {
   main {
     java {
-      srcDir(file("build/generated/ksp/src/main"))
+      srcDir(file("build/generated/ksp/src/main/kotlin"))
     }
   }
   test {
     java {
-      srcDir(file("build/generated/ksp/src/test"))
+      srcDir(file("build/generated/ksp/src/test/kotlin"))
     }
   }
 }
 
 dependencies {
-  kapt deps.moshi.kotlinCodeGen
-
   implementation project(':moshi-sealed-annotations')
   implementation deps.kotlin.stdlibjdk8
   implementation deps.moshi.kotlin
@@ -44,16 +41,16 @@ dependencies {
   compileOnly(project(":moshi-sealed-codegen"))
   ksp(project(":moshi-sealed-codegen"))
 
-  kaptTest project(':moshi-sealed-codegen')
   testCompile deps.test.junit
   testCompile deps.test.truth
 }
 
-kapt {
-  arguments {
-    arg("moshi.generated", "javax.annotation.Generated")
-  }
-}
+// TODO use ksp options when implemented
+//kapt {
+//  arguments {
+//    arg("moshi.generated", "javax.annotation.Generated")
+//  }
+//}
 
 compileTestKotlin {
   kotlinOptions {

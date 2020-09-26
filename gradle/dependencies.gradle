@@ -19,8 +19,8 @@ def versions = [
     ksp: "1.4.0-dev-experimental-20200914",
     kotlinpoet: '1.6.0',
     incap: '0.3',
-//    moshi: '1.10.0-LOCAL2',
-    moshi: '1.9.3'
+    moshi: '1.10.0-LOCAL2'
+//    moshi: '1.9.3'
 ]
 
 def apt = [

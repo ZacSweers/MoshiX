@@ -32,8 +32,16 @@ internal fun KSAnnotated.getAnnotationWithType(target: KSType): KSAnnotation {
   return findAnnotationWithType(target) ?: error("Annotation $target not found.")
 }
 
+internal inline fun <reified T : Annotation> KSAnnotated.hasAnnotation(resolver: Resolver): Boolean {
+  return hasAnnotation(resolver.getClassDeclarationByName<T>().asType())
+}
+
 internal fun KSAnnotated.hasAnnotation(target: KSType): Boolean {
   return findAnnotationWithType(target) != null
+}
+
+internal inline fun <reified T : Annotation> KSAnnotated.findAnnotationWithType(resolver: Resolver): KSAnnotation? {
+  return findAnnotationWithType(resolver.getClassDeclarationByName<T>().asType())
 }
 
 internal fun KSAnnotated.findAnnotationWithType(target: KSType): KSAnnotation? {

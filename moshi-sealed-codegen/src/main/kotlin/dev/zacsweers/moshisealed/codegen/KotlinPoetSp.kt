@@ -24,10 +24,10 @@ import com.squareup.kotlinpoet.STAR as KpStar
 fun KSType.toTypeName(): TypeName {
   val type = when (declaration) {
     is KSClassDeclaration -> {
-      (this as KSClassDeclaration).toTypeName(typeParameters.map { it.toTypeName() })
+      (declaration as KSClassDeclaration).toTypeName(arguments.map { it.type!!.resolve()!!.toTypeName() })
     }
     is KSTypeParameter -> {
-      (this as KSTypeParameter).toTypeName()
+      (declaration as KSTypeParameter).toTypeName()
     }
     else -> error("Unsupported type: $declaration")
   }
