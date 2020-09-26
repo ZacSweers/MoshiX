@@ -21,14 +21,14 @@ plugins {
 }
 
 dependencies {
-  kapt(project(":moshi-sealed-codegen"))
+  kapt(project(":moshi-sealed:codegen"))
   kapt(Dependencies.Moshi.codegen)
 
-  implementation(project(":moshi-sealed-annotations"))
+  implementation(project(":moshi-sealed:annotations"))
   implementation(Dependencies.Moshi.kotlin)
-  implementation(project(":moshi-sealed-reflect"))
+  implementation(project(":moshi-sealed:reflect"))
 
-  kaptTest(project(":moshi-sealed-codegen"))
+  kaptTest(project(":moshi-sealed:codegen"))
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)
 }

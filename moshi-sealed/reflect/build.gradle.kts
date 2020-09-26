@@ -19,7 +19,7 @@ plugins {
 }
 
 dependencies {
-  implementation(project(":moshi-sealed-annotations"))
+  implementation(project(":moshi-sealed:annotations"))
   api(Dependencies.Moshi.moshi)
   api(Dependencies.Moshi.adapters)
   implementation(Dependencies.KotlinPoet.kotlinPoet)
