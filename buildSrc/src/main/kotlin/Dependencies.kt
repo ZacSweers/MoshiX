@@ -37,6 +37,7 @@ object Dependencies {
     const val version = "1.4.10"
     const val dokkaVersion = "1.4.10"
     const val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
+    const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.1.0"
     val jvmTarget = "1.8"
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
   }
