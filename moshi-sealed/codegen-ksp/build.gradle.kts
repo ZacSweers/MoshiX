@@ -16,12 +16,25 @@
 plugins {
   id("symbol-processing") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
-  kotlin("kapt")
   id("com.vanniktech.maven.publish")
 }
 
+// Necessary to ensure the generated service file is included in the jar
+sourceSets {
+  main {
+    resources {
+      srcDir("build/generated/ksp/src/main/resources")
+    }
+  }
+}
+
+val compileKotlin = tasks.named("compileKotlin")
+tasks.named<ProcessResources>("processResources").configure {
+  dependsOn(compileKotlin)
+}
+
 dependencies {
-  kapt(Dependencies.AutoService.processor)
+  ksp(project(":misc:auto-service-ksp"))
   compileOnly(Dependencies.AutoService.annotations)
   compileOnly(Dependencies.Kotlin.Ksp.api)
 

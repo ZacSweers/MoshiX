@@ -24,7 +24,6 @@ plugins {
 val useKsp = findProperty("moshix.useKsp")?.toString()?.toBoolean() ?: false
 
 dependencies {
-  ksp(project(":moshi-sealed:codegen-ksp"))
   if (useKsp) {
     ksp(project(":moshi-sealed:codegen-ksp"))
   } else {
