@@ -28,11 +28,11 @@ pluginManagement {
     gradlePluginPortal()
     jcenter()
     google()
+    maven("https://oss.sonatype.org/content/repositories/snapshots")
   }
 }
 
 rootProject.name = "moshix-root"
-include("misc:auto-service-ksp")
 include("moshi-ksp")
 include("moshi-ktx")
 include("moshi-metadata-reflect")
