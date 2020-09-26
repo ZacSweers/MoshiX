@@ -16,7 +16,6 @@
 package dev.zacsweers.moshi
 
 import com.squareup.moshi.Types
-import com.squareup.moshi.internal.Util
 import java.lang.reflect.GenericArrayType
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
