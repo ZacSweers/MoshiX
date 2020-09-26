@@ -16,12 +16,20 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+  id("symbol-processing") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
   kotlin("kapt")
 }
 
+val useKsp = findProperty("moshix.useKsp")?.toString()?.toBoolean() ?: false
+
 dependencies {
-  kapt(project(":moshi-sealed:codegen"))
+  ksp(project(":moshi-sealed:codegen-ksp"))
+  if (useKsp) {
+    ksp(project(":moshi-sealed:codegen-ksp"))
+  } else {
+    kapt(project(":moshi-sealed:codegen"))
+  }
   kapt(Dependencies.Moshi.codegen)
 
   implementation(project(":moshi-ktx"))
@@ -29,9 +37,16 @@ dependencies {
   implementation(Dependencies.Moshi.kotlin)
   implementation(project(":moshi-sealed:reflect"))
 
-  kaptTest(project(":moshi-sealed:codegen"))
+  if (!useKsp) {
+    kaptTest(project(":moshi-sealed:codegen"))
+  }
+  kaptTest(Dependencies.Moshi.codegen)
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)
+}
+
+ksp {
+  arg("moshi.generated", "javax.annotation.Generated")
 }
 
 kapt {
