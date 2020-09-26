@@ -15,6 +15,14 @@
  */
 
 pluginManagement {
+  resolutionStrategy {
+    eachPlugin {
+      when (requested.id.id) {
+        "symbol-processing" ->
+          useModule("com.google.devtools.ksp:symbol-processing:${requested.version}")
+      }
+    }
+  }
   repositories {
     mavenCentral()
     gradlePluginPortal()
@@ -29,4 +37,5 @@ include("moshi-ktx")
 include("moshi-sealed:reflect")
 include("moshi-sealed:annotations")
 include("moshi-sealed:codegen")
+include("moshi-sealed:codegen-ksp")
 include("moshi-sealed:sample")
