@@ -15,14 +15,13 @@
  */
 package dev.zacsweers.moshi
 
+import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonQualifier
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.reflect.typeOf
@@ -45,11 +44,11 @@ class KotlinExtensionsTest {
       .filterTo(mutableSetOf()) {
         it.annotationClass.java.isAnnotationPresent(JsonQualifier::class.java)
       }
-    assertEquals(2, annotations.size)
+    assertThat(annotations).hasSize(2)
     val next = annotations.nextAnnotations<TestAnnotation2>()
     checkNotNull(next)
-    assertEquals(1, next.size)
-    assertTrue(next.first() is TestAnnotation1)
+    assertThat(next).hasSize(1)
+    assertThat(next.first() is TestAnnotation1).isTrue()
   }
 
   @Test
@@ -60,7 +59,7 @@ class KotlinExtensionsTest {
     val stringListType = typeOf<List<String>>()
     val stringListArray = stringListType.asArrayType()
     val expected = Types.arrayOf(Types.newParameterizedType(List::class.java, String::class.java))
-    assertEquals(stringListArray, expected)
+    assertThat(expected).isEqualTo(stringListArray)
   }
 
   @Test
@@ -80,7 +79,7 @@ class KotlinExtensionsTest {
       .addAdapter(customIntdapter)
       .build()
 
-    assertEquals(-1, moshi.adapter<Int>().fromJson("5"))
+    assertThat(moshi.adapter<Int>().fromJson("5")).isEqualTo(-1)
   }
 
   @Test
@@ -100,11 +99,15 @@ class KotlinExtensionsTest {
       .addAdapter(customIntListAdapter)
       .build()
 
-    assertEquals(listOf(-1), moshi.adapter<List<Int>>().fromJson("[5]"))
+    assertThat(moshi.adapter<List<Int>>().fromJson("[5]")).isEqualTo(listOf(-1))
   }
 
-  // TODO
-  //  simple class
-  //  list
-  //  array
+  @Test
+  fun arrays() {
+    val adapter = Moshi.Builder().build().adapter<Array<Int>>()
+    val json = "[1,2,3]"
+    val instance = adapter.fromJson(json)
+    checkNotNull(instance)
+    assertThat(instance).isEqualTo(arrayOf(1, 2, 3))
+  }
 }
