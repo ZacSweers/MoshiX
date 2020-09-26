@@ -620,7 +620,7 @@ class KotlinJsonAdapterTest {
     } catch (e: IllegalArgumentException) {
       assertThat(e).hasMessageThat().contains(
         "No JsonAdapter for interface " +
-          "dev.zacsweers.moshi.reflect.KotlinJsonAdapterTest\$Interface (with no annotations)"
+          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$Interface (with no annotations)"
       )
     }
   }
@@ -635,7 +635,7 @@ class KotlinJsonAdapterTest {
     } catch (e: IllegalArgumentException) {
       assertThat(e).hasMessageThat().contains(
         "Cannot serialize abstract class " +
-          "dev.zacsweers.moshi.reflect.KotlinJsonAdapterTest\$AbstractClass"
+          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$AbstractClass"
       )
     }
   }
@@ -650,7 +650,7 @@ class KotlinJsonAdapterTest {
     } catch (e: IllegalArgumentException) {
       assertThat(e).hasMessageThat().contains(
         "Cannot serialize inner class " +
-          "dev.zacsweers.moshi.reflect.KotlinJsonAdapterTest\$InnerClass"
+          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$InnerClass"
       )
     }
   }
@@ -666,7 +666,7 @@ class KotlinJsonAdapterTest {
     } catch (e: IllegalArgumentException) {
       assertThat(e).hasMessageThat().contains(
         "Cannot serialize local class or object expression " +
-          "dev.zacsweers.moshi.reflect.KotlinJsonAdapterTest\$localClassesNotSupported\$LocalClass"
+          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$localClassesNotSupported\$LocalClass"
       )
     }
   }
@@ -679,7 +679,7 @@ class KotlinJsonAdapterTest {
     } catch (e: IllegalArgumentException) {
       assertThat(e).hasMessageThat().contains(
         "Cannot serialize object declaration " +
-          "dev.zacsweers.moshi.reflect.KotlinJsonAdapterTest\$ObjectDeclaration"
+          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$ObjectDeclaration"
       )
     }
   }
@@ -706,7 +706,7 @@ class KotlinJsonAdapterTest {
       }
       assertThat(e).hasMessageThat().contains(
         "Cannot serialize $type " +
-          "dev.zacsweers.moshi.reflect.KotlinJsonAdapterTest\$anonymousClassesNotSupported" +
+          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$anonymousClassesNotSupported" +
           "\$expression$1"
       )
     }
@@ -916,7 +916,7 @@ class KotlinJsonAdapterTest {
       .isEqualTo("GeneratedJsonAdapter(KotlinJsonAdapterTest.UsesGeneratedAdapter).nullSafe()")
     assertThat(reflectionAdapter.toString())
       .isEqualTo(
-        "KotlinJsonAdapter(dev.zacsweers.moshi.reflect.KotlinJsonAdapterTest" +
+        "KotlinJsonAdapter(dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest" +
           ".UsesReflectionAdapter).nullSafe()"
       )
   }
