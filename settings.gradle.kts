@@ -32,11 +32,12 @@ pluginManagement {
 }
 
 rootProject.name = "moshix-root"
-include("moshi-metadata-reflect")
-include("moshi-ktx")
 include("misc:auto-service-ksp")
-include("moshi-sealed:reflect")
+include("moshi-ksp")
+include("moshi-ktx")
+include("moshi-metadata-reflect")
 include("moshi-sealed:annotations")
 include("moshi-sealed:codegen")
 include("moshi-sealed:codegen-ksp")
+include("moshi-sealed:reflect")
 include("moshi-sealed:sample")

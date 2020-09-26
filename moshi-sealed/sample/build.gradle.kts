@@ -31,10 +31,11 @@ val generatedAnnotation = if (JavaVersion.current().isJava10Compatible) {
 dependencies {
   if (useKsp) {
     ksp(project(":moshi-sealed:codegen-ksp"))
+    ksp(project(":moshi-ksp"))
   } else {
     kapt(project(":moshi-sealed:codegen"))
+    kapt(Dependencies.Moshi.codegen)
   }
-  kapt(Dependencies.Moshi.codegen)
 
   implementation(project(":moshi-ktx"))
   implementation(project(":moshi-sealed:annotations"))
@@ -44,7 +45,6 @@ dependencies {
   if (!useKsp) {
     kaptTest(project(":moshi-sealed:codegen"))
   }
-  kaptTest(Dependencies.Moshi.codegen)
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)
 }
