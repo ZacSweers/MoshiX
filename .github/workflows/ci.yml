@@ -15,12 +15,16 @@ jobs:
     steps:
     - name: Debugging ref
       if: github.ref == 'refs/heads/z/debuggingActions'
+      run: echo "Ran"
     - name: Debugging event
       if: github.event_name == 'pull_request'
+      run: echo "Ran"
     - name: Debugging JDK
       if: matrix.java_version == '1.8'
+      run: echo "Ran"
     - name: Debugging KSP
       if: matrix.ksp_enabled == 'true'
+      run: echo "Ran"
     - name: Checkout
       uses: actions/checkout@v1
     - name: Gradle Wrapper Validation
