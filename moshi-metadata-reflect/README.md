@@ -3,15 +3,25 @@
 A kotlinx-metadata based implementation of KotlinJsonAdapterFactory. This allows for reflective Moshi
 serialization on Kotlin classes without the cost of including kotlin-reflect.
 
+This will eventually live in Moshi directly: https://github.com/square/moshi/pull/1183
+
+## Usage
+
+Gradle dependency
+```kotlin
+dependencies {
+  implementation("dev.zacsweers.moshix:moshi-metadata-reflect:<version>")
+}
+```
+
+Code usage
 ```kotlin
 val moshi = Moshi.Builder()
   .add(MetadataKotlinJsonAdapterFactory())
   .build()
 ```
 
-This will eventually live in Moshi directly: https://github.com/square/moshi/pull/1183
-
----
+## Motivation
 
 Kotlin-reflect has been a long-standing thorn for `KotlinJsonAdapter` for a number of reasons:
 
@@ -23,7 +33,7 @@ This replaces kotlin-reflect entirely with kotlinx-metadata-reflect, the low-lev
 
 ### Stats
 
-Quick androidx-benchmark on my serialization benchmarks project shows this is ~21.5% faster for buffer reads as well! https://github.com/ZacSweers/json-serialization-benchmarking/pull/10
+Androidx-benchmark on my serialization benchmarks project shows this is ~21.5% faster for buffer reads: https://github.com/ZacSweers/json-serialization-benchmarking/pull/10
 
 ```
 AndroidBenchmark.moshi_kotlin_codegen_buffer_toJson[minified=true]                   5,052,032  ns
