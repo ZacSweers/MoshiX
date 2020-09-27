@@ -11,6 +11,9 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSNode
+import com.google.devtools.ksp.symbol.Origin.KOTLIN
+import org.jetbrains.kotlin.analyzer.AnalysisResult.CompilationErrorException
 import java.io.OutputStreamWriter
 import java.lang.RuntimeException
 import java.nio.charset.StandardCharsets
@@ -49,10 +52,10 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     logger: KSPLogger
   ) {
     this.codeGenerator = codeGenerator
-    this.logger = logger
+    this.logger = MoshiKSPLogger(logger)
 
     generatedOption = options[OPTION_GENERATED]?.also {
-      require(it in POSSIBLE_GENERATED_NAMES) {
+      logger.check(it in POSSIBLE_GENERATED_NAMES) {
         "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
       }
     }
@@ -75,9 +78,11 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME)
       .asSequence()
       .forEach { type ->
-        check(type is KSClassDeclaration) {
+        logger.check(type is KSClassDeclaration && type.origin == KOTLIN, type) {
           "@JsonClass can't be applied to $type: must be a Kotlin class"
         }
+        // For the smart cast
+        check(type is KSClassDeclaration)
 
         val jsonClassAnnotation = type.findAnnotationWithType(jsonClassType) ?: return@forEach
 
@@ -143,7 +148,8 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
 
     for ((name, parameter) in type.constructor.parameters) {
       if (type.properties[parameter.name] == null && !parameter.hasDefault) {
-        error("No property for required constructor parameter $name")
+        // TODO would be nice if we could pass the parameter node directly?
+        logger.errorAndThrow("No property for required constructor parameter $name", originalType)
       }
     }
 
@@ -157,5 +163,13 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     }
 
     return AdapterGenerator(type, sortedProperties)
+  }
+}
+
+// TODO temporary until KSP's logger makes errors fail the build
+private class MoshiKSPLogger(private val delegate: KSPLogger) : KSPLogger by delegate {
+  override fun error(message: String, symbol: KSNode?) {
+    delegate.error(message, symbol)
+    throw CompilationErrorException()
   }
 }

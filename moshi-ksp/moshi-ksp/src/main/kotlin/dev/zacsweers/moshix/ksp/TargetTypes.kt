@@ -36,25 +36,25 @@ internal fun targetType(
   resolver: Resolver,
   logger: KSPLogger,
 ): TargetType? {
-  require(type.classKind != ClassKind.ENUM_CLASS) {
+  logger.check(type.classKind != ClassKind.ENUM_CLASS, type) {
     "@JsonClass with 'generateAdapter = \"true\"' can't be applied to $type: code gen for enums is not supported or necessary"
   }
-  require(type.classKind == ClassKind.CLASS) {
+  logger.check(type.classKind == ClassKind.CLASS, type) {
     "@JsonClass can't be applied to $type: must be a Kotlin class"
   }
-  require(Modifier.INNER !in type.modifiers) {
+  logger.check(Modifier.INNER !in type.modifiers, type) {
     "@JsonClass can't be applied to $type: must not be an inner class"
   }
-  require(Modifier.SEALED !in type.modifiers) {
+  logger.check(Modifier.SEALED !in type.modifiers, type) {
     "@JsonClass can't be applied to $type: must not be sealed"
   }
-  require(Modifier.ABSTRACT !in type.modifiers) {
+  logger.check(Modifier.ABSTRACT !in type.modifiers, type) {
     "@JsonClass can't be applied to $type: must not be abstract"
   }
-  require(!type.isLocal()) {
+  logger.check(!type.isLocal(), type) {
     "@JsonClass can't be applied to $type: must not be local"
   }
-  require(type.isPublic() || type.isInternal()) {
+  logger.check(type.isPublic() || type.isInternal(), type) {
     "@JsonClass can't be applied to $type: must be internal or public"
   }
 
@@ -64,16 +64,16 @@ internal fun targetType(
   val appliedType = AppliedType.get(type)
 
   val constructor = primaryConstructor(resolver, type)
-    ?: error("No primary constructor found on $type")
+    ?: logger.errorAndThrow("No primary constructor found on $type", type)
   if (constructor.visibility != KModifier.INTERNAL && constructor.visibility != KModifier.PUBLIC) {
-    error("@JsonClass can't be applied to $type: " +
-      "primary constructor is not internal or public")
+    logger.errorAndThrow("@JsonClass can't be applied to $type: " +
+      "primary constructor is not internal or public", type)
   }
 
   val properties = mutableMapOf<String, TargetProperty>()
 
   val resolvedTypes = mutableListOf<ResolvedTypeMapping>()
-  val superTypes = appliedType.supertypes(resolver)
+  val superTypes = appliedType.supertypes(resolver, logger)
     .filterNot { supertype ->
       supertype.typeName == OBJECT_CLASS || // Don't load properties for java.lang.Object.
         supertype.type.classKind != ClassKind.CLASS  // Don't load properties for interface types.

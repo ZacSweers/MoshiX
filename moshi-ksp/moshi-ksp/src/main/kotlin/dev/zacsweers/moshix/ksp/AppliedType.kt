@@ -16,8 +16,10 @@
 package dev.zacsweers.moshix.ksp
 
 import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.Origin.KOTLIN
 
 /**
  * A concrete type like `List<String>` with enough information to know how to resolve its type
@@ -29,13 +31,17 @@ internal class AppliedType private constructor(val type: KSClassDeclaration) {
   /** Returns all supertypes of this, recursively. Includes both interface and class supertypes. */
   fun supertypes(
     resolver: Resolver,
+    logger: KSPLogger,
     result: LinkedHashSet<AppliedType> = LinkedHashSet(),
   ): LinkedHashSet<AppliedType> {
     result.add(this)
     for (supertype in type.getAllSuperTypes()) {
       check(supertype.declaration is KSClassDeclaration)
-      val superTypeKsClass = resolver.getClassDeclarationByName(
-        supertype.declaration.qualifiedName!!)!!
+      if (supertype.declaration.origin != KOTLIN) {
+        logger.errorAndThrow("supertype ${supertype.declaration} is not a Kotlin type")
+      }
+      val qualifiedName = supertype.declaration.qualifiedName!!
+      val superTypeKsClass = resolver.getClassDeclarationByName(qualifiedName)!!
       val appliedSupertype = AppliedType(superTypeKsClass)
       result.add(appliedSupertype)
     }
