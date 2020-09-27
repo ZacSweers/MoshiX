@@ -5,6 +5,7 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
+import com.google.devtools.ksp.symbol.KSTypeArgument
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Nullability.NULLABLE
@@ -17,6 +18,7 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeVariableName
+import com.squareup.kotlinpoet.WildcardTypeName
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets.UTF_8
 import com.squareup.kotlinpoet.STAR as KpStar
@@ -24,8 +26,7 @@ import com.squareup.kotlinpoet.STAR as KpStar
 internal fun KSType.toTypeName(): TypeName {
   val type = when (declaration) {
     is KSClassDeclaration -> {
-      (declaration as KSClassDeclaration).toTypeName(
-        arguments.map { it.type?.resolve()?.toTypeName() ?: com.squareup.kotlinpoet.STAR })
+      (declaration as KSClassDeclaration).toTypeName(arguments.map(KSTypeArgument::toTypeName))
     }
     is KSTypeParameter -> {
       (declaration as KSTypeParameter).toTypeName()
@@ -69,11 +70,20 @@ internal fun KSTypeParameter.toTypeName(): TypeName {
   val typeVarName = name.getShortName()
   val typeVarBounds = bounds.map { it.toTypeName() }
   val typeVarVariance = when (variance) {
-    COVARIANT -> KModifier.IN
-    CONTRAVARIANT -> KModifier.OUT
+    COVARIANT -> KModifier.OUT
+    CONTRAVARIANT -> KModifier.IN
     else -> null
   }
   return TypeVariableName(typeVarName, bounds = typeVarBounds, variance = typeVarVariance)
+}
+
+internal fun KSTypeArgument.toTypeName(): TypeName {
+  val typeName = type?.resolve()?.toTypeName() ?: return KpStar
+  return when (variance) {
+    COVARIANT -> WildcardTypeName.producerOf(typeName)
+    CONTRAVARIANT -> WildcardTypeName.consumerOf(typeName)
+    else -> typeName
+  }
 }
 
 internal fun KSTypeReference.toTypeName(): TypeName {
