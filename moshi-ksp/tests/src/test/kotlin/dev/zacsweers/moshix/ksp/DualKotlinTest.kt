@@ -318,26 +318,25 @@ class DualKotlinTest(useReflection: Boolean) {
     assertThat(result.inline.i).isEqualTo(42)
   }
 
-  // TODO re-enable when https://github.com/google/ksp/issues/82 is fixed
-//  // Regression test for https://github.com/square/moshi/issues/955
-//  @Test fun backwardReferencingTypeVars() {
-//    val adapter = moshi.adapter<TextAssetMetaData>()
-//
-//    @Language("JSON")
-//    val testJson =
-//      """{"text":"text"}"""
-//
-//    assertThat(adapter.toJson(TextAssetMetaData("text"))).isEqualTo(testJson)
-//
-//    val result = adapter.fromJson(testJson)!!
-//    assertThat(result.text).isEqualTo("text")
-//  }
-//
-//  @JsonClass(generateAdapter = true)
-//  class TextAssetMetaData(val text: String) : AssetMetaData<TextAsset>()
-//  class TextAsset : Asset<TextAsset>()
-//  abstract class Asset<A : Asset<A>>
-//  abstract class AssetMetaData<A : Asset<A>>
+  // Regression test for https://github.com/square/moshi/issues/955
+  @Test fun backwardReferencingTypeVars() {
+    val adapter = moshi.adapter<TextAssetMetaData>()
+
+    @Language("JSON")
+    val testJson =
+      """{"text":"text"}"""
+
+    assertThat(adapter.toJson(TextAssetMetaData("text"))).isEqualTo(testJson)
+
+    val result = adapter.fromJson(testJson)!!
+    assertThat(result.text).isEqualTo("text")
+  }
+
+  @JsonClass(generateAdapter = true)
+  class TextAssetMetaData(val text: String) : AssetMetaData<TextAsset>()
+  class TextAsset : Asset<TextAsset>()
+  abstract class Asset<A : Asset<A>>
+  abstract class AssetMetaData<A : Asset<A>>
 
   // Regression test for https://github.com/square/moshi/issues/968
   @Test fun abstractSuperProperties() {
