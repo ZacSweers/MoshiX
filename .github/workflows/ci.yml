@@ -13,6 +13,12 @@ jobs:
         ksp_enabled: [true, false]
       fail-fast: false
     steps:
+    - name: Debugging
+      run: |
+        echo ${{ github.ref }}
+        echo ${{ github.event_name }}
+        echo ${{ matrix.java_version }}
+        echo ${{ matrix.ksp_enabled }}
     - name: Debugging ref
       if: github.ref == 'refs/heads/z/debuggingActions'
       run: echo "Ran"
@@ -23,7 +29,7 @@ jobs:
       if: matrix.java_version == '1.8'
       run: echo "Ran"
     - name: Debugging KSP
-      if: matrix.ksp_enabled == 'true'
+      if: matrix.ksp_enabled
       run: echo "Ran"
     - name: Checkout
       uses: actions/checkout@v1
