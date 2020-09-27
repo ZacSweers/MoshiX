@@ -51,6 +51,28 @@ kapt "dev.zacsweers.moshisealed:moshi-sealed-codegen:{version}"
 No runtime Moshi instance configuration is needed, code gen will generate `JsonAdapter`s in a way that Moshi understands
 natively.
 
+##### KSP support
+
+There is an experimental [KSP](https://github.com/google/ksp) implementation available as `moshi-sealed-ksp`.
+Note that KSP itself is experimental, so expect this API to break regularly.
+
+Add this dependency as a `ksp` dependency instead of the `moshi-kotlin-codegen` dependency.
+
+```diff
+dependencies {
+-  kapt("dev.zacsweers.moshix:moshi-sealed-codegen:<version>")
++  ksp("dev.zacsweers.moshix:moshi-sealed-ksp:<version>")
+}
+```
+
+To add `@Generated` controls, add them via ksp arguments
+
+```kotlin
+ksp {
+  arg("moshi.generated", "javax.annotation.Generated")
+}
+```
+
 #### Reflection
 
 Reflection works via `MoshiSealedJsonAdapterFactory`. Just add this in moshi before 
