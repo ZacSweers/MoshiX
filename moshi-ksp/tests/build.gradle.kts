@@ -38,6 +38,7 @@ dependencies {
   ksp(project(":moshi-ksp:moshi-ksp"))
   testImplementation(Dependencies.Moshi.moshi)
   testImplementation(project(":moshi-ktx"))
+  testImplementation(project(":moshi-metadata-reflect"))
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)
   testImplementation(Dependencies.Kotlin.reflect)
@@ -50,6 +51,6 @@ ksp {
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
+    freeCompilerArgs += listOf("-Xopt-in=kotlin.ExperimentalStdlibApi", "-Xinline-classes")
   }
 }
