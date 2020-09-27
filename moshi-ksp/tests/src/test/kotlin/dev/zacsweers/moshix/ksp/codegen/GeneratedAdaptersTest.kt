@@ -1350,7 +1350,7 @@ class GeneratedAdaptersTest {
       moshi.adapter(MultipleGenerics::class.java)
       fail("Should have failed to construct the adapter due to missing generics")
     } catch (e: RuntimeException) {
-      assertThat(e).hasMessageThat().isEqualTo("Failed to find the generated JsonAdapter constructor for 'class dev.zacsweers.moshix.ksp.GeneratedAdaptersTest\$MultipleGenerics'. Suspiciously, the type was not parameterized but the target class 'dev.zacsweers.moshix.ksp.GeneratedAdaptersTest_MultipleGenericsJsonAdapter' is generic. Consider using Types#newParameterizedType() to define these missing type variables.")
+      assertThat(e).hasMessageThat().isEqualTo("Failed to find the generated JsonAdapter constructor for 'class dev.zacsweers.moshix.ksp.codegen.GeneratedAdaptersTest\$MultipleGenerics'. Suspiciously, the type was not parameterized but the target class 'dev.zacsweers.moshix.ksp.codegen.GeneratedAdaptersTest_MultipleGenericsJsonAdapter' is generic. Consider using Types#newParameterizedType() to define these missing type variables.")
     }
   }
 
