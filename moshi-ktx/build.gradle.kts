@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 tasks.named<KotlinCompile>("compileTestKotlin") {
