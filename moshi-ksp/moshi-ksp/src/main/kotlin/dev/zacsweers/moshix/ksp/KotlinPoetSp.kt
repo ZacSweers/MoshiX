@@ -25,7 +25,7 @@ internal fun KSType.toTypeName(): TypeName {
   val type = when (declaration) {
     is KSClassDeclaration -> {
       (declaration as KSClassDeclaration).toTypeName(
-        arguments.map { it.type!!.resolve().toTypeName() })
+        arguments.map { it.type?.resolve()?.toTypeName() ?: com.squareup.kotlinpoet.STAR })
     }
     is KSTypeParameter -> {
       (declaration as KSTypeParameter).toTypeName()
