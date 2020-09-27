@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.zacsweers.moshix.ksp
+package dev.zacsweers.moshix.ksp.codegen
 
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.FromJson

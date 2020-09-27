@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.zacsweers.moshix.ksp
+package dev.zacsweers.moshix.ksp.codegen
 
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
-import dev.zacsweers.moshix.ksp.GeneratedAdaptersTest.CustomGeneratedClass
+import dev.zacsweers.moshix.ksp.codegen.GeneratedAdaptersTest.CustomGeneratedClass
 
 // This also tests custom generated types with no moshi constructor
 class GeneratedAdaptersTest_CustomGeneratedClassJsonAdapter : JsonAdapter<CustomGeneratedClass>() {

@@ -15,7 +15,7 @@
  */
 @file:Suppress("UNUSED", "UNUSED_PARAMETER")
 
-package dev.zacsweers.moshix.ksp
+package dev.zacsweers.moshix.ksp.codegen
 
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonClass
