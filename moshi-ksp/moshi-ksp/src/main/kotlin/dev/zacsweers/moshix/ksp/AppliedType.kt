@@ -37,11 +37,11 @@ internal class AppliedType private constructor(val type: KSClassDeclaration) {
     result.add(this)
     for (supertype in type.getAllSuperTypes()) {
       check(supertype.declaration is KSClassDeclaration)
+      val qualifiedName = supertype.declaration.qualifiedName
       if (supertype.declaration.origin != KOTLIN) {
-        logger.errorAndThrow("supertype ${supertype.declaration} is not a Kotlin type")
+        logger.errorAndThrow("supertype ${qualifiedName?.asString()} is not a Kotlin type")
       }
-      val qualifiedName = supertype.declaration.qualifiedName!!
-      val superTypeKsClass = resolver.getClassDeclarationByName(qualifiedName)!!
+      val superTypeKsClass = resolver.getClassDeclarationByName(qualifiedName!!)!!
       val appliedSupertype = AppliedType(superTypeKsClass)
       result.add(appliedSupertype)
     }

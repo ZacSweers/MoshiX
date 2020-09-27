@@ -27,11 +27,13 @@ dependencies {
   implementation(Dependencies.asm)
   implementation(Dependencies.KotlinPoet.kotlinPoet)
   implementation(Dependencies.Moshi.moshi)
+  implementation(Dependencies.Kotlin.compilerEmbeddable)
 
   testImplementation(Dependencies.Kotlin.Ksp.api)
   testImplementation(Dependencies.Testing.truth)
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Kotlin.Ksp.api)
   testImplementation(Dependencies.Kotlin.Ksp.ksp)
+  testImplementation(Dependencies.Kotlin.reflect)
   testImplementation(project(":ksp-test-util"))
 }

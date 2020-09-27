@@ -37,30 +37,28 @@ internal fun targetType(
   logger: KSPLogger,
 ): TargetType? {
   logger.check(type.classKind != ClassKind.ENUM_CLASS, type) {
-    "@JsonClass with 'generateAdapter = \"true\"' can't be applied to $type: code gen for enums is not supported or necessary"
+    "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.qualifiedName?.asString()}: code gen for enums is not supported or necessary"
   }
   logger.check(type.classKind == ClassKind.CLASS, type) {
-    "@JsonClass can't be applied to $type: must be a Kotlin class"
+    "@JsonClass can't be applied to ${type.qualifiedName?.asString()}: must be a Kotlin class"
   }
   logger.check(Modifier.INNER !in type.modifiers, type) {
-    "@JsonClass can't be applied to $type: must not be an inner class"
+    "@JsonClass can't be applied to ${type.qualifiedName?.asString()}: must not be an inner class"
   }
   logger.check(Modifier.SEALED !in type.modifiers, type) {
-    "@JsonClass can't be applied to $type: must not be sealed"
+    "@JsonClass can't be applied to ${type.qualifiedName?.asString()}: must not be sealed"
   }
   logger.check(Modifier.ABSTRACT !in type.modifiers, type) {
-    "@JsonClass can't be applied to $type: must not be abstract"
+    "@JsonClass can't be applied to ${type.qualifiedName?.asString()}: must not be abstract"
   }
   logger.check(!type.isLocal(), type) {
-    "@JsonClass can't be applied to $type: must not be local"
+    "@JsonClass can't be applied to ${type.qualifiedName?.asString()}: must not be local"
   }
   logger.check(type.isPublic() || type.isInternal(), type) {
-    "@JsonClass can't be applied to $type: must be internal or public"
+    "@JsonClass can't be applied to ${type.qualifiedName?.asString()}: must be internal or public"
   }
 
   val typeVariables = type.typeParameters.map { it.toTypeName() }
-  logger.logging("[KSP] Type is $type")
-  logger.logging("[KSP] Type variables are $typeVariables")
   val appliedType = AppliedType.get(type)
 
   val constructor = primaryConstructor(resolver, type)
@@ -153,9 +151,7 @@ internal fun targetType(
     typeName = type.toTypeName(),
     constructor = constructor,
     properties = properties,
-    typeVariables = typeVariables.filterIsInstance<TypeVariableName>().also {
-      logger.logging("[KSP] Filtered typevars: $it")
-    },
+    typeVariables = typeVariables.filterIsInstance<TypeVariableName>(),
     isDataClass = Modifier.DATA in type.modifiers,
     visibility = resolvedVisibility)
 }

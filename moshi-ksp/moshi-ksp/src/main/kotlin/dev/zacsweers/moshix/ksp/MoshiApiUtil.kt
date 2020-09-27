@@ -11,10 +11,8 @@ import dev.zacsweers.moshix.ksp.shade.api.rawType
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import java.lang.annotation.ElementType
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
-import java.lang.annotation.Target
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.TypeName
 
 private val VISIBILITY_MODIFIERS = setOf(
   KModifier.INTERNAL,
@@ -75,14 +73,16 @@ internal fun TargetProperty.generator(
     // Check Java types since that covers both Java and Kotlin annotations.
     val annotationElement = resolver.getClassDeclarationByName(qualifierRawType.canonicalName)
     annotationElement.findAnnotationWithType<Retention>(resolver)?.let {
-      if (it.getMember<RetentionPolicy>("value") != RetentionPolicy.RUNTIME) {
+      // TODO this is super hacky but I don't know how else to compare enums here
+      if (it.getMember<TypeName>("value") != AnnotationRetention::class.asClassName().nestedClass("RUNTIME")) {
         logger.error(
           "JsonQualifier @${qualifierRawType.simpleName} must have RUNTIME retention"
         )
       }
     }
     annotationElement.findAnnotationWithType<Target>(resolver)?.let {
-      if (ElementType.FIELD !in it.getMember<Array<ElementType>>("value")) {
+      // TODO this is super hacky but I don't know how else to compare enums here
+      if (AnnotationTarget::class.asClassName().nestedClass("FIELD") !in it.getMember<List<TypeName>>("allowedTargets")) {
         logger.error(
           "JsonQualifier @${qualifierRawType.simpleName} must support FIELD target"
         )

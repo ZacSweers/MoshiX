@@ -49,7 +49,26 @@ internal inline fun <reified T> KSAnnotation.getMember(name: String): T {
   val matchingArg = arguments.find { it.name?.asString() == name }
     ?: error(
       "No member name found for '$name'. All arguments: ${arguments.map { it.name?.asString() }}")
-  return matchingArg.value as? T ?: error("No value found for $name. Was ${matchingArg.value}")
+  return when (val argValue = matchingArg.value) {
+    is List<*> -> {
+      if (argValue.isEmpty()) {
+        argValue as T
+      } else {
+        val first = argValue[0]
+        if (first is KSType) {
+          argValue.map { (it as KSType).toTypeName() } as T
+        } else {
+          argValue as T
+        }
+      }
+    }
+    is KSType -> {
+      argValue.toTypeName() as T
+    }
+    else -> {
+      argValue as? T ?: error("No value found for $name. Was ${matchingArg.value}")
+    }
+  }
 }
 
 internal fun Visibility.asKModifier(): KModifier {
