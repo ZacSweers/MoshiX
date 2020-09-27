@@ -13,6 +13,12 @@ jobs:
         ksp_enabled: [true, false]
       fail-fast: false
     steps:
+    - name: Debugging
+      run: |
+        echo ${{ github.ref }}
+        echo ${{ github.event_name }}
+        echo ${{ matrix.java_version }}
+        echo ${{ matrix.ksp_enabled }}
     - name: Checkout
       uses: actions/checkout@v1
     - name: Gradle Wrapper Validation
