@@ -56,7 +56,7 @@ natively.
 There is an experimental [KSP](https://github.com/google/ksp) implementation available as `moshi-sealed-ksp`.
 Note that KSP itself is experimental, so expect this API to break regularly.
 
-Add this dependency as a `ksp` dependency instead of the `moshi-kotlin-codegen` dependency.
+Add this dependency as a `ksp` dependency instead of the `moshi-sealed-codegen` dependency.
 
 ```diff
 dependencies {
