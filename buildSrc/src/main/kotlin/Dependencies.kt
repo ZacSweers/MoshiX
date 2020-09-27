@@ -36,6 +36,7 @@ object Dependencies {
     const val dokkaVersion = "1.4.10"
     const val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
     const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.1.0"
+    const val compilerEmbeddable = "org.jetbrains.kotlin:kotlin-compiler-embeddable:$version"
     const val jvmTarget = "1.8"
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
 
@@ -62,6 +63,7 @@ object Dependencies {
   }
 
   object Testing {
+    const val compileTesting = "com.github.tschuchortdev:kotlin-compile-testing:1.2.11"
     const val kspCompileTesting = "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.2.11"
     const val junit = "junit:junit:4.12"
     const val truth = "com.google.truth:truth:1.0"

@@ -18,50 +18,39 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   id("symbol-processing") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
-  kotlin("kapt")
 }
 
-val useKsp = findProperty("moshix.useKsp")?.toString()?.toBoolean() ?: false
 val generatedAnnotation = if (JavaVersion.current().isJava10Compatible) {
   "javax.annotation.processing.Generated"
 } else {
   "javax.annotation.Generated"
 }
 
+sourceSets {
+  test {
+    java {
+      srcDir("build/generated/ksp/src/test/kotlin")
+    }
+  }
+}
+
 dependencies {
-  if (useKsp) {
-    ksp(project(":moshi-sealed:codegen-ksp"))
-    ksp(project(":moshi-ksp:moshi-ksp"))
-  } else {
-    kapt(project(":moshi-sealed:codegen"))
-    kapt(Dependencies.Moshi.codegen)
-  }
-
-  implementation(project(":moshi-ktx"))
-  implementation(project(":moshi-sealed:annotations"))
-  implementation(Dependencies.Moshi.kotlin)
-  implementation(project(":moshi-sealed:reflect"))
-
-  if (!useKsp) {
-    kaptTest(project(":moshi-sealed:codegen"))
-  }
+  ksp(project(":moshi-ksp:moshi-ksp"))
+  testImplementation(Dependencies.Moshi.moshi)
+  testImplementation(project(":moshi-ktx"))
+  testImplementation(project(":moshi-metadata-reflect"))
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)
+  testImplementation(Dependencies.Kotlin.reflect)
 }
 
 ksp {
   arg("moshi.generated", generatedAnnotation)
 }
 
-kapt {
-  arguments {
-    arg("moshi.generated", generatedAnnotation)
-  }
-}
-
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
+    freeCompilerArgs += listOf("-Xopt-in=kotlin.ExperimentalStdlibApi", "-Xinline-classes")
   }
 }
