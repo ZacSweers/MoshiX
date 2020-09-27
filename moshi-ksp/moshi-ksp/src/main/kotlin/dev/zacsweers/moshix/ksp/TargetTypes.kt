@@ -1,5 +1,6 @@
 package dev.zacsweers.moshix.ksp
 
+import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.getVisibility
 import com.google.devtools.ksp.isInternal
@@ -88,32 +89,35 @@ internal fun targetType(
       // Load the kotlin API cache into memory eagerly so we can reuse the parsed APIs
       val api = supertype.type
 
-//        val apiSuperClass = api.getAllSuperTypes().first()
-//        if (apiSuperClass.arguments.isNotEmpty()) {
-//          //
-//          // This extends a typed generic superclass. We want to construct a mapping of the
-//          // superclass typevar names to their materialized types here.
-//          //
-//          // class Foo extends Bar<String>
-//          // class Bar<T>
-//          //
-//          // We will store {Foo : {T : [String]}}.
-//          //
-//          // Then when we look at Bar<T> later, we'll look up to the descendent Foo and extract its
-//          // materialized type from there.
-//          //
-//          val untyped = supertype.type
-//
-//          // Convert to an element and back to wipe the typed generics off of this
-//          resolvedTypes += ResolvedTypeMapping(
-//              target = untyped.toClassName(),
-//              args = supertype.typeName.asSequence()
-//                  .cast<TypeVariableName>()
-//                  .map(TypeVariableName::name)
-//                  .zip(apiSuperClass.arguments.asSequence())
-//                  .associate { it }
-//          )
-//        }
+      val apiSuperClass = api.getAllSuperTypes().firstOrNull()
+      if (apiSuperClass != null && apiSuperClass.arguments.isNotEmpty()) {
+        //
+        // This extends a typed generic superclass. We want to construct a mapping of the
+        // superclass typevar names to their materialized types here.
+        //
+        // class Foo extends Bar<String>
+        // class Bar<T>
+        //
+        // We will store {Foo : {T : [String]}}.
+        //
+        // Then when we look at Bar<T> later, we'll look up to the descendent Foo and extract its
+        // materialized type from there.
+        //
+        val untyped = apiSuperClass.declaration
+        check(untyped is KSClassDeclaration)
+
+        // Convert to an element and back to wipe the typed generics off of this
+        resolvedTypes += ResolvedTypeMapping(
+            target = untyped.toClassName(),
+            args = untyped.typeParameters
+              .map { it.toTypeName() }
+              .filterIsInstance<TypeVariableName>()
+              .map(TypeVariableName::name)
+              .asSequence()
+              .zip(apiSuperClass.arguments.asSequence().map { it.toTypeName() })
+              .associate { it }
+        )
+      }
 
       return@associateWithTo api
     }
@@ -198,39 +202,37 @@ private fun resolveTypeArgs(
   allowedTypeVars: Set<TypeVariableName>,
   entryStartIndex: Int = resolvedTypes.indexOfLast { it.target == targetClass },
 ): TypeName {
-  // TODO do we need the rest?
-  return propertyType
-//  val unwrappedType = propertyType.unwrapTypeAlias()
-//
-//  if (unwrappedType !is TypeVariableName) {
-//    return unwrappedType
-//  } else if (entryStartIndex == -1) {
-//    return unwrappedType
-//  }
-//
-//  val targetMappingIndex = resolvedTypes[entryStartIndex]
-//  val targetMappings = targetMappingIndex.args
-//
-//  // Try to resolve the real type of this property based on mapped generics in the subclass.
-//  // We need to us a non-nullable version for mapping since we're just mapping based on raw java
-//  // type vars, but then can re-copy nullability back if it is found.
-//  val resolvedType = targetMappings[unwrappedType.name]
-//    ?.copy(nullable = unwrappedType.isNullable)
-//    ?: unwrappedType
-//
-//  return when {
-//    resolvedType !is TypeVariableName -> resolvedType
-//    entryStartIndex != 0 -> {
-//      // We need to go deeper
-//      resolveTypeArgs(targetClass, resolvedType, resolvedTypes, allowedTypeVars, entryStartIndex - 1)
-//    }
-//    resolvedType.copy(nullable = false) in allowedTypeVars -> {
-//      // This is a generic type in the top-level declared class. This is fine to leave in because
-//      // this will be handled by the `Type` array passed in at runtime.
-//      resolvedType
-//    }
-//    else -> error("Could not find $resolvedType in $resolvedTypes. Also not present in allowable top-level type vars $allowedTypeVars")
-//  }
+  val unwrappedType = propertyType.unwrapTypeAlias()
+
+  if (unwrappedType !is TypeVariableName) {
+    return unwrappedType
+  } else if (entryStartIndex == -1) {
+    return unwrappedType
+  }
+
+  val targetMappingIndex = resolvedTypes[entryStartIndex]
+  val targetMappings = targetMappingIndex.args
+
+  // Try to resolve the real type of this property based on mapped generics in the subclass.
+  // We need to us a non-nullable version for mapping since we're just mapping based on raw java
+  // type vars, but then can re-copy nullability back if it is found.
+  val resolvedType = targetMappings[unwrappedType.name]
+    ?.copy(nullable = unwrappedType.isNullable)
+    ?: unwrappedType
+
+  return when {
+    resolvedType !is TypeVariableName -> resolvedType
+    entryStartIndex != 0 -> {
+      // We need to go deeper
+      resolveTypeArgs(targetClass, resolvedType, resolvedTypes, allowedTypeVars, entryStartIndex - 1)
+    }
+    resolvedType.copy(nullable = false) in allowedTypeVars -> {
+      // This is a generic type in the top-level declared class. This is fine to leave in because
+      // this will be handled by the `Type` array passed in at runtime.
+      resolvedType
+    }
+    else -> error("Could not find $resolvedType in $resolvedTypes. Also not present in allowable top-level type vars $allowedTypeVars")
+  }
 }
 
 private fun KSAnnotated?.qualifiers(resolver: Resolver): Set<AnnotationSpec> {
@@ -262,14 +264,14 @@ private fun declaredProperties(
 
   val result = mutableMapOf<String, TargetProperty>()
   for (property in kotlinApi.getDeclaredProperties()) {
-//    val resolvedType = resolveTypeArgs(
-//      targetClass = currentClass,
-//      propertyType = initialProperty.type,
-//      resolvedTypes = resolvedTypes,
-//      allowedTypeVars = allowedTypeVars
-//    )
-//    val property = initialProperty.toBuilder(type = resolvedType).build()
-    val propertySpec = property.toPropertySpec(resolver)
+    val initialProperty = property.toPropertySpec(resolver)
+    val resolvedType = resolveTypeArgs(
+      targetClass = currentClass,
+      propertyType = initialProperty.type,
+      resolvedTypes = resolvedTypes,
+      allowedTypeVars = allowedTypeVars
+    )
+    val propertySpec = initialProperty.toBuilder(type = resolvedType).build()
     val name = propertySpec.name
     val parameter = constructor.parameters[name]
     result[name] = TargetProperty(
