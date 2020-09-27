@@ -56,15 +56,13 @@ internal inline fun <reified T> KSAnnotation.getMember(name: String): T {
       } else {
         val first = argValue[0]
         if (first is KSType) {
-          argValue.map { (it as KSType).toTypeName() } as T
+          argValue.map { (it as KSType).toClassName() } as T
         } else {
           argValue as T
         }
       }
     }
-    is KSType -> {
-      argValue.toTypeName() as T
-    }
+    is KSType -> argValue.toClassName() as T
     else -> {
       argValue as? T ?: error("No value found for $name. Was ${matchingArg.value}")
     }
@@ -100,7 +98,7 @@ internal fun KSAnnotation.toAnnotationSpec(resolver: Resolver): AnnotationSpec {
 //        }
 //        member.add("⇤⇤]")
       }
-      is KSType -> member.add("%T::class", value.toTypeName())
+      is KSType -> member.add("%T::class", value.toClassName())
       // TODO is this the right way to handle an enum constant?
       is KSName -> member.add("%T.%L", ClassName.bestGuess(value.getQualifier()),
         value.getShortName())

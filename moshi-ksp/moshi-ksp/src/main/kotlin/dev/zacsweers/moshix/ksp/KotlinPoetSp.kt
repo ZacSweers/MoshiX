@@ -11,6 +11,7 @@ import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Nullability.NULLABLE
 import com.google.devtools.ksp.symbol.Variance.CONTRAVARIANT
 import com.google.devtools.ksp.symbol.Variance.COVARIANT
+import com.google.devtools.ksp.symbol.Variance.INVARIANT
 import com.google.devtools.ksp.symbol.Variance.STAR
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
@@ -23,17 +24,17 @@ import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets.UTF_8
 import com.squareup.kotlinpoet.STAR as KpStar
 
-internal fun KSType.toTypeName(): TypeName {
-  val type = when (declaration) {
-    is KSClassDeclaration -> {
-      (declaration as KSClassDeclaration).toTypeName(arguments.map(KSTypeArgument::toTypeName))
-    }
-    is KSTypeParameter -> {
-      (declaration as KSTypeParameter).toTypeName()
-    }
-    is KSTypeAlias -> {
-      (declaration as KSTypeAlias).type.resolve().toTypeName()
-    }
+internal fun KSType.toClassName(): ClassName {
+  val decl = declaration
+  check(decl is KSClassDeclaration)
+  return decl.toClassName()
+}
+
+internal fun KSType.toTypeName(typeParamResolver: TypeParameterResolver): TypeName {
+  val type = when (val decl = declaration) {
+    is KSClassDeclaration -> decl.toTypeName(arguments.map { it.toTypeName(typeParamResolver) })
+    is KSTypeParameter -> typeParamResolver[decl.name.getShortName()]
+    is KSTypeAlias -> decl.type.resolve().toTypeName(typeParamResolver)
     else -> error("Unsupported type: $declaration")
   }
 
@@ -42,15 +43,48 @@ internal fun KSType.toTypeName(): TypeName {
   return type.copy(nullable = nullable)
 }
 
-internal fun KSClassDeclaration.toTypeName(
-  actualTypeArgs: List<TypeName> = typeParameters.map { it.toTypeName() },
-): TypeName {
+internal fun KSClassDeclaration.toTypeName(argumentList: List<TypeName> = emptyList()): TypeName {
   val className = toClassName()
-  return if (typeParameters.isNotEmpty()) {
-    className.parameterizedBy(actualTypeArgs)
+  return if (argumentList.isNotEmpty()) {
+    className.parameterizedBy(argumentList)
   } else {
     className
   }
+}
+
+internal interface TypeParameterResolver {
+  val parametersMap: Map<String, TypeVariableName>
+  operator fun get(index: String): TypeVariableName
+}
+
+internal fun List<KSTypeParameter>.toTypeParameterResolver(
+  fallback: TypeParameterResolver? = null,
+  sourceType: String? = null,
+): TypeParameterResolver {
+  val parametersMap = LinkedHashMap<String, TypeVariableName>()
+  val typeParamResolver = { id: String ->
+    parametersMap[id]
+      ?: fallback?.get(id)
+      ?: throw IllegalStateException("No type argument found for $id! Anaylzing $sourceType")
+  }
+
+  val resolver = object : TypeParameterResolver {
+    override val parametersMap: Map<String, TypeVariableName> = parametersMap
+
+    override operator fun get(index: String): TypeVariableName = typeParamResolver(index)
+  }
+
+  // Fill the parametersMap. Need to do sequentially and allow for referencing previously defined params
+  forEach {
+    // Put the simple typevar in first, then it can be referenced in the full toTypeVariable()
+    // replacement later that may add bounds referencing this.
+    val id = it.name.getShortName()
+    parametersMap[id] = TypeVariableName(id)
+    // Now replace it with the full version.
+    parametersMap[id] = it.toTypeVariableName(resolver)
+  }
+
+  return resolver
 }
 
 internal fun KSClassDeclaration.toClassName(): ClassName {
@@ -65,10 +99,16 @@ internal fun KSClassDeclaration.toClassName(): ClassName {
   return ClassName(pkgName, simpleNames)
 }
 
-internal fun KSTypeParameter.toTypeName(): TypeName {
+internal fun KSTypeParameter.toTypeName(typeParamResolver: TypeParameterResolver): TypeName {
   if (variance == STAR) return KpStar
+  return toTypeVariableName(typeParamResolver)
+}
+
+internal fun KSTypeParameter.toTypeVariableName(
+  typeParamResolver: TypeParameterResolver,
+): TypeVariableName {
   val typeVarName = name.getShortName()
-  val typeVarBounds = bounds.map { it.toTypeName() }
+  val typeVarBounds = bounds.map { it.toTypeName(typeParamResolver) }
   val typeVarVariance = when (variance) {
     COVARIANT -> KModifier.OUT
     CONTRAVARIANT -> KModifier.IN
@@ -77,18 +117,19 @@ internal fun KSTypeParameter.toTypeName(): TypeName {
   return TypeVariableName(typeVarName, bounds = typeVarBounds, variance = typeVarVariance)
 }
 
-internal fun KSTypeArgument.toTypeName(): TypeName {
-  val typeName = type?.resolve()?.toTypeName() ?: return KpStar
+internal fun KSTypeArgument.toTypeName(typeParamResolver: TypeParameterResolver): TypeName {
+  val typeName = type?.resolve()?.toTypeName(typeParamResolver) ?: return KpStar
   return when (variance) {
     COVARIANT -> WildcardTypeName.producerOf(typeName)
     CONTRAVARIANT -> WildcardTypeName.consumerOf(typeName)
-    else -> typeName
+    STAR -> KpStar
+    INVARIANT -> typeName
   }
 }
 
-internal fun KSTypeReference.toTypeName(): TypeName {
+internal fun KSTypeReference.toTypeName(typeParamResolver: TypeParameterResolver): TypeName {
   val type = resolve()
-  return type.toTypeName()
+  return type.toTypeName(typeParamResolver)
 }
 
 internal fun FileSpec.writeTo(codeGenerator: CodeGenerator) {
