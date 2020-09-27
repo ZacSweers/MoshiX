@@ -13,24 +13,6 @@ jobs:
         ksp_enabled: [true, false]
       fail-fast: false
     steps:
-    - name: Debugging
-      run: |
-        echo ${{ github.ref }}
-        echo ${{ github.event_name }}
-        echo ${{ matrix.java_version }}
-        echo ${{ matrix.ksp_enabled }}
-    - name: Debugging ref
-      if: github.ref == 'refs/heads/z/debuggingActions'
-      run: echo "Ran"
-    - name: Debugging event
-      if: github.event_name == 'pull_request'
-      run: echo "Ran"
-    - name: Debugging JDK
-      if: matrix.java_version == '1.8'
-      run: echo "Ran"
-    - name: Debugging KSP
-      if: matrix.ksp_enabled
-      run: echo "Ran"
     - name: Checkout
       uses: actions/checkout@v1
     - name: Gradle Wrapper Validation
@@ -54,4 +36,4 @@ jobs:
       run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} --stacktrace
     - name: Upload snapshot (main only)
       run: ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SONATYPE_USERNAME }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SONATYPE_PASSWORD }}
-      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.java_version == '1.8' && matrix.ksp_enabled == 'false'
+      if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.java_version == '1.8' && !matrix.ksp_enabled
