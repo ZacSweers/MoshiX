@@ -292,6 +292,13 @@ private fun KSPropertyDeclaration.toPropertySpec(resolver: Resolver): PropertySp
       if (hasAnnotation(resolver.getClassDeclarationByName<Transient>().asType())) {
         addAnnotation(Transient::class.java)
       }
+      addAnnotations(this@toPropertySpec.annotations.mapNotNull {
+        if ((it.annotationType.resolve().declaration as KSClassDeclaration).isJsonQualifier(resolver))  {
+          it.toAnnotationSpec(resolver)
+        } else {
+          null
+        }
+      })
     }
     .build()
 }

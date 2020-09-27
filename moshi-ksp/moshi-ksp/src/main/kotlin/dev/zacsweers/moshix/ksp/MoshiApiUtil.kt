@@ -69,7 +69,7 @@ internal fun TargetProperty.generator(
   }
 
   // Merge parameter and property annotations
-  val qualifiers = parameter?.qualifiers.orEmpty() + propertySpec.annotations.qualifiers(resolver)
+  val qualifiers = parameter?.qualifiers.orEmpty() + propertySpec.annotations
   for (jsonQualifier in qualifiers) {
     val qualifierRawType = jsonQualifier.typeName.rawType()
     // Check Java types since that covers both Java and Kotlin annotations.
@@ -102,10 +102,7 @@ internal fun TargetProperty.generator(
   )
 }
 
-private fun List<AnnotationSpec>?.qualifiers(resolver: Resolver): Set<AnnotationSpec> {
-  if (this == null) return setOf()
+internal fun KSClassDeclaration.isJsonQualifier(resolver: Resolver): Boolean {
   val jsonQualifier = resolver.getClassDeclarationByName<JsonQualifier>().asType()
-  return filterTo(mutableSetOf()) {
-    resolver.getClassDeclarationByName(it.typeName.toString()).hasAnnotation(jsonQualifier)
-  }
+  return hasAnnotation(jsonQualifier)
 }
