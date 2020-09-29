@@ -32,7 +32,14 @@ internal fun KSType.toClassName(): ClassName {
 
 internal fun KSType.toTypeName(typeParamResolver: TypeParameterResolver): TypeName {
   val type = when (val decl = declaration) {
-    is KSClassDeclaration -> decl.toTypeName(arguments.map { it.toTypeName(typeParamResolver) })
+    is KSClassDeclaration -> {
+      val className = decl.toClassName()
+      if (arguments.isEmpty()) {
+        className.parameterizedBy(arguments.map { it.toTypeName(typeParamResolver) })
+      } else {
+        className
+      }
+    }
     is KSTypeParameter -> typeParamResolver[decl.name.getShortName()]
     is KSTypeAlias -> decl.type.resolve().toTypeName(typeParamResolver)
     else -> error("Unsupported type: $declaration")
@@ -41,15 +48,6 @@ internal fun KSType.toTypeName(typeParamResolver: TypeParameterResolver): TypeNa
   val nullable = nullability == NULLABLE
 
   return type.copy(nullable = nullable)
-}
-
-internal fun KSClassDeclaration.toTypeName(argumentList: List<TypeName> = emptyList()): TypeName {
-  val className = toClassName()
-  return if (argumentList.isNotEmpty()) {
-    className.parameterizedBy(argumentList)
-  } else {
-    className
-  }
 }
 
 internal interface TypeParameterResolver {
