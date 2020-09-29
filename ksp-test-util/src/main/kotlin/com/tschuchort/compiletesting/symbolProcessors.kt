@@ -91,7 +91,7 @@ private class KspCompileTestingComponentRegistrar(
 
   var options: MutableMap<String, String> = mutableMapOf()
 
-  val errorFunction = KotlinCompilation::class.java.getDeclaredMethod("error", String::class.java)
+  val errorFunction = AbstractKotlinCompilation::class.java.getDeclaredMethod("error", String::class.java)
     .apply {
       isAccessible = true
     }
