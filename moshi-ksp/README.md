@@ -15,7 +15,7 @@ dependencies {
 }
 ```
 
-To add `@Generated` controls, add them via ksp arguments
+To add `@Generated` annotations, specify them via ksp arguments in Gradle.
 
 ```kotlin
 ksp {
