@@ -1,6 +1,8 @@
 # moshi-ksp
 
-A [KSP](https://github.com/google/ksp) implementation of Moshi Kotlin Codegen.
+A [KSP](https://github.com/google/ksp) implementation of Moshi Kotlin Codegen. This is experimental
+insofar as KSP itself is experimental, but it passes all the same tests that Moshi's existing 
+annotation-processor-based code gen does.
 
 ## Usage
 
@@ -13,16 +15,10 @@ dependencies {
 }
 ```
 
-To add `@Generated` controls, add them via ksp arguments
+To add `@Generated` annotations, specify them via ksp arguments in Gradle.
 
 ```kotlin
 ksp {
   arg("moshi.generated", "javax.annotation.Generated")
 }
 ```
-
-## Caveats
-
-There are a few Moshi tests that do not yet pass due to this KSP issue with nullability of generics: https://github.com/google/ksp/issues/82
-
-All other tests pass!

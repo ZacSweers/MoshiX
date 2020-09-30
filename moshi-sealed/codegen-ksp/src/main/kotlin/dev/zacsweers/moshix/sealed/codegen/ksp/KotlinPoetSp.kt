@@ -6,7 +6,6 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
-import com.google.devtools.ksp.symbol.Nullability.NULLABLE
 import com.google.devtools.ksp.symbol.Variance.CONTRAVARIANT
 import com.google.devtools.ksp.symbol.Variance.COVARIANT
 import com.google.devtools.ksp.symbol.Variance.STAR
@@ -32,7 +31,7 @@ internal fun KSType.toTypeName(): TypeName {
     else -> error("Unsupported type: $declaration")
   }
 
-  val nullable = nullability == NULLABLE
+  val nullable = makeNullable() == this
 
   return type.copy(nullable = nullable)
 }

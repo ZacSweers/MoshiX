@@ -443,39 +443,38 @@ class DualKotlinTest(useReflection: Boolean) {
     var prop: Int = 0
   }
 
-  // TODO re-enable when https://github.com/google/ksp/issues/82 is fixed
-//  @Test fun typeAliasUnwrapping() {
-//    val adapter = moshi
-//      .newBuilder()
-//      .add(Types.supertypeOf(Int::class.javaObjectType), moshi.adapter<Int>())
-//      .build()
-//      .adapter<TypeAliasUnwrapping>()
-//
-//    @Language("JSON")
-//    val testJson =
-//      """{"simpleClass":6,"parameterized":{"value":6},"wildcardIn":{"value":6},"wildcardOut":{"value":6},"complex":{"value":[{"value":6}]}}"""
-//
-//    val testValue = TypeAliasUnwrapping(
-//      simpleClass = 6,
-//      parameterized = GenericClass(6),
-//      wildcardIn = GenericClass(6),
-//      wildcardOut = GenericClass(6),
-//      complex = GenericClass(listOf(GenericClass(6)))
-//    )
-//    assertThat(adapter.toJson(testValue)).isEqualTo(testJson)
-//
-//    val result = adapter.fromJson(testJson)!!
-//    assertThat(result).isEqualTo(testValue)
-//  }
-//
-//  @JsonClass(generateAdapter = true)
-//  data class TypeAliasUnwrapping(
-//    val simpleClass: TypeAlias,
-//    val parameterized: GenericClass<TypeAlias>,
-//    val wildcardIn: GenericClass<in TypeAlias>,
-//    val wildcardOut: GenericClass<out TypeAlias>,
-//    val complex: GenericClass<GenericTypeAlias>?
-//  )
+  @Test fun typeAliasUnwrapping() {
+    val adapter = moshi
+      .newBuilder()
+      .add(Types.supertypeOf(Int::class.javaObjectType), moshi.adapter<Int>())
+      .build()
+      .adapter<TypeAliasUnwrapping>()
+
+    @Language("JSON")
+    val testJson =
+      """{"simpleClass":6,"parameterized":{"value":6},"wildcardIn":{"value":6},"wildcardOut":{"value":6},"complex":{"value":[{"value":6}]}}"""
+
+    val testValue = TypeAliasUnwrapping(
+      simpleClass = 6,
+      parameterized = GenericClass(6),
+      wildcardIn = GenericClass(6),
+      wildcardOut = GenericClass(6),
+      complex = GenericClass(listOf(GenericClass(6)))
+    )
+    assertThat(adapter.toJson(testValue)).isEqualTo(testJson)
+
+    val result = adapter.fromJson(testJson)!!
+    assertThat(result).isEqualTo(testValue)
+  }
+
+  @JsonClass(generateAdapter = true)
+  data class TypeAliasUnwrapping(
+    val simpleClass: TypeAlias,
+    val parameterized: GenericClass<TypeAlias>,
+    val wildcardIn: GenericClass<in TypeAlias>,
+    val wildcardOut: GenericClass<out TypeAlias>,
+    val complex: GenericClass<GenericTypeAlias>?
+  )
 
   // Regression test for https://github.com/square/moshi/issues/991
   @Test fun nullablePrimitiveProperties() {
@@ -568,35 +567,32 @@ class DualKotlinTest(useReflection: Boolean) {
     val deepNestedNullableShouldBeNullable: E
   )
 
-  // TODO re-enable when https://github.com/google/ksp/issues/82 is fixed
-//  // Regression test for https://github.com/square/moshi/issues/1009
-//  @Test fun outDeclaration() {
-//    val adapter = moshi.adapter<OutDeclaration<Int>>()
-//
-//    @Language("JSON")
-//    val testJson =
-//      """{"input":3}"""
-//
-//    val instance = OutDeclaration(3)
-//    assertThat(adapter.serializeNulls().toJson(instance))
-//      .isEqualTo(testJson)
-//
-//    val result = adapter.fromJson(testJson)!!
-//    assertThat(result).isEqualTo(instance)
-//  }
-//
-//  @JsonClass(generateAdapter = true)
-//  data class OutDeclaration<out T>(val input: T)
+  // Regression test for https://github.com/square/moshi/issues/1009
+  @Test fun outDeclaration() {
+    val adapter = moshi.adapter<OutDeclaration<Int>>()
+
+    @Language("JSON")
+    val testJson =
+      """{"input":3}"""
+
+    val instance = OutDeclaration(3)
+    assertThat(adapter.serializeNulls().toJson(instance))
+      .isEqualTo(testJson)
+
+    val result = adapter.fromJson(testJson)!!
+    assertThat(result).isEqualTo(instance)
+  }
+
+  @JsonClass(generateAdapter = true)
+  data class OutDeclaration<out T>(val input: T)
 }
 
 typealias TypeAlias = Int
-// TODO re-enable when https://github.com/google/ksp/issues/82 is fixed
-//@Suppress("REDUNDANT_PROJECTION")
-//typealias GenericTypeAlias = List<out GenericClass<in TypeAlias>?>?
+@Suppress("REDUNDANT_PROJECTION")
+typealias GenericTypeAlias = List<out GenericClass<in TypeAlias>?>?
 
-// TODO re-enable when https://github.com/google/ksp/issues/82 is fixed
-//@JsonClass(generateAdapter = true)
-//data class GenericClass<T>(val value: T)
+@JsonClass(generateAdapter = true)
+data class GenericClass<T>(val value: T)
 
 // Has to be outside since inline classes are only allowed on top level
 @JsonClass(generateAdapter = true)
