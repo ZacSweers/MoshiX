@@ -529,8 +529,6 @@ class JsonClassSymbolProcessorTest {
 //    )
   }
 
-  // TODO re-enable when https://github.com/google/ksp/issues/82 is fixed
-  @Ignore("Ignored due to bug")
   @Test
   fun `Processor should generate comprehensive proguard rules`() {
     val compilation = prepareCompilation(

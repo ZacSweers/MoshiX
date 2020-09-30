@@ -8,7 +8,6 @@ import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.KSTypeArgument
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
-import com.google.devtools.ksp.symbol.Nullability.NULLABLE
 import com.google.devtools.ksp.symbol.Variance.CONTRAVARIANT
 import com.google.devtools.ksp.symbol.Variance.COVARIANT
 import com.google.devtools.ksp.symbol.Variance.INVARIANT
@@ -38,7 +37,7 @@ internal fun KSType.toTypeName(typeParamResolver: TypeParameterResolver): TypeNa
     else -> error("Unsupported type: $declaration")
   }
 
-  val nullable = nullability == NULLABLE
+  val nullable = makeNullable() == this
 
   return type.copy(nullable = nullable)
 }
