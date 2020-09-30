@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Version 0.3.1
+-------------
+
+_2020-09-30_
+
+`moshi-ksp` now fully supports nullable generic types, which means it is now at feature parity with
+Moshi's annotation-processor-based code gen 🥳
+
 Version 0.3.0
 -------------
 
