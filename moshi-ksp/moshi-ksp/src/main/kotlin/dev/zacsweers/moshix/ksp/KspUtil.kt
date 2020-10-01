@@ -1,7 +1,10 @@
 package dev.zacsweers.moshix.ksp
 
+import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.processing.KSBuiltIns
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.symbol.ClassKind.CLASS
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -30,6 +33,13 @@ internal fun Resolver.getClassDeclarationByName(fqcn: String): KSClassDeclaratio
 }
 
 internal fun KSClassDeclaration.asType() = asType(emptyList())
+
+internal fun KSClassDeclaration.superclass(resolver: Resolver): KSType {
+  return getAllSuperTypes().firstOrNull {
+    val decl = it.declaration
+    decl is KSClassDeclaration && decl.classKind == CLASS
+  } ?: resolver.builtIns.anyType
+}
 
 internal fun KSAnnotated.hasAnnotation(target: KSType): Boolean {
   return findAnnotationWithType(target) != null
