@@ -13,6 +13,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.Origin.KOTLIN
+import dev.zacsweers.moshix.ksp.shade.api.BridgeGenerator
 import org.jetbrains.kotlin.analyzer.AnalysisResult.CompilationErrorException
 import java.io.OutputStreamWriter
 import java.lang.RuntimeException
@@ -108,6 +109,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
 
         preparedAdapter.spec.writeTo(codeGenerator)
         preparedAdapter.proguardConfig?.writeTo(codeGenerator)
+        preparedAdapter.bridgeType?.writeTo(codeGenerator)
       }
   }
 
@@ -129,6 +131,13 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
           }
           .invoke(this, it)
       }
+  }
+
+  private fun BridgeGenerator.writeTo(codeGenerator: CodeGenerator) {
+    val classBytes = generateClassBytes()
+    codeGenerator.createNewFile(packageName, name, "class").buffered().use {
+      it.write(classBytes)
+    }
   }
 
   private fun adapterGenerator(
@@ -162,7 +171,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
       }
     }
 
-    return AdapterGenerator(type, sortedProperties)
+    return AdapterGenerator(type, sortedProperties, generateBytecode = true)
   }
 }
 
