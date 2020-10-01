@@ -18,32 +18,44 @@ package dev.zacsweers.moshix.ksp
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.symbol.ClassKind.CLASS
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.Origin.KOTLIN
+import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.asClassName
+
+private val OBJECT_CLASS = java.lang.Object::class.asClassName()
 
 /**
  * A concrete type like `List<String>` with enough information to know how to resolve its type
  * variables.
  */
-internal class AppliedType private constructor(val type: KSClassDeclaration) {
-  val typeName = type.toTypeName()
+internal class AppliedType private constructor(
+  val type: KSClassDeclaration,
+  val typeName: TypeName = type.toTypeName()
+) {
 
   /** Returns all supertypes of this, recursively. Includes both interface and class supertypes. */
   fun supertypes(
     resolver: Resolver,
-    logger: KSPLogger,
-    result: LinkedHashSet<AppliedType> = LinkedHashSet(),
   ): LinkedHashSet<AppliedType> {
+    val result: LinkedHashSet<AppliedType> = LinkedHashSet()
     result.add(this)
     for (supertype in type.getAllSuperTypes()) {
-      check(supertype.declaration is KSClassDeclaration)
-      val qualifiedName = supertype.declaration.qualifiedName
-      if (supertype.declaration.origin != KOTLIN) {
-        logger.errorAndThrow("supertype ${qualifiedName?.asString()} is not a Kotlin type")
+      val decl = supertype.declaration
+      check(decl is KSClassDeclaration)
+      if (decl.classKind != CLASS){
+        // Don't load properties for interface types.
+        continue
       }
+      val qualifiedName = decl.qualifiedName
       val superTypeKsClass = resolver.getClassDeclarationByName(qualifiedName!!)!!
-      val appliedSupertype = AppliedType(superTypeKsClass)
-      result.add(appliedSupertype)
+      val typeName = type.toTypeName()
+      if (typeName == OBJECT_CLASS) {
+        // Don't load properties for java.lang.Object.
+        continue
+      }
+      result.add(AppliedType(superTypeKsClass, typeName))
     }
     return result
   }
