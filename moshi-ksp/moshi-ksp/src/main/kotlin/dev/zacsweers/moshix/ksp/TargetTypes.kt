@@ -1,6 +1,5 @@
 package dev.zacsweers.moshix.ksp
 
-import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.getVisibility
 import com.google.devtools.ksp.isInternal
@@ -9,6 +8,7 @@ import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.ClassKind
+import com.google.devtools.ksp.symbol.ClassKind.CLASS
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
@@ -39,7 +39,7 @@ internal fun targetType(
   logger.check(type.classKind != ClassKind.ENUM_CLASS, type) {
     "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.qualifiedName?.asString()}: code gen for enums is not supported or necessary"
   }
-  logger.check(type.classKind == ClassKind.CLASS, type) {
+  logger.check(type.classKind == CLASS, type) {
     "@JsonClass can't be applied to ${type.qualifiedName?.asString()}: must be a Kotlin class"
   }
   logger.check(Modifier.INNER !in type.modifiers, type) {
@@ -76,7 +76,7 @@ internal fun targetType(
   val superTypes = appliedType.supertypes(resolver, logger)
     .filterNot { supertype ->
       supertype.typeName == OBJECT_CLASS || // Don't load properties for java.lang.Object.
-        supertype.type.classKind != ClassKind.CLASS  // Don't load properties for interface types.
+        supertype.type.classKind != CLASS  // Don't load properties for interface types.
     }
     .onEach { supertype ->
       if (supertype.type.hasAnnotation(resolver.getClassDeclarationByName<Metadata>().asType())) {
@@ -89,8 +89,8 @@ internal fun targetType(
       // Load the kotlin API cache into memory eagerly so we can reuse the parsed APIs
       val api = supertype.type
 
-      val apiSuperClass = api.getAllSuperTypes().firstOrNull()
-      if (apiSuperClass != null && apiSuperClass.arguments.isNotEmpty()) {
+      val apiSuperClass = api.superclass(resolver)
+      if (apiSuperClass != resolver.builtIns.anyType && apiSuperClass.arguments.isNotEmpty()) {
         //
         // This extends a typed generic superclass. We want to construct a mapping of the
         // superclass typevar names to their materialized types here.
