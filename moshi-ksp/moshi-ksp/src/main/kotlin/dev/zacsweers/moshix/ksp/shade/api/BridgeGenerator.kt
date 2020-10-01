@@ -44,7 +44,7 @@ internal class BridgeGenerator(
      *   - kotlin/jvm/internal/DefaultConstructorMarker for the constructor marker arg (always null at runtime)
     */
     val prefix = primaryConstructorDesc.substringBeforeLast(")")
-    val maskParams = 0.until(maskCount).joinToString { "I" }
+    val maskParams = 0.until(maskCount).joinToString("") { "I" }
     val bridgeDesc = "${prefix}$maskParams)L$targetJvmName;"
     val defaultsConstructorDesc = "${prefix}${maskParams}L$MARKER;)V"
 
@@ -72,7 +72,12 @@ internal class BridgeGenerator(
 
       // Load parameters onto the stack
       var counter = 0
-      for (argType in Type.getArgumentTypes(bridgeDesc)) {
+      val argTypes = try {
+        Type.getArgumentTypes(bridgeDesc)
+      } catch (e: Exception) {
+        throw IllegalStateException("Could not parse $bridgeDesc", e)
+      }
+      for (argType in argTypes) {
         visitVarInsn(argType.toLoadInstruction(), counter)
         counter += argType.toStackSize()
       }
