@@ -20,15 +20,12 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeVariableName
-import com.squareup.kotlinpoet.asClassName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonQualifier
 import dev.zacsweers.moshix.ksp.shade.api.TargetConstructor
 import dev.zacsweers.moshix.ksp.shade.api.TargetParameter
 import dev.zacsweers.moshix.ksp.shade.api.TargetProperty
 import dev.zacsweers.moshix.ksp.shade.api.TargetType
-
-private val OBJECT_CLASS = java.lang.Object::class.asClassName()
 
 /** Returns a target type for `element`, or null if it cannot be used with code gen. */
 internal fun targetType(
@@ -73,16 +70,11 @@ internal fun targetType(
   val properties = mutableMapOf<String, TargetProperty>()
 
   val resolvedTypes = mutableListOf<ResolvedTypeMapping>()
-  val superTypes = appliedType.supertypes(resolver, logger)
-    .filterNot { supertype ->
-      supertype.typeName == OBJECT_CLASS || // Don't load properties for java.lang.Object.
-        supertype.type.classKind != CLASS  // Don't load properties for interface types.
-    }
+  val superTypes = appliedType.supertypes(resolver)
     .onEach { supertype ->
-      if (supertype.type.hasAnnotation(resolver.getClassDeclarationByName<Metadata>().asType())) {
-        println(
+      if (!supertype.type.isKotlinClass(resolver)) {
+        logger.errorAndThrow(
           "@JsonClass can't be applied to $type: supertype $supertype is not a Kotlin type: $type")
-        return null
       }
     }
     .associateWithTo(LinkedHashMap()) { supertype ->
