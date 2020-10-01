@@ -496,7 +496,22 @@ internal class AdapterGenerator(
       CodeBlock.of("return·")
     }
     if (useDefaultsConstructor) {
-      if (!generateBytecode) {
+      if (generateBytecode) {
+        bridgeGenerator = BridgeGenerator(
+          packageName = className.packageName,
+          name = "${adapterName}Bridge",
+          targetClassName = className.canonicalName,
+          primaryConstructorDesc = target.constructor.signature!!.substringAfter("<init>"),
+          maskCount = maskCount
+        )
+        val bridgeTypeName = ClassName(bridgeGenerator.packageName, bridgeGenerator.name)
+        result.addCode(
+          "«%L%T.%L(",
+          returnOrResultAssignment,
+          bridgeTypeName,
+          BridgeGenerator.BRIDGE_METHOD_NAME
+        )
+      } else {
         classBuilder.addProperty(constructorProperty)
         // Dynamic default constructor call
         val nonNullConstructorType = constructorProperty.type.copy(nullable = false)
@@ -535,21 +550,6 @@ internal class AdapterGenerator(
           "«%L%N.newInstance(",
           returnOrResultAssignment,
           localConstructorProperty
-        )
-      } else {
-        bridgeGenerator = BridgeGenerator(
-          packageName = className.packageName,
-          name = "${adapterName}Bridge",
-          targetClassName = className.canonicalName,
-          primaryConstructorDesc = target.constructor.signature!!.substringAfter("<init>"),
-          maskCount = maskCount
-        )
-        val bridgeTypeName = ClassName(bridgeGenerator.packageName, bridgeGenerator.name)
-        result.addCode(
-          "«%L%T.%L(",
-          returnOrResultAssignment,
-          bridgeTypeName,
-          BridgeGenerator.BRIDGE_METHOD_NAME
         )
       }
     } else {
