@@ -592,8 +592,13 @@ internal class AdapterGenerator(
     }
 
     if (useDefaultsConstructor) {
+      // If we're generating bytecode, we don't need to add the default marker instance
+      val defaultConstructorMarker = if (generateBytecode) "" else ",\nnull"
       // Add the masks and a null instance for the trailing default marker instance
-      result.addCode(",\n%L,\nnull", maskNames.map { CodeBlock.of("%L", it) }.joinToCode(", "))
+      result.addCode(
+        ",\n%L$defaultConstructorMarker",
+        maskNames.map { CodeBlock.of("%L", it) }.joinToCode()
+      )
     }
 
     result.addCode("\n»)\n")
