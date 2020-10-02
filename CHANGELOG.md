@@ -10,7 +10,7 @@ Fixes two issues with `moshi-ksp`:
 - Handle `Any` superclasses when the supertype is from another module
 - Filter out non-`CLASS` kinds from supertypes
 
-Special thanks to [@JvmName][https://github.com/JvmName] for reporting and helping debug this!
+Special thanks to [@JvmName](https://github.com/JvmName) for reporting and helping debug this!
 
 Version 0.3.1
 -------------
