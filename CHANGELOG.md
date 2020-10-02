@@ -1,6 +1,17 @@
 Changelog
 =========
 
+Version 0.3.2
+-------------
+
+_2020-10-01_
+
+Fixes two issues with `moshi-ksp`:
+- Handle `Any` superclasses when the supertype is from another module
+- Filter out non-`CLASS` kinds from supertypes
+
+Special thanks to [@JvmName][https://github.com/JvmName] for reporting and helping debug this!
+
 Version 0.3.1
 -------------
 
