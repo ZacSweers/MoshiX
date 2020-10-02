@@ -16,11 +16,10 @@
 package dev.zacsweers.moshix.ksp
 
 import com.google.devtools.ksp.getAllSuperTypes
-import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.ClassKind.CLASS
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.Origin.KOTLIN
+import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asClassName
 
@@ -51,8 +50,8 @@ internal class AppliedType private constructor(
       val qualifiedName = decl.qualifiedName
       val superTypeKsClass = resolver.getClassDeclarationByName(qualifiedName!!)!!
       val typeName = type.toTypeName()
-      if (typeName == OBJECT_CLASS) {
-        // Don't load properties for java.lang.Object.
+      if (typeName == ANY || typeName == OBJECT_CLASS) {
+        // Don't load properties for kotlin.Any/java.lang.Object.
         continue
       }
       result.add(AppliedType(superTypeKsClass, typeName))
