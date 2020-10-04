@@ -74,13 +74,13 @@ internal fun List<KSTypeParameter>.toTypeParameterResolver(
   }
 
   // Fill the parametersMap. Need to do sequentially and allow for referencing previously defined params
-  forEach {
+  for (typeVar in this) {
     // Put the simple typevar in first, then it can be referenced in the full toTypeVariable()
     // replacement later that may add bounds referencing this.
-    val id = it.name.getShortName()
+    val id = typeVar.name.getShortName()
     parametersMap[id] = TypeVariableName(id)
     // Now replace it with the full version.
-    parametersMap[id] = it.toTypeVariableName(resolver)
+    parametersMap[id] = typeVar.toTypeVariableName(resolver)
   }
 
   return resolver
