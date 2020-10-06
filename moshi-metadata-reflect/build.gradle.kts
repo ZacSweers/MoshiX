@@ -32,7 +32,6 @@ dependencies {
   implementation(Dependencies.Kotlin.metadata)
   implementation(Dependencies.Moshi.moshi)
   kaptTest(Dependencies.Moshi.codegen)
-  testImplementation(project(":moshi-ktx"))
   testImplementation("org.assertj:assertj-core:3.11.1")
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)

@@ -3,7 +3,7 @@ package dev.zacsweers.moshix.ksp.codegen
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
-import dev.zacsweers.moshix.adapter
+import com.squareup.moshi.adapter
 import org.junit.Test
 
 // Tests specific to Moshi-KSP
