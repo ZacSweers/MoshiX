@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
@@ -12,7 +13,6 @@ import dev.zacsweers.moshix.sealed.sample.Message
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import dev.zacsweers.moshix.adapter
 import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)

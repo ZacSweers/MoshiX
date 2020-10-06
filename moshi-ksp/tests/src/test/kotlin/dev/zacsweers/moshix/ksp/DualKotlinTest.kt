@@ -25,7 +25,7 @@ import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.Types
-import dev.zacsweers.moshix.adapter
+import com.squareup.moshi.adapter
 import dev.zacsweers.moshix.reflect.MetadataKotlinJsonAdapterFactory
 import org.intellij.lang.annotations.Language
 import org.junit.Assert.fail

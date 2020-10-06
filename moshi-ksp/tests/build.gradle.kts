@@ -37,7 +37,6 @@ sourceSets {
 dependencies {
   ksp(project(":moshi-ksp:moshi-ksp"))
   testImplementation(Dependencies.Moshi.moshi)
-  testImplementation(project(":moshi-ktx"))
   testImplementation(project(":moshi-metadata-reflect"))
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)

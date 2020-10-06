@@ -3,7 +3,6 @@
 Extensions for Moshi
 
 * [moshi-ksp](https://github.com/ZacSweers/MoshiX/tree/main/moshi-ksp) - A [KSP](https://github.com/google/ksp) implementation of Moshi Kotlin Codegen.
-* [moshi-ktx](https://github.com/ZacSweers/MoshiX/tree/main/moshi-ktx) - Kotlin extensions for Moshi with no kotlin-reflect requirements and fully compatible with generic reified types via the stdlib's `typeOf()` API.
 * [moshi-metadata-reflect](https://github.com/ZacSweers/MoshiX/tree/main/moshi-metadata-reflect) - A [kotlinx-metadata](https://github.com/JetBrains/kotlin/tree/master/libraries/kotlinx-metadata/jvm) based implementation of `KotlinJsonAdapterFactory`. This allows for reflective Moshi serialization on Kotlin classes without the cost of including kotlin-reflect.
 * [moshi-sealed](https://github.com/ZacSweers/MoshiX/tree/main/moshi-sealed) - Reflective and code gen implementations for serializing Kotlin sealed classes via Moshi polymorphic adapters.
 
