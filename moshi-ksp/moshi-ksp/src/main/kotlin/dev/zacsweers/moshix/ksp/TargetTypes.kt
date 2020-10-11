@@ -175,12 +175,7 @@ internal fun primaryConstructor(
     )
   }
 
-  val kmConstructorSignature: String? = try {
-    resolver.mapToJvmSignature(primaryConstructor)
-  } catch (e: IllegalStateException) {
-    // TODO remove try/catch once https://github.com/google/ksp/issues/83 is fixed
-    null
-  }
+  val kmConstructorSignature: String = resolver.mapToJvmSignature(primaryConstructor)
   return TargetConstructor(parameters, primaryConstructor.getVisibility().asKModifier(),
     kmConstructorSignature)
 }

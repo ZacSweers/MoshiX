@@ -37,9 +37,7 @@ internal fun KSType.toTypeName(typeParamResolver: TypeParameterResolver): TypeNa
     else -> error("Unsupported type: $declaration")
   }
 
-  val nullable = makeNullable() == this
-
-  return type.copy(nullable = nullable)
+  return type.copy(nullable = isMarkedNullable)
 }
 
 internal fun KSClassDeclaration.toTypeName(argumentList: List<TypeName> = emptyList()): TypeName {
