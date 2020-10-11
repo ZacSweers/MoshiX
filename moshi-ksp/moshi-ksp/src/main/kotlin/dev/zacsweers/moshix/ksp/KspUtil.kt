@@ -105,7 +105,7 @@ internal fun KSAnnotation.toAnnotationSpec(resolver: Resolver): AnnotationSpec {
     member.add("%L = ", name)
     when (val value = argument.value!!) {
       resolver.builtIns.arrayType -> {
-//        TODO("Arrays aren't supported tet")
+//        TODO("Arrays aren't supported yet")
 //        member.add("[⇥⇥")
 //        values.forEachIndexed { index, value ->
 //          if (index > 0) member.add(", ")
