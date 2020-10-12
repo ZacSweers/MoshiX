@@ -19,7 +19,7 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 
-public class ObjectJsonAdapter<T : Any>(private val instance: T) : JsonAdapter<T?>() {
+public class ObjectJsonAdapter<T : Any>(private val instance: T) : JsonAdapter<T>() {
   override fun fromJson(reader: JsonReader): T {
     reader.beginObject()
     while (reader.hasNext()) {
