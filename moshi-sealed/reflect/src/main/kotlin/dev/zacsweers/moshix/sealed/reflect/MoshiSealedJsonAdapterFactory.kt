@@ -8,7 +8,7 @@ import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
-import dev.zacsweers.moshix.sealed.runtime.ObjectJsonAdapter
+import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import java.lang.reflect.Type
 import kotlin.reflect.full.findAnnotation
 
