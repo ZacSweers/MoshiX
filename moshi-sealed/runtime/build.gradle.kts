@@ -18,3 +18,10 @@ plugins {
   kotlin("jvm")
   id("com.vanniktech.maven.publish")
 }
+
+dependencies {
+  api(Dependencies.Moshi.moshi)
+
+  testImplementation(Dependencies.Testing.junit)
+  testImplementation(Dependencies.Testing.truth)
+}

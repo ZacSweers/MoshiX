@@ -8,15 +8,16 @@ import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import java.lang.reflect.Type
 import kotlin.reflect.full.findAnnotation
 
-private object UNSET
+private val UNSET = Any()
 
 public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
   override fun create(type: Type,
-      annotations: MutableSet<out Annotation>,
-      moshi: Moshi): JsonAdapter<*>? {
+    annotations: MutableSet<out Annotation>,
+    moshi: Moshi): JsonAdapter<*>? {
     if (annotations.isNotEmpty()) {
       return null
     }
@@ -40,42 +41,62 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       var defaultObjectInstance: Any? = UNSET
       if (rawTypeKotlin.annotations.any { it is DefaultNull }) {
         defaultObjectInstance = null
-      } else {
-        rawTypeKotlin.sealedSubclasses
-            .firstOrNull { subclass -> subclass.annotations.any { it is DefaultObject } }
-            ?.let {
-              it.objectInstance ?: error("Must be an object type to use as a @DefaultObject")
-            }
-            ?.run {
-              rawTypeKotlin.sealedSubclasses.asSequence()
-                  .mapNotNull { it.objectInstance }
-                  .singleOrNull()
-            }
-            ?.let {
-              defaultObjectInstance = it
-            }
       }
 
-      @Suppress("UNCHECKED_CAST")
-      val polymorphicFactory = PolymorphicJsonAdapterFactory.of(rawType as Class<Any>?, typeLabel)
-          .let {
-            if (defaultObjectInstance != UNSET) {
-              it.withDefaultValue(defaultObjectInstance)
+      val objectSubtypes = mutableMapOf<Class<*>, Any>()
+      val subtypes = mutableMapOf<Class<*>, String>()
+      for (sealedSubclass in rawTypeKotlin.sealedSubclasses) {
+        val objectInstance = sealedSubclass.objectInstance
+        val isAnnotatedDefaultObject = sealedSubclass.java.isAnnotationPresent(DefaultObject::class.java)
+        if (isAnnotatedDefaultObject) {
+          if (objectInstance == null) {
+            error("Must be an object type to use as a @DefaultObject: $sealedSubclass")
+          } else if (defaultObjectInstance === UNSET) {
+            defaultObjectInstance = objectInstance
+          } else {
+            if (defaultObjectInstance == null) {
+              error("Can not have both @DefaultObject and @DefaultNull: $sealedSubclass")
             } else {
-              it
+              error("Can only have one @DefaultObject: $sealedSubclass and ${defaultObjectInstance.javaClass} are both annotated")
             }
           }
-          .let {
-            rawTypeKotlin.sealedSubclasses
-                .filter { subclass -> subclass.objectInstance == null }
-                .fold(it) { factory, sealedSubclass ->
-              val label = sealedSubclass.findAnnotation<TypeLabel>()?.value
-                  ?: throw IllegalArgumentException("Sealed subtypes must be annotated with @TypeLabel to define their label ${sealedSubclass.qualifiedName}")
-              factory.withSubtype(sealedSubclass.java, label)
-            }
+        } else {
+          val label = sealedSubclass.findAnnotation<TypeLabel>()?.value
+            ?: throw IllegalArgumentException(
+              "Sealed subtypes must be annotated with @TypeLabel to define their label ${sealedSubclass.qualifiedName}")
+          subtypes[sealedSubclass.java] = label
+          if (objectInstance != null) {
+            objectSubtypes[sealedSubclass.java] = objectInstance
           }
+        }
+      }
 
-      return polymorphicFactory.create(rawType, annotations, moshi)
+      val delegateMoshi = if (objectSubtypes.isEmpty()) {
+        moshi
+      } else {
+        moshi.newBuilder()
+          .apply {
+            for ((subtype, instance) in objectSubtypes) {
+              add(subtype, ObjectJsonAdapter(instance))
+            }
+          }
+          .build()
+      }
+      @Suppress("UNCHECKED_CAST")
+      val seed = PolymorphicJsonAdapterFactory.of(rawType as Class<Any>?, typeLabel)
+      val polymorphicFactory = subtypes.entries
+        .fold(seed) { factory, (subtype, label) ->
+          factory.withSubtype(subtype, label)
+        }
+        .let { factory ->
+          if (defaultObjectInstance !== UNSET) {
+              factory.withDefaultValue(defaultObjectInstance)
+          } else {
+            factory
+          }
+        }
+
+      return polymorphicFactory.create(rawType, annotations, delegateMoshi)
     }
     return null
   }
