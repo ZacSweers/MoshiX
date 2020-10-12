@@ -14,6 +14,7 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.joinToCode
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -37,6 +38,7 @@ internal fun createType(
   originatingElement: TypeElement?,
   generatedAnnotation: AnnotationSpec?,
   subtypes: Set<Subtype>,
+  objectAdapters: List<CodeBlock>
 ): FileSpec {
   val defaultCodeBlockBuilder = CodeBlock.builder()
   val adapterName = ClassName.bestGuess(
@@ -76,20 +78,31 @@ internal fun createType(
       continue
     }
     subtype.originatingElement?.let(classBuilder::addOriginatingElement)
-    runtimeAdapterInitializer.add("    .withSubtype(%T::class.java, %S)\n",
+    runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
       subtype.className,
       subtype.typeLabelType
     )
   }
 
   if (defaultCodeBlockBuilder.isNotEmpty()) {
-    runtimeAdapterInitializer.add("    .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
+    runtimeAdapterInitializer.add("  .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
   }
 
-  runtimeAdapterInitializer.add("    .create(%T::class.java, %M(), %N)·as·%T\n»",
+  val moshiArg = if (objectAdapters.isEmpty()) {
+    CodeBlock.of("%N", moshiParam)
+  } else {
+    CodeBlock.builder()
+      .add("%N.newBuilder()\n", moshiParam)
+      .apply {
+        add("%L\n", objectAdapters.joinToCode("\n", prefix = "    "))
+      }
+      .add(".build()")
+      .build()
+  }
+  runtimeAdapterInitializer.add("  .create(%T::class.java, %M(), %L)·as·%T\n»",
     targetType,
     MemberName("kotlin.collections", "emptySet"),
-    moshiParam,
+    moshiArg,
     jsonAdapterType
   )
 
