@@ -23,7 +23,7 @@ class MessageTest(type: Type) {
     REFLECT(
         moshi = Moshi.Builder()
             .add(MoshiSealedJsonAdapterFactory())
-            .add(KotlinJsonAdapterFactory())
+            .addLast(KotlinJsonAdapterFactory())
             .build()
     )
     ,
