@@ -32,11 +32,11 @@ Moshi-sealed can be used via reflection or code generation. Note that you must i
 `moshi-adapters` artifact as a dependency, as that's where the `PolymorphicJsonAdapter` implementation
 lives.
 
-`@TypeLabel` and default indicator annotations are available in the `moshi-sealed-annotations` artifact.
+`@TypeLabel` and default indicator annotations are available in the `moshi-sealed-runtime` artifact.
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshisealed/moshi-sealed-annotations.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshisealed/moshi-sealed-annotations)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshisealed/moshi-sealed-runtime.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshisealed/moshi-sealed-runtime)
 ```gradle
-implementation "dev.zacsweers.moshisealed:moshi-sealed-annotations:{version}"
+implementation "dev.zacsweers.moshisealed:moshi-sealed-runtime:{version}"
 ```
 
 #### Code gen

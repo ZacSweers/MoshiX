@@ -27,7 +27,7 @@ dependencies {
   implementation(Dependencies.KotlinPoet.kotlinPoet)
   implementation(Dependencies.Moshi.adapters)
   implementation(Dependencies.Moshi.moshi)
-  implementation(project(":moshi-sealed:annotations"))
+  implementation(project(":moshi-sealed:runtime"))
 
   testImplementation(Dependencies.Kotlin.Ksp.api)
   testImplementation(Dependencies.Testing.truth)
