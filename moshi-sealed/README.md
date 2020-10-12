@@ -26,6 +26,54 @@ sealed class Message {
 }
 ```
 
+#### `object` subtypes
+
+`object` types are useful in cases when receiving empty JSON objects (`{}`) or cases where its
+type can be inferred by some delegating adapter that peeks its keys. They should only be used for
+types that are sentinels and do not actually contain meaningful data.
+
+In the next example, we have a `FunctionSpec` that defines the signature of a function and a
+`Type` representations that can be used to model its return type and parameter types. These are all
+`object` types, so any contents are skipped in its serialization and only its `type` key is read
+by the `PolymorphicJsonAdapterFactory` to determine its type.
+
+```kotlin
+@JsonClass(generateAdapter = false, generator = "sealed:type")
+sealed class Type(val type: String) {
+  @TypeLabel("void")
+  object VoidType : Type("void")
+  @TypeLabel("boolean")
+  object BooleanType : Type("boolean")
+  @TypeLabel("int")
+  object IntType : Type("int")
+}
+
+data class FunctionSpec(
+ val name: String,
+ val returnType: Type,
+ val parameters: Map<String, Type>
+)
+
+// Usage
+val json = """
+ {
+   "name": "tacoFactory",
+   "returnType": { "type": "void" },
+   "parameters": {
+     "param1": { "type": "int" },
+     "param2": { "type": "boolean" }
+   }
+ }
+""".trimIndent()
+
+val functionSpec = moshi.adapter<FunctionSpec>().fromJson(json)
+assertThat(functionSpec).isEqualTo(FunctionSpec(
+        name = "tacoFactory",
+        returnType = VoidType,
+        parameters = mapOf("param1" to IntType, "param2" to BooleanType)
+))
+```
+
 ### Installation
 
 Moshi-sealed can be used via reflection or code generation. Note that you must include the 
