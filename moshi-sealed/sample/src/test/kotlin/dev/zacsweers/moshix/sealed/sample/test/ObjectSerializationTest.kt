@@ -34,7 +34,7 @@ class ObjectSerializationTest(type: Type) {
     fun data(): Collection<Array<*>> {
       return listOf(
         arrayOf(Type.REFLECT),
-//        arrayOf(Type.CODEGEN)
+        arrayOf(Type.CODEGEN)
       )
     }
   }

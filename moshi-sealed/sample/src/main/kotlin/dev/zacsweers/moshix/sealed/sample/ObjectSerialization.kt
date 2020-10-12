@@ -14,7 +14,7 @@ import dev.zacsweers.moshix.sealed.annotations.TypeLabel
  * `object` types, so any contents are skipped in its serialization and only its `type` key is read
  * by the [PolymorphicJsonAdapterFactory] to determine its type.
  */
-@JsonClass(generateAdapter = false, generator = "sealed:type")
+@JsonClass(generateAdapter = true, generator = "sealed:type")
 sealed class Type(val type: String) {
   @TypeLabel("void")
   object VoidType : Type("void")
@@ -26,6 +26,7 @@ sealed class Type(val type: String) {
   override fun toString() = type
 }
 
+@JsonClass(generateAdapter = true)
 data class FunctionSpec(
   val name: String,
   val returnType: Type,
