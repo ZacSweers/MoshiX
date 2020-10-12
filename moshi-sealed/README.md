@@ -30,9 +30,9 @@ sealed class Message {
 
 `object` types are useful in cases when receiving empty JSON objects (`{}`) or cases where its
 type can be inferred by some delegating adapter that peeks its keys. They should only be used for
-types that are sentinels and do not actually contain meaningful data.
+types that are indicator types and do not actually contain meaningful other data.
 
-In the next example, we have a `FunctionSpec` that defines the signature of a function and a
+In the below example, we have a `FunctionSpec` that defines the signature of a function and a
 `Type` representations that can be used to model its return type and parameter types. These are all
 `object` types, so any contents are skipped in its serialization and only its `type` key is read
 by the `PolymorphicJsonAdapterFactory` to determine its type.

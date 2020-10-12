@@ -1,6 +1,81 @@
 Changelog
 =========
 
+Version 0.4.0
+-------------
+
+_2020-10-12_
+
+* Updated Moshi to 1.11.0
+
+#### moshi-ksp
+
+* Updated to `1.4.10-dev-experimental-20201009`
+
+#### moshi-ktx
+
+Removed! These APIs live in Moshi natively now as of 1.11.0
+
+#### moshi-adapters
+
+New artifact!
+
+First adapter in this release is a new `@JsonString` qualifier + adapter, so you can 
+capture raw JSON content from payloads. This is adapted from the recipe in Moshi.
+
+```Kotlin
+val moshi = Moshi.Builder()
+  .add(JsonString.Factory())
+  .build()
+
+@JsonClass(generateAdapter = true)
+data class Message(
+  val type: String,
+  /** Raw JSON string for the `data` key. */
+  @JsonString val data: String
+)
+```
+
+Get it via
+
+```kotlin
+dependencies {
+  implementation("dev.zacsweers.moshix:moshi-adapters:<version>")
+}
+```
+
+#### moshi-sealed
+
+New support for multiple `object` subtypes. This allows for sentinel types who only contain an indicator
+label but no other data.
+
+In the below example, we have a `FunctionSpec` that defines the signature of a function and a
+`Type` representations that can be used to model its return type and parameter types. These are all
+`object` types, so any contents are skipped in its serialization and only its `type` key is read
+by the `PolymorphicJsonAdapterFactory` to determine its type.
+
+```kotlin
+@JsonClass(generateAdapter = false, generator = "sealed:type")
+sealed class Type(val type: String) {
+  @TypeLabel("void")
+  object VoidType : Type("void")
+  @TypeLabel("boolean")
+  object BooleanType : Type("boolean")
+  @TypeLabel("int")
+  object IntType : Type("int")
+}
+
+data class FunctionSpec(
+ val name: String,
+ val returnType: Type,
+ val parameters: Map<String, Type>
+)
+```
+
+**NOTE**: As part of this change, the `moshi-sealed-annotations` artifact was replaced with a
+`moshi-sealed-runtime` artifact. Please update your coordinates accordingly, and don't use `compileOnly`
+anymore.
+
 Version 0.3.2
 -------------
 
