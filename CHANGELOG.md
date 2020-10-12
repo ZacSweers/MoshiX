@@ -6,11 +6,11 @@ Version 0.4.0
 
 _2020-10-12_
 
-* Updated Moshi to 1.11.0
+Updated Moshi to 1.11.0
 
 #### moshi-ksp
 
-* Updated to `1.4.10-dev-experimental-20201009`
+Updated to `1.4.10-dev-experimental-20201009`
 
 #### moshi-ktx
 
