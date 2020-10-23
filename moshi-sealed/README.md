@@ -135,7 +135,7 @@ val moshi = Moshi.Builder()
 
 Gradle dependency:
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshisealed/moshi-sealed-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshisealed/moshi-sealed-reflect)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-reflect)
 ```gradle
 implementation "dev.zacsweers.moshisealed:moshi-sealed-reflect:{version}"
 ```
