@@ -82,18 +82,18 @@ lives.
 
 `@TypeLabel` and default indicator annotations are available in the `moshi-sealed-runtime` artifact.
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshisealed/moshi-sealed-runtime.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshisealed/moshi-sealed-runtime)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-runtime.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-runtime)
 ```gradle
-implementation "dev.zacsweers.moshisealed:moshi-sealed-runtime:{version}"
+implementation "dev.zacsweers.moshix:moshi-sealed-runtime:{version}"
 ```
 
 #### Code gen
 
 Code gen works via annotation processor, and only requires adding the kapt dependency:
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshisealed/moshi-sealed-codegen.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshisealed/moshi-sealed-codegen)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-codegen.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-codegen)
 ```gradle
-kapt "dev.zacsweers.moshisealed:moshi-sealed-codegen:{version}"
+kapt "dev.zacsweers.moshix:moshi-sealed-codegen:{version}"
 ```
 
 No runtime Moshi instance configuration is needed, code gen will generate `JsonAdapter`s in a way that Moshi understands
@@ -137,7 +137,7 @@ Gradle dependency:
 
 [![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-reflect)
 ```gradle
-implementation "dev.zacsweers.moshisealed:moshi-sealed-reflect:{version}"
+implementation "dev.zacsweers.moshix:moshi-sealed-reflect:{version}"
 ```
 
 Snapshots of the development version are available in [Sonatype's snapshots repository][snapshots].
@@ -159,4 +159,4 @@ License
     See the License for the specific language governing permissions and
     limitations under the License.
 
- [snapshots]: https://oss.sonatype.org/content/repositories/snapshots/dev/zacsweers/moshisealed/
+ [snapshots]: https://oss.sonatype.org/content/repositories/snapshots/dev/zacsweers/moshix/
