@@ -1,6 +1,29 @@
 Changelog
 =========
 
+Version 0.5.0
+-------------
+
+_2020-10-25_
+
+Dependency updates for all code generation artifacts:
+* KSP `1.4.10-dev-experimental-20201023`
+* KotlinPoet `1.7.2`
+
+#### moshi-ksp
+
+* Use KSP's new `asMemberOf` API for materializing type parameters, allowing us to remove a lot of ugly
+  `moshi-ksp` code that existed to accomplish the same.
+* Defer failing the compilation when errors are reported to the `KSPLogger` until the end of the KSP run,
+  allowing reporting all errors rather than just the first.
+
+#### moshi-sealed
+
+`moshi-sealed-codegen` and `moshi-sealed-codegen-ksp` now generate proguard rules for generated adapters
+on the fly, matching Moshi's new behavior introduced in 1.10.0.
+
+Thanks to [@plnice](https://github.com/plnice) for contributing to this release.
+
 Version 0.4.0
 -------------
 
