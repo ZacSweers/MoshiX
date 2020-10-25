@@ -41,14 +41,14 @@ object Dependencies {
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
 
     object Ksp {
-      const val version = "1.4.10-dev-experimental-20201009"
+      const val version = "1.4.10-dev-experimental-20201023"
       const val api = "com.google.devtools.ksp:symbol-processing-api:$version"
       const val ksp = "com.google.devtools.ksp:symbol-processing:$version"
     }
   }
 
   object KotlinPoet {
-    private const val version = "1.6.0"
+    private const val version = "1.7.2"
     const val kotlinPoet = "com.squareup:kotlinpoet:$version"
     const val metadata = "com.squareup:kotlinpoet-metadata-specs:$version"
     const val metadataSpecs = "com.squareup:kotlinpoet-metadata-specs:$version"

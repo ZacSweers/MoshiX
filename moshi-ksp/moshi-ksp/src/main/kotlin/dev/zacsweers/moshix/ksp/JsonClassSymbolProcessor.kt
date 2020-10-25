@@ -1,11 +1,6 @@
 package dev.zacsweers.moshix.ksp
 
 import com.google.auto.service.AutoService
-import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.moshi.JsonClass
-import dev.zacsweers.moshix.ksp.shade.api.AdapterGenerator
-import dev.zacsweers.moshix.ksp.shade.api.ProguardConfig
-import dev.zacsweers.moshix.ksp.shade.api.PropertyGenerator
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
@@ -13,10 +8,15 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.Origin.KOTLIN
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.moshi.JsonClass
+import dev.zacsweers.moshix.ksp.shade.api.AdapterGenerator
+import dev.zacsweers.moshix.ksp.shade.api.ProguardConfig
+import dev.zacsweers.moshix.ksp.shade.api.PropertyGenerator
 import org.jetbrains.kotlin.analyzer.AnalysisResult.CompilationErrorException
 import java.io.OutputStreamWriter
-import java.lang.RuntimeException
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.atomic.AtomicBoolean
 
 @AutoService(SymbolProcessor::class)
 public class JsonClassSymbolProcessor : SymbolProcessor {
@@ -42,14 +42,14 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
   }
 
   private lateinit var codeGenerator: CodeGenerator
-  private lateinit var logger: KSPLogger
+  private lateinit var logger: MoshiKSPLogger
   private var generatedOption: String? = null
 
   override fun init(
     options: Map<String, String>,
     kotlinVersion: KotlinVersion,
     codeGenerator: CodeGenerator,
-    logger: KSPLogger
+    logger: KSPLogger,
   ) {
     this.codeGenerator = codeGenerator
     this.logger = MoshiKSPLogger(logger)
@@ -82,7 +82,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
           "@JsonClass can't be applied to $type: must be a Kotlin class"
         }
         // For the smart cast
-        check(type is KSClassDeclaration)
+        if (type !is KSClassDeclaration) return@forEach
 
         val jsonClassAnnotation = type.findAnnotationWithType(jsonClassType) ?: return@forEach
 
@@ -92,9 +92,9 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
 
         if (!jsonClassAnnotation.getMember<Boolean>("generateAdapter")) return@forEach
 
-        val adapterGenerator = adapterGenerator(logger, resolver, type) ?: return@forEach
-        val preparedAdapter = try {
-          adapterGenerator
+        val adapterGenerator = adapterGenerator(logger, resolver, type)
+        try {
+          val preparedAdapter = adapterGenerator
             .prepare { spec ->
               spec.toBuilder()
                 .apply {
@@ -102,17 +102,17 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
                 }
                 .build()
             }
+          preparedAdapter.spec.writeTo(codeGenerator)
+          preparedAdapter.proguardConfig?.writeTo(codeGenerator)
         } catch (e: Exception) {
-          throw RuntimeException("Error preparing ${type.simpleName.asString()}", e)
+          logger.error(
+            "Error preparing ${type.simpleName.asString()}: ${e.stackTrace.joinToString("\n")}")
         }
-
-        preparedAdapter.spec.writeTo(codeGenerator)
-        preparedAdapter.proguardConfig?.writeTo(codeGenerator)
       }
   }
 
   override fun finish() {
-
+    logger.reportErrors()
   }
 
   private fun ProguardConfig.writeTo(codeGenerator: CodeGenerator) {
@@ -135,8 +135,8 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     logger: KSPLogger,
     resolver: Resolver,
     originalType: KSClassDeclaration,
-  ): AdapterGenerator? {
-    val type = targetType(originalType, resolver, logger) ?: return null
+  ): AdapterGenerator {
+    val type = targetType(originalType, resolver, logger)
 
     val properties = mutableMapOf<String, PropertyGenerator>()
     for (property in type.properties.values) {
@@ -168,8 +168,15 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
 
 // TODO temporary until KSP's logger makes errors fail the build
 private class MoshiKSPLogger(private val delegate: KSPLogger) : KSPLogger by delegate {
+  private val hasErrors = AtomicBoolean(false)
   override fun error(message: String, symbol: KSNode?) {
     delegate.error(message, symbol)
-    throw CompilationErrorException()
+    hasErrors.set(true)
+  }
+
+  fun reportErrors() {
+    if (hasErrors.get()) {
+      throw CompilationErrorException()
+    }
   }
 }

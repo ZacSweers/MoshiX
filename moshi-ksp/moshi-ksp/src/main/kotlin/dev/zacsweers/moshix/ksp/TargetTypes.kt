@@ -13,13 +13,13 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
-import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonQualifier
 import dev.zacsweers.moshix.ksp.shade.api.TargetConstructor
@@ -32,7 +32,7 @@ internal fun targetType(
   type: KSClassDeclaration,
   resolver: Resolver,
   logger: KSPLogger,
-): TargetType? {
+): TargetType {
   logger.check(type.classKind != ClassKind.ENUM_CLASS, type) {
     "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.qualifiedName?.asString()}: code gen for enums is not supported or necessary"
   }
@@ -69,65 +69,21 @@ internal fun targetType(
 
   val properties = mutableMapOf<String, TargetProperty>()
 
-  val resolvedTypes = mutableListOf<ResolvedTypeMapping>()
-  val superTypes = appliedType.supertypes(resolver)
-    .onEach { supertype ->
-      if (!supertype.type.isKotlinClass(resolver)) {
-        logger.errorAndThrow(
-          "@JsonClass can't be applied to $type: supertype $supertype is not a Kotlin type: $type")
-      }
+  val originalType = appliedType.type
+  for (supertype in appliedType.supertypes(resolver)) {
+    val classDecl = supertype.type
+    if (!classDecl.isKotlinClass(resolver)) {
+      logger.errorAndThrow(
+        "@JsonClass can't be applied to $type: supertype $supertype is not a Kotlin type: $type")
     }
-    .associateWithTo(LinkedHashMap()) { supertype ->
-      // Load the kotlin API cache into memory eagerly so we can reuse the parsed APIs
-      val api = supertype.type
-
-      val apiSuperClass = api.superclass(resolver)
-      if (apiSuperClass != resolver.builtIns.anyType && apiSuperClass.arguments.isNotEmpty()) {
-        //
-        // This extends a typed generic superclass. We want to construct a mapping of the
-        // superclass typevar names to their materialized types here.
-        //
-        // class Foo extends Bar<String>
-        // class Bar<T>
-        //
-        // We will store {Foo : {T : [String]}}.
-        //
-        // Then when we look at Bar<T> later, we'll look up to the descendent Foo and extract its
-        // materialized type from there.
-        //
-        val untyped = apiSuperClass.declaration
-        check(untyped is KSClassDeclaration)
-        val apiParamsResolver = api.typeParameters.toTypeParameterResolver(classTypeParamsResolver)
-        val superParamsResolver = untyped.typeParameters.toTypeParameterResolver(apiParamsResolver)
-
-        // Convert to an element and back to wipe the typed generics off of this
-        resolvedTypes += ResolvedTypeMapping(
-          target = untyped.toClassName(),
-          args = untyped.typeParameters
-            .map { it.toTypeName(superParamsResolver) }
-            .filterIsInstance<TypeVariableName>()
-            .map(TypeVariableName::name)
-            .asSequence()
-            .zip(apiSuperClass.arguments.asSequence().map { it.toTypeName(superParamsResolver) })
-            .associate { it }
-        )
-      }
-
-      return@associateWithTo api
-    }
-
-  for ((localAppliedType, supertypeApi) in superTypes.entries) {
-    val appliedClassName = localAppliedType.type.toClassName()
     val supertypeProperties = declaredProperties(
       constructor = constructor,
-      kotlinApi = supertypeApi,
-      allowedTypeVars = typeVariables.toSet(),
-      currentClass = appliedClassName,
-      resolvedTypes = resolvedTypes,
+      originalType = originalType,
+      classDecl = classDecl,
       resolver = resolver,
       // TODO cache this?
-      typeParameterResolver = supertypeApi.typeParameters.toTypeParameterResolver(
-        classTypeParamsResolver)
+      typeParameterResolver = classDecl.typeParameters
+        .toTypeParameterResolver(classTypeParamsResolver)
     )
     for ((name, property) in supertypeProperties) {
       properties.putIfAbsent(name, property)
@@ -180,54 +136,6 @@ internal fun primaryConstructor(
     kmConstructorSignature)
 }
 
-/**
- * Represents a resolved raw class to type arguments where [args] are a map of the parent type var
- * name to its resolved [TypeName].
- */
-private data class ResolvedTypeMapping(val target: ClassName, val args: Map<String, TypeName>)
-
-private fun resolveTypeArgs(
-  targetClass: ClassName,
-  propertyType: TypeName,
-  resolvedTypes: List<ResolvedTypeMapping>,
-  allowedTypeVars: Set<TypeVariableName>,
-  entryStartIndex: Int = resolvedTypes.indexOfLast { it.target == targetClass },
-): TypeName {
-  val unwrappedType = propertyType.unwrapTypeAlias()
-
-  if (unwrappedType !is TypeVariableName) {
-    return unwrappedType
-  } else if (entryStartIndex == -1) {
-    return unwrappedType
-  }
-
-  val targetMappingIndex = resolvedTypes[entryStartIndex]
-  val targetMappings = targetMappingIndex.args
-
-  // Try to resolve the real type of this property based on mapped generics in the subclass.
-  // We need to us a non-nullable version for mapping since we're just mapping based on raw java
-  // type vars, but then can re-copy nullability back if it is found.
-  val resolvedType = targetMappings[unwrappedType.name]
-    ?.copy(nullable = unwrappedType.isNullable)
-    ?: unwrappedType
-
-  return when {
-    resolvedType !is TypeVariableName -> resolvedType
-    entryStartIndex != 0 -> {
-      // We need to go deeper
-      resolveTypeArgs(targetClass, resolvedType, resolvedTypes, allowedTypeVars,
-        entryStartIndex - 1)
-    }
-    resolvedType.copy(nullable = false) in allowedTypeVars -> {
-      // This is a generic type in the top-level declared class. This is fine to leave in because
-      // this will be handled by the `Type` array passed in at runtime.
-      resolvedType
-    }
-    else -> error(
-      "Could not find $resolvedType in $resolvedTypes. Also not present in allowable top-level type vars $allowedTypeVars")
-  }
-}
-
 private fun KSAnnotated?.qualifiers(resolver: Resolver): Set<AnnotationSpec> {
   if (this == null) return setOf()
   val jsonQualifierType = resolver.getClassDeclarationByName<JsonQualifier>().asType()
@@ -248,24 +156,21 @@ private fun KSAnnotated?.jsonName(resolver: Resolver): String? {
 
 private fun declaredProperties(
   constructor: TargetConstructor,
-  kotlinApi: KSClassDeclaration,
-  allowedTypeVars: Set<TypeVariableName>,
-  currentClass: ClassName,
-  resolvedTypes: List<ResolvedTypeMapping>,
+  originalType: KSClassDeclaration,
+  classDecl: KSClassDeclaration,
   resolver: Resolver,
   typeParameterResolver: TypeParameterResolver,
 ): Map<String, TargetProperty> {
 
   val result = mutableMapOf<String, TargetProperty>()
-  for (property in kotlinApi.getDeclaredProperties()) {
-    val initialProperty = property.toPropertySpec(resolver, typeParameterResolver)
-    val resolvedType = resolveTypeArgs(
-      targetClass = currentClass,
-      propertyType = initialProperty.type,
-      resolvedTypes = resolvedTypes,
-      allowedTypeVars = allowedTypeVars
-    )
-    val propertySpec = initialProperty.toBuilder(type = resolvedType).build()
+  for (property in classDecl.getDeclaredProperties()) {
+    val initialType = property.type.resolve()
+    val resolvedType = if (initialType.declaration is KSTypeParameter) {
+      resolver.asMemberOf(property, originalType.asType())
+    } else {
+      initialType
+    }
+    val propertySpec = property.toPropertySpec(resolver, resolvedType, typeParameterResolver)
     val name = propertySpec.name
     val parameter = constructor.parameters[name]
     result[name] = TargetProperty(
@@ -282,9 +187,13 @@ private fun declaredProperties(
 
 private fun KSPropertyDeclaration.toPropertySpec(
   resolver: Resolver,
+  resolvedType: KSType,
   typeParameterResolver: TypeParameterResolver,
 ): PropertySpec {
-  return PropertySpec.builder(simpleName.getShortName(), type.toTypeName(typeParameterResolver))
+  return PropertySpec.builder(
+    name = simpleName.getShortName(),
+    type = resolvedType.toTypeName(typeParameterResolver)
+  )
     .mutable(isMutable)
     .addModifiers(modifiers.map { KModifier.valueOf(it.name) })
     .apply {
