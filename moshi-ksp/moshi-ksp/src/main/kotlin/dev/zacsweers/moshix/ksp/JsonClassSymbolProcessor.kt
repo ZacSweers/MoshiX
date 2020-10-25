@@ -42,7 +42,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
   }
 
   private lateinit var codeGenerator: CodeGenerator
-  private lateinit var logger: KSPLogger
+  private lateinit var logger: MoshiKSPLogger
   private var generatedOption: String? = null
 
   override fun init(
@@ -112,7 +112,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
   }
 
   override fun finish() {
-
+    logger.reportErrors()
   }
 
   private fun ProguardConfig.writeTo(codeGenerator: CodeGenerator) {
@@ -168,8 +168,15 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
 
 // TODO temporary until KSP's logger makes errors fail the build
 private class MoshiKSPLogger(private val delegate: KSPLogger) : KSPLogger by delegate {
+  private val hasErrors = AtomicBoolean(false)
   override fun error(message: String, symbol: KSNode?) {
     delegate.error(message, symbol)
-    throw CompilationErrorException()
+    hasErrors.set(true)
+  }
+
+  fun reportErrors() {
+    if (hasErrors.get()) {
+      throw CompilationErrorException()
+    }
   }
 }
