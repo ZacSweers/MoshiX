@@ -11,6 +11,7 @@ import com.google.devtools.ksp.symbol.KSDeclarationContainer
 import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.moshi.JsonClass
@@ -149,7 +150,7 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
         }
       }
 
-    createType(
+    val preparedAdapter = createType(
       targetType = type.toClassName(),
       isInternal = Modifier.INTERNAL in type.modifiers,
       typeLabel = typeLabel,
@@ -159,7 +160,9 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
       subtypes = sealedSubtypes,
       objectAdapters = objectAdapters
     )
-      .writeTo(codeGenerator)
+
+    preparedAdapter.spec.writeTo(codeGenerator)
+    preparedAdapter.proguardConfig.writeTo(codeGenerator)
   }
 
   private fun KSClassDeclaration.sealedSubtypes(): Set<KSClassDeclaration> {
@@ -185,3 +188,5 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
 
   }
 }
+
+internal data class PreparedAdapter(val spec: FileSpec, val proguardConfig: ProguardConfig)
