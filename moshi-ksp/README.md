@@ -8,6 +8,7 @@ annotation-processor-based code gen does.
 
 Add this dependency as a `ksp` dependency instead of the `moshi-kotlin-codegen` dependency.
 
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-ksp.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-ksp)
 ```diff
 dependencies {
 -  kapt("com.squareup.moshi:moshi-kotlin-codegen:<version>")
