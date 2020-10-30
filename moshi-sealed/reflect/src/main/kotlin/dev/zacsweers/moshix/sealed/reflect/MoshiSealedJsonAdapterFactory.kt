@@ -44,7 +44,7 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       }
 
       val objectSubtypes = mutableMapOf<Class<*>, Any>()
-      val subtypes = mutableMapOf<Class<*>, String>()
+      val labels = mutableMapOf<String, Class<*>>()
       for (sealedSubclass in rawTypeKotlin.sealedSubclasses) {
         val objectInstance = sealedSubclass.objectInstance
         val isAnnotatedDefaultObject = sealedSubclass.java.isAnnotationPresent(DefaultObject::class.java)
@@ -61,10 +61,15 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
             }
           }
         } else {
-          val label = sealedSubclass.findAnnotation<TypeLabel>()?.value
+          val labelAnnotation = sealedSubclass.findAnnotation<TypeLabel>()
             ?: throw IllegalArgumentException(
               "Sealed subtypes must be annotated with @TypeLabel to define their label ${sealedSubclass.qualifiedName}")
-          subtypes[sealedSubclass.java] = label
+          val clazz = sealedSubclass.java
+          val label = labelAnnotation.label
+          labels[label] = clazz
+          for (alternate in labelAnnotation.alternateLabels) {
+            labels[alternate] = clazz
+          }
           if (objectInstance != null) {
             objectSubtypes[sealedSubclass.java] = objectInstance
           }
@@ -84,8 +89,8 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       }
       @Suppress("UNCHECKED_CAST")
       val seed = PolymorphicJsonAdapterFactory.of(rawType as Class<Any>?, typeLabel)
-      val polymorphicFactory = subtypes.entries
-        .fold(seed) { factory, (subtype, label) ->
+      val polymorphicFactory = labels.entries
+        .fold(seed) { factory, (label, subtype) ->
           factory.withSubtype(subtype, label)
         }
         .let { factory ->
