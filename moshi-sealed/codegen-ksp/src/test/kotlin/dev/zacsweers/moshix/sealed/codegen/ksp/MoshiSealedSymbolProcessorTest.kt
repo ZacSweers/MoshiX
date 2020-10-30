@@ -19,7 +19,7 @@ class MoshiSealedSymbolProcessorTest {
 
       @JsonClass(generateAdapter = true, generator = "sealed:type")
       sealed class BaseType {
-        @TypeLabel("a")
+        @TypeLabel("a", ["aa"])
         class TypeA : BaseType()
         @TypeLabel("b")
         class TypeB : BaseType()
@@ -57,6 +57,7 @@ class MoshiSealedSymbolProcessorTest {
         private val runtimeAdapter: JsonAdapter<BaseType> =
             PolymorphicJsonAdapterFactory.of(BaseType::class.java, "type")
               .withSubtype(BaseType.TypeA::class.java, "a")
+              .withSubtype(BaseType.TypeA::class.java, "aa")
               .withSubtype(BaseType.TypeB::class.java, "b")
               .create(BaseType::class.java, emptySet(), moshi) as JsonAdapter<BaseType>
       
