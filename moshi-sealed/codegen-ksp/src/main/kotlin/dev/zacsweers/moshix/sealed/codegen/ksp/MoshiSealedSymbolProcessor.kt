@@ -141,7 +141,7 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
           labels += labelAnnotation.arguments
             .find { it.name?.getShortName() == "alternateLabels" }
             ?.value as? Array<String>
-            ?: error("No alternateLabels member for TypeLabel annotation!")
+            ?: emptyArray() // ksp ignores undefined args https://github.com/google/ksp/issues/134
 
           if (isObject) {
             objectAdapters.add(CodeBlock.of(
