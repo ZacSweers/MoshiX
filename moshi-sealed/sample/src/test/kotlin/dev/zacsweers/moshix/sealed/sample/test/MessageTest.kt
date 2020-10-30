@@ -84,6 +84,9 @@ class MessageTest(type: Type) {
   ) {
     assertThat(adapter.fromJson("{\"type\":\"success\",\"value\":\"Okay!\"}"))
         .isEqualTo(success)
+    // Test alternates
+    assertThat(adapter.fromJson("{\"type\":\"successful\",\"value\":\"Okay!\"}"))
+        .isEqualTo(success)
     assertThat(adapter.fromJson("{\"type\":\"error\",\"error_logs\":{\"order\":66}}"))
         .isEqualTo(error)
     assertThat(adapter.fromJson("{\"type\":\"taco\",\"junkdata\":100}"))
@@ -120,7 +123,7 @@ class MessageTest(type: Type) {
   @JsonClass(generateAdapter = true, generator = "sealed:type")
   internal sealed class MessageWithInternalVisibilityModifier {
 
-    @TypeLabel("success")
+    @TypeLabel("success", ["successful"])
     @JsonClass(generateAdapter = true)
     internal data class Success(val value: String) : MessageWithInternalVisibilityModifier()
 

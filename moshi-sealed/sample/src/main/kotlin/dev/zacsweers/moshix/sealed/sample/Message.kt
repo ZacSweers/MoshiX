@@ -7,7 +7,7 @@ import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 @JsonClass(generateAdapter = true, generator = "sealed:type")
 sealed class Message {
 
-  @TypeLabel("success")
+  @TypeLabel("success", ["successful"])
   @JsonClass(generateAdapter = true)
   data class Success(val value: String) : Message()
 
