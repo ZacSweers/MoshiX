@@ -124,20 +124,25 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: $subtype
               """.trimIndent())
           } else {
-            return@mapTo Subtype(
-              className = className,
-              isDefaultObject = true,
-              typeLabelType = null,
-              originatingElement = null
-            )
+            return@mapTo Subtype.ObjectType(className)
           }
         } else {
           val labelAnnotation = subtype.findAnnotationWithType(typeLabelAnnotation)
             ?: error("Missing @TypeLabel: $subtype")
-          val labelValue = labelAnnotation.arguments
-            .find { it.name?.getShortName() == "value" }
+
+          val labels = mutableListOf<String>()
+
+          labels += labelAnnotation.arguments
+            .find { it.name?.getShortName() == "label" }
             ?.value as? String
-            ?: error("No value found for label annotation!")
+            ?: error("No label member for TypeLabel annotation!")
+
+          @Suppress("UNCHECKED_CAST")
+          labels += labelAnnotation.arguments
+            .find { it.name?.getShortName() == "alternateLabels" }
+            ?.value as? List<String> // arrays are lists in KSP https://github.com/google/ksp/issues/135
+            ?: emptyList() // ksp ignores undefined args https://github.com/google/ksp/issues/134
+
           if (isObject) {
             objectAdapters.add(CodeBlock.of(
               ".%1M<%2T>(%3T(%2T))",
@@ -146,7 +151,7 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
               ObjectJsonAdapter::class.asClassName()
             ))
           }
-          Subtype(className, false, labelValue, null)
+          Subtype.ClassType(className, labels)
         }
       }
 

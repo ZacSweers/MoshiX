@@ -218,10 +218,12 @@ public class MoshiSealedProcessor : AbstractProcessor() {
       }
       @Suppress("DEPRECATION")
       val className = type.asClassName()
-      runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
-        className,
-        labelAnnotation.value
-      )
+      for (label in listOf(labelAnnotation.label, *labelAnnotation.alternateLabels)) {
+        runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
+          className,
+          label
+        )
+      }
       if (isObject) {
         objectAdapters.add(CodeBlock.of(
           ".%1M<%2T>(%3T(%2T))",

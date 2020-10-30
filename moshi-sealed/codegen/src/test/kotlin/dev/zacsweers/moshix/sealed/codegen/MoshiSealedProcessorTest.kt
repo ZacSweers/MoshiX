@@ -20,7 +20,7 @@ class MoshiSealedProcessorTest {
 
       @JsonClass(generateAdapter = true, generator = "sealed:type")
       sealed class BaseType {
-        @TypeLabel("a")
+        @TypeLabel("a", ["aa"])
         class TypeA : BaseType()
         @TypeLabel("b")
         class TypeB : BaseType()
@@ -58,6 +58,7 @@ class MoshiSealedProcessorTest {
         private val runtimeAdapter: JsonAdapter<BaseType> =
             PolymorphicJsonAdapterFactory.of(BaseType::class.java, "type")
               .withSubtype(BaseType.TypeA::class.java, "a")
+              .withSubtype(BaseType.TypeA::class.java, "aa")
               .withSubtype(BaseType.TypeB::class.java, "b")
               .create(BaseType::class.java, emptySet(), moshi) as JsonAdapter<BaseType>
       
@@ -72,9 +73,9 @@ class MoshiSealedProcessorTest {
 
     val proguardFiles = result.generatedFiles.filter { it.extension == "pro" }
     check(proguardFiles.isNotEmpty())
-    proguardFiles.filter { it.extension == "pro" }.forEach { generatedFile ->
-      when (generatedFile.nameWithoutExtension) {
-        "moshi-sealed-test.BaseType" -> assertThat(generatedFile.readText()).contains(
+    proguardFiles.filter { it.extension == "pro" }.forEach { file ->
+      when (file.nameWithoutExtension) {
+        "moshi-sealed-test.BaseType" -> assertThat(file.readText()).contains(
           """
           -if class test.BaseType
           -keepnames class test.BaseType
@@ -84,7 +85,7 @@ class MoshiSealedProcessorTest {
           }
           """.trimIndent()
         )
-        else -> error("Unrecognized proguard file: $generatedFile")
+        else -> error("Unrecognized proguard file: $file")
       }
     }
   }
