@@ -97,7 +97,7 @@ class MessageTest(type: Type) {
   @JsonClass(generateAdapter = true, generator = "sealed:type")
   sealed class MessageWithNullDefault {
 
-    @TypeLabel("success")
+    @TypeLabel("success", ["successful"])
     @JsonClass(generateAdapter = true)
     data class Success(val value: String) : MessageWithNullDefault()
 
@@ -110,7 +110,7 @@ class MessageTest(type: Type) {
   @JsonClass(generateAdapter = true, generator = "sealed:type")
   sealed class MessageWithNoDefault {
 
-    @TypeLabel("success")
+    @TypeLabel("success", ["successful"])
     @JsonClass(generateAdapter = true)
     data class Success(val value: String) : MessageWithNoDefault()
 
