@@ -113,7 +113,7 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
     val useDefaultNull = type.hasAnnotation(defaultNullAnnotation)
     val objectAdapters = mutableListOf<CodeBlock>()
     val sealedSubtypes = type.sealedSubtypes()
-      .mapNotNullTo(LinkedHashSet()) { subtype ->
+      .mapTo(LinkedHashSet()) { subtype ->
         val className = subtype.toClassName()
         val isObject = subtype.classKind == OBJECT
         if (isObject && subtype.hasAnnotation(defaultObjectAnnotation)) {
@@ -124,7 +124,7 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: $subtype
               """.trimIndent())
           } else {
-            return@mapNotNullTo null
+            return@mapTo Subtype.ObjectType(className)
           }
         } else {
           val labelAnnotation = subtype.findAnnotationWithType(typeLabelAnnotation)
@@ -151,7 +151,7 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
               ObjectJsonAdapter::class.asClassName()
             ))
           }
-          Subtype(className, false, labels, null)
+          Subtype.ClassType(className, labels)
         }
       }
 

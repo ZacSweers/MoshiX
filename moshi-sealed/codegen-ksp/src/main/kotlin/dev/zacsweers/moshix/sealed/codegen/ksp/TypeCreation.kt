@@ -21,14 +21,14 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
+import dev.zacsweers.moshix.sealed.codegen.ksp.Subtype.ClassType
+import dev.zacsweers.moshix.sealed.codegen.ksp.Subtype.ObjectType
 import javax.lang.model.element.TypeElement
 
-internal data class Subtype(
-  val className: TypeName,
-  val isDefaultObject: Boolean,
-  val labels: List<String>,
-  val originatingElement: TypeElement?,
-)
+internal sealed class Subtype(val className: TypeName) {
+  class ObjectType(className: TypeName) : Subtype(className)
+  class ClassType(className: TypeName, val labels: List<String>) : Subtype(className)
+}
 
 internal fun createType(
   targetType: ClassName,
@@ -73,16 +73,18 @@ internal fun createType(
   }
 
   for (subtype in subtypes) {
-    if (subtype.isDefaultObject) {
-      defaultCodeBlockBuilder.add("%T", subtype.className)
-      continue
-    }
-    subtype.originatingElement?.let(classBuilder::addOriginatingElement)
-    for (label in subtype.labels) {
-      runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
-        subtype.className,
-        label
-      )
+    when (subtype) {
+      is ObjectType -> {
+        defaultCodeBlockBuilder.add("%T", subtype.className)
+      }
+      is ClassType -> {
+        for (label in subtype.labels) {
+          runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
+            subtype.className,
+            label
+          )
+        }
+      }
     }
   }
 
