@@ -26,7 +26,7 @@ import javax.lang.model.element.TypeElement
 internal data class Subtype(
   val className: TypeName,
   val isDefaultObject: Boolean,
-  val typeLabelType: String?,
+  val labels: List<String>,
   val originatingElement: TypeElement?,
 )
 
@@ -78,10 +78,12 @@ internal fun createType(
       continue
     }
     subtype.originatingElement?.let(classBuilder::addOriginatingElement)
-    runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
-      subtype.className,
-      subtype.typeLabelType
-    )
+    for (label in subtype.labels) {
+      runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
+        subtype.className,
+        label
+      )
+    }
   }
 
   if (defaultCodeBlockBuilder.isNotEmpty()) {
