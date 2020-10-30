@@ -15,7 +15,7 @@ can match the same sealed subtype.
 @JsonClass(generateAdapter = true, generator = "sealed:type")
 sealed class Message {
 
-  @TypeLabel("success", ["successful"])
+  @TypeLabel("success", alternateLabels = ["successful"])
   @JsonClass(generateAdapter = true)
   data class Success(val value: String) : Message()
 }
