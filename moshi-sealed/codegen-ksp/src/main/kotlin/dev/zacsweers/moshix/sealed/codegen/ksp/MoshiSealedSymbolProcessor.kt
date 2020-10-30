@@ -140,8 +140,8 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
           @Suppress("UNCHECKED_CAST")
           labels += labelAnnotation.arguments
             .find { it.name?.getShortName() == "alternateLabels" }
-            ?.value as? Array<String>
-            ?: emptyArray() // ksp ignores undefined args https://github.com/google/ksp/issues/134
+            ?.value as? List<String> // arrays are lists in KSP https://github.com/google/ksp/issues/135
+            ?: emptyList() // ksp ignores undefined args https://github.com/google/ksp/issues/134
 
           if (isObject) {
             objectAdapters.add(CodeBlock.of(
