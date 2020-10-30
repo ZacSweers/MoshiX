@@ -1,6 +1,30 @@
 Changelog
 =========
 
+Version 0.6.0
+-------------
+
+_2020-10-30_
+
+#### moshi-sealed
+
+`@TypeLabel` now has an optional `alternateLabels` array property for cases where multiple labels 
+can match the same sealed subtype.
+
+```kotlin
+@JsonClass(generateAdapter = true, generator = "sealed:type")
+sealed class Message {
+
+  @TypeLabel("success", ["successful"])
+  @JsonClass(generateAdapter = true)
+  data class Success(val value: String) : Message()
+}
+```
+
+**NOTE:** We also changed `@TypeLabel`'s `value` property to the more meaningful `label` name. This 
+is technically a breaking change, but should be pretty low impact since most people wouldn't be 
+defining this parameter name or reading the property directly.
+
 Version 0.5.0
 -------------
 
