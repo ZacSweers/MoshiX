@@ -33,11 +33,11 @@ pluginManagement {
 
 rootProject.name = "moshix-root"
 include("ksp-test-util")
+include("moshi-adapters")
 include("moshi-ksp:moshi-ksp")
 include("moshi-ksp:tests")
-include("moshi-ktx")
 include("moshi-metadata-reflect")
-include("moshi-sealed:annotations")
+include("moshi-sealed:runtime")
 include("moshi-sealed:codegen")
 include("moshi-sealed:codegen-ksp")
 include("moshi-sealed:reflect")

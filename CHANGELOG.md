@@ -1,6 +1,139 @@
 Changelog
 =========
 
+Version 0.6.0
+-------------
+
+_2020-10-30_
+
+#### moshi-sealed
+
+`@TypeLabel` now has an optional `alternateLabels` array property for cases where multiple labels 
+can match the same sealed subtype.
+
+```kotlin
+@JsonClass(generateAdapter = true, generator = "sealed:type")
+sealed class Message {
+
+  @TypeLabel("success", alternateLabels = ["successful"])
+  @JsonClass(generateAdapter = true)
+  data class Success(val value: String) : Message()
+}
+```
+
+**NOTE:** We also changed `@TypeLabel`'s `value` property to the more meaningful `label` name. This 
+is technically a breaking change, but should be pretty low impact since most people wouldn't be 
+defining this parameter name or reading the property directly.
+
+Version 0.5.0
+-------------
+
+_2020-10-25_
+
+Dependency updates for all code generation artifacts:
+* KSP `1.4.10-dev-experimental-20201023`
+* KotlinPoet `1.7.2`
+
+#### moshi-ksp
+
+* Use KSP's new `asMemberOf` API for materializing type parameters, allowing us to remove a lot of ugly
+  `moshi-ksp` code that existed to accomplish the same.
+* Defer failing the compilation when errors are reported to the `KSPLogger` until the end of the KSP run,
+  allowing reporting all errors rather than just the first.
+
+#### moshi-sealed
+
+`moshi-sealed-codegen` and `moshi-sealed-codegen-ksp` now generate proguard rules for generated adapters
+on the fly, matching Moshi's new behavior introduced in 1.10.0.
+
+Thanks to [@plnice](https://github.com/plnice) for contributing to this release.
+
+Version 0.4.0
+-------------
+
+_2020-10-12_
+
+Updated Moshi to 1.11.0
+
+#### moshi-ksp
+
+Updated to `1.4.10-dev-experimental-20201009`
+
+#### moshi-ktx
+
+Removed! These APIs live in Moshi natively now as of 1.11.0
+
+#### moshi-adapters
+
+New artifact!
+
+First adapter in this release is a new `@JsonString` qualifier + adapter, so you can 
+capture raw JSON content from payloads. This is adapted from the recipe in Moshi.
+
+```Kotlin
+val moshi = Moshi.Builder()
+  .add(JsonString.Factory())
+  .build()
+
+@JsonClass(generateAdapter = true)
+data class Message(
+  val type: String,
+  /** Raw JSON string for the `data` key. */
+  @JsonString val data: String
+)
+```
+
+Get it via
+
+```kotlin
+dependencies {
+  implementation("dev.zacsweers.moshix:moshi-adapters:<version>")
+}
+```
+
+#### moshi-sealed
+
+New support for multiple `object` subtypes. This allows for sentinel types who only contain an indicator
+label but no other data.
+
+In the below example, we have a `FunctionSpec` that defines the signature of a function and a
+`Type` representations that can be used to model its return type and parameter types. These are all
+`object` types, so any contents are skipped in its serialization and only its `type` key is read
+by the `PolymorphicJsonAdapterFactory` to determine its type.
+
+```kotlin
+@JsonClass(generateAdapter = false, generator = "sealed:type")
+sealed class Type(val type: String) {
+  @TypeLabel("void")
+  object VoidType : Type("void")
+  @TypeLabel("boolean")
+  object BooleanType : Type("boolean")
+  @TypeLabel("int")
+  object IntType : Type("int")
+}
+
+data class FunctionSpec(
+ val name: String,
+ val returnType: Type,
+ val parameters: Map<String, Type>
+)
+```
+
+**NOTE**: As part of this change, the `moshi-sealed-annotations` artifact was replaced with a
+`moshi-sealed-runtime` artifact. Please update your coordinates accordingly, and don't use `compileOnly`
+anymore.
+
+Version 0.3.2
+-------------
+
+_2020-10-01_
+
+Fixes two issues with `moshi-ksp`:
+- Handle `Any` superclasses when the supertype is from another module
+- Filter out non-`CLASS` kinds from supertypes
+
+Special thanks to [@JvmName](https://github.com/JvmName) for reporting and helping debug this!
+
 Version 0.3.1
 -------------
 

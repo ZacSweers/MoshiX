@@ -30,6 +30,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.joinToCode
 import com.squareup.kotlinpoet.metadata.ImmutableKmClass
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.squareup.kotlinpoet.metadata.isInternal
@@ -47,6 +48,7 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.codegen.MoshiSealedProcessor.Companion.OPTION_GENERATED
+import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType
 import javax.annotation.processing.AbstractProcessor
@@ -140,13 +142,16 @@ public class MoshiSealedProcessor : AbstractProcessor() {
             messager.printMessage(Diagnostic.Kind.ERROR, "Must be a sealed class!", type)
             return@forEach
           }
-          createType(type, typeLabel, kmClass)
+
+          val preparedAdapter = prepareAdapter(type, typeLabel, kmClass)
+          preparedAdapter?.spec?.writeTo(filer)
+          preparedAdapter?.proguardConfig?.writeTo(filer)
         }
 
     return false
   }
 
-  private fun createType(element: TypeElement, typeLabel: String, kmClass: ImmutableKmClass) {
+  private fun prepareAdapter(element: TypeElement, typeLabel: String, kmClass: ImmutableKmClass): PreparedAdapter? {
     val sealedSubtypes = kmClass.sealedSubclasses
         .map {
           // Canonicalize
@@ -164,14 +169,15 @@ public class MoshiSealedProcessor : AbstractProcessor() {
 
     @Suppress("DEPRECATION")
     val targetType = element.asClassName()
-    val moshiParam = ParameterSpec.builder(allocator.newName("moshi"), Moshi::class)
-        .build()
+    val moshiClass = Moshi::class
+    val moshiParam = ParameterSpec.builder(allocator.newName("moshi"), moshiClass).build()
     val jsonAdapterType = JsonAdapter::class.asClassName().parameterizedBy(targetType)
+    val primaryConstructor = FunSpec.constructorBuilder().addParameter(moshiParam).build()
 
     val classBuilder = TypeSpec.classBuilder(adapterName)
         .addModifiers(visibilityModifier)
         .superclass(jsonAdapterType)
-        .primaryConstructor(FunSpec.constructorBuilder().addParameter(moshiParam).build())
+        .primaryConstructor(primaryConstructor)
         .addOriginatingElement(element)
 
     generatedAnnotation?.let {
@@ -190,44 +196,63 @@ public class MoshiSealedProcessor : AbstractProcessor() {
       defaultCodeBlockBuilder.add("null")
     }
 
+    val objectAdapters = mutableListOf<CodeBlock>()
     for ((type, kmData) in sealedSubtypes) {
-      if (kmData.isObject) {
-        val isDefaultObject = type.getAnnotation(DefaultObject::class.java) != null
-        if (isDefaultObject) {
-          if (useDefaultNull) {
-            // Print both for reference
-            messager.printMessage(Diagnostic.Kind.ERROR, "Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type.", type)
-            messager.printMessage(Diagnostic.Kind.ERROR, "Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type.", element)
-            return
-          } else {
-            defaultCodeBlockBuilder.add("%T", type)
-          }
-        } else if (!useDefaultNull) {
-          messager.printMessage(Diagnostic.Kind.ERROR, "Unhandled object type, cannot serialize this.", type)
-          return
+      val isObject = kmData.isObject
+      val isAnnotatedDefaultObject = isObject && type.getAnnotation(DefaultObject::class.java) != null
+      if (isAnnotatedDefaultObject) {
+        if (useDefaultNull) {
+          // Print both for reference
+          messager.printMessage(Diagnostic.Kind.ERROR, "Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type.", type)
+          messager.printMessage(Diagnostic.Kind.ERROR, "Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type.", element)
+          return null
+        } else {
+          defaultCodeBlockBuilder.add("%T", type)
         }
         continue
       }
       classBuilder.addOriginatingElement(type)
       val labelAnnotation = type.getAnnotation(TypeLabel::class.java) ?: run {
         messager.printMessage(Diagnostic.Kind.ERROR, "Missing @TypeLabel.", type)
-        return
+        return null
       }
       @Suppress("DEPRECATION")
-      runtimeAdapterInitializer.add("    .withSubtype(%T::class.java, %S)\n",
-          type.asClassName(),
-          labelAnnotation.value
-      )
+      val className = type.asClassName()
+      for (label in listOf(labelAnnotation.label, *labelAnnotation.alternateLabels)) {
+        runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
+          className,
+          label
+        )
+      }
+      if (isObject) {
+        objectAdapters.add(CodeBlock.of(
+          ".%1M<%2T>(%3T(%2T))",
+          MemberName("com.squareup.moshi", "addAdapter"),
+          className,
+          ObjectJsonAdapter::class.asClassName())
+        )
+      }
     }
 
     if (defaultCodeBlockBuilder.isNotEmpty()) {
-      runtimeAdapterInitializer.add("    .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
+      runtimeAdapterInitializer.add("  .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
     }
 
-    runtimeAdapterInitializer.add("    .create(%T::class.java, %M(), %N)·as·%T\n»",
+    val moshiArg = if (objectAdapters.isEmpty()) {
+      CodeBlock.of("%N", moshiParam)
+    } else {
+      CodeBlock.builder()
+        .add("%N.newBuilder()\n", moshiParam)
+        .apply {
+          add("%L\n", objectAdapters.joinToCode("\n", prefix = "    "))
+        }
+        .add(".build()")
+        .build()
+    }
+    runtimeAdapterInitializer.add("  .create(%T::class.java, %M(), %L)·as·%T\n»",
         targetType,
         MemberName("kotlin.collections", "emptySet"),
-        moshiParam,
+        moshiArg,
         jsonAdapterType
     )
 
@@ -263,11 +288,20 @@ public class MoshiSealedProcessor : AbstractProcessor() {
             .build())
 
     // TODO how do generics work?
-    FileSpec.builder(targetType.packageName, adapterName)
+    val fileSpec = FileSpec.builder(targetType.packageName, adapterName)
         .indent("  ")
         .addComment("Code generated by moshi-sealed. Do not edit.")
         .addType(classBuilder.build())
         .build()
-        .writeTo(filer)
+
+    val proguardConfig = ProguardConfig(
+      targetClass = targetType,
+      adapterName = adapterName,
+      adapterConstructorParams = listOf(moshiClass.asClassName().reflectionName())
+    )
+
+    return PreparedAdapter(fileSpec, proguardConfig)
   }
 }
+
+internal data class PreparedAdapter(val spec: FileSpec, val proguardConfig: ProguardConfig)

@@ -47,21 +47,21 @@ object Dependencies {
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
 
     object Ksp {
-      const val version = "1.4.10-dev-experimental-20200924"
+      const val version = "1.4.10-dev-experimental-20201023"
       const val api = "com.google.devtools.ksp:symbol-processing-api:$version"
       const val ksp = "com.google.devtools.ksp:symbol-processing:$version"
     }
   }
 
   object KotlinPoet {
-    private const val version = "1.6.0"
+    private const val version = "1.7.2"
     const val kotlinPoet = "com.squareup:kotlinpoet:$version"
     const val metadata = "com.squareup:kotlinpoet-metadata-specs:$version"
     const val metadataSpecs = "com.squareup:kotlinpoet-metadata-specs:$version"
   }
 
   object Moshi {
-    private const val version = "1.10.0"
+    private const val version = "1.11.0"
     const val moshi = "com.squareup.moshi:moshi:$version"
     const val kotlin = "com.squareup.moshi:moshi-kotlin:$version"
     const val codegen = "com.squareup.moshi:moshi-kotlin-codegen:$version"
@@ -71,7 +71,7 @@ object Dependencies {
   object Testing {
     const val compileTesting = "com.github.tschuchortdev:kotlin-compile-testing:1.3.1"
     const val kspCompileTesting = "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.3.1"
-    const val junit = "junit:junit:4.12"
-    const val truth = "com.google.truth:truth:1.0"
+    const val junit = "junit:junit:4.13.1"
+    const val truth = "com.google.truth:truth:1.1"
   }
 }

@@ -8,6 +8,8 @@ This will eventually live in Moshi directly: https://github.com/square/moshi/pul
 ## Usage
 
 Gradle dependency
+
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-metadata-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-metadata-reflect)
 ```kotlin
 dependencies {
   implementation("dev.zacsweers.moshix:moshi-metadata-reflect:<version>")

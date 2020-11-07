@@ -37,8 +37,7 @@ dependencies {
     kapt(Dependencies.Moshi.codegen)
   }
 
-  implementation(project(":moshi-ktx"))
-  implementation(project(":moshi-sealed:annotations"))
+  implementation(project(":moshi-sealed:runtime"))
   implementation(Dependencies.Moshi.kotlin)
   implementation(project(":moshi-sealed:reflect"))
 

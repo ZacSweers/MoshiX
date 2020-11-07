@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
@@ -12,7 +13,6 @@ import dev.zacsweers.moshix.sealed.sample.Message
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import dev.zacsweers.moshix.adapter
 import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)
@@ -23,7 +23,7 @@ class MessageTest(type: Type) {
     REFLECT(
         moshi = Moshi.Builder()
             .add(MoshiSealedJsonAdapterFactory())
-            .add(KotlinJsonAdapterFactory())
+            .addLast(KotlinJsonAdapterFactory())
             .build()
     )
     ,
@@ -84,6 +84,9 @@ class MessageTest(type: Type) {
   ) {
     assertThat(adapter.fromJson("{\"type\":\"success\",\"value\":\"Okay!\"}"))
         .isEqualTo(success)
+    // Test alternates
+    assertThat(adapter.fromJson("{\"type\":\"successful\",\"value\":\"Okay!\"}"))
+        .isEqualTo(success)
     assertThat(adapter.fromJson("{\"type\":\"error\",\"error_logs\":{\"order\":66}}"))
         .isEqualTo(error)
     assertThat(adapter.fromJson("{\"type\":\"taco\",\"junkdata\":100}"))
@@ -94,7 +97,7 @@ class MessageTest(type: Type) {
   @JsonClass(generateAdapter = true, generator = "sealed:type")
   sealed class MessageWithNullDefault {
 
-    @TypeLabel("success")
+    @TypeLabel("success", ["successful"])
     @JsonClass(generateAdapter = true)
     data class Success(val value: String) : MessageWithNullDefault()
 
@@ -107,7 +110,7 @@ class MessageTest(type: Type) {
   @JsonClass(generateAdapter = true, generator = "sealed:type")
   sealed class MessageWithNoDefault {
 
-    @TypeLabel("success")
+    @TypeLabel("success", ["successful"])
     @JsonClass(generateAdapter = true)
     data class Success(val value: String) : MessageWithNoDefault()
 
@@ -120,7 +123,7 @@ class MessageTest(type: Type) {
   @JsonClass(generateAdapter = true, generator = "sealed:type")
   internal sealed class MessageWithInternalVisibilityModifier {
 
-    @TypeLabel("success")
+    @TypeLabel("success", ["successful"])
     @JsonClass(generateAdapter = true)
     internal data class Success(val value: String) : MessageWithInternalVisibilityModifier()
 

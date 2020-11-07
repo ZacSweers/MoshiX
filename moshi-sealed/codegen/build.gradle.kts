@@ -32,5 +32,9 @@ dependencies {
   implementation(Dependencies.KotlinPoet.metadataSpecs)
   implementation(Dependencies.Moshi.adapters)
   implementation(Dependencies.Moshi.moshi)
-  implementation(project(":moshi-sealed:annotations"))
+  implementation(project(":moshi-sealed:runtime"))
+
+  testImplementation(Dependencies.Testing.compileTesting)
+  testImplementation(Dependencies.Testing.truth)
+  testImplementation(Dependencies.Testing.junit)
 }
