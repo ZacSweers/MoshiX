@@ -501,7 +501,7 @@ internal class AdapterGenerator(
         bridgeGenerator = BridgeGenerator(
           packageName = className.packageName,
           name = "${adapterName}Bridge",
-          targetClassName = className.canonicalName,
+          targetClassName = className.simpleNames.joinToString("$"),
           primaryConstructorDesc = target.constructor.signature!!.substringAfter("<init>"),
           maskCount = maskCount
         )
