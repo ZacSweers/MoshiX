@@ -124,7 +124,7 @@ internal fun primaryConstructor(
     parameters[name] = TargetParameter(
       name = name,
       index = index,
-      type = parameter.type!!.toTypeName(typeParameterResolver),
+      type = parameter.type.toTypeName(typeParameterResolver),
       hasDefault = parameter.hasDefault,
       qualifiers = parameter.qualifiers(resolver),
       jsonName = parameter.jsonName(resolver)
