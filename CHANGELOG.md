@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 0.6.1
+-------------
+
+_2020-11-12_
+
+`moshi-ksp` and `moshi-sealed-ksp` are now built against KSP version `1.4.10-dev-experimental-20201110`.
+
 Version 0.6.0
 -------------
 
