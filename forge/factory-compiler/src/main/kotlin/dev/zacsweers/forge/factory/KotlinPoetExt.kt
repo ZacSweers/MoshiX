@@ -1,0 +1,157 @@
+package dev.zacsweers.forge.factory
+
+import com.google.devtools.ksp.getClassDeclarationByName
+import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.symbol.KSFunction
+import com.google.devtools.ksp.symbol.KSTypeReference
+import com.google.devtools.ksp.symbol.KSValueParameter
+import com.squareup.kotlinpoet.ANY
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.TypeVariableName
+import com.squareup.kotlinpoet.WildcardTypeName
+import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.jvm.jvmSuppressWildcards
+import dagger.Lazy
+import dagger.internal.DoubleCheck
+import javax.inject.Provider
+
+internal data class Parameter(
+  val name: String,
+  val typeName: TypeName,
+  val providerTypeName: ParameterizedTypeName,
+  val lazyTypeName: ParameterizedTypeName,
+  val isWrappedInProvider: Boolean,
+  val isWrappedInLazy: Boolean
+) {
+  val originalTypeName: TypeName = when {
+    isWrappedInProvider -> providerTypeName
+    isWrappedInLazy -> lazyTypeName
+    else -> typeName
+  }
+}
+
+private val TypeName.rawType: ClassName
+get() = when (this) {
+  is ClassName -> this
+  is ParameterizedTypeName -> rawType
+  is TypeVariableName -> ANY
+  is WildcardTypeName -> outTypes[0].rawType
+  else -> error("No raw type for TypeName")
+}.copy(nullable = false, emptyList(), emptyMap())
+
+internal fun List<KSValueParameter>.mapToParameter(
+  resolver: Resolver,
+  typeParameterResolver: TypeParameterResolver
+): List<Parameter> =
+  mapIndexed { index, parameter ->
+    val parameterType = parameter.type.resolve()
+    val parameterTypeName = parameterType.toTypeName(typeParameterResolver)
+    val rawType = parameterTypeName.rawType
+
+    val isWrappedInProvider = rawType.canonicalName == "dagger.Provides"
+    val isWrappedInLazy = rawType.canonicalName == "dagger.Lazy"
+
+    val typeName = when {
+      isWrappedInProvider || isWrappedInLazy ->
+        parameterType.arguments
+          .single()
+          .type!!
+          .toTypeName(typeParameterResolver)
+
+      else -> parameterTypeName
+    }.withJvmSuppressWildcardsIfNeeded(resolver, parameter.type)
+
+    Parameter(
+      name = "param$index",
+      typeName = typeName,
+      providerTypeName = typeName.wrapInProvider(),
+      lazyTypeName = typeName.wrapInLazy(),
+      isWrappedInProvider = isWrappedInProvider,
+      isWrappedInLazy = isWrappedInLazy
+    )
+  }
+
+private fun TypeName.wrapInProvider(): ParameterizedTypeName {
+  return Provider::class.asClassName().parameterizedBy(this)
+}
+
+private fun TypeName.wrapInLazy(): ParameterizedTypeName {
+  return Lazy::class.asClassName().parameterizedBy(this)
+}
+
+internal fun TypeName.withJvmSuppressWildcardsIfNeeded(
+  resolver: Resolver,
+  type: KSTypeReference
+): TypeName {
+  // If the parameter is annotated with @JvmSuppressWildcards, then add the annotation
+  // to our type so that this information is forwarded when our Factory is compiled.
+  val hasJvmSuppressWildcards =
+    type.hasAnnotation(resolver.getClassDeclarationByName<JvmSuppressWildcards>()!!.asType())
+
+  // Add the @JvmSuppressWildcards annotation even for simple generic return types like
+  // Set<String>. This avoids some edge cases where Dagger chokes.
+  val isGenericType = isGenericType()
+
+  // Same for functions.
+  val isFunctionType = type.isFunctionType()
+
+  return when {
+    hasJvmSuppressWildcards || isGenericType -> this.jvmSuppressWildcards()
+    isFunctionType -> this.jvmSuppressWildcards()
+    else -> this
+  }
+}
+
+internal fun TypeName.isGenericType(): Boolean {
+  return this is ParameterizedTypeName
+}
+
+internal fun KSTypeReference.isFunctionType(): Boolean = this is KSFunction
+
+internal val daggerDoubleCheckFqNameString = DoubleCheck::class.java.canonicalName
+internal fun List<Parameter>.asArgumentList(
+  asProvider: Boolean,
+  includeModule: Boolean
+): String {
+  return this
+    .let { list ->
+      if (asProvider) {
+        list.map { parameter ->
+          when {
+            parameter.isWrappedInProvider -> parameter.name
+            parameter.isWrappedInLazy ->
+              "$daggerDoubleCheckFqNameString.lazy(${parameter.name})"
+            else -> "${parameter.name}.get()"
+          }
+        }
+      } else list.map { it.name }
+    }
+    .let {
+      if (includeModule) {
+        val result = it.toMutableList()
+        result.add(0, "module")
+        result.toList()
+      } else {
+        it
+      }
+    }
+    .joinToString()
+}
+
+internal fun TypeSpec.Builder.addGeneratedAnnotation(): TypeSpec.Builder {
+  // TODO
+  return this
+}
+
+internal fun FileSpec.Builder.addGeneratedByComment(): FileSpec.Builder {
+  return addComment("""
+  // Generated by ${ForgeProcessor::class.java.canonicalName}
+  // https://github.com/TODO
+  
+  """.trimIndent())
+}

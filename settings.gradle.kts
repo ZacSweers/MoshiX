@@ -32,6 +32,8 @@ pluginManagement {
 }
 
 rootProject.name = "moshix-root"
+include("forge:factory-compiler")
+//include("forge:forge-runtime")
 include("ksp-test-util")
 include("moshi-adapters")
 include("moshi-ksp:moshi-ksp")
