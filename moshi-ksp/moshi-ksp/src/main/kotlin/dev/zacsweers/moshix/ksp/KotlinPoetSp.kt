@@ -2,6 +2,7 @@ package dev.zacsweers.moshix.ksp
 
 import com.google.devtools.ksp.isLocal
 import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
@@ -130,7 +131,8 @@ internal fun KSTypeReference.toTypeName(typeParamResolver: TypeParameterResolver
 }
 
 internal fun FileSpec.writeTo(codeGenerator: CodeGenerator) {
-  val file = codeGenerator.createNewFile(packageName, name)
+  val dependencies = Dependencies(false, *originatingKSFiles().toTypedArray())
+  val file = codeGenerator.createNewFile(dependencies, packageName, name)
   // Don't use writeTo(file) because that tries to handle directories under the hood
   OutputStreamWriter(file, UTF_8)
     .use(::writeTo)

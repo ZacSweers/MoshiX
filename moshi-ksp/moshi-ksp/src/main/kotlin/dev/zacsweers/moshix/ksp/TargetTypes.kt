@@ -1,5 +1,6 @@
 package dev.zacsweers.moshix.ksp
 
+import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.getVisibility
 import com.google.devtools.ksp.isInternal
@@ -111,6 +112,7 @@ internal fun targetType(
     visibility = resolvedVisibility)
 }
 
+@OptIn(KspExperimental::class)
 internal fun primaryConstructor(
   resolver: Resolver,
   targetType: KSClassDeclaration,
