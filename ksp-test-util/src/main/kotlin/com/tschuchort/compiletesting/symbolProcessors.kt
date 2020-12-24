@@ -75,6 +75,26 @@ private val KotlinCompilation.kspCachesDir: File
   get() = kspWorkingDir.resolve("caches")
 
 /**
+ * Controls for enabling incremental processing in KSP.
+ */
+public var KotlinCompilation.kspIncremental: Boolean
+  get() = getKspRegistrar().incremental
+  set(value) {
+    val registrar = getKspRegistrar()
+    registrar.incremental = value
+  }
+
+/**
+ * Controls for enabling incremental processing logs in KSP.
+ */
+public var KotlinCompilation.kspIncrementalLog: Boolean
+  get() = getKspRegistrar().incrementalLog
+  set(value) {
+    val registrar = getKspRegistrar()
+    registrar.incrementalLog = value
+  }
+
+/**
  * Custom subclass of [AbstractKotlinSymbolProcessingExtension] where processors are pre-defined instead of being
  * loaded via ServiceLocator.
  */
@@ -100,6 +120,9 @@ private class KspCompileTestingComponentRegistrar(
 
   var options: MutableMap<String, String> = mutableMapOf()
 
+  var incremental: Boolean = false
+  var incrementalLog: Boolean = false
+
   val errorFunction = AbstractKotlinCompilation::class.java.getDeclaredMethod(
     "error",
     String::class.java
@@ -118,6 +141,9 @@ private class KspCompileTestingComponentRegistrar(
       this.projectBaseDir = compilation.kspWorkingDir
 
       this.processingOptions.putAll(compilation.kspArgs)
+
+      this.incremental = this@KspCompileTestingComponentRegistrar.incremental
+      this.incrementalLog = this@KspCompileTestingComponentRegistrar.incrementalLog
 
       this.cachesDir = compilation.kspCachesDir.also {
         it.deleteRecursively()
