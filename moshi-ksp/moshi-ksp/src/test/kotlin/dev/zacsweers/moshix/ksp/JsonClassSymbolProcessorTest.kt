@@ -21,12 +21,15 @@ import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.java
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.kspArgs
+import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessors
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KType
@@ -36,7 +39,20 @@ import kotlin.reflect.KVariance.INVARIANT
 import kotlin.reflect.full.createType
 
 /** Execute kotlinc to confirm that either files are generated or errors are printed. */
-class JsonClassSymbolProcessorTest {
+@RunWith(Parameterized::class)
+class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
+
+  companion object {
+    @JvmStatic
+    @Parameterized.Parameters(name = "incremental={0}")
+    fun data() : Collection<Array<Any>> {
+      return listOf(
+        arrayOf(true),
+        arrayOf(false)
+      )
+    }
+  }
+
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
   @Test
@@ -781,6 +797,7 @@ class JsonClassSymbolProcessorTest {
         symbolProcessors = listOf(JsonClassSymbolProcessor())
         sources = sourceFiles.asList()
         verbose = false
+        kspIncremental = incremental
       }
   }
 
