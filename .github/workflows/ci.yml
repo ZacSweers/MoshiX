@@ -11,6 +11,9 @@ jobs:
         # No 9, 10, or 12 because Kapt
         java_version: [ 1.8, 11, 13, 14, 15 ]
         ksp_enabled: [ true, false ]
+        include:
+          - ksp_enabled: true
+            ksp_incremental_enabled: true
       fail-fast: false
     steps:
       - name: Checkout
@@ -33,7 +36,7 @@ jobs:
         # Initial gradle configuration, install dependencies, etc
         run: ./gradlew help
       - name: Build project
-        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} --stacktrace
+        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} -Pksp.incremental=${{ matrix.ksp_incremental_enabled }} --stacktrace
       - name: Upload snapshot (main only)
         run: |
           ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9 || true
