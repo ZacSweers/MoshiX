@@ -23,7 +23,6 @@ import com.squareup.moshi.Types
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.codegen.ksp.Subtype.ClassType
 import dev.zacsweers.moshix.sealed.codegen.ksp.Subtype.ObjectType
-import javax.lang.model.element.TypeElement
 
 internal sealed class Subtype(val className: TypeName) {
   class ObjectType(className: TypeName) : Subtype(className)
@@ -35,10 +34,10 @@ internal fun createType(
   isInternal: Boolean,
   typeLabel: String,
   useDefaultNull: Boolean,
-  originatingElement: TypeElement?,
   generatedAnnotation: AnnotationSpec?,
   subtypes: Set<Subtype>,
   objectAdapters: List<CodeBlock>,
+  typeSpecHook: TypeSpec.Builder.() -> Unit
 ): PreparedAdapter {
   val defaultCodeBlockBuilder = CodeBlock.builder()
   val adapterName = ClassName.bestGuess(
@@ -55,7 +54,7 @@ internal fun createType(
     .superclass(jsonAdapterType)
     .primaryConstructor(FunSpec.constructorBuilder().addParameter(moshiParam).build())
 
-  originatingElement?.let(classBuilder::addOriginatingElement)
+  classBuilder.typeSpecHook()
 
   generatedAnnotation?.let {
     classBuilder.addAnnotation(it)

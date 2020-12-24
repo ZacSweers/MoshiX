@@ -160,11 +160,12 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
       isInternal = Modifier.INTERNAL in type.modifiers,
       typeLabel = typeLabel,
       useDefaultNull = useDefaultNull,
-      originatingElement = null,
       generatedAnnotation = generatedAnnotation,
       subtypes = sealedSubtypes,
       objectAdapters = objectAdapters
-    )
+    ) {
+      addOriginatingKSFile(type.containingFile!!)
+    }
 
     preparedAdapter.spec.writeTo(codeGenerator)
     preparedAdapter.proguardConfig.writeTo(codeGenerator)
