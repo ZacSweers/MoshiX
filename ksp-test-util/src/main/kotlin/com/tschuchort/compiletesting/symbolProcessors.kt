@@ -7,6 +7,7 @@ import com.google.devtools.ksp.AbstractKotlinSymbolProcessingExtension
 import com.google.devtools.ksp.KspOptions
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.symbol.KSNode
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
@@ -99,7 +100,17 @@ private class KspCompileTestingComponentRegistrar(
 
   var options: MutableMap<String, String> = mutableMapOf()
 
-  override fun registerProjectComponents(project: MockProject, configuration: CompilerConfiguration) {
+  val errorFunction = AbstractKotlinCompilation::class.java.getDeclaredMethod(
+    "error",
+    String::class.java
+  )
+    .apply {
+      isAccessible = true
+    }
+  val addError: (String) -> Unit = { error -> errorFunction.invoke(compilation, error) }
+
+  override fun registerProjectComponents(project: MockProject,
+    configuration: CompilerConfiguration) {
     if (processors.isEmpty()) {
       return
     }
@@ -133,11 +144,21 @@ private class KspCompileTestingComponentRegistrar(
         it.mkdirs()
       }
     }.build()
+
     // TODO: replace with KotlinCompilation.internalMessageStream
     val messageCollectorBasedKSPLogger = MessageCollectorBasedKSPLogger(
       PrintingMessageCollector(System.err, MessageRenderer.GRADLE_STYLE, compilation.verbose)
     )
-    val registrar = KspTestExtension(options, processors, messageCollectorBasedKSPLogger)
+    val registrar = KspTestExtension(
+      options,
+      processors,
+      object : KSPLogger by messageCollectorBasedKSPLogger {
+        override fun error(message: String, symbol: KSNode?) {
+          messageCollectorBasedKSPLogger.error(message, symbol)
+          addError(message)
+        }
+      }
+    )
     AnalysisHandlerExtension.registerExtension(project, registrar)
   }
 }
