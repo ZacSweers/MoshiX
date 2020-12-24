@@ -1,10 +1,13 @@
+/**
+ * Adds support for KSP (https://goo.gle/ksp).
+ */
 package com.tschuchort.compiletesting
 
 import com.google.devtools.ksp.AbstractKotlinSymbolProcessingExtension
 import com.google.devtools.ksp.KspOptions
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.SymbolProcessor
-import com.google.devtools.ksp.symbol.KSNode
+import com.google.devtools.ksp.processing.impl.MessageCollectorBasedKSPLogger
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
@@ -26,7 +29,7 @@ public var KotlinCompilation.symbolProcessors: List<SymbolProcessor>
   }
 
 /**
- * The directory where generates KSP sources are written
+ * The directory where generated KSP sources are written
  */
 public val KotlinCompilation.kspSourcesDir: File
   get() = kspWorkingDir.resolve("sources")
@@ -66,13 +69,19 @@ private val KotlinCompilation.kspClassesDir: File
   get() = kspWorkingDir.resolve("classes")
 
 /**
+ * The directory where compiled KSP caches are written
+ */
+private val KotlinCompilation.kspCachesDir: File
+  get() = kspWorkingDir.resolve("caches")
+
+/**
  * Custom subclass of [AbstractKotlinSymbolProcessingExtension] where processors are pre-defined instead of being
  * loaded via ServiceLocator.
  */
 private class KspTestExtension(
   options: KspOptions,
   private val processors: List<SymbolProcessor>,
-  logger: KSPLogger,
+  logger: KSPLogger
 ) : AbstractKotlinSymbolProcessingExtension(
   options = options,
   logger = logger,
@@ -85,28 +94,29 @@ private class KspTestExtension(
  * Registers the [KspTestExtension] to load the given list of processors.
  */
 private class KspCompileTestingComponentRegistrar(
-  private val compilation: KotlinCompilation,
+  private val compilation: KotlinCompilation
 ) : ComponentRegistrar {
   var processors = emptyList<SymbolProcessor>()
 
   var options: MutableMap<String, String> = mutableMapOf()
 
-  val errorFunction = AbstractKotlinCompilation::class.java.getDeclaredMethod("error", String::class.java)
-    .apply {
-      isAccessible = true
-    }
-  val addError: (String) -> Unit = { error -> errorFunction.invoke(compilation, error) }
-
-  override fun registerProjectComponents(
-    project: MockProject,
-    configuration: CompilerConfiguration,
-  ) {
+  override fun registerProjectComponents(project: MockProject, configuration: CompilerConfiguration) {
     if (processors.isEmpty()) {
       return
     }
     val options = KspOptions.Builder().apply {
+      this.projectBaseDir = compilation.kspWorkingDir
+
       this.processingOptions.putAll(compilation.kspArgs)
 
+      this.cachesDir = compilation.kspCachesDir.also {
+        it.deleteRecursively()
+        it.mkdirs()
+      }
+      this.kspOutputDir = compilation.kspSourcesDir.also {
+        it.deleteRecursively()
+        it.mkdirs()
+      }
       this.classOutputDir = compilation.kspClassesDir.also {
         it.deleteRecursively()
         it.mkdirs()
@@ -128,16 +138,7 @@ private class KspCompileTestingComponentRegistrar(
     val messageCollectorBasedKSPLogger = MessageCollectorBasedKSPLogger(
       PrintingMessageCollector(System.err, MessageRenderer.GRADLE_STYLE, compilation.verbose)
     )
-    val registrar = KspTestExtension(
-      options,
-      processors,
-      object : KSPLogger by messageCollectorBasedKSPLogger {
-          override fun error(message: String, symbol: KSNode?) {
-              messageCollectorBasedKSPLogger.error(message, symbol)
-              addError(message)
-          }
-      }
-    )
+    val registrar = KspTestExtension(options, processors, messageCollectorBasedKSPLogger)
     AnalysisHandlerExtension.registerExtension(project, registrar)
   }
 }
