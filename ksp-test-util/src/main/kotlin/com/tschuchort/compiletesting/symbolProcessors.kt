@@ -7,7 +7,6 @@ import com.google.devtools.ksp.AbstractKotlinSymbolProcessingExtension
 import com.google.devtools.ksp.KspOptions
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.SymbolProcessor
-import com.google.devtools.ksp.symbol.KSNode
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
@@ -16,6 +15,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
 import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 import java.io.File
+import java.io.PrintStream
 
 /**
  * The list of symbol processors for the kotlin compilation.
@@ -123,14 +123,9 @@ private class KspCompileTestingComponentRegistrar(
   var incremental: Boolean = false
   var incrementalLog: Boolean = false
 
-  val errorFunction = AbstractKotlinCompilation::class.java.getDeclaredMethod(
-    "error",
-    String::class.java
-  )
-    .apply {
-      isAccessible = true
-    }
-  val addError: (String) -> Unit = { error -> errorFunction.invoke(compilation, error) }
+  private val internalMessageStream = AbstractKotlinCompilation::class.java
+    .getDeclaredMethod("getInternalMessageStream")
+    .apply { isAccessible = true }
 
   override fun registerProjectComponents(project: MockProject,
     configuration: CompilerConfiguration) {
@@ -171,19 +166,13 @@ private class KspCompileTestingComponentRegistrar(
       }
     }.build()
 
-    // TODO: replace with KotlinCompilation.internalMessageStream
     val messageCollectorBasedKSPLogger = MessageCollectorBasedKSPLogger(
-      PrintingMessageCollector(System.err, MessageRenderer.GRADLE_STYLE, compilation.verbose)
+      PrintingMessageCollector(internalMessageStream.invoke(compilation) as PrintStream, MessageRenderer.GRADLE_STYLE, compilation.verbose)
     )
     val registrar = KspTestExtension(
       options,
       processors,
-      object : KSPLogger by messageCollectorBasedKSPLogger {
-        override fun error(message: String, symbol: KSNode?) {
-          messageCollectorBasedKSPLogger.error(message, symbol)
-          addError(message)
-        }
-      }
+      messageCollectorBasedKSPLogger
     )
     AnalysisHandlerExtension.registerExtension(project, registrar)
   }
