@@ -33,7 +33,6 @@ pluginManagement {
 }
 
 rootProject.name = "moshix-root"
-include("ksp-test-util")
 include("moshi-adapters")
 include("moshi-ksp:moshi-ksp")
 include("moshi-ksp:tests")
