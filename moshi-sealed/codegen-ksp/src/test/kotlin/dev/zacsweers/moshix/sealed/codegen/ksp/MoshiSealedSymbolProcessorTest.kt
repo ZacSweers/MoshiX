@@ -4,12 +4,28 @@ import com.google.common.truth.Truth.assertThat
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
+import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessors
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import java.io.File
 
-class MoshiSealedSymbolProcessorTest {
+@RunWith(Parameterized::class)
+class MoshiSealedSymbolProcessorTest(private val incremental: Boolean) {
+
+  companion object {
+    @JvmStatic
+    @Parameterized.Parameters(name = "incremental={0}")
+    fun data() : Collection<Array<Any>> {
+      return listOf(
+        arrayOf(true),
+        arrayOf(false)
+      )
+    }
+  }
+
   @Test
   fun smokeTest() {
     val source = SourceFile.kotlin("CustomCallable.kt", """
@@ -30,6 +46,7 @@ class MoshiSealedSymbolProcessorTest {
       sources = listOf(source)
       inheritClassPath = true
       symbolProcessors = listOf(MoshiSealedSymbolProcessor())
+      kspIncremental = incremental
     }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)

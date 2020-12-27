@@ -167,8 +167,9 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
       addOriginatingKSFile(type.containingFile!!)
     }
 
+    val ksFile = preparedAdapter.spec.originatingKSFiles().single()
     preparedAdapter.spec.writeTo(codeGenerator)
-    preparedAdapter.proguardConfig.writeTo(codeGenerator)
+    preparedAdapter.proguardConfig.writeTo(codeGenerator, ksFile)
   }
 
   private fun KSClassDeclaration.sealedSubtypes(): Set<KSClassDeclaration> {

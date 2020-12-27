@@ -16,6 +16,8 @@
 package dev.zacsweers.moshix.sealed.codegen.ksp
 
 import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.Dependencies
+import com.google.devtools.ksp.symbol.KSFile
 import com.squareup.kotlinpoet.ClassName
 
 /**
@@ -32,14 +34,18 @@ import com.squareup.kotlinpoet.ClassName
 internal data class ProguardConfig(
   val targetClass: ClassName,
   val adapterName: String,
-  val adapterConstructorParams: List<String>,
+  val adapterConstructorParams: List<String>
 ) {
   private val outputFile = "META-INF/proguard/moshi-sealed-${targetClass.canonicalName}.pro"
 
   /** Writes this to `filer`. */
-  fun writeTo(codeGenerator: CodeGenerator) {
-    codeGenerator.createNewFile("", outputFile, "").bufferedWriter()
-      .use(::writeTo)
+  fun writeTo(codeGenerator: CodeGenerator, originatingKSFile: KSFile) {
+    codeGenerator.createNewFile(
+      Dependencies(false, originatingKSFile),
+      "",
+      outputFile,
+      ""
+    ).bufferedWriter().use(::writeTo)
   }
 
   private fun writeTo(out: Appendable): Unit = out.run {
