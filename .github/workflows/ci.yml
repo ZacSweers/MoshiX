@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # No 9, 10, or 12 because Kapt
         java_version: [ 1.8, 11, 13, 14, 15 ]
         ksp_enabled: [ true, false ]
         ksp_incremental_enabled: [ true, false ]
