@@ -13,11 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
   id("symbol-processing") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
   id("com.vanniktech.maven.publish")
   id("dev.zacsweers.autoservice.ksp")
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+  kotlinOptions {
+    @Suppress("SuspiciousCollectionReassignment")
+    freeCompilerArgs += listOf("-Xopt-in=kotlin.RequiresOptIn")
+  }
 }
 
 dependencies {
@@ -34,5 +43,5 @@ dependencies {
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Kotlin.Ksp.ksp)
   testImplementation(Dependencies.Kotlin.reflect)
-  testImplementation(project(":ksp-test-util"))
+  testImplementation(Dependencies.Testing.kspCompileTesting)
 }

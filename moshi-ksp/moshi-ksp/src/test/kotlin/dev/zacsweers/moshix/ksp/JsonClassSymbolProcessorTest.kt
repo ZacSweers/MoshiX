@@ -21,12 +21,15 @@ import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.java
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.kspArgs
+import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessors
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KType
@@ -36,7 +39,20 @@ import kotlin.reflect.KVariance.INVARIANT
 import kotlin.reflect.full.createType
 
 /** Execute kotlinc to confirm that either files are generated or errors are printed. */
-class JsonClassSymbolProcessorTest {
+@RunWith(Parameterized::class)
+class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
+
+  companion object {
+    @JvmStatic
+    @Parameterized.Parameters(name = "incremental={0}")
+    fun data() : Collection<Array<Any>> {
+      return listOf(
+        arrayOf(true),
+        arrayOf(false)
+      )
+    }
+  }
+
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
   @Test
@@ -118,7 +134,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.Interface: must be a Kotlin class"
+      "@JsonClass can't be applied to test.Interface: must be a Kotlin class"
     )
   }
 
@@ -155,7 +171,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.AbstractClass: must not be abstract"
+      "@JsonClass can't be applied to test.AbstractClass: must not be abstract"
     )
   }
 
@@ -175,7 +191,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.SealedClass: must not be sealed"
+      "@JsonClass can't be applied to test.SealedClass: must not be sealed"
     )
   }
 
@@ -197,7 +213,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.Outer.InnerClass: must not be an inner class"
+      "@JsonClass can't be applied to test.Outer.InnerClass: must not be an inner class"
     )
   }
 
@@ -219,7 +235,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass with 'generateAdapter = \"true\"' can't be applied to test.KotlinEnum: code gen for enums is not supported or necessary"
+      "@JsonClass with 'generateAdapter = \"true\"' can't be applied to test.KotlinEnum: code gen for enums is not supported or necessary"
     )
   }
 
@@ -243,7 +259,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to LocalClass: must not be local"
+      "@JsonClass can't be applied to LocalClass: must not be local"
     )
   }
 
@@ -263,7 +279,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.PrivateClass: must be internal or public"
+      "@JsonClass can't be applied to test.PrivateClass: must be internal or public"
     )
   }
 
@@ -285,7 +301,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.ObjectDeclaration: must be a Kotlin class"
+      "@JsonClass can't be applied to test.ObjectDeclaration: must be a Kotlin class"
     )
   }
 
@@ -307,7 +323,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to expression: must be a Kotlin class"
+      "@JsonClass can't be applied to expression: must be a Kotlin class"
     )
   }
 
@@ -327,7 +343,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: No default value for transient property a"
+      "No default value for transient property a"
     )
   }
 
@@ -348,7 +364,7 @@ class JsonClassSymbolProcessorTest {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: No property for required constructor parameter a"
+      "No property for required constructor parameter a"
     )
   }
 
@@ -781,6 +797,7 @@ class JsonClassSymbolProcessorTest {
         symbolProcessors = listOf(JsonClassSymbolProcessor())
         sources = sourceFiles.asList()
         verbose = false
+        kspIncremental = incremental
       }
   }
 

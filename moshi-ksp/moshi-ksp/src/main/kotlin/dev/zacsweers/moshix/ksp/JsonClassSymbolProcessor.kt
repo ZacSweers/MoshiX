@@ -2,10 +2,12 @@ package dev.zacsweers.moshix.ksp
 
 import com.google.auto.service.AutoService
 import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.Origin.KOTLIN
 import com.squareup.kotlinpoet.AnnotationSpec
@@ -92,6 +94,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
 
         if (!jsonClassAnnotation.getMember<Boolean>("generateAdapter")) return@forEach
 
+        val originatingFile = type.containingFile!!
         val adapterGenerator = adapterGenerator(logger, resolver, type)
         try {
           val preparedAdapter = adapterGenerator
@@ -99,11 +102,12 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
               spec.toBuilder()
                 .apply {
                   generatedAnnotation?.let(::addAnnotation)
+                  addOriginatingKSFile(originatingFile)
                 }
                 .build()
             }
           preparedAdapter.spec.writeTo(codeGenerator)
-          preparedAdapter.proguardConfig?.writeTo(codeGenerator)
+          preparedAdapter.proguardConfig?.writeTo(codeGenerator, originatingFile)
         } catch (e: Exception) {
           logger.error(
             "Error preparing ${type.simpleName.asString()}: ${e.stackTrace.joinToString("\n")}")
@@ -115,10 +119,15 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     logger.reportErrors()
   }
 
-  private fun ProguardConfig.writeTo(codeGenerator: CodeGenerator) {
+  private fun ProguardConfig.writeTo(codeGenerator: CodeGenerator, originatingKSFile: KSFile) {
     // TODO outputFile needs to be public
     val name = "META-INF/proguard/moshi-${targetClass.canonicalName}"
-    val file = codeGenerator.createNewFile("", name, "pro")
+    val file = codeGenerator.createNewFile(
+      Dependencies(false, originatingKSFile),
+      "",
+      name,
+      "pro"
+    )
     // Don't use writeTo(file) because that tries to handle directories under the hood
     OutputStreamWriter(file, StandardCharsets.UTF_8)
       .use {

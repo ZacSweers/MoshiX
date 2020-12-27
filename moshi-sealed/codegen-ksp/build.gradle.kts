@@ -33,5 +33,5 @@ dependencies {
   testImplementation(Dependencies.Testing.truth)
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Kotlin.Ksp.ksp)
-  testImplementation(project(":ksp-test-util"))
+  testImplementation(Dependencies.Testing.kspCompileTesting)
 }
