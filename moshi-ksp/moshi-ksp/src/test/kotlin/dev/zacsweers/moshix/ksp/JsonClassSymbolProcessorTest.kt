@@ -134,7 +134,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.Interface: must be a Kotlin class"
+      "@JsonClass can't be applied to test.Interface: must be a Kotlin class"
     )
   }
 
@@ -171,7 +171,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.AbstractClass: must not be abstract"
+      "@JsonClass can't be applied to test.AbstractClass: must not be abstract"
     )
   }
 
@@ -191,7 +191,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.SealedClass: must not be sealed"
+      "@JsonClass can't be applied to test.SealedClass: must not be sealed"
     )
   }
 
@@ -213,7 +213,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.Outer.InnerClass: must not be an inner class"
+      "@JsonClass can't be applied to test.Outer.InnerClass: must not be an inner class"
     )
   }
 
@@ -235,7 +235,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass with 'generateAdapter = \"true\"' can't be applied to test.KotlinEnum: code gen for enums is not supported or necessary"
+      "@JsonClass with 'generateAdapter = \"true\"' can't be applied to test.KotlinEnum: code gen for enums is not supported or necessary"
     )
   }
 
@@ -259,7 +259,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to LocalClass: must not be local"
+      "@JsonClass can't be applied to LocalClass: must not be local"
     )
   }
 
@@ -279,7 +279,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.PrivateClass: must be internal or public"
+      "@JsonClass can't be applied to test.PrivateClass: must be internal or public"
     )
   }
 
@@ -301,7 +301,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to test.ObjectDeclaration: must be a Kotlin class"
+      "@JsonClass can't be applied to test.ObjectDeclaration: must be a Kotlin class"
     )
   }
 
@@ -323,7 +323,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: @JsonClass can't be applied to expression: must be a Kotlin class"
+      "@JsonClass can't be applied to expression: must be a Kotlin class"
     )
   }
 
@@ -343,7 +343,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: No default value for transient property a"
+      "No default value for transient property a"
     )
   }
 
@@ -364,7 +364,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains(
-      "error: No property for required constructor parameter a"
+      "No property for required constructor parameter a"
     )
   }
 
