@@ -28,14 +28,13 @@ plugins {
   kotlin("jvm") version Dependencies.Kotlin.version apply false
   id("org.jetbrains.dokka") version Dependencies.Kotlin.dokkaVersion apply false
   id("com.vanniktech.maven.publish") version "0.13.0" apply false
-  id("dev.zacsweers.autoservice.ksp") version "0.2.0-SNAPSHOT" apply false
+  id("dev.zacsweers.autoservice.ksp") version "0.2.0" apply false
 }
 
 subprojects {
   repositories {
     mavenCentral()
     google()
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
     // Required for Dokka
     exclusiveContent {
       forRepository {
