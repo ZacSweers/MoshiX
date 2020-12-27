@@ -15,8 +15,6 @@ jobs:
         exclude:
           - ksp_enabled: false
             ksp_incremental_enabled: true
-          - ksp_enabled: false
-            ksp_incremental_enabled: false
       fail-fast: false
     steps:
       - name: Checkout
