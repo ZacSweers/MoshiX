@@ -12,6 +12,7 @@ jobs:
         java_version: [ 1.8, 11, 13, 14, 15 ]
         ksp_enabled: [ true, false ]
         ksp_incremental_enabled: [ true, false ]
+        # Don't test incremental KSP if KSP itself isn't enabled
         exclude:
           - ksp_enabled: false
             ksp_incremental_enabled: true
