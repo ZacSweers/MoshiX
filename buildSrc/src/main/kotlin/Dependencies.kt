@@ -32,7 +32,7 @@ object Dependencies {
   }
 
   object Kotlin {
-    private const val version = "1.4.21"
+    const val version = "1.4.21"
     const val dokkaVersion = "1.4.20"
     const val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
     const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.1.0"
@@ -41,7 +41,7 @@ object Dependencies {
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
 
     object Ksp {
-      private const val version = "1.4.20-dev-experimental-20210107"
+      const val version = "1.4.20-dev-experimental-20210107"
       const val api = "com.google.devtools.ksp:symbol-processing-api:$version"
       const val ksp = "com.google.devtools.ksp:symbol-processing:$version"
     }
