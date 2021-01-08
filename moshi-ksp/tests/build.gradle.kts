@@ -16,7 +16,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("symbol-processing") version Dependencies.Kotlin.Ksp.version
+  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
 }
 

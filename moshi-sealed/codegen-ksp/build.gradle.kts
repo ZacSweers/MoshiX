@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 plugins {
-  id("symbol-processing") version Dependencies.Kotlin.Ksp.version
+  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
   id("com.vanniktech.maven.publish")
   id("dev.zacsweers.autoservice.ksp")
