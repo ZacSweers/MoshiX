@@ -21,7 +21,7 @@ object Dependencies {
 
   object AutoService {
     private const val version = "1.0-rc7"
-    const val annotations = "com.google.auto.service:auto-service-annotations:1.0-rc07"
+    const val annotations = "com.google.auto.service:auto-service-annotations:1.0-rc7"
     const val ksp = "dev.zacsweers.autoservice:auto-service-ksp:0.3.0"
   }
 
