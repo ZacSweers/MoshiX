@@ -32,6 +32,7 @@ dependencies {
   implementation(Dependencies.AutoService.annotations)
   ksp(Dependencies.AutoService.ksp)
   compileOnly(Dependencies.Kotlin.Ksp.api)
+  compileOnly(Dependencies.Kotlin.compilerEmbeddable)
 
   implementation(Dependencies.asm)
   implementation(Dependencies.KotlinPoet.kotlinPoet)

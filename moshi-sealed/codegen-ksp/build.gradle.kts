@@ -23,6 +23,7 @@ dependencies {
   implementation(Dependencies.AutoService.annotations)
   ksp(Dependencies.AutoService.ksp)
   compileOnly(Dependencies.Kotlin.Ksp.api)
+  compileOnly(Dependencies.Kotlin.compilerEmbeddable)
 
   implementation(Dependencies.KotlinPoet.kotlinPoet)
   implementation(Dependencies.Moshi.adapters)
