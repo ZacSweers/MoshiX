@@ -28,7 +28,6 @@ plugins {
   kotlin("jvm") version Dependencies.Kotlin.version apply false
   id("org.jetbrains.dokka") version Dependencies.Kotlin.dokkaVersion apply false
   id("com.vanniktech.maven.publish") version "0.13.0" apply false
-  id("dev.zacsweers.autoservice.ksp") version "0.2.1" apply false
 }
 
 subprojects {

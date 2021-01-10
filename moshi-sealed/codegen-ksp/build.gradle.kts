@@ -17,11 +17,11 @@ plugins {
   id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
   id("com.vanniktech.maven.publish")
-  id("dev.zacsweers.autoservice.ksp")
 }
 
 dependencies {
   implementation(Dependencies.AutoService.annotations)
+  ksp(Dependencies.AutoService.ksp)
   compileOnly(Dependencies.Kotlin.Ksp.api)
 
   implementation(Dependencies.KotlinPoet.kotlinPoet)

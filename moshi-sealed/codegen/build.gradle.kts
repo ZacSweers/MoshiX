@@ -18,11 +18,11 @@ plugins {
   kotlin("jvm")
   kotlin("kapt")
   id("com.vanniktech.maven.publish")
-  id("dev.zacsweers.autoservice.ksp")
 }
 
 dependencies {
   implementation(Dependencies.AutoService.annotations)
+  ksp(Dependencies.AutoService.ksp)
   kapt(Dependencies.Incap.processor)
   compileOnly(Dependencies.Incap.annotations)
 
