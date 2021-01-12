@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 0.7.1
+-------------
+
+_2021-01-11_
+
+* Update to KSP `1.4.20-dev-experimental-20210111`.
+
 Version 0.7.0
 -------------
 
