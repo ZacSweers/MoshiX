@@ -16,10 +16,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("symbol-processing") version Dependencies.Kotlin.Ksp.version
+  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
   id("com.vanniktech.maven.publish")
-  id("dev.zacsweers.autoservice.ksp")
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -31,17 +30,22 @@ tasks.withType<KotlinCompile>().configureEach {
 
 dependencies {
   implementation(Dependencies.AutoService.annotations)
+  ksp(Dependencies.AutoService.ksp)
   compileOnly(Dependencies.Kotlin.Ksp.api)
+  compileOnly(Dependencies.Kotlin.compilerEmbeddable)
 
   implementation(Dependencies.asm)
   implementation(Dependencies.KotlinPoet.kotlinPoet)
   implementation(Dependencies.Moshi.moshi)
-  implementation(Dependencies.Kotlin.compilerEmbeddable)
 
   testImplementation(Dependencies.Kotlin.Ksp.api)
   testImplementation(Dependencies.Testing.truth)
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Kotlin.Ksp.ksp)
   testImplementation(Dependencies.Kotlin.reflect)
-  testImplementation(Dependencies.Testing.kspCompileTesting)
+  // TODO re-enable with new release
+//  testImplementation(Dependencies.Testing.kspCompileTesting)
+  testImplementation(Dependencies.Kotlin.Ksp.ksp)
+  testImplementation(Dependencies.Testing.compileTesting)
+  testImplementation(Dependencies.Kotlin.compilerEmbeddable)
 }

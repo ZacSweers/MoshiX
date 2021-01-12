@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 plugins {
-  id("symbol-processing") version Dependencies.Kotlin.Ksp.version
+  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
   kotlin("kapt")
   id("com.vanniktech.maven.publish")
-  id("dev.zacsweers.autoservice.ksp")
 }
 
 dependencies {
   implementation(Dependencies.AutoService.annotations)
+  ksp(Dependencies.AutoService.ksp)
   kapt(Dependencies.Incap.processor)
   compileOnly(Dependencies.Incap.annotations)
 

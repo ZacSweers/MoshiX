@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 plugins {
-  id("symbol-processing") version Dependencies.Kotlin.Ksp.version
+  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
   id("com.vanniktech.maven.publish")
-  id("dev.zacsweers.autoservice.ksp")
 }
 
 dependencies {
   implementation(Dependencies.AutoService.annotations)
+  ksp(Dependencies.AutoService.ksp)
   compileOnly(Dependencies.Kotlin.Ksp.api)
+  compileOnly(Dependencies.Kotlin.compilerEmbeddable)
 
   implementation(Dependencies.KotlinPoet.kotlinPoet)
   implementation(Dependencies.Moshi.adapters)
@@ -33,5 +34,9 @@ dependencies {
   testImplementation(Dependencies.Testing.truth)
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Kotlin.Ksp.ksp)
-  testImplementation(Dependencies.Testing.kspCompileTesting)
+  // TODO re-enable with new release
+//  testImplementation(Dependencies.Testing.kspCompileTesting)
+  testImplementation(Dependencies.Kotlin.Ksp.ksp)
+  testImplementation(Dependencies.Testing.compileTesting)
+  testImplementation(Dependencies.Kotlin.compilerEmbeddable)
 }
