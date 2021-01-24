@@ -20,6 +20,14 @@ pluginManagement {
     gradlePluginPortal()
     jcenter()
     google()
+    // Kotlin EAPs, only tested on CI shadow jobs
+    maven("https://dl.bintray.com/kotlin/kotlin-eap") {
+      name = "Kotlin-eap"
+      content {
+        // this repository *only* contains Kotlin artifacts (don't try others here)
+        includeGroupByRegex("org\\.jetbrains.*")
+      }
+    }
   }
 }
 
