@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 plugins {
-  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
+  // TODO use ksp version again when ksp supports 1.4.30
+  //  https://github.com/google/ksp/issues/267
+//  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
   kotlin("kapt")
   id("com.vanniktech.maven.publish")
@@ -22,7 +24,7 @@ plugins {
 
 dependencies {
   implementation(Dependencies.AutoService.annotations)
-  ksp(Dependencies.AutoService.ksp)
+  kapt(Dependencies.AutoService.processor)
   kapt(Dependencies.Incap.processor)
   compileOnly(Dependencies.Incap.annotations)
 
