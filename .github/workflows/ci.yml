@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: JDK ${{ matrix.java_version }} - KSP ${{ matrix.ksp_enabled }} - Incremental ${{ matrix.ksp_incremental_enabled }}
+    name: JDK ${{ matrix.java_version }} - KSP ${{ matrix.ksp_enabled }} - Incremental ${{ matrix.ksp_incremental_enabled }} - Kotlin ${{ matrix.kotlin_version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -13,10 +13,13 @@ jobs:
         kotlin_version: [ 1.4.21, 1.4.30-RC ]
         ksp_enabled: [ true, false ]
         ksp_incremental_enabled: [ true, false ]
-        # Don't test incremental KSP if KSP itself isn't enabled
         exclude:
+          # Don't test incremental KSP if KSP itself isn't enabled
           - ksp_enabled: false
             ksp_incremental_enabled: true
+          # KSP not compatible with Kotlin 1.4.30 yet
+          - ksp_enabled: false
+            kotlin_version: 1.4.30-RC
       fail-fast: false
     env:
       MOSHIX_KOTLIN: ${{ matrix.kotlin_version }}
