@@ -36,14 +36,18 @@ include("moshi-adapters")
 include("moshi-ksp:moshi-ksp")
 include("moshi-ksp:tests")
 include("moshi-metadata-reflect")
-include("moshi-records-reflect")
 include("moshi-sealed:runtime")
 include("moshi-sealed:codegen")
 include("moshi-sealed:codegen-ksp")
-include("moshi-sealed:java-sealed-reflect")
 include("moshi-sealed:reflect")
 include("moshi-sealed:sample")
 include("moshi-sealed:sample")
-include("moshi-sealed:sealed-interfaces-samples:java")
+
+if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)) {
+  include("moshi-records-reflect")
+  include("moshi-sealed:java-sealed-reflect")
+  include("moshi-sealed:sealed-interfaces-samples:java")
+}
+
 // TODO enable in Kotlin 1.4.30
 //include("moshi-sealed:sealed-interfaces-samples:kotlin")
