@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 import dev.zacsweers.moshix.records.RecordsJsonAdapterFactory;
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull;
@@ -118,7 +119,7 @@ public final class JavaSealedJsonAdapterFactoryTest {
 
         Success success = (Success) o;
 
-        return value != null ? value.equals(success.value) : success.value == null;
+        return Objects.equals(value, success.value);
       }
 
       @Override
@@ -143,7 +144,7 @@ public final class JavaSealedJsonAdapterFactoryTest {
 
         Error error = (Error) o;
 
-        return error_logs != null ? error_logs.equals(error.error_logs) : error.error_logs == null;
+        return Objects.equals(error_logs, error.error_logs);
       }
 
       @Override
