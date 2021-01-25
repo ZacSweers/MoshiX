@@ -110,6 +110,21 @@ public final class JavaSealedJsonAdapterFactoryTest {
       Success(String value) {
         this.value = value;
       }
+
+      @Override
+      public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+
+        Success success = (Success) o;
+
+        return value != null ? value.equals(success.value) : success.value == null;
+      }
+
+      @Override
+      public int hashCode() {
+        return value != null ? value.hashCode() : 0;
+      }
     }
 
     @TypeLabel(label = "error")
@@ -119,6 +134,21 @@ public final class JavaSealedJsonAdapterFactoryTest {
 
       Error(Map<String, Object> error_logs) {
         this.error_logs = error_logs;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+
+        Error error = (Error) o;
+
+        return error_logs != null ? error_logs.equals(error.error_logs) : error.error_logs == null;
+      }
+
+      @Override
+      public int hashCode() {
+        return error_logs != null ? error_logs.hashCode() : 0;
       }
     }
   }
