@@ -9,6 +9,10 @@ Extensions for Moshi
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository][snap].
 
+### Local development
+
+This project requires JDK 15 as some projects support sealed interfaces/classes in Java.
+
 License
 --------
 
