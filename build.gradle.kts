@@ -57,10 +57,25 @@ subprojects {
       }
     }
   }
+  val toolChainVersion = project.findProperty("moshix.javaLanguageVersion")?.toString() ?: "8"
+  val usePreview = project.findProject("moshix.javaPreview")?.toString()?.toBoolean() ?: false
   pluginManager.withPlugin("java") {
     configure<JavaPluginExtension> {
-      sourceCompatibility = JavaVersion.VERSION_1_8
-      targetCompatibility = JavaVersion.VERSION_1_8
+      toolchain {
+        languageVersion.set(JavaLanguageVersion.of(toolChainVersion))
+      }
+    }
+
+    if (usePreview) {
+      tasks.withType<JavaCompile>().configureEach {
+        options.compilerArgs.add("--enable-preview")
+      }
+
+      tasks.withType<Test>().configureEach {
+        // TODO why doesn't add() work?
+        //  jvmArgs!!.add("--enable-preview")
+        jvmArgs = listOf("--enable-preview")
+      }
     }
   }
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
