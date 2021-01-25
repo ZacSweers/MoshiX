@@ -18,7 +18,7 @@ jobs:
           - ksp_enabled: false
             ksp_incremental_enabled: true
           # KSP not compatible with Kotlin 1.4.30 yet
-          - ksp_enabled: false
+          - ksp_enabled: true
             kotlin_version: 1.4.30-RC
       fail-fast: false
     env:
