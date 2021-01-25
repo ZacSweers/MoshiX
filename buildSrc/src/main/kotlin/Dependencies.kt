@@ -21,6 +21,7 @@ object Dependencies {
 
   object AutoService {
     const val annotations = "com.google.auto.service:auto-service-annotations:1.0-rc7"
+    const val processor = "com.google.auto.service:auto-service:1.0-rc7"
     const val ksp = "dev.zacsweers.autoservice:auto-service-ksp:0.3.0"
   }
 
@@ -31,11 +32,11 @@ object Dependencies {
   }
 
   object Kotlin {
-    const val version = "1.4.21"
+    val version = System.getenv()["MOSHIX_KOTLIN"] ?: "1.4.21"
     const val dokkaVersion = "1.4.20"
-    const val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
+    val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
     const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.1.0"
-    const val compilerEmbeddable = "org.jetbrains.kotlin:kotlin-compiler-embeddable:$version"
+    val compilerEmbeddable = "org.jetbrains.kotlin:kotlin-compiler-embeddable:$version"
     const val jvmTarget = "1.8"
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
 
