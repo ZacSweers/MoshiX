@@ -10,6 +10,7 @@ jobs:
       matrix:
         # No 9, 10, or 12 because Kapt
         java_version: [ 1.8, 11, 13, 14, 15 ]
+        kotlin_version: [ 1.4.21, 1.4.30-RC ]
         ksp_enabled: [ true, false ]
         ksp_incremental_enabled: [ true, false ]
         # Don't test incremental KSP if KSP itself isn't enabled
@@ -17,6 +18,9 @@ jobs:
           - ksp_enabled: false
             ksp_incremental_enabled: true
       fail-fast: false
+    env:
+      MOSHIX_KOTLIN: ${{ matrix.kotlin_version }}
+      MOSHIX_JAVA: ${{ matrix.java_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v1
