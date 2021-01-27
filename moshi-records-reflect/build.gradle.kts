@@ -16,11 +16,10 @@
 
 plugins {
   `java-library`
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
-  implementation(project(":moshi-sealed:runtime"))
-  implementation(Dependencies.Moshi.adapters)
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)
 }
