@@ -1,6 +1,70 @@
 Changelog
 =========
 
+Version 0.8.0-alpha
+-------------------
+
+_2021-01-27_
+
+* **New:** Experimental support for Java `record` classes via new `moshi-records-reflect` artifact. See 
+`RecordsJsonAdapterFactory`. Requires JDK 15 + `--enable-preview`.
+  ```java
+  Moshi moshi = new Moshi.Builder()
+      .add(new RecordsJsonAdapterFactory())
+      .build();
+  
+  final record Message(String value) {
+  }
+  ```
+
+* **New:** Experimental support for Java `sealed` classes and interfaces in moshi-sealed via new 
+  `moshi-sealed-java-sealed-reflect` artifact. See `JavaSealedJsonAdapterFactory`.  Requires JDK 15 + `--enable-preview`.
+  ```java
+  Moshi moshi = new Moshi.Builder()
+      .add(new JavaSealedJsonAdapterFactory())
+      .add(new RecordsJsonAdapterFactory())
+      .build();
+  
+  @JsonClass(generateAdapter = true, generator = "sealed:type")
+  sealed interface MessageInterface
+      permits MessageInterface.Success, MessageInterface.Error {
+  
+    @TypeLabel(label = "success", alternateLabels = {"successful"})
+    final record Success(String value) implements MessageInterface {
+    }
+    
+    @TypeLabel(label = "error")
+    final record Error(Map<String, Object> error_logs) implements MessageInterface {
+    }
+  }
+  ```
+
+* **New:** `@AdaptedBy` annotation support in `moshi-adapters`. This is analogous to Gson's `@JsonAdapter` annotation,
+ allowing you to annotate a class or a property with it to indicate which `JsonAdapter` or `JsonAdapter.Factory`
+ should be used to encode it.
+ ```Kotlin
+  val moshi = Moshi.Builder()
+    .add(AdaptedBy.Factory())
+    .build()
+  
+  @AdaptedBy(StringAliasAdapter::class)
+  data class StringAlias(val value: String)
+  
+  class StringAliasAdapter : JsonAdapter<StringAlias>() {
+    override fun fromJson(reader: JsonReader): StringAlias? {
+      return StringAlias(reader.nextString())
+    }
+  
+    override fun toJson(writer: JsonWriter, value: StringAlias?) {
+      if (value == null) {
+        writer.nullValue()
+        return
+      }
+      writer.value(value.value)
+    }
+  }
+  ```
+
 Version 0.7.1
 -------------
 
