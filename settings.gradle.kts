@@ -20,6 +20,14 @@ pluginManagement {
     gradlePluginPortal()
     jcenter()
     google()
+    // Kotlin EAPs, only tested on CI shadow jobs
+    maven("https://dl.bintray.com/kotlin/kotlin-eap") {
+      name = "Kotlin-eap"
+      content {
+        // this repository *only* contains Kotlin artifacts (don't try others here)
+        includeGroupByRegex("org\\.jetbrains.*")
+      }
+    }
   }
 }
 
@@ -33,3 +41,13 @@ include("moshi-sealed:codegen")
 include("moshi-sealed:codegen-ksp")
 include("moshi-sealed:reflect")
 include("moshi-sealed:sample")
+include("moshi-sealed:sample")
+
+if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)) {
+  include("moshi-records-reflect")
+  include("moshi-sealed:java-sealed-reflect")
+  include("moshi-sealed:sealed-interfaces-samples:java")
+}
+
+// TODO enable in Kotlin 1.4.30
+//include("moshi-sealed:sealed-interfaces-samples:kotlin")

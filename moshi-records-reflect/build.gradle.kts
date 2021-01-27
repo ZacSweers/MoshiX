@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2020 Zac Sweers
+ * Copyright (c) 2021 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,21 +15,12 @@
  */
 
 plugins {
-  `kotlin-dsl`
+  `java-library`
 }
 
-kotlinDslPluginOptions {
-  experimentalWarning.set(false)
-}
-
-repositories {
-  mavenCentral()
-  // Kotlin EAPs, only tested on CI shadow jobs
-  maven("https://dl.bintray.com/kotlin/kotlin-eap") {
-    name = "Kotlin-eap"
-    content {
-      // this repository *only* contains Kotlin artifacts (don't try others here)
-      includeGroupByRegex("org\\.jetbrains.*")
-    }
-  }
+dependencies {
+  implementation(project(":moshi-sealed:runtime"))
+  implementation(Dependencies.Moshi.adapters)
+  testImplementation(Dependencies.Testing.junit)
+  testImplementation(Dependencies.Testing.truth)
 }

@@ -48,11 +48,34 @@ subprojects {
         includeModule("org.jetbrains", "markdown")
       }
     }
+    // Kotlin EAPs, only tested on CI shadow jobs
+    maven("https://dl.bintray.com/kotlin/kotlin-eap") {
+      name = "Kotlin-eap"
+      content {
+        // this repository *only* contains Kotlin artifacts (don't try others here)
+        includeGroupByRegex("org\\.jetbrains.*")
+      }
+    }
   }
+  val toolChainVersion = project.findProperty("moshix.javaLanguageVersion")?.toString() ?: "8"
+  val usePreview = project.hasProperty("moshix.javaPreview")
   pluginManager.withPlugin("java") {
     configure<JavaPluginExtension> {
-      sourceCompatibility = JavaVersion.VERSION_1_8
-      targetCompatibility = JavaVersion.VERSION_1_8
+      toolchain {
+        languageVersion.set(JavaLanguageVersion.of(toolChainVersion))
+      }
+    }
+
+    if (usePreview) {
+      project.tasks.withType<JavaCompile>().configureEach {
+        options.compilerArgs.add("--enable-preview")
+      }
+
+      project.tasks.withType<Test>().configureEach {
+        // TODO why doesn't add() work?
+        //  jvmArgs!!.add("--enable-preview")
+        jvmArgs = listOf("--enable-preview")
+      }
     }
   }
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
@@ -63,7 +86,7 @@ subprojects {
         freeCompilerArgs += Dependencies.Kotlin.defaultFreeCompilerArgs
       }
     }
-    if (project.name != "sample") {
+    if (project.name != "sample" && !project.path.contains("sample")) {
       configure<KotlinProjectExtension> {
         explicitApi()
       }
