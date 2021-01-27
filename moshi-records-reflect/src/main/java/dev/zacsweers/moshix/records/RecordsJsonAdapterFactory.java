@@ -13,10 +13,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,7 +35,23 @@ public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
       Type type, Set<? extends Annotation> annotations, Moshi moshi) {
     if (!annotations.isEmpty()) { return null; }
 
+    if (!(type instanceof Class) && !(type instanceof ParameterizedType)) {
+      return null;
+    }
+
     var rawType = Types.getRawType(type);
+
+    Map<String, Type> mappedTypeArgs = null;
+    if (type instanceof ParameterizedType parameterizedType) {
+      Type[] typeArgs = parameterizedType.getActualTypeArguments();
+      var typeVars = rawType.getTypeParameters();
+      mappedTypeArgs = new LinkedHashMap<>(typeArgs.length);
+      for (int i = 0; i < typeArgs.length; ++i) {
+        var typeVarName = typeVars[i].getName();
+        var materialized = typeArgs[i];
+        mappedTypeArgs.put(typeVarName, materialized);
+      }
+    }
     if (!rawType.isRecord()) { return null; }
     var components = rawType.getRecordComponents();
     var bindings = new LinkedHashMap<String, ComponentBinding<?>>();
@@ -42,6 +61,17 @@ public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
       constructorParams[i] = component.getType();
       var name = component.getName();
       var componentType = component.getGenericType();
+      if (componentType instanceof TypeVariable<?> typeVariable) {
+        var typeVarName = typeVariable.getName();
+        if (mappedTypeArgs == null) {
+          throw new AssertionError("No mapped type arguments found for type '" + typeVarName + "'");
+        }
+        var mappedType = mappedTypeArgs.get(typeVarName);
+        if (mappedType == null) {
+          throw new AssertionError("No materialized type argument found for type '" + typeVarName + "'");
+        }
+        componentType = mappedType;
+      }
       var jsonName = name;
       Set<Annotation> qualifiers = null;
       for (var annotation : component.getDeclaredAnnotations()) {
