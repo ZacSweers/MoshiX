@@ -24,4 +24,13 @@ public final class RecordJsonAdapterFactoryTest {
         .isEqualTo(new GenericRecord<>("Okay!"));
   }
 
+  @Test
+  public void genericBoundedRecord() throws IOException {
+    var adapter = moshi.<GenericBoundedRecord<Integer>>adapter(
+        Types.newParameterizedType(GenericBoundedRecord.class,
+        Integer.class));
+    assertThat(adapter.fromJson("{\"value\":4}"))
+        .isEqualTo(new GenericBoundedRecord<>(4));
+  }
+
 }

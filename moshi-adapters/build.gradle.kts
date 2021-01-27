@@ -31,6 +31,7 @@ tasks.named<KotlinCompile>("compileTestKotlin") {
 dependencies {
   implementation(Dependencies.Moshi.moshi)
   kaptTest(Dependencies.Moshi.codegen)
+  testImplementation(Dependencies.Moshi.kotlin)
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)
 }

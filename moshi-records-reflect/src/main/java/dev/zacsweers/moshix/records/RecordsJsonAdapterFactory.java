@@ -19,12 +19,11 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * A {@link JsonAdapter.Factory} that supports JDK 14+ {@code record} classes via reflection.
+ * A {@link JsonAdapter.Factory} that supports Java {@code record} classes via reflection.
  * <p>
  * <em>NOTE:</em> Java records are currently in preview.
  */

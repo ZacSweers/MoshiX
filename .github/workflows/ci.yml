@@ -42,13 +42,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java_version }}
-      - name: Configure Gradle
-        # Initial gradle configuration, install dependencies, etc
-        run: ./gradlew help
       - name: Build project
         run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} -Pksp.incremental=${{ matrix.ksp_incremental_enabled }} --stacktrace
       - name: Upload snapshot (main only)
         run: |
           ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9 || true
           ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SONATYPE_USERNAME }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SONATYPE_PASSWORD }}
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java_version == '1.8' && !matrix.ksp_enabled
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java_version == '15' && !matrix.ksp_enabled

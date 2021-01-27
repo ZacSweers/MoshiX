@@ -30,3 +30,31 @@ data class Message(
   @JsonString val data: String
 )
 ```
+
+### `AdaptedBy`
+
+An annotation that indicates the Moshi `JsonAdapter` or `JsonAdapter.Factory` to use
+with a class or property (as a `@JsonQualifier`).
+
+```Kotlin
+val moshi = Moshi.Builder()
+  .add(AdaptedBy.Factory())
+  .build()
+
+@AdaptedBy(StringAliasAdapter::class)
+data class StringAlias(val value: String)
+
+class StringAliasAdapter : JsonAdapter<StringAlias>() {
+  override fun fromJson(reader: JsonReader): StringAlias? {
+    return StringAlias(reader.nextString())
+  }
+
+  override fun toJson(writer: JsonWriter, value: StringAlias?) {
+    if (value == null) {
+      writer.nullValue()
+      return
+    }
+    writer.value(value.value)
+  }
+}
+```
