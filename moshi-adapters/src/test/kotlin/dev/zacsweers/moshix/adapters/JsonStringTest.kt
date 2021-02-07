@@ -17,9 +17,16 @@ package dev.zacsweers.moshix.adapters
 
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonClass
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi.Builder
 import com.squareup.moshi.adapter
+import org.junit.Assert.assertThrows
 import org.junit.Test
+import retrofit2.Call
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.create
+import retrofit2.http.GET
 
 class JsonStringTest {
   @Test
@@ -67,4 +74,39 @@ class JsonStringTest {
     val type: Int,
     @JsonString val rawJson: String?,
   )
+
+  @Test
+  fun retrofitServiceMethodCase() {
+    //language=JSON
+    val json = "{\"a\":2,\"b\":3,\"c\":[1,2,3]}"
+
+    val moshi = Builder()
+      .add(JsonString.Factory())
+      .build()
+
+    val aService = Retrofit.Builder()
+      .baseUrl("http://example.com/")
+      .callFactory(IdempotentCallFactory(json))
+      .addConverterFactory(MoshiConverterFactory.create(moshi))
+      .build()
+      .create<AService>()
+
+    assertThat(aService.aJsonStringMethod().execute().body()).isEqualTo(json)
+
+    val exception = assertThrows(JsonDataException::class.java) {
+      aService.aNonJsonStringMethod().execute().body()
+    }
+
+    assertThat(exception).hasMessageThat().contains("Expected a string but was BEGIN_OBJECT at path \$")
+  }
+
+  interface AService {
+
+    @JsonString
+    @GET("/")
+    fun aJsonStringMethod(): Call<String>
+
+    @GET("/")
+    fun aNonJsonStringMethod(): Call<String>
+  }
 }
