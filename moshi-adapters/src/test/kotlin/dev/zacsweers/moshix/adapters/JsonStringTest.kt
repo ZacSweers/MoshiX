@@ -20,6 +20,8 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi.Builder
 import com.squareup.moshi.adapter
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import retrofit2.Call
@@ -84,9 +86,13 @@ class JsonStringTest {
       .add(JsonString.Factory())
       .build()
 
+    val server = MockWebServer()
+    server.enqueue(MockResponse().setBody(json))
+    server.enqueue(MockResponse().setBody(json))
+    server.start()
+
     val aService = Retrofit.Builder()
-      .baseUrl("http://example.com/")
-      .callFactory(IdempotentCallFactory(json))
+      .baseUrl(server.url("/"))
       .addConverterFactory(MoshiConverterFactory.create(moshi))
       .build()
       .create<AService>()
@@ -98,6 +104,8 @@ class JsonStringTest {
     }
 
     assertThat(exception).hasMessageThat().contains("Expected a string but was BEGIN_OBJECT at path \$")
+
+    server.shutdown()
   }
 
   interface AService {

@@ -32,6 +32,8 @@ dependencies {
   implementation(Dependencies.Moshi.moshi)
   kaptTest(Dependencies.Moshi.codegen)
   testImplementation(Dependencies.Moshi.kotlin)
+  testImplementation(Dependencies.OkHttp.okHttp)
+  testImplementation(Dependencies.OkHttp.mockWebServer)
   testImplementation(Dependencies.Retrofit.retrofit)
   testImplementation(Dependencies.Retrofit.moshiConverter)
   testImplementation(Dependencies.Testing.junit)
