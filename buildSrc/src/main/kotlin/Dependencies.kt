@@ -62,6 +62,18 @@ object Dependencies {
     const val adapters = "com.squareup.moshi:moshi-adapters:$version"
   }
 
+  object OkHttp {
+    private const val version = "4.9.1"
+    const val okHttp = "com.squareup.okhttp3:okhttp:$version"
+    const val mockWebServer = "com.squareup.okhttp3:mockwebserver:$version"
+  }
+
+  object Retrofit {
+    private const val version = "2.9.0"
+    const val retrofit = "com.squareup.retrofit2:retrofit:$version"
+    const val moshiConverter = "com.squareup.retrofit2:converter-moshi:$version"
+  }
+
   object Testing {
     const val compileTesting = "com.github.tschuchortdev:kotlin-compile-testing:1.3.4"
     const val kspCompileTesting = "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.3.4"

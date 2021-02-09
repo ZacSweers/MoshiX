@@ -26,6 +26,7 @@ import java.lang.reflect.Type
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.annotation.AnnotationTarget.PROPERTY
+import kotlin.annotation.AnnotationTarget.FUNCTION
 
 /**
  * A [JsonQualifier] for use with [String] properties to indicate that their value should be
@@ -46,7 +47,7 @@ import kotlin.annotation.AnnotationTarget.PROPERTY
  */
 @JsonQualifier
 @Retention(RUNTIME)
-@Target(PROPERTY, FIELD)
+@Target(PROPERTY, FIELD, FUNCTION)
 public annotation class JsonString {
   public class Factory : JsonAdapter.Factory {
     override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
