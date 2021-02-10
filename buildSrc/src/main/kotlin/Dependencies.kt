@@ -32,7 +32,7 @@ object Dependencies {
   }
 
   object Kotlin {
-    val version = System.getenv()["MOSHIX_KOTLIN"] ?: "1.4.21"
+    val version = System.getenv()["MOSHIX_KOTLIN"] ?: "1.4.30"
     const val dokkaVersion = "1.4.20"
     val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
     const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.1.0"
@@ -41,7 +41,7 @@ object Dependencies {
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
 
     object Ksp {
-      const val version = "1.4.20-dev-experimental-20210111"
+      const val version = "1.4.30-1.0.0-alpha02"
       const val api = "com.google.devtools.ksp:symbol-processing-api:$version"
       const val ksp = "com.google.devtools.ksp:symbol-processing:$version"
     }
