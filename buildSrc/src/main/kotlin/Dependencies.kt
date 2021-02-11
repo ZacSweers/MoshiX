@@ -22,7 +22,7 @@ object Dependencies {
   object AutoService {
     const val annotations = "com.google.auto.service:auto-service-annotations:1.0-rc7"
     const val processor = "com.google.auto.service:auto-service:1.0-rc7"
-    const val ksp = "dev.zacsweers.autoservice:auto-service-ksp:0.3.0"
+    const val ksp = "dev.zacsweers.autoservice:auto-service-ksp:0.3.2"
   }
 
   object Incap {
