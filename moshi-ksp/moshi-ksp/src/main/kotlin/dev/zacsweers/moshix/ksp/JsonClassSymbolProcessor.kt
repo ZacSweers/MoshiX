@@ -6,6 +6,7 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSNode
@@ -63,7 +64,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     }
   }
 
-  override fun process(resolver: Resolver) {
+  override fun process(resolver: Resolver): List<KSAnnotated> {
     val generatedAnnotation = generatedOption?.let {
       val annotationType = resolver.getClassDeclarationByName(resolver.getKSNameFromString(it))
         ?: error("Generated annotation type doesn't exist: $it")
@@ -113,6 +114,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
             "Error preparing ${type.simpleName.asString()}: ${e.stackTrace.joinToString("\n")}")
         }
       }
+    return emptyList()
   }
 
   override fun finish() {

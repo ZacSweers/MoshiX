@@ -97,14 +97,14 @@ private val KotlinCompilation.kspCachesDir: File
  */
 private class KspTestExtension(
     options: KspOptions,
-    private val processors: List<SymbolProcessor>,
+    private val inputProcessors: List<SymbolProcessor>,
     logger: KSPLogger
 ) : AbstractKotlinSymbolProcessingExtension(
     options = options,
     logger = logger,
     testMode = false
 ) {
-    override fun loadProcessors() = processors
+    override fun loadProcessors() = inputProcessors
 }
 
 /**
