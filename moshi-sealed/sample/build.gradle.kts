@@ -40,6 +40,7 @@ dependencies {
   implementation(project(":moshi-sealed:runtime"))
   implementation(Dependencies.Moshi.kotlin)
   implementation(project(":moshi-sealed:reflect"))
+  implementation(project(":moshi-sealed:metadata-reflect"))
 
   if (!useKsp) {
     kaptTest(project(":moshi-sealed:codegen"))

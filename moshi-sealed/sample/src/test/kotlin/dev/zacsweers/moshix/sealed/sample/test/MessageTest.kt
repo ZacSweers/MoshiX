@@ -8,6 +8,7 @@ import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+import dev.zacsweers.moshix.sealed.reflect.MetadataMoshiSealedJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.reflect.MoshiSealedJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.sample.Message
 import org.junit.Test
@@ -27,6 +28,13 @@ class MessageTest(type: Type) {
             .build()
     )
     ,
+    METADATA_REFLECT(
+        moshi = Moshi.Builder()
+            .add(MetadataMoshiSealedJsonAdapterFactory())
+            .addLast(KotlinJsonAdapterFactory())
+            .build()
+    )
+    ,
     CODEGEN
   }
 
@@ -36,6 +44,7 @@ class MessageTest(type: Type) {
     fun data(): Collection<Array<*>> {
       return listOf(
           arrayOf(Type.REFLECT),
+          arrayOf(Type.METADATA_REFLECT),
           arrayOf(Type.CODEGEN)
       )
     }
