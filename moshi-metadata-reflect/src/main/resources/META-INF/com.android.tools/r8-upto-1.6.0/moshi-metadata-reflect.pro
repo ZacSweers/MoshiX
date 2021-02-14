@@ -10,8 +10,8 @@
 
 # Keep implementations of service loaded interfaces
 # R8 will automatically handle these these in 1.6+
--keep interface com.squareup.moshi.kotlin.kotlinx.metadata.impl.extensions.MetadataExtensions
--keep class * implements com.squareup.moshi.kotlin.kotlinx.metadata.impl.extensions.MetadataExtensions { public protected *; }
+-keep interface kotlinx.metadata.impl.extensions.MetadataExtensions
+-keep class * implements kotlinx.metadata.impl.extensions.MetadataExtensions { public protected *; }
 
 # Keep generic signatures and annotations at runtime.
 # R8 requires InnerClasses and EnclosingMethod if you keepattributes Signature.

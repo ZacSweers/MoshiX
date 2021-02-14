@@ -9,8 +9,8 @@
 -keepnames class kotlin.jvm.internal.DefaultConstructorMarker
 
 # Keep implementations of service loaded interfaces
--keep interface com.squareup.moshi.kotlin.kotlinx.metadata.impl.extensions.MetadataExtensions
--keep class * implements com.squareup.moshi.kotlin.kotlinx.metadata.impl.extensions.MetadataExtensions { public protected *; }
+-keep interface kotlinx.metadata.impl.extensions.MetadataExtensions
+-keep class * implements kotlinx.metadata.impl.extensions.MetadataExtensions { public protected *; }
 
 # Keep generic signatures and annotations at runtime.
 -keepattributes Signature,RuntimeVisible*Annotations
