@@ -66,7 +66,10 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val generatedAnnotation = generatedOption?.let {
       val annotationType = resolver.getClassDeclarationByName(resolver.getKSNameFromString(it))
-        ?: error("Generated annotation type doesn't exist: $it")
+        ?: run {
+          logger.error("Generated annotation type doesn't exist: $it")
+          return emptyList()
+        }
       AnnotationSpec.builder(annotationType.toClassName())
         .addMember("value = [%S]", JsonClassSymbolProcessor::class.java.canonicalName)
         .addMember("comments = %S", "https://github.com/square/moshi")
@@ -76,7 +79,10 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     val jsonClassType = resolver.getClassDeclarationByName(
       resolver.getKSNameFromString(JSON_CLASS_NAME))
       ?.asType()
-      ?: error("JsonClass type not found on the classpath.")
+      ?: run {
+        logger.error("JsonClass type not found on the classpath.")
+        return emptyList()
+      }
     resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME)
       .asSequence()
       .forEach { type ->
