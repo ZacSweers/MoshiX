@@ -40,6 +40,7 @@ include("moshi-sealed:runtime")
 include("moshi-sealed:codegen")
 include("moshi-sealed:codegen-ksp")
 include("moshi-sealed:reflect")
+include("moshi-sealed:metadata-reflect")
 include("moshi-sealed:sample")
 include("moshi-sealed:sample")
 

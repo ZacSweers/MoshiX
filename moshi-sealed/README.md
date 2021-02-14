@@ -141,6 +141,26 @@ Gradle dependency:
 implementation "dev.zacsweers.moshix:moshi-sealed-reflect:{version}"
 ```
 
+#### kotlinx-metadata based reflection
+
+You can also use the kotlinx-metadata based version of reflection artifact, which cuts off the cost
+of including kotlin-reflect. In your moshi instance construction, use
+`MetadataMoshiSealedJsonAdapterFactory`:
+
+```kotlin
+val moshi = Moshi.Builder()
+    .add(MetadataMoshiSealedJsonAdapterFactory())
+    .add(KotlinJsonAdapterFactory())
+    .build()
+```
+
+Gradle dependency:
+
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-metadata-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-metadata-reflect)
+```gradle
+implementation "dev.zacsweers.moshix:moshi-sealed-metadata-reflect:{version}"
+```
+
 Snapshots of the development version are available in [Sonatype's snapshots repository][snapshots].
 
 License

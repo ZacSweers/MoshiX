@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import dev.zacsweers.moshix.sealed.reflect.MetadataMoshiSealedJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.reflect.MoshiSealedJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.sample.FunctionSpec
 import dev.zacsweers.moshix.sealed.sample.Type.BooleanType
@@ -25,6 +26,13 @@ class ObjectSerializationTest(type: Type) {
         .build()
     )
     ,
+    METADATA_REFLECT(
+      moshi = Moshi.Builder()
+        .add(MetadataMoshiSealedJsonAdapterFactory())
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+    )
+    ,
     CODEGEN
   }
 
@@ -34,6 +42,7 @@ class ObjectSerializationTest(type: Type) {
     fun data(): Collection<Array<*>> {
       return listOf(
         arrayOf(Type.REFLECT),
+        arrayOf(Type.METADATA_REFLECT),
         arrayOf(Type.CODEGEN)
       )
     }
