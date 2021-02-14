@@ -30,13 +30,15 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
     }
     val rawType = Types.getRawType(type)
     if (!rawType.isAnnotationPresent(KOTLIN_METADATA)) return null
-    val kmClass = rawType.header()?.toKmClass() ?: return null
 
     rawType.getAnnotation(JsonClass::class.java)?.let { jsonClass ->
       val generator = jsonClass.generator
       if (!generator.startsWith("sealed:")) {
         return null
       }
+
+      val kmClass = rawType.header()?.toKmClass() ?: return null
+
       val typeLabel = generator.removePrefix("sealed:")
       if (!Flag.IS_SEALED(kmClass.flags)) {
         return null
