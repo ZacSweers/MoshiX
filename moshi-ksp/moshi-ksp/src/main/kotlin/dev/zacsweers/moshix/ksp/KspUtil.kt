@@ -22,7 +22,6 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.KModifier
-import org.jetbrains.kotlin.analyzer.AnalysisResult.CompilationErrorException
 
 internal inline fun <reified T> Resolver.getClassDeclarationByName(): KSClassDeclaration {
   return getClassDeclarationByName(T::class.qualifiedName!!)
@@ -137,11 +136,6 @@ internal fun memberForValue(value: Any) = when (value) {
   is Float -> CodeBlock.of("%Lf", value)
 //  is Char -> CodeBlock.of("'%L'", characterLiteralWithoutSingleQuotes(value)) // TODO public?
   else -> CodeBlock.of("%L", value)
-}
-
-internal fun KSPLogger.errorAndThrow(message: String, node: KSNode? = null): Nothing {
-  error(message, node)
-  throw CompilationErrorException()
 }
 
 internal inline fun KSPLogger.check(condition: Boolean, message: () -> String) {

@@ -33,7 +33,7 @@ internal fun targetType(
   type: KSClassDeclaration,
   resolver: Resolver,
   logger: KSPLogger,
-): TargetType {
+): TargetType? {
   logger.check(type.classKind != ClassKind.ENUM_CLASS, type) {
     "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.qualifiedName?.asString()}: code gen for enums is not supported or necessary"
   }
@@ -62,10 +62,14 @@ internal fun targetType(
   val appliedType = AppliedType.get(type)
 
   val constructor = primaryConstructor(resolver, type, classTypeParamsResolver)
-    ?: logger.errorAndThrow("No primary constructor found on $type", type)
+    ?: run {
+      logger.error("No primary constructor found on $type", type)
+      return null
+    }
   if (constructor.visibility != KModifier.INTERNAL && constructor.visibility != KModifier.PUBLIC) {
-    logger.errorAndThrow("@JsonClass can't be applied to $type: " +
+    logger.error("@JsonClass can't be applied to $type: " +
       "primary constructor is not internal or public", type)
+    return null
   }
 
   val properties = mutableMapOf<String, TargetProperty>()
@@ -74,8 +78,9 @@ internal fun targetType(
   for (supertype in appliedType.supertypes(resolver)) {
     val classDecl = supertype.type
     if (!classDecl.isKotlinClass(resolver)) {
-      logger.errorAndThrow(
+      logger.error(
         "@JsonClass can't be applied to $type: supertype $supertype is not a Kotlin type: $type")
+      return null
     }
     val supertypeProperties = declaredProperties(
       constructor = constructor,

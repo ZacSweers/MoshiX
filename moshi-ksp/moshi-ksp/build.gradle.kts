@@ -31,6 +31,8 @@ tasks.withType<KotlinCompile>().configureEach {
 dependencies {
   implementation(Dependencies.AutoService.annotations)
   ksp(Dependencies.AutoService.ksp)
+  // For access to MessageCollectorBasedKSPLogger
+  compileOnly(Dependencies.Kotlin.Ksp.ksp)
   compileOnly(Dependencies.Kotlin.Ksp.api)
   compileOnly(Dependencies.Kotlin.compilerEmbeddable)
 

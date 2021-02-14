@@ -6,10 +6,10 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.processing.impl.MessageCollectorBasedKSPLogger
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
-import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.Origin.KOTLIN
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.moshi.JsonClass
@@ -19,7 +19,6 @@ import dev.zacsweers.moshix.ksp.shade.api.PropertyGenerator
 import org.jetbrains.kotlin.analyzer.AnalysisResult.CompilationErrorException
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.atomic.AtomicBoolean
 
 @AutoService(SymbolProcessor::class)
 public class JsonClassSymbolProcessor : SymbolProcessor {
@@ -45,7 +44,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
   }
 
   private lateinit var codeGenerator: CodeGenerator
-  private lateinit var logger: MoshiKSPLogger
+  private lateinit var logger: KSPLogger
   private var generatedOption: String? = null
 
   override fun init(
@@ -55,7 +54,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     logger: KSPLogger,
   ) {
     this.codeGenerator = codeGenerator
-    this.logger = MoshiKSPLogger(logger)
+    this.logger = logger
 
     generatedOption = options[OPTION_GENERATED]?.also {
       logger.check(it in POSSIBLE_GENERATED_NAMES) {
@@ -96,7 +95,7 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
         if (!jsonClassAnnotation.getMember<Boolean>("generateAdapter")) return@forEach
 
         val originatingFile = type.containingFile!!
-        val adapterGenerator = adapterGenerator(logger, resolver, type)
+        val adapterGenerator = adapterGenerator(logger, resolver, type) ?: return emptyList()
         try {
           val preparedAdapter = adapterGenerator
             .prepare { spec ->
@@ -118,7 +117,6 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
   }
 
   override fun finish() {
-    logger.reportErrors()
   }
 
   private fun ProguardConfig.writeTo(codeGenerator: CodeGenerator, originatingKSFile: KSFile) {
@@ -146,8 +144,8 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     logger: KSPLogger,
     resolver: Resolver,
     originalType: KSClassDeclaration,
-  ): AdapterGenerator {
-    val type = targetType(originalType, resolver, logger)
+  ): AdapterGenerator? {
+    val type = targetType(originalType, resolver, logger) ?: return null
 
     val properties = mutableMapOf<String, PropertyGenerator>()
     for (property in type.properties.values) {
@@ -160,7 +158,8 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     for ((name, parameter) in type.constructor.parameters) {
       if (type.properties[parameter.name] == null && !parameter.hasDefault) {
         // TODO would be nice if we could pass the parameter node directly?
-        logger.errorAndThrow("No property for required constructor parameter $name", originalType)
+        logger.error("No property for required constructor parameter $name", originalType)
+        return null
       }
     }
 
@@ -175,19 +174,11 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
 
     return AdapterGenerator(type, sortedProperties)
   }
-}
 
-// TODO temporary until KSP's logger makes errors fail the build
-private class MoshiKSPLogger(private val delegate: KSPLogger) : KSPLogger by delegate {
-  private val hasErrors = AtomicBoolean(false)
-  override fun error(message: String, symbol: KSNode?) {
-    delegate.error(message, symbol)
-    hasErrors.set(true)
-  }
-
-  fun reportErrors() {
-    if (hasErrors.get()) {
-      throw CompilationErrorException()
-    }
+  override fun onError() {
+    // TODO temporary until KSP's logger makes errors fail the compilation and not just the build
+    println("onError called")
+    (logger as? MessageCollectorBasedKSPLogger)?.reportAll()
+    throw CompilationErrorException()
   }
 }
