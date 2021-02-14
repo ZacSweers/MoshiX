@@ -37,7 +37,7 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         return null
       }
 
-      val kmClass = rawType.header()?.toKmClass() ?: return null
+      val kmClass = checkNotNull(rawType.header()?.toKmClass())
 
       val typeLabel = generator.removePrefix("sealed:")
       if (!Flag.IS_SEALED(kmClass.flags)) {
@@ -58,7 +58,7 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       val labels = mutableMapOf<String, Class<*>>()
       for (sealedSubclassName in kmClass.sealedSubclasses) {
         val sealedSubclass = sealedSubclassName.toJavaClass()
-        val kmSealedSubclass = sealedSubclass.header()?.toKmClass() ?: return null
+        val kmSealedSubclass = checkNotNull(sealedSubclass.header()?.toKmClass())
         val isObject = Flag.Class.IS_OBJECT(kmSealedSubclass.flags)
 
         val isAnnotatedDefaultObject = sealedSubclass.isAnnotationPresent(DefaultObject::class.java)
