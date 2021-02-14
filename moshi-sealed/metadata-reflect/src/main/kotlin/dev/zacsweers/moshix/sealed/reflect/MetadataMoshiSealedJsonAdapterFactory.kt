@@ -75,9 +75,9 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
             }
           }
         } else {
-          val labelAnnotation = sealedSubclass.getAnnotation(TypeLabel::class.java)
-            ?: throw IllegalArgumentException(
-              "Sealed subtypes must be annotated with @TypeLabel to define their label $sealedSubclass")
+          val labelAnnotation = checkNotNull(sealedSubclass.getAnnotation(TypeLabel::class.java)) {
+            "Sealed subtypes must be annotated with @TypeLabel to define their label $sealedSubclass"
+          }
           val label = labelAnnotation.label
           labels[label] = sealedSubclass
           for (alternate in labelAnnotation.alternateLabels) {
