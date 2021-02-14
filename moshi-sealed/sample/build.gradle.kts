@@ -32,6 +32,8 @@ dependencies {
   if (useKsp) {
     ksp(project(":moshi-sealed:codegen-ksp"))
     ksp(project(":moshi-ksp:moshi-ksp"))
+    kspTest(project(":moshi-sealed:codegen-ksp"))
+    kspTest(project(":moshi-ksp:moshi-ksp"))
   } else {
     kapt(project(":moshi-sealed:codegen"))
     kapt(Dependencies.Moshi.codegen)
