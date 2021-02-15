@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import com.diffplug.gradle.spotless.JavaExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -62,8 +61,10 @@ spotless {
     endWithNewline()
     licenseHeaderFile("spotless/spotless.kt")
       .updateYearWithLatest(false)
-    targetExclude("**/Dependencies.kt", "**/spotless.kt", "**/build/**", "**/moshi-ksp/tests/**",
-      "**/moshi-ksp/moshi-ksp/src/main/kotlin/dev/zacsweers/moshix/ksp/shade/**")
+    targetExclude(
+      "**/Dependencies.kt", "**/spotless.kt", "**/build/**", "**/moshi-ksp/tests/**",
+      "**/moshi-ksp/moshi-ksp/src/main/kotlin/dev/zacsweers/moshix/ksp/shade/**"
+    )
   }
 //  format("externalKotlin", KotlinExtension::class.java) {
 //    // These don't use our spotless config for header files since we don't want to overwrite the
