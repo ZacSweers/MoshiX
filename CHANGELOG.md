@@ -17,7 +17,7 @@ _Applies to all KSP-using artifacts._
 #### moshi-ksp
 
 * **Fix:** Reserve property type simple names eagerly to avoid collisions like https://github.com/square/moshi/issues/1277
-* **Fix:** Include `"RedundantVisibilityModifier"` suppression in generated adapters to cover for KotlinPoet's 
+* **Fix:** Include `"RedundantVisibilityModifier"` suppression in generated adapters to cover for KotlinPoet's
   explicit `public` modifiers.
 
 #### moshi-sealed
