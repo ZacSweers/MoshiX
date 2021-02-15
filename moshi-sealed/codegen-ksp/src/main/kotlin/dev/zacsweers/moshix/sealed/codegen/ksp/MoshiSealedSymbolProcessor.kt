@@ -85,9 +85,10 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
           "@JsonClass is only applicable to classes!"
         }
 
-        val generator = type.findAnnotationWithType(jsonClassType)
-          ?.getMember<String>("generator")
-          ?: return@forEach
+        val jsonClass = type.findAnnotationWithType(jsonClassType) ?: return@forEach
+        if (!jsonClass.getMember<Boolean>("generateAdapter")) return@forEach
+
+        val generator = jsonClass.getMember<String>("generator")
 
         if (!generator.startsWith("sealed:")) {
           return@forEach
