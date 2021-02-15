@@ -80,7 +80,9 @@ internal class AdapterGenerator(
       "RedundantExplicitType",
       // NameAllocator will just add underscores to differentiate names, which Kotlin doesn't
       // like for stylistic reasons.
-      "LocalVariableName"
+      "LocalVariableName",
+      // KotlinPoet always generates explicit public modifiers for public members.
+      "RedundantVisibilityModifier"
     ).let { suppressions ->
       AnnotationSpec.builder(Suppress::class)
         .addMember(
@@ -158,7 +160,15 @@ internal class AdapterGenerator(
     .build()
 
   fun prepare(typeHook: (TypeSpec) -> TypeSpec = { it }): PreparedAdapter {
+    val reservedSimpleNames = mutableSetOf<String>()
     for (property in nonTransientProperties) {
+      // Allocate names for simple property types first to avoid collisions
+      // See https://github.com/square/moshi/issues/1277
+      property.target.type.findRawType()?.simpleName?.let { simpleNameToReserve ->
+        if (reservedSimpleNames.add(simpleNameToReserve)) {
+          nameAllocator.newName(simpleNameToReserve)
+        }
+      }
       property.allocateNames(nameAllocator)
     }
 

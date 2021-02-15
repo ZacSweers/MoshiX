@@ -14,6 +14,12 @@ _Applies to all KSP-using artifacts._
 
 * Update to KSP `1.4.30-1.0.0-alpha02`. Note that `incremental` is now _on_ by default.
 
+#### moshi-ksp
+
+* **Fix:** Reserve property type simple names eagerly to avoid collisions like https://github.com/square/moshi/issues/1277
+* **Fix:** Include `"RedundantVisibilityModifier"` suppression in generated adapters to cover for KotlinPoet's
+  explicit `public` modifiers.
+
 #### moshi-sealed
 
 _Changes apply to all moshi-sealed implementations (Java, reflect, KSP, code gen, etc) unless otherwise
@@ -33,6 +39,8 @@ specified._
 * **Fix:** KSP failing to find sealed subclasses when sealed base class is generic.
 * **Fix:** Check for duplicate labels.
 * **Fix:** KSP now routes all errors through `KSPLogger.error()`.
+* **Fix:** Generate `@Suppress` annotations with suppressions for common warnings in generated code in both KSP and
+  code gen.
 
 #### moshi-adapters
 

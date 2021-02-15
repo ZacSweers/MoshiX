@@ -1376,6 +1376,16 @@ internal data class MismatchParentAndNestedClassVisibility(
   )
 }
 
+// Regression test for https://github.com/square/moshi/issues/1277
+// Compile-only test
+@JsonClass(generateAdapter = true)
+data class OtherTestModel(val TestModel: TestModel? = null)
+@JsonClass(generateAdapter = true)
+data class TestModel(
+  val someVariable: Int,
+  val anotherVariable: String
+)
+
 // Regression test for https://github.com/square/moshi/issues/1052
 // Compile-only test
 @JsonClass(generateAdapter = true)
