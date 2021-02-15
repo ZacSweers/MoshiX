@@ -132,7 +132,9 @@ public class MoshiSealedProcessor : AbstractProcessor() {
         .asSequence()
         .map { it as TypeElement }
         .forEach { type ->
-          val generator = type.getAnnotation(JsonClass::class.java).generator
+          val jsonClass = type.getAnnotation(JsonClass::class.java)
+          if (!jsonClass.generateAdapter) return@forEach
+          val generator = jsonClass.generator
           if (!generator.startsWith("sealed:")) {
             return@forEach
           }
