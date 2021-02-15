@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 Zac Sweers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.zacsweers.moshix.sealed.codegen.ksp
 
 import com.google.auto.service.AutoService
@@ -83,7 +98,8 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
     }
 
     val jsonClassType = resolver.getClassDeclarationByName(
-      resolver.getKSNameFromString(JSON_CLASS_NAME))
+      resolver.getKSNameFromString(JSON_CLASS_NAME)
+    )
       ?.asType()
       ?: run {
         logger.error("JsonClass type not found on the classpath.")
@@ -134,10 +150,13 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
         if (isObject && subtype.hasAnnotation(defaultObjectAnnotation)) {
           if (useDefaultNull) {
             // Print both for reference
-            logger.error("""
+            logger.error(
+              """
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type: $type
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: $subtype
-              """.trimIndent(), subtype)
+              """.trimIndent(),
+              subtype
+            )
             return
           } else {
             return@mapTo Subtype.ObjectType(className)
@@ -193,12 +212,14 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
           labels += alternates
 
           if (isObject) {
-            objectAdapters.add(CodeBlock.of(
-              ".%1M<%2T>(%3T(%2T))",
-              MemberName("com.squareup.moshi", "addAdapter"),
-              className,
-              ObjectJsonAdapter::class.asClassName()
-            ))
+            objectAdapters.add(
+              CodeBlock.of(
+                ".%1M<%2T>(%3T(%2T))",
+                MemberName("com.squareup.moshi", "addAdapter"),
+                className,
+                ObjectJsonAdapter::class.asClassName()
+              )
+            )
           }
           Subtype.ClassType(className, labels)
         }
@@ -241,7 +262,6 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
   }
 
   override fun finish() {
-
   }
 
   override fun onError() {

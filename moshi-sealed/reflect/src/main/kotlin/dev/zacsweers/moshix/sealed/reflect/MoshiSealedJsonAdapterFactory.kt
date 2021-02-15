@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 Zac Sweers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.zacsweers.moshix.sealed.reflect
 
 import com.squareup.moshi.JsonAdapter
@@ -15,9 +30,11 @@ import kotlin.reflect.full.findAnnotation
 private val UNSET = Any()
 
 public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
-  override fun create(type: Type,
+  override fun create(
+    type: Type,
     annotations: MutableSet<out Annotation>,
-    moshi: Moshi): JsonAdapter<*>? {
+    moshi: Moshi
+  ): JsonAdapter<*>? {
     if (annotations.isNotEmpty()) {
       return null
     }
@@ -63,7 +80,8 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         } else {
           val labelAnnotation = sealedSubclass.findAnnotation<TypeLabel>()
             ?: throw IllegalArgumentException(
-              "Sealed subtypes must be annotated with @TypeLabel to define their label ${sealedSubclass.qualifiedName}")
+              "Sealed subtypes must be annotated with @TypeLabel to define their label ${sealedSubclass.qualifiedName}"
+            )
           val clazz = sealedSubclass.java
 
           check(clazz.typeParameters.isEmpty()) {
@@ -104,7 +122,7 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         }
         .let { factory ->
           if (defaultObjectInstance !== UNSET) {
-              factory.withDefaultValue(defaultObjectInstance)
+            factory.withDefaultValue(defaultObjectInstance)
           } else {
             factory
           }

@@ -12,7 +12,7 @@ Snapshots of the development version are available in [Sonatype's `snapshots` re
 
 ### Local development
 
-This project requires JDK 15 as some projects support Java sealed interfaces/classes or records. By default, these 
+This project requires JDK 15 as some projects support Java sealed interfaces/classes or records. By default, these
 projects will not be enabled unless the current JDK supports 15+.
 
 License

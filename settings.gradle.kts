@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2020 Zac Sweers
+ * Copyright (C) 2020 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,4 +51,4 @@ if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)) {
 }
 
 // TODO enable in Kotlin 1.4.30
-//include("moshi-sealed:sealed-interfaces-samples:kotlin")
+// include("moshi-sealed:sealed-interfaces-samples:kotlin")
