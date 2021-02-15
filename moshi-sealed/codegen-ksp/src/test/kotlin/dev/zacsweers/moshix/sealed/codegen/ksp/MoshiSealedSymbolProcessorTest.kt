@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
+import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessors
@@ -28,7 +29,7 @@ class MoshiSealedSymbolProcessorTest(private val incremental: Boolean) {
 
   @Test
   fun smokeTest() {
-    val source = SourceFile.kotlin("CustomCallable.kt", """
+    val source = kotlin("CustomCallable.kt", """
       package test
       import com.squareup.moshi.JsonClass
       import dev.zacsweers.moshix.sealed.annotations.TypeLabel
@@ -104,5 +105,92 @@ class MoshiSealedSymbolProcessorTest(private val incremental: Boolean) {
         else -> error("Unrecognized proguard file: $generatedFile")
       }
     }
+  }
+
+  @Test
+  fun duplicateLabels() {
+    val source = kotlin(
+      "BaseType.kt", """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a")
+        class TypeA : BaseType()
+        @TypeLabel("a")
+        class TypeB : BaseType()
+      }
+    """
+    )
+
+    val compilation = KotlinCompilation().apply {
+      sources = listOf(source)
+      inheritClassPath = true
+      symbolProcessors = listOf(MoshiSealedSymbolProcessor())
+      kspIncremental = incremental
+    }
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages).contains("Duplicate label")
+  }
+
+  @Test
+  fun duplicateAlternateLabels() {
+    val source = kotlin(
+      "BaseType.kt", """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a", alternateLabels = ["aa"])
+        class TypeA : BaseType()
+        @TypeLabel("b", alternateLabels = ["aa"])
+        class TypeB : BaseType()
+      }
+    """
+    )
+
+    val compilation = KotlinCompilation().apply {
+      sources = listOf(source)
+      inheritClassPath = true
+      symbolProcessors = listOf(MoshiSealedSymbolProcessor())
+      kspIncremental = incremental
+    }
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages).contains("Duplicate alternate label")
+  }
+
+  @Test
+  fun genericSubTypes() {
+    val source = kotlin(
+      "BaseType.kt", """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType<T> {
+        @TypeLabel("a")
+        class TypeA : BaseType<String>()
+        @TypeLabel("b")
+        class TypeB<T> : BaseType<T>()
+      }
+    """
+    )
+
+    val compilation = KotlinCompilation().apply {
+      sources = listOf(source)
+      inheritClassPath = true
+      symbolProcessors = listOf(MoshiSealedSymbolProcessor())
+      kspIncremental = incremental
+    }
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages).contains("Moshi-sealed subtypes cannot be generic.")
   }
 }

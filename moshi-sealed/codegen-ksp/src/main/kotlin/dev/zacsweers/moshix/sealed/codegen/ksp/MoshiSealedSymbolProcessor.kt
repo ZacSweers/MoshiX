@@ -5,12 +5,14 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.processing.impl.MessageCollectorBasedKSPLogger
 import com.google.devtools.ksp.symbol.ClassKind.OBJECT
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclarationContainer
 import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.MemberName
@@ -20,6 +22,7 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
+import org.jetbrains.kotlin.analyzer.AnalysisResult.CompilationErrorException
 
 @AutoService(SymbolProcessor::class)
 public class MoshiSealedSymbolProcessor : SymbolProcessor {
@@ -47,6 +50,7 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
   }
 
   private lateinit var codeGenerator: CodeGenerator
+  private lateinit var logger: KSPLogger
   private var generatedOption: String? = null
 
   override fun init(
@@ -56,6 +60,7 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
     logger: KSPLogger,
   ) {
     this.codeGenerator = codeGenerator
+    this.logger = logger
 
     generatedOption = options[OPTION_GENERATED]?.also {
       require(it in POSSIBLE_GENERATED_NAMES) {
@@ -67,7 +72,10 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val generatedAnnotation = generatedOption?.let {
       val annotationType = resolver.getClassDeclarationByName(resolver.getKSNameFromString(it))
-        ?: error("Generated annotation type doesn't exist: $it")
+        ?: run {
+          logger.error("Generated annotation type doesn't exist: $it")
+          return emptyList()
+        }
       AnnotationSpec.builder(annotationType.toClassName())
         .addMember("value = [%S]", MoshiSealedSymbolProcessor::class.java.canonicalName)
         .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
@@ -77,7 +85,10 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
     val jsonClassType = resolver.getClassDeclarationByName(
       resolver.getKSNameFromString(JSON_CLASS_NAME))
       ?.asType()
-      ?: error("JsonClass type not found on the classpath.")
+      ?: run {
+        logger.error("JsonClass type not found on the classpath.")
+        return emptyList()
+      }
     resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME)
       .asSequence()
       .forEach { type ->
@@ -85,9 +96,10 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
           "@JsonClass is only applicable to classes!"
         }
 
-        val generator = type.findAnnotationWithType(jsonClassType)
-          ?.getMember<String>("generator")
-          ?: return@forEach
+        val jsonClass = type.findAnnotationWithType(jsonClassType) ?: return@forEach
+        if (!jsonClass.getMember<Boolean>("generateAdapter")) return@forEach
+
+        val generator = jsonClass.getMember<String>("generator")
 
         if (!generator.startsWith("sealed:")) {
           return@forEach
@@ -114,6 +126,7 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
     val typeLabelAnnotation = resolver.getClassDeclarationByName<TypeLabel>().asType()
     val useDefaultNull = type.hasAnnotation(defaultNullAnnotation)
     val objectAdapters = mutableListOf<CodeBlock>()
+    val seenLabels = mutableMapOf<String, ClassName>()
     val sealedSubtypes = type.sealedSubtypes()
       .mapTo(LinkedHashSet()) { subtype ->
         val className = subtype.toClassName()
@@ -121,29 +134,63 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
         if (isObject && subtype.hasAnnotation(defaultObjectAnnotation)) {
           if (useDefaultNull) {
             // Print both for reference
-            error("""
+            logger.error("""
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type: $type
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: $subtype
-              """.trimIndent())
+              """.trimIndent(), subtype)
+            return
           } else {
             return@mapTo Subtype.ObjectType(className)
           }
         } else {
           val labelAnnotation = subtype.findAnnotationWithType(typeLabelAnnotation)
-            ?: error("Missing @TypeLabel: $subtype")
+            ?: run {
+              logger.error("Missing @TypeLabel", subtype)
+              return
+            }
+
+          if (subtype.typeParameters.isNotEmpty()) {
+            logger.error("Moshi-sealed subtypes cannot be generic.", subtype)
+            return
+          }
 
           val labels = mutableListOf<String>()
 
-          labels += labelAnnotation.arguments
+          val mainLabel = labelAnnotation.arguments
             .find { it.name?.getShortName() == "label" }
             ?.value as? String
-            ?: error("No label member for TypeLabel annotation!")
+            ?: run {
+              logger.error("No label member for TypeLabel annotation!")
+              return
+            }
+
+          seenLabels.put(mainLabel, className)?.let { prev ->
+            logger.error(
+              "Duplicate label '$mainLabel' defined for $className and $prev.",
+              type
+            )
+            return
+          }
+
+          labels += mainLabel
 
           @Suppress("UNCHECKED_CAST")
-          labels += labelAnnotation.arguments
+          val alternates = labelAnnotation.arguments
             .find { it.name?.getShortName() == "alternateLabels" }
             ?.value as? List<String> // arrays are lists in KSP https://github.com/google/ksp/issues/135
             ?: emptyList() // ksp ignores undefined args https://github.com/google/ksp/issues/134
+
+          for (alternate in alternates) {
+            seenLabels.put(alternate, className)?.let { prev ->
+              logger.error(
+                "Duplicate alternate label '$alternate' defined for $className and $prev.",
+                type
+              )
+              return
+            }
+          }
+
+          labels += alternates
 
           if (isObject) {
             objectAdapters.add(CodeBlock.of(
@@ -176,9 +223,9 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
 
   private fun KSClassDeclaration.sealedSubtypes(): Set<KSClassDeclaration> {
     // All sealed subtypes are guaranteed to to be in this file... somewhere
-    val targetSuperClass = asType()
+    val targetSuperClass = asType().declaration
     return containingFile?.allTypes()
-      ?.filter { it.superTypes.firstOrNull()?.resolve() == targetSuperClass }
+      ?.filter { it.superTypes.firstOrNull()?.resolve()?.declaration == targetSuperClass }
       ?.toSet()
       .orEmpty()
   }
@@ -195,6 +242,12 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
 
   override fun finish() {
 
+  }
+
+  override fun onError() {
+    // TODO temporary until KSP's logger makes errors fail the compilation and not just the build
+    (logger as? MessageCollectorBasedKSPLogger)?.reportAll()
+    throw CompilationErrorException()
   }
 }
 

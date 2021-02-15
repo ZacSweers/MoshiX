@@ -55,6 +55,39 @@ public final class JavaSealedJsonAdapterFactoryTest {
     );
   }
 
+  @Test
+  public void duplicateLabels() {
+    try {
+      //noinspection ResultOfMethodCallIgnored
+      moshi.adapter(FailureTestCases.DuplicateLabels.class);
+      fail();
+    } catch (IllegalStateException e) {
+      assertThat(e).hasMessageThat().contains("Duplicate label");
+    }
+  }
+
+  @Test
+  public void duplicateAlternateLabels() {
+    try {
+      //noinspection ResultOfMethodCallIgnored
+      moshi.adapter(FailureTestCases.DuplicateAlternateLabels.class);
+      fail();
+    } catch (IllegalStateException e) {
+      assertThat(e).hasMessageThat().contains("Duplicate alternate label");
+    }
+  }
+
+  @Test
+  public void genericSubtypes() {
+    try {
+      //noinspection ResultOfMethodCallIgnored
+      moshi.adapter(FailureTestCases.GenericSubtypes.class);
+      fail();
+    } catch (IllegalStateException e) {
+      assertThat(e).hasMessageThat().contains("Moshi-sealed subtypes cannot be generic: dev.zacsweers.moshix.sealed.sample.java.FailureTestCases.GenericSubtypes.TypeB");
+    }
+  }
+
   private static <T> void assertPolymorphicBehavior(
       JsonAdapter<T> adapter,
       T success,

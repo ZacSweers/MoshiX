@@ -49,14 +49,27 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
         var sealedSubclass = Class.forName(toBinaryName(sealedSubclassDesc.descriptorString()));
         var labelAnnotation = sealedSubclass.getAnnotation(TypeLabel.class);
         if (labelAnnotation == null) {
-          throw new IllegalArgumentException(
+          throw new IllegalStateException(
               "Sealed subtypes must be annotated with @TypeLabel to define their label "
                   + sealedSubclass.getCanonicalName());
         }
+
+        if (sealedSubclass.getTypeParameters().length > 0) {
+          throw new IllegalStateException("Moshi-sealed subtypes cannot be generic: " + sealedSubclass.getCanonicalName());
+        }
+
         var label = labelAnnotation.label();
-        labels.put(label, sealedSubclass);
+        var prevMain = labels.put(label, sealedSubclass);
+        if (prevMain != null) {
+          throw new IllegalStateException(
+              "Duplicate label '" + label + "' defined for " + sealedSubclass + " and " + prevMain + ".");
+        }
         for (var alternate : labelAnnotation.alternateLabels()) {
-          labels.put(alternate, sealedSubclass);
+          var prev = labels.put(alternate, sealedSubclass);
+          if (prev != null) {
+            throw new IllegalStateException(
+                "Duplicate alternate label '" + label + "' defined for " + sealedSubclass + " and " + prev + ".");
+          }
         }
       } catch (ClassNotFoundException e) {
         e.printStackTrace();

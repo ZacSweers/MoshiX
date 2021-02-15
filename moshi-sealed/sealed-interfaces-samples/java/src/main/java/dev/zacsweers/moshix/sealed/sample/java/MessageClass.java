@@ -8,7 +8,7 @@ import java.util.Objects;
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
 
 // @DefaultObject is not possible in java
-@JsonClass(generateAdapter = true, generator = "sealed:type")
+@JsonClass(generateAdapter = false, generator = "sealed:type")
 sealed class MessageClass permits MessageClass.Success, MessageClass.Error {
 
   @TypeLabel(label = "success", alternateLabels = {"successful"})

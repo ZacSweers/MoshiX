@@ -7,7 +7,7 @@ import java.util.Map;
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
 
 // @DefaultObject is not possible in java
-@JsonClass(generateAdapter = true, generator = "sealed:type")
+@JsonClass(generateAdapter = false, generator = "sealed:type")
 sealed interface MessageInterface
     permits MessageInterface.Success, MessageInterface.Error {
 

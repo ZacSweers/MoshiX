@@ -132,7 +132,9 @@ public class MoshiSealedProcessor : AbstractProcessor() {
         .asSequence()
         .map { it as TypeElement }
         .forEach { type ->
-          val generator = type.getAnnotation(JsonClass::class.java).generator
+          val jsonClass = type.getAnnotation(JsonClass::class.java)
+          if (!jsonClass.generateAdapter) return@forEach
+          val generator = jsonClass.generator
           if (!generator.startsWith("sealed:")) {
             return@forEach
           }
@@ -197,6 +199,7 @@ public class MoshiSealedProcessor : AbstractProcessor() {
     }
 
     val objectAdapters = mutableListOf<CodeBlock>()
+    val seenLabels = mutableMapOf<String, ClassName>()
     for ((type, kmData) in sealedSubtypes) {
       val isObject = kmData.isObject
       val isAnnotatedDefaultObject = isObject && type.getAnnotation(DefaultObject::class.java) != null
@@ -216,9 +219,36 @@ public class MoshiSealedProcessor : AbstractProcessor() {
         messager.printMessage(Diagnostic.Kind.ERROR, "Missing @TypeLabel.", type)
         return null
       }
+
+      if (type.typeParameters.isNotEmpty()) {
+        messager.printMessage(Diagnostic.Kind.ERROR, "Moshi-sealed subtypes cannot be generic.", type)
+        return null
+      }
+
       @Suppress("DEPRECATION")
       val className = type.asClassName()
-      for (label in listOf(labelAnnotation.label, *labelAnnotation.alternateLabels)) {
+      val mainLabel = labelAnnotation.label
+      seenLabels.put(mainLabel, className)?.let { prev ->
+        messager.printMessage(
+          Diagnostic.Kind.ERROR,
+          "Duplicate label '$mainLabel' defined for $className and $prev.",
+          type
+        )
+        return null
+      }
+      runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
+        className,
+        labelAnnotation.label
+      )
+      for (label in labelAnnotation.alternateLabels) {
+        seenLabels.put(label, className)?.let { prev ->
+          messager.printMessage(
+            Diagnostic.Kind.ERROR,
+            "Duplicate alternate label '$label' defined for $className and $prev.",
+            type
+          )
+          return null
+        }
         runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
           className,
           label
