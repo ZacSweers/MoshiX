@@ -149,6 +149,11 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
               return
             }
 
+          if (subtype.typeParameters.isNotEmpty()) {
+            logger.error("Moshi-sealed subtypes cannot be generic.", subtype)
+            return
+          }
+
           val labels = mutableListOf<String>()
 
           val mainLabel = labelAnnotation.arguments
