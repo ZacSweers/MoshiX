@@ -41,6 +41,33 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     )
 
     private val JSON_CLASS_NAME = JsonClass::class.qualifiedName!!
+
+    private val COMMON_SUPPRESS = arrayOf(
+      // https://github.com/square/moshi/issues/1023
+      "DEPRECATION",
+      // Because we look it up reflectively
+      "unused",
+      // Because we include underscores
+      "ClassName",
+      // Because we generate redundant `out` variance for some generics and there's no way
+      // for us to know when it's redundant.
+      "REDUNDANT_PROJECTION",
+      // Because we may generate redundant explicit types for local vars with default values.
+      // Example: 'var fooSet: Boolean = false'
+      "RedundantExplicitType",
+      // NameAllocator will just add underscores to differentiate names, which Kotlin doesn't
+      // like for stylistic reasons.
+      "LocalVariableName",
+      // KotlinPoet always generates explicit public modifiers for public members.
+      "RedundantVisibilityModifier"
+    ).let { suppressions ->
+      AnnotationSpec.builder(Suppress::class)
+        .addMember(
+          suppressions.indices.joinToString { "%S" },
+          *suppressions
+        )
+        .build()
+    }
   }
 
   private lateinit var codeGenerator: CodeGenerator
@@ -108,8 +135,9 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
               spec.toBuilder()
                 .apply {
                   generatedAnnotation?.let(::addAnnotation)
-                  addOriginatingKSFile(originatingFile)
                 }
+                .addAnnotation(COMMON_SUPPRESS)
+                .addOriginatingKSFile(originatingFile)
                 .build()
             }
           preparedAdapter.spec.writeTo(codeGenerator)
