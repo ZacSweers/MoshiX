@@ -55,6 +55,26 @@ public final class JavaSealedJsonAdapterFactoryTest {
     );
   }
 
+  @Test
+  public void duplicateLabels() throws IOException {
+    try {
+      moshi.adapter(DuplicateLabels.class);
+      fail();
+    } catch (IllegalStateException e) {
+      assertThat(e).hasMessageThat().contains("Duplicate label");
+    }
+  }
+
+  @Test
+  public void duplicateAlternateLabels() throws IOException {
+    try {
+      moshi.adapter(DuplicateAlternateLabels.class);
+      fail();
+    } catch (IllegalStateException e) {
+      assertThat(e).hasMessageThat().contains("Duplicate alternate label");
+    }
+  }
+
   private static <T> void assertPolymorphicBehavior(
       JsonAdapter<T> adapter,
       T success,
