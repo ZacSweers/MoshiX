@@ -54,9 +54,17 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
                   + sealedSubclass.getCanonicalName());
         }
         var label = labelAnnotation.label();
-        labels.put(label, sealedSubclass);
+        var prevMain = labels.put(label, sealedSubclass);
+        if (prevMain != null) {
+          throw new IllegalStateException(
+              "Duplicate label '" + label + "' defined for " + sealedSubclass + " and " + prevMain + ".");
+        }
         for (var alternate : labelAnnotation.alternateLabels()) {
-          labels.put(alternate, sealedSubclass);
+          var prev = labels.put(alternate, sealedSubclass);
+          if (prev != null) {
+            throw new IllegalStateException(
+                "Duplicate alternate label '" + label + "' defined for " + sealedSubclass + " and " + prev + ".");
+          }
         }
       } catch (ClassNotFoundException e) {
         e.printStackTrace();
