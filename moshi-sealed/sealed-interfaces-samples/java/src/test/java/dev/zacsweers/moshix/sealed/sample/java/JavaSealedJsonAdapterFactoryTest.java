@@ -58,7 +58,7 @@ public final class JavaSealedJsonAdapterFactoryTest {
   @Test
   public void duplicateLabels() throws IOException {
     try {
-      moshi.adapter(DuplicateLabels.class);
+      moshi.adapter(FailureTestCases.DuplicateLabels.class);
       fail();
     } catch (IllegalStateException e) {
       assertThat(e).hasMessageThat().contains("Duplicate label");
@@ -68,7 +68,7 @@ public final class JavaSealedJsonAdapterFactoryTest {
   @Test
   public void duplicateAlternateLabels() throws IOException {
     try {
-      moshi.adapter(DuplicateAlternateLabels.class);
+      moshi.adapter(FailureTestCases.DuplicateAlternateLabels.class);
       fail();
     } catch (IllegalStateException e) {
       assertThat(e).hasMessageThat().contains("Duplicate alternate label");
