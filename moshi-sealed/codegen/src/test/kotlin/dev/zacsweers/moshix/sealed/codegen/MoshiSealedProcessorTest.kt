@@ -52,6 +52,8 @@ class MoshiSealedProcessorTest {
       import kotlin.Unit
       import kotlin.collections.emptySet
       
+      @Suppress("DEPRECATION", "unused", "ClassName", "REDUNDANT_PROJECTION", "RedundantExplicitType",
+          "LocalVariableName", "RedundantVisibilityModifier")
       public class BaseTypeJsonAdapter(
         moshi: Moshi
       ) : JsonAdapter<BaseType>() {
