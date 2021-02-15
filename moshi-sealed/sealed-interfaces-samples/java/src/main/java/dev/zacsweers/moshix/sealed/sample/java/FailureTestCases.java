@@ -22,4 +22,15 @@ public interface FailureTestCases {
     @TypeLabel(label = "b", alternateLabels = {"aa"})
     static final class TypeB extends DuplicateAlternateLabels {}
   }
+
+  @JsonClass(generateAdapter = false, generator = "sealed:type")
+  sealed class GenericSubtypes<T> permits GenericSubtypes.TypeA, GenericSubtypes.TypeB {
+    // This form is ok
+    @TypeLabel(label = "a", alternateLabels = {"aa"})
+    static final class TypeA extends GenericSubtypes<String> {}
+
+    // This form is not ok
+    @TypeLabel(label = "b", alternateLabels = {"aa"})
+    static final class TypeB<T> extends GenericSubtypes<T> {}
+  }
 }

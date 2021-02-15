@@ -56,8 +56,9 @@ public final class JavaSealedJsonAdapterFactoryTest {
   }
 
   @Test
-  public void duplicateLabels() throws IOException {
+  public void duplicateLabels() {
     try {
+      //noinspection ResultOfMethodCallIgnored
       moshi.adapter(FailureTestCases.DuplicateLabels.class);
       fail();
     } catch (IllegalStateException e) {
@@ -66,12 +67,24 @@ public final class JavaSealedJsonAdapterFactoryTest {
   }
 
   @Test
-  public void duplicateAlternateLabels() throws IOException {
+  public void duplicateAlternateLabels() {
     try {
+      //noinspection ResultOfMethodCallIgnored
       moshi.adapter(FailureTestCases.DuplicateAlternateLabels.class);
       fail();
     } catch (IllegalStateException e) {
       assertThat(e).hasMessageThat().contains("Duplicate alternate label");
+    }
+  }
+
+  @Test
+  public void genericSubtypes() {
+    try {
+      //noinspection ResultOfMethodCallIgnored
+      moshi.adapter(FailureTestCases.GenericSubtypes.class);
+      fail();
+    } catch (IllegalStateException e) {
+      assertThat(e).hasMessageThat().contains("Moshi-sealed subtypes cannot be generic: dev.zacsweers.moshix.sealed.sample.java.FailureTestCases.GenericSubtypes.TypeB");
     }
   }
 
