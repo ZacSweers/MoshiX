@@ -218,9 +218,9 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
 
   private fun KSClassDeclaration.sealedSubtypes(): Set<KSClassDeclaration> {
     // All sealed subtypes are guaranteed to to be in this file... somewhere
-    val targetSuperClass = asType()
+    val targetSuperClass = asType().declaration
     return containingFile?.allTypes()
-      ?.filter { it.superTypes.firstOrNull()?.resolve() == targetSuperClass }
+      ?.filter { it.superTypes.firstOrNull()?.resolve()?.declaration == targetSuperClass }
       ?.toSet()
       .orEmpty()
   }
