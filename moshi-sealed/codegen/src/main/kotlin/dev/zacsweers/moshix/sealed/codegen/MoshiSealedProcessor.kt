@@ -219,6 +219,12 @@ public class MoshiSealedProcessor : AbstractProcessor() {
         messager.printMessage(Diagnostic.Kind.ERROR, "Missing @TypeLabel.", type)
         return null
       }
+
+      if (type.typeParameters.isNotEmpty()) {
+        messager.printMessage(Diagnostic.Kind.ERROR, "Moshi-sealed subtypes cannot be generic.", type)
+        return null
+      }
+
       @Suppress("DEPRECATION")
       val className = type.asClassName()
       val mainLabel = labelAnnotation.label

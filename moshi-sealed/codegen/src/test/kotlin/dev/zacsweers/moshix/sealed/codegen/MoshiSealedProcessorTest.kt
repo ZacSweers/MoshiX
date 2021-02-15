@@ -142,4 +142,30 @@ class MoshiSealedProcessorTest {
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains("Duplicate alternate label")
   }
+
+  @Test
+  fun genericSubTypes() {
+    val source = kotlin("BaseType.kt", """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType<T> {
+        @TypeLabel("a")
+        class TypeA : BaseType<String>()
+        @TypeLabel("b")
+        class TypeB<T> : BaseType<T>()
+      }
+    """)
+
+    val compilation = KotlinCompilation().apply {
+      sources = listOf(source)
+      inheritClassPath = true
+      annotationProcessors = listOf(MoshiSealedProcessor())
+    }
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages).contains("Moshi-sealed subtypes cannot be generic.")
+  }
 }
