@@ -528,6 +528,7 @@ internal class AdapterGenerator(
       closeNextControlFlowInAssignment = true
 
       classBuilder.addProperty(constructorProperty)
+      result.addComment("Reflectively invoke the synthetic defaults constructor")
       // Dynamic default constructor call
       val nonNullConstructorType = constructorProperty.type.copy(nullable = false)
       val args = constructorPropertyTypes
