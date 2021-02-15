@@ -82,4 +82,25 @@ class ReflectOnlyTests(type: Type) {
     @TypeLabel("b", alternateLabels = ["aa"])
     class TypeB : DuplicateAlternateLabels()
   }
+
+  @Test
+  fun genericSubtypes() {
+    try {
+      moshi.adapter<GenericSubtypes<String>>()
+      fail()
+    } catch (e: IllegalStateException) {
+      assertThat(e).hasMessageThat().contains("Moshi-sealed subtypes cannot be generic")
+    }
+  }
+
+  @JsonClass(generateAdapter = false, generator = "sealed:type")
+  sealed class GenericSubtypes<T> {
+    // This form is ok
+    @TypeLabel("a")
+    class TypeA : GenericSubtypes<String>()
+
+    // This form is not ok
+    @TypeLabel("b")
+    class TypeB<T> : GenericSubtypes<T>()
+  }
 }

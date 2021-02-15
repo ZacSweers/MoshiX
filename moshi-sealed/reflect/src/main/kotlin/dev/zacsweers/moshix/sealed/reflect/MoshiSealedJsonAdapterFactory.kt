@@ -65,6 +65,11 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
             ?: throw IllegalArgumentException(
               "Sealed subtypes must be annotated with @TypeLabel to define their label ${sealedSubclass.qualifiedName}")
           val clazz = sealedSubclass.java
+
+          check(clazz.typeParameters.isNotEmpty()) {
+            "Moshi-sealed subtypes cannot be generic: $clazz"
+          }
+
           val label = labelAnnotation.label
           labels.put(label, clazz)?.let { prev ->
             error("Duplicate label '$label' defined for $clazz and $prev.")
