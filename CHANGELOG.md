@@ -1,6 +1,59 @@
 Changelog
 =========
 
+NEXT
+-------------------
+
+_WIP_
+
+* Update to Kotlin `1.4.30`.
+
+#### KSP
+
+_Applies to all KSP-using artifacts._
+
+* Update to KSP `1.4.30-1.0.0-alpha02`. Note that `incremental` is now _on_ by default.
+
+#### moshi-sealed
+
+_Changes apply to all moshi-sealed implementations (Java, reflect, KSP, code gen, etc) unless otherwise 
+specified._
+
+* **New:** `moshi-sealed-metadata-reflect` artifact with a `kotlinx-metadata`-based implementation, allowing 
+  reflective use without `kotlin-reflect`.
+
+  [![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-metadata-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-metadata-reflect)
+  ```gradle
+  implementation "dev.zacsweers.moshix:moshi-sealed-metadata-reflect:{version}"
+  ```
+
+* **Fix:** Check for generic sealed subtypes. The base sealed type can be generic, but subtypes cannot since we 
+  can't plumb their generic information down to them when looking up from the base alone!
+* **Fix:** Code gen and ksp now respect `JsonClass.generateAdapter`.
+* **Fix:** KSP failing to find sealed subclasses when sealed base class is generic.
+* **Fix:** Check for duplicate labels.
+* **Fix:** KSP now routes all errors through `KSPLogger.error()`.
+
+#### moshi-adapters
+
+* **New:** `@JsonString` can now be used on functions/methods, allowing use in more scenarios like AutoValue and 
+  Retrofit.
+  
+  ```kotlin
+  interface TacoApi {
+    @JsonString
+    @GET("/")
+    fun getTacosAsRawJsonString(): String
+  }
+  ```
+
+#### moshi-metadata-reflect
+
+* **Fix:** Embedded proguard rules now keep the right package for kotlinx-metadata extensions.
+
+_Special thanks to [@efemoney](https://github.com/efemoney) and [@plnice](https://github.com/plnice) for 
+contributing to this release!_
+
 Version 0.8.0
 -------------------
 
