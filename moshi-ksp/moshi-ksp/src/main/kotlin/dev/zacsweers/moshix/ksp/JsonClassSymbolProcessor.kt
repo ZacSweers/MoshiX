@@ -183,7 +183,6 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
 
   override fun onError() {
     // TODO temporary until KSP's logger makes errors fail the compilation and not just the build
-    println("onError called")
     (logger as? MessageCollectorBasedKSPLogger)?.reportAll()
     throw CompilationErrorException()
   }
