@@ -1,10 +1,10 @@
 Changelog
 =========
 
-NEXT
--------------------
+Version 0.9.0
+-------------
 
-_WIP_
+_20202-02-15_
 
 * Update to Kotlin `1.4.30`.
 
@@ -45,6 +45,24 @@ specified._
     @GET("/")
     fun getTacosAsRawJsonString(): String
   }
+  ```
+
+* **New:** `@TrackUnknownKeys` annotation + factory to record unknown keys in a JSON body. See its doc for more 
+  information. This API should be treated as experimental (even by MoshiX standards), feedback welcome on how best 
+  to improve the API!
+
+  ```kotlin
+  val moshi = Moshi.Builder()
+    .add(TrackUnknownKeys.Factory())
+    .build()
+  
+  @TrackUnknownKeys
+  @JsonClass(generateAdapter = true)
+  data class Message(
+    val data: String
+  )
+  
+  // JSON of {"data": "value", "foo": "bar"} would report an unknown "foo"
   ```
 
 #### moshi-metadata-reflect

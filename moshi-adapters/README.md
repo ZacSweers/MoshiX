@@ -14,7 +14,7 @@ dependencies {
 ```
 ## Adapters
 
-### `JsonString`
+### `@JsonString`
 
 A `JsonQualifier` for use with `String` properties to indicate that their value should be
 propagated with the raw JSON string representation of that property rather than a decoded type.
@@ -31,7 +31,7 @@ data class Message(
 )
 ```
 
-### `AdaptedBy`
+### `@AdaptedBy`
 
 An annotation that indicates the Moshi `JsonAdapter` or `JsonAdapter.Factory` to use
 with a class or property (as a `@JsonQualifier`).
@@ -58,3 +58,30 @@ class StringAliasAdapter : JsonAdapter<StringAlias>() {
   }
 }
 ```
+
+### `@TrackUnknownKeys`
+
+An annotation to help track unknown keys in JSON.
+
+Note that this adapter is slow because it must parse the entire JSON object ahead of time, then writes and re-reads
+it.
+
+In general, it is not recommended to use this adapter in production unless absolutely necessary or to sample its
+usage. This should be used for debugging/logging information only.
+
+Usage:
+
+```kotlin
+val moshi = Moshi.Builder()
+  .add(TrackUnknownKeys.Factory())
+  .build()
+
+@TrackUnknownKeys
+@JsonClass(generateAdapter = true)
+data class Message(
+  val data: String
+)
+
+// JSON of {"data": "value", "foo": "bar"} would report an unknown "foo"
+```
+
