@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Zac Sweers
+ * Copyright (C) $YEAR Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,3 @@
  * limitations under the License.
  */
 
-plugins {
-  kotlin("jvm")
-  id("com.vanniktech.maven.publish")
-}
-
-dependencies {
-  implementation(project(":moshi-sealed:runtime"))
-  api(Dependencies.Moshi.moshi)
-  api(Dependencies.Moshi.adapters)
-  implementation(Dependencies.Kotlin.metadata)
-}

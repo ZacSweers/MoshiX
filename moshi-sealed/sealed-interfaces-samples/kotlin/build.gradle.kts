@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2021 Zac Sweers
+ * Copyright (C) 2021 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -21,7 +22,7 @@ plugins {
   kotlin("kapt")
 }
 
-//val useKsp = findProperty("moshix.useKsp")?.toString()?.toBoolean() ?: false
+// val useKsp = findProperty("moshix.useKsp")?.toString()?.toBoolean() ?: false
 val generatedAnnotation = if (JavaVersion.current().isJava10Compatible) {
   "javax.annotation.processing.Generated"
 } else {
@@ -49,9 +50,9 @@ dependencies {
   testImplementation(Dependencies.Testing.truth)
 }
 
-//ksp {
+// ksp {
 //  arg("moshi.generated", generatedAnnotation)
-//}
+// }
 
 kapt {
   arguments {

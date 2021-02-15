@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 Zac Sweers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.zacsweers.moshix.ksp
 
 import com.google.devtools.ksp.KspExperimental
@@ -57,7 +72,8 @@ internal fun targetType(
   }
 
   val classTypeParamsResolver = type.typeParameters.toTypeParameterResolver(
-    sourceType = type.qualifiedName!!.asString())
+    sourceType = type.qualifiedName!!.asString()
+  )
   val typeVariables = type.typeParameters.map { it.toTypeVariableName(classTypeParamsResolver) }
   val appliedType = AppliedType.get(type)
 
@@ -67,8 +83,11 @@ internal fun targetType(
       return null
     }
   if (constructor.visibility != KModifier.INTERNAL && constructor.visibility != KModifier.PUBLIC) {
-    logger.error("@JsonClass can't be applied to $type: " +
-      "primary constructor is not internal or public", type)
+    logger.error(
+      "@JsonClass can't be applied to $type: " +
+        "primary constructor is not internal or public",
+      type
+    )
     return null
   }
 
@@ -79,7 +98,8 @@ internal fun targetType(
     val classDecl = supertype.type
     if (!classDecl.isKotlinClass(resolver)) {
       logger.error(
-        "@JsonClass can't be applied to $type: supertype $supertype is not a Kotlin type: $type")
+        "@JsonClass can't be applied to $type: supertype $supertype is not a Kotlin type: $type"
+      )
       return null
     }
     val supertypeProperties = declaredProperties(
@@ -114,7 +134,8 @@ internal fun targetType(
     properties = properties,
     typeVariables = typeVariables,
     isDataClass = Modifier.DATA in type.modifiers,
-    visibility = resolvedVisibility)
+    visibility = resolvedVisibility
+  )
 }
 
 @OptIn(KspExperimental::class)
@@ -139,8 +160,10 @@ internal fun primaryConstructor(
   }
 
   val kmConstructorSignature: String = resolver.mapToJvmSignature(primaryConstructor)
-  return TargetConstructor(parameters, primaryConstructor.getVisibility().asKModifier(),
-    kmConstructorSignature)
+  return TargetConstructor(
+    parameters, primaryConstructor.getVisibility().asKModifier(),
+    kmConstructorSignature
+  )
 }
 
 private fun KSAnnotated?.qualifiers(resolver: Resolver): Set<AnnotationSpec> {
@@ -185,7 +208,7 @@ private fun declaredProperties(
       parameter = parameter,
       visibility = property.modifiers.map { KModifier.valueOf(it.name) }.visibility(),
       jsonName = parameter?.jsonName ?: property.jsonName(resolver)
-      ?: name.escapeDollarSigns()
+        ?: name.escapeDollarSigns()
     )
   }
 
@@ -207,14 +230,18 @@ private fun KSPropertyDeclaration.toPropertySpec(
       if (hasAnnotation(resolver.getClassDeclarationByName<Transient>().asType())) {
         addAnnotation(Transient::class.java)
       }
-      addAnnotations(this@toPropertySpec.annotations.mapNotNull {
-        if ((it.annotationType.resolve().declaration as KSClassDeclaration).isJsonQualifier(
-            resolver)) {
-          it.toAnnotationSpec(resolver)
-        } else {
-          null
+      addAnnotations(
+        this@toPropertySpec.annotations.mapNotNull {
+          if ((it.annotationType.resolve().declaration as KSClassDeclaration).isJsonQualifier(
+              resolver
+            )
+          ) {
+            it.toAnnotationSpec(resolver)
+          } else {
+            null
+          }
         }
-      })
+      )
     }
     .build()
 }
