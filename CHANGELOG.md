@@ -21,10 +21,10 @@ _Applies to all KSP-using artifacts._
 
 #### moshi-sealed
 
-_Changes apply to all moshi-sealed implementations (Java, reflect, KSP, code gen, etc) unless otherwise 
+_Changes apply to all moshi-sealed implementations (Java, reflect, KSP, code gen, etc) unless otherwise
 specified._
 
-* **New:** `moshi-sealed-metadata-reflect` artifact with a `kotlinx-metadata`-based implementation, allowing 
+* **New:** `moshi-sealed-metadata-reflect` artifact with a `kotlinx-metadata`-based implementation, allowing
   reflective use without `kotlin-reflect`.
 
   [![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-metadata-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-metadata-reflect)
@@ -32,7 +32,7 @@ specified._
   implementation "dev.zacsweers.moshix:moshi-sealed-metadata-reflect:{version}"
   ```
 
-* **Fix:** Check for generic sealed subtypes. The base sealed type can be generic, but subtypes cannot since we 
+* **Fix:** Check for generic sealed subtypes. The base sealed type can be generic, but subtypes cannot since we
   can't plumb their generic information down to them when looking up from the base alone!
 * **Fix:** Code gen and ksp now respect `JsonClass.generateAdapter`.
 * **Fix:** KSP failing to find sealed subclasses when sealed base class is generic.
@@ -43,9 +43,9 @@ specified._
 
 #### moshi-adapters
 
-* **New:** `@JsonString` can now be used on functions/methods, allowing use in more scenarios like AutoValue and 
+* **New:** `@JsonString` can now be used on functions/methods, allowing use in more scenarios like AutoValue and
   Retrofit.
-  
+
   ```kotlin
   interface TacoApi {
     @JsonString
@@ -58,7 +58,7 @@ specified._
 
 * **Fix:** Embedded proguard rules now keep the right package for kotlinx-metadata extensions.
 
-_Special thanks to [@efemoney](https://github.com/efemoney) and [@plnice](https://github.com/plnice) for 
+_Special thanks to [@efemoney](https://github.com/efemoney) and [@plnice](https://github.com/plnice) for
 contributing to this release!_
 
 Version 0.8.0
@@ -66,33 +66,33 @@ Version 0.8.0
 
 _2021-01-27_
 
-* **New:** Experimental support for Java `record` classes via new `moshi-records-reflect` artifact. See 
+* **New:** Experimental support for Java `record` classes via new `moshi-records-reflect` artifact. See
 `RecordsJsonAdapterFactory`. Requires JDK 15 + `--enable-preview`.
   ```java
   Moshi moshi = new Moshi.Builder()
       .add(new RecordsJsonAdapterFactory())
       .build();
-  
+
   final record Message(String value) {
   }
   ```
 
-* **New:** Experimental support for Java `sealed` classes and interfaces in moshi-sealed via new 
+* **New:** Experimental support for Java `sealed` classes and interfaces in moshi-sealed via new
   `moshi-sealed-java-sealed-reflect` artifact. See `JavaSealedJsonAdapterFactory`.  Requires JDK 15 + `--enable-preview`.
   ```java
   Moshi moshi = new Moshi.Builder()
       .add(new JavaSealedJsonAdapterFactory())
       .add(new RecordsJsonAdapterFactory())
       .build();
-  
+
   @JsonClass(generateAdapter = true, generator = "sealed:type")
   sealed interface MessageInterface
       permits MessageInterface.Success, MessageInterface.Error {
-  
+
     @TypeLabel(label = "success", alternateLabels = {"successful"})
     final record Success(String value) implements MessageInterface {
     }
-    
+
     @TypeLabel(label = "error")
     final record Error(Map<String, Object> error_logs) implements MessageInterface {
     }
@@ -106,15 +106,15 @@ _2021-01-27_
   val moshi = Moshi.Builder()
     .add(AdaptedBy.Factory())
     .build()
-  
+
   @AdaptedBy(StringAliasAdapter::class)
   data class StringAlias(val value: String)
-  
+
   class StringAliasAdapter : JsonAdapter<StringAlias>() {
     override fun fromJson(reader: JsonReader): StringAlias? {
       return StringAlias(reader.nextString())
     }
-  
+
     override fun toJson(writer: JsonWriter, value: StringAlias?) {
       if (value == null) {
         writer.nullValue()
@@ -161,7 +161,7 @@ _2020-10-30_
 
 #### moshi-sealed
 
-`@TypeLabel` now has an optional `alternateLabels` array property for cases where multiple labels 
+`@TypeLabel` now has an optional `alternateLabels` array property for cases where multiple labels
 can match the same sealed subtype.
 
 ```kotlin
@@ -174,8 +174,8 @@ sealed class Message {
 }
 ```
 
-**NOTE:** We also changed `@TypeLabel`'s `value` property to the more meaningful `label` name. This 
-is technically a breaking change, but should be pretty low impact since most people wouldn't be 
+**NOTE:** We also changed `@TypeLabel`'s `value` property to the more meaningful `label` name. This
+is technically a breaking change, but should be pretty low impact since most people wouldn't be
 defining this parameter name or reading the property directly.
 
 Version 0.5.0
@@ -220,7 +220,7 @@ Removed! These APIs live in Moshi natively now as of 1.11.0
 
 New artifact!
 
-First adapter in this release is a new `@JsonString` qualifier + adapter, so you can 
+First adapter in this release is a new `@JsonString` qualifier + adapter, so you can
 capture raw JSON content from payloads. This is adapted from the recipe in Moshi.
 
 ```Kotlin
@@ -309,7 +309,7 @@ This project is now **MoshiX** and contains multiple Moshi extensions.
 * **New:** [moshi-metadata-reflect](https://github.com/ZacSweers/MoshiX/blob/main/moshi-metadata-reflect/README.md) - A [kotlinx-metadata](https://github.com/JetBrains/kotlin/tree/master/libraries/kotlinx-metadata/jvm) based implementation of `KotlinJsonAdapterFactory`. This allows for reflective Moshi serialization on Kotlin classes without the cost of including kotlin-reflect.
 * **Updated:** [moshi-sealed](https://github.com/ZacSweers/MoshiX/blob/main/moshi-sealed/README.md) - Largely unchanged, but now there is a new `moshi-sealed-ksp` artifact available for KSP users.
 
-Some of these will eventually move to Moshi directly. This project going forward is a focused set of extensions that 
+Some of these will eventually move to Moshi directly. This project going forward is a focused set of extensions that
 either don't belong in Moshi directly or can be a non-API-stable testing ground for early adopters.
 
 Version 0.2.0

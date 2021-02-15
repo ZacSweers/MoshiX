@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Square, Inc.
+ * Copyright (C) 2018 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
   companion object {
     @JvmStatic
     @Parameterized.Parameters(name = "incremental={0}")
-    fun data() : Collection<Array<Any>> {
+    fun data(): Collection<Array<Any>> {
       return listOf(
         arrayOf(true),
         arrayOf(false)
@@ -450,7 +450,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
         package com.squareup.moshi.kotlin.codegen;
         public class JavaSuperclass {
           public int a = 1;
-        }  
+        }
         """
       )
     )

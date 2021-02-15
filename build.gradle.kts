@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2020 Zac Sweers
+ * Copyright (C) 2020 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -28,6 +29,55 @@ plugins {
   kotlin("jvm") version Dependencies.Kotlin.version apply false
   id("org.jetbrains.dokka") version Dependencies.Kotlin.dokkaVersion apply false
   id("com.vanniktech.maven.publish") version "0.13.0" apply false
+  id("com.diffplug.spotless") version "5.9.0"
+}
+
+spotless {
+  format("misc") {
+    target("*.md", ".gitignore")
+    trimTrailingWhitespace()
+    indentWithSpaces(2)
+    endWithNewline()
+  }
+  // GJF not compatible with JDK 15 yet
+//  if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)) {
+//    val configureCommonJavaFormat: JavaExtension.() -> Unit = {
+//      googleJavaFormat("1.9")
+//    }
+//    java {
+//      configureCommonJavaFormat()
+//      target("**/*.java")
+//      targetExclude(
+//        "**/spotless.java",
+//        "**/build/**"
+//      )
+//      licenseHeaderFile("spotless/spotless.java")
+//    }
+//  }
+  kotlin {
+    ktlint(Dependencies.ktlintVersion).userData(mapOf("indent_size" to "2"))
+    target("**/*.kt")
+    trimTrailingWhitespace()
+    endWithNewline()
+    licenseHeaderFile("spotless/spotless.kt")
+      .updateYearWithLatest(false)
+    targetExclude(
+      "**/Dependencies.kt", "**/spotless.kt", "**/build/**", "**/moshi-ksp/tests/**",
+      "**/moshi-ksp/moshi-ksp/src/main/kotlin/dev/zacsweers/moshix/ksp/shade/**"
+    )
+  }
+//  format("externalKotlin", KotlinExtension::class.java) {
+//    // These don't use our spotless config for header files since we don't want to overwrite the
+//    // existing copyright headers.
+//    configureCommonKotlinFormat()
+//  }
+  kotlinGradle {
+    ktlint(Dependencies.ktlintVersion).userData(mapOf("indent_size" to "2"))
+    target("**/*.gradle.kts")
+    trimTrailingWhitespace()
+    endWithNewline()
+    licenseHeaderFile("spotless/spotless.kts", "(import|plugins|buildscript|dependencies|pluginManagement)")
+  }
 }
 
 subprojects {

@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2020 Zac Sweers
+ * Copyright (C) 2020 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.zacsweers.moshix.sealed.codegen
 
 import com.google.auto.service.AutoService
@@ -85,8 +84,8 @@ public class MoshiSealedProcessor : AbstractProcessor() {
     public const val OPTION_GENERATED: String = "moshi.generated"
 
     private val POSSIBLE_GENERATED_NAMES = setOf(
-        "javax.annotation.processing.Generated",
-        "javax.annotation.Generated"
+      "javax.annotation.processing.Generated",
+      "javax.annotation.Generated"
     )
 
     private val COMMON_SUPPRESS = arrayOf(
@@ -139,9 +138,9 @@ public class MoshiSealedProcessor : AbstractProcessor() {
     }?.let {
       @Suppress("DEPRECATION")
       AnnotationSpec.builder(it.asClassName())
-          .addMember("value = [%S]", MoshiSealedProcessor::class.java.canonicalName)
-          .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
-          .build()
+        .addMember("value = [%S]", MoshiSealedProcessor::class.java.canonicalName)
+        .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
+        .build()
     }
   }
 
@@ -149,47 +148,49 @@ public class MoshiSealedProcessor : AbstractProcessor() {
 
   override fun getSupportedAnnotationTypes(): Set<String> {
     return setOf(JsonClass::class, TypeLabel::class, DefaultObject::class, DefaultNull::class)
-        .mapTo(mutableSetOf()) { it.java.canonicalName }
+      .mapTo(mutableSetOf()) { it.java.canonicalName }
   }
 
-  override fun process(annotations: Set<TypeElement>,
-      roundEnv: RoundEnvironment): Boolean {
+  override fun process(
+    annotations: Set<TypeElement>,
+    roundEnv: RoundEnvironment
+  ): Boolean {
 
     roundEnv.getElementsAnnotatedWith(JsonClass::class.java)
-        .asSequence()
-        .map { it as TypeElement }
-        .forEach { type ->
-          val jsonClass = type.getAnnotation(JsonClass::class.java)
-          if (!jsonClass.generateAdapter) return@forEach
-          val generator = jsonClass.generator
-          if (!generator.startsWith("sealed:")) {
-            return@forEach
-          }
-          val typeLabel = generator.removePrefix("sealed:")
-          val kmClass = type.getAnnotation(Metadata::class.java).toImmutableKmClass()
-          if (!kmClass.isSealed) {
-            messager.printMessage(Diagnostic.Kind.ERROR, "Must be a sealed class!", type)
-            return@forEach
-          }
-
-          val preparedAdapter = prepareAdapter(type, typeLabel, kmClass)
-          preparedAdapter?.spec?.writeTo(filer)
-          preparedAdapter?.proguardConfig?.writeTo(filer)
+      .asSequence()
+      .map { it as TypeElement }
+      .forEach { type ->
+        val jsonClass = type.getAnnotation(JsonClass::class.java)
+        if (!jsonClass.generateAdapter) return@forEach
+        val generator = jsonClass.generator
+        if (!generator.startsWith("sealed:")) {
+          return@forEach
         }
+        val typeLabel = generator.removePrefix("sealed:")
+        val kmClass = type.getAnnotation(Metadata::class.java).toImmutableKmClass()
+        if (!kmClass.isSealed) {
+          messager.printMessage(Diagnostic.Kind.ERROR, "Must be a sealed class!", type)
+          return@forEach
+        }
+
+        val preparedAdapter = prepareAdapter(type, typeLabel, kmClass)
+        preparedAdapter?.spec?.writeTo(filer)
+        preparedAdapter?.proguardConfig?.writeTo(filer)
+      }
 
     return false
   }
 
   private fun prepareAdapter(element: TypeElement, typeLabel: String, kmClass: ImmutableKmClass): PreparedAdapter? {
     val sealedSubtypes = kmClass.sealedSubclasses
-        .map {
-          // Canonicalize
-          it.replace("/", ".")
-        }
-        .map { elements.getTypeElement(it) }
-        .associateWithTo(LinkedHashMap()) {
-          it.getAnnotation(Metadata::class.java).toImmutableKmClass()
-        }
+      .map {
+        // Canonicalize
+        it.replace("/", ".")
+      }
+      .map { elements.getTypeElement(it) }
+      .associateWithTo(LinkedHashMap()) {
+        it.getAnnotation(Metadata::class.java).toImmutableKmClass()
+      }
     val defaultCodeBlockBuilder = CodeBlock.builder()
     @Suppress("DEPRECATION")
     val adapterName = ClassName.bestGuess(generatedJsonAdapterName(element.asClassName().reflectionName())).simpleName
@@ -204,22 +205,23 @@ public class MoshiSealedProcessor : AbstractProcessor() {
     val primaryConstructor = FunSpec.constructorBuilder().addParameter(moshiParam).build()
 
     val classBuilder = TypeSpec.classBuilder(adapterName)
-        .addAnnotation(COMMON_SUPPRESS)
-        .addModifiers(visibilityModifier)
-        .superclass(jsonAdapterType)
-        .primaryConstructor(primaryConstructor)
-        .addOriginatingElement(element)
+      .addAnnotation(COMMON_SUPPRESS)
+      .addModifiers(visibilityModifier)
+      .superclass(jsonAdapterType)
+      .primaryConstructor(primaryConstructor)
+      .addOriginatingElement(element)
 
     generatedAnnotation?.let {
       classBuilder.addAnnotation(it)
     }
 
     val runtimeAdapterInitializer = CodeBlock.builder()
-        .add("%T.of(%T::class.java, %S)«\n",
-            PolymorphicJsonAdapterFactory::class,
-            targetType,
-            typeLabel
-        )
+      .add(
+        "%T.of(%T::class.java, %S)«\n",
+        PolymorphicJsonAdapterFactory::class,
+        targetType,
+        typeLabel
+      )
 
     val useDefaultNull = element.getAnnotation(DefaultNull::class.java) != null
     if (useDefaultNull) {
@@ -264,7 +266,8 @@ public class MoshiSealedProcessor : AbstractProcessor() {
         )
         return null
       }
-      runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
+      runtimeAdapterInitializer.add(
+        "  .withSubtype(%T::class.java, %S)\n",
         className,
         labelAnnotation.label
       )
@@ -277,17 +280,20 @@ public class MoshiSealedProcessor : AbstractProcessor() {
           )
           return null
         }
-        runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
+        runtimeAdapterInitializer.add(
+          "  .withSubtype(%T::class.java, %S)\n",
           className,
           label
         )
       }
       if (isObject) {
-        objectAdapters.add(CodeBlock.of(
-          ".%1M<%2T>(%3T(%2T))",
-          MemberName("com.squareup.moshi", "addAdapter"),
-          className,
-          ObjectJsonAdapter::class.asClassName())
+        objectAdapters.add(
+          CodeBlock.of(
+            ".%1M<%2T>(%3T(%2T))",
+            MemberName("com.squareup.moshi", "addAdapter"),
+            className,
+            ObjectJsonAdapter::class.asClassName()
+          )
         )
       }
     }
@@ -307,50 +313,55 @@ public class MoshiSealedProcessor : AbstractProcessor() {
         .add(".build()")
         .build()
     }
-    runtimeAdapterInitializer.add("  .create(%T::class.java, %M(), %L)·as·%T\n»",
-        targetType,
-        MemberName("kotlin.collections", "emptySet"),
-        moshiArg,
-        jsonAdapterType
+    runtimeAdapterInitializer.add(
+      "  .create(%T::class.java, %M(), %L)·as·%T\n»",
+      targetType,
+      MemberName("kotlin.collections", "emptySet"),
+      moshiArg,
+      jsonAdapterType
     )
 
     val runtimeAdapterProperty = PropertySpec.builder(
-        allocator.newName("runtimeAdapter"),
-        jsonAdapterType,
-        KModifier.PRIVATE
+      allocator.newName("runtimeAdapter"),
+      jsonAdapterType,
+      KModifier.PRIVATE
     )
-        .addAnnotation(
-            AnnotationSpec.builder(Suppress::class)
-                .addMember("%S", "UNCHECKED_CAST")
-                .build()
-        )
-        .initializer(runtimeAdapterInitializer.build())
-        .build()
+      .addAnnotation(
+        AnnotationSpec.builder(Suppress::class)
+          .addMember("%S", "UNCHECKED_CAST")
+          .build()
+      )
+      .initializer(runtimeAdapterInitializer.build())
+      .build()
 
     val nullableTargetType = targetType.copy(nullable = true)
     val readerParam = ParameterSpec(allocator.newName("reader"), JsonReader::class.asClassName())
     val writerParam = ParameterSpec(allocator.newName("writer"), JsonWriter::class.asClassName())
     val valueParam = ParameterSpec(allocator.newName("value"), nullableTargetType)
     classBuilder.addProperty(runtimeAdapterProperty)
-        .addFunction(FunSpec.builder("fromJson")
-            .addModifiers(KModifier.OVERRIDE)
-            .addParameter(readerParam)
-            .returns(nullableTargetType)
-            .addStatement("return %N.fromJson(%N)", runtimeAdapterProperty, readerParam)
-            .build())
-        .addFunction(FunSpec.builder("toJson")
-            .addModifiers(KModifier.OVERRIDE)
-            .addParameter(writerParam)
-            .addParameter(valueParam)
-            .addStatement("%N.toJson(%N, %N)", runtimeAdapterProperty, writerParam, valueParam)
-            .build())
+      .addFunction(
+        FunSpec.builder("fromJson")
+          .addModifiers(KModifier.OVERRIDE)
+          .addParameter(readerParam)
+          .returns(nullableTargetType)
+          .addStatement("return %N.fromJson(%N)", runtimeAdapterProperty, readerParam)
+          .build()
+      )
+      .addFunction(
+        FunSpec.builder("toJson")
+          .addModifiers(KModifier.OVERRIDE)
+          .addParameter(writerParam)
+          .addParameter(valueParam)
+          .addStatement("%N.toJson(%N, %N)", runtimeAdapterProperty, writerParam, valueParam)
+          .build()
+      )
 
     // TODO how do generics work?
     val fileSpec = FileSpec.builder(targetType.packageName, adapterName)
-        .indent("  ")
-        .addComment("Code generated by moshi-sealed. Do not edit.")
-        .addType(classBuilder.build())
-        .build()
+      .indent("  ")
+      .addComment("Code generated by moshi-sealed. Do not edit.")
+      .addType(classBuilder.build())
+      .build()
 
     val proguardConfig = ProguardConfig(
       targetClass = targetType,

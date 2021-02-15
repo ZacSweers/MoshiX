@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 Zac Sweers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.zacsweers.moshix.sealed.codegen.ksp
 
 import com.squareup.kotlinpoet.AnnotationSpec
@@ -41,7 +56,8 @@ internal fun createType(
 ): PreparedAdapter {
   val defaultCodeBlockBuilder = CodeBlock.builder()
   val adapterName = ClassName.bestGuess(
-    Types.generatedJsonAdapterName(targetType.reflectionName())).simpleName
+    Types.generatedJsonAdapterName(targetType.reflectionName())
+  ).simpleName
   val visibilityModifier = if (isInternal) KModifier.INTERNAL else KModifier.PUBLIC
   val allocator = NameAllocator()
 
@@ -61,7 +77,8 @@ internal fun createType(
   }
 
   val runtimeAdapterInitializer = CodeBlock.builder()
-    .add("%T.of(%T::class.java, %S)«\n",
+    .add(
+      "%T.of(%T::class.java, %S)«\n",
       PolymorphicJsonAdapterFactory::class,
       targetType,
       typeLabel
@@ -78,7 +95,8 @@ internal fun createType(
       }
       is ClassType -> {
         for (label in subtype.labels) {
-          runtimeAdapterInitializer.add("  .withSubtype(%T::class.java, %S)\n",
+          runtimeAdapterInitializer.add(
+            "  .withSubtype(%T::class.java, %S)\n",
             subtype.className,
             label
           )
@@ -102,7 +120,8 @@ internal fun createType(
       .add(".build()")
       .build()
   }
-  runtimeAdapterInitializer.add("  .create(%T::class.java, %M(), %L)·as·%T\n»",
+  runtimeAdapterInitializer.add(
+    "  .create(%T::class.java, %M(), %L)·as·%T\n»",
     targetType,
     MemberName("kotlin.collections", "emptySet"),
     moshiArg,
@@ -127,18 +146,22 @@ internal fun createType(
   val writerParam = ParameterSpec(allocator.newName("writer"), JsonWriter::class.asClassName())
   val valueParam = ParameterSpec(allocator.newName("value"), nullableTargetType)
   classBuilder.addProperty(runtimeAdapterProperty)
-    .addFunction(FunSpec.builder("fromJson")
-      .addModifiers(KModifier.OVERRIDE)
-      .addParameter(readerParam)
-      .returns(nullableTargetType)
-      .addStatement("return %N.fromJson(%N)", runtimeAdapterProperty, readerParam)
-      .build())
-    .addFunction(FunSpec.builder("toJson")
-      .addModifiers(KModifier.OVERRIDE)
-      .addParameter(writerParam)
-      .addParameter(valueParam)
-      .addStatement("%N.toJson(%N, %N)", runtimeAdapterProperty, writerParam, valueParam)
-      .build())
+    .addFunction(
+      FunSpec.builder("fromJson")
+        .addModifiers(KModifier.OVERRIDE)
+        .addParameter(readerParam)
+        .returns(nullableTargetType)
+        .addStatement("return %N.fromJson(%N)", runtimeAdapterProperty, readerParam)
+        .build()
+    )
+    .addFunction(
+      FunSpec.builder("toJson")
+        .addModifiers(KModifier.OVERRIDE)
+        .addParameter(writerParam)
+        .addParameter(valueParam)
+        .addStatement("%N.toJson(%N, %N)", runtimeAdapterProperty, writerParam, valueParam)
+        .build()
+    )
 
   // TODO how do generics work?
   val fileSpec = FileSpec.builder(targetType.packageName, adapterName)
