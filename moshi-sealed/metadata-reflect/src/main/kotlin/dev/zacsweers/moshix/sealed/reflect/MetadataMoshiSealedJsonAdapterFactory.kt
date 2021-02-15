@@ -79,8 +79,8 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
             "Sealed subtypes must be annotated with @TypeLabel to define their label $sealedSubclass"
           }
 
-          check(sealedSubclass.typeParameters.isNotEmpty()) {
-            "Moshi-sealed subtypes cannot be generic: $type"
+          check(sealedSubclass.typeParameters.isEmpty()) {
+            "Moshi-sealed subtypes cannot be generic: $sealedSubclass"
           }
 
           val label = labelAnnotation.label

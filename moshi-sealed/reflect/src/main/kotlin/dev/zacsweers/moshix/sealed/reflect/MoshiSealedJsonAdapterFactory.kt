@@ -66,7 +66,7 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
               "Sealed subtypes must be annotated with @TypeLabel to define their label ${sealedSubclass.qualifiedName}")
           val clazz = sealedSubclass.java
 
-          check(clazz.typeParameters.isNotEmpty()) {
+          check(clazz.typeParameters.isEmpty()) {
             "Moshi-sealed subtypes cannot be generic: $clazz"
           }
 

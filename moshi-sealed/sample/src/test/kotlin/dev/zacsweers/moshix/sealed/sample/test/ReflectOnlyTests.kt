@@ -89,7 +89,7 @@ class ReflectOnlyTests(type: Type) {
       moshi.adapter<GenericSubtypes<String>>()
       fail()
     } catch (e: IllegalStateException) {
-      assertThat(e).hasMessageThat().contains("Moshi-sealed subtypes cannot be generic")
+      assertThat(e).hasMessageThat().contains("Moshi-sealed subtypes cannot be generic: class dev.zacsweers.moshix.sealed.sample.test.ReflectOnlyTests\$GenericSubtypes\$TypeB")
     }
   }
 
