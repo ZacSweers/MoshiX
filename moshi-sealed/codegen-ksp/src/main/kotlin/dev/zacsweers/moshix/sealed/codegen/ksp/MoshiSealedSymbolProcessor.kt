@@ -72,7 +72,10 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val generatedAnnotation = generatedOption?.let {
       val annotationType = resolver.getClassDeclarationByName(resolver.getKSNameFromString(it))
-        ?: error("Generated annotation type doesn't exist: $it")
+        ?: run {
+          logger.error("Generated annotation type doesn't exist: $it")
+          return emptyList()
+        }
       AnnotationSpec.builder(annotationType.toClassName())
         .addMember("value = [%S]", MoshiSealedSymbolProcessor::class.java.canonicalName)
         .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
@@ -82,7 +85,10 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
     val jsonClassType = resolver.getClassDeclarationByName(
       resolver.getKSNameFromString(JSON_CLASS_NAME))
       ?.asType()
-      ?: error("JsonClass type not found on the classpath.")
+      ?: run {
+        logger.error("JsonClass type not found on the classpath.")
+        return emptyList()
+      }
     resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME)
       .asSequence()
       .forEach { type ->
@@ -128,23 +134,30 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
         if (isObject && subtype.hasAnnotation(defaultObjectAnnotation)) {
           if (useDefaultNull) {
             // Print both for reference
-            error("""
+            logger.error("""
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type: $type
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: $subtype
-              """.trimIndent())
+              """.trimIndent(), subtype)
+            return
           } else {
             return@mapTo Subtype.ObjectType(className)
           }
         } else {
           val labelAnnotation = subtype.findAnnotationWithType(typeLabelAnnotation)
-            ?: error("Missing @TypeLabel: $subtype")
+            ?: run {
+              logger.error("Missing @TypeLabel", subtype)
+              return
+            }
 
           val labels = mutableListOf<String>()
 
           val mainLabel = labelAnnotation.arguments
             .find { it.name?.getShortName() == "label" }
             ?.value as? String
-            ?: error("No label member for TypeLabel annotation!")
+            ?: run {
+              logger.error("No label member for TypeLabel annotation!")
+              return
+            }
 
           seenLabels.put(mainLabel, className)?.let { prev ->
             logger.error(
