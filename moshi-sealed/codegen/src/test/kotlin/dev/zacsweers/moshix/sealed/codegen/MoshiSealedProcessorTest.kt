@@ -5,6 +5,7 @@ import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
+import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import org.junit.Test
 import java.io.File
 
@@ -13,7 +14,7 @@ class MoshiSealedProcessorTest {
 
   @Test
   fun smokeTest() {
-    val source = SourceFile.kotlin("CustomCallable.kt", """
+    val source = kotlin("BaseType.kt", """
       package test
       import com.squareup.moshi.JsonClass
       import dev.zacsweers.moshix.sealed.annotations.TypeLabel
@@ -90,4 +91,55 @@ class MoshiSealedProcessorTest {
     }
   }
 
+  @Test
+  fun duplicateLabels() {
+    val source = kotlin("BaseType.kt", """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a")
+        class TypeA : BaseType()
+        @TypeLabel("a")
+        class TypeB : BaseType()
+      }
+    """)
+
+    val compilation = KotlinCompilation().apply {
+      sources = listOf(source)
+      inheritClassPath = true
+      annotationProcessors = listOf(MoshiSealedProcessor())
+    }
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages).contains("Duplicate label")
+  }
+
+  @Test
+  fun duplicateAlternateLabels() {
+    val source = kotlin("BaseType.kt", """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a", alternateLabels = ["aa"])
+        class TypeA : BaseType()
+        @TypeLabel("b", alternateLabels = ["aa"])
+        class TypeB : BaseType()
+      }
+    """)
+
+    val compilation = KotlinCompilation().apply {
+      sources = listOf(source)
+      inheritClassPath = true
+      annotationProcessors = listOf(MoshiSealedProcessor())
+    }
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages).contains("Duplicate alternate label")
+  }
 }
