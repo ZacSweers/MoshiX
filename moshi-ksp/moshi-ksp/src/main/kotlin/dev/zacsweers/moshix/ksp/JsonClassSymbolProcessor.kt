@@ -124,8 +124,8 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
               spec.toBuilder()
                 .apply {
                   generatedAnnotation?.let(::addAnnotation)
-                  addOriginatingKSFile(originatingFile)
                 }
+                .addOriginatingKSFile(originatingFile)
                 .build()
             }
           preparedAdapter.spec.writeTo(codeGenerator)
