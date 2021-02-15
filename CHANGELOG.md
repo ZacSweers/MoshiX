@@ -38,7 +38,7 @@ specified._
 * **Fix:** KSP failing to find sealed subclasses when sealed base class is generic.
 * **Fix:** Check for duplicate labels.
 * **Fix:** KSP now routes all errors through `KSPLogger.error()`.
-* **Fix:** Generate `@Suppress` annotations with suppressions for common warnings in generated code in both KSP and 
+* **Fix:** Generate `@Suppress` annotations with suppressions for common warnings in generated code in both KSP and
   code gen.
 
 #### moshi-adapters
