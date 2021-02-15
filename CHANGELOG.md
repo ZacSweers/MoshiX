@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Version 0.9.0
+Version 0.9.1
 -------------
 
 _20202-02-15_
@@ -79,6 +79,11 @@ specified._
 
 _Special thanks to [@efemoney](https://github.com/efemoney) and [@plnice](https://github.com/plnice) for
 contributing to this release!_
+
+Version 0.9.0
+-------------
+
+This version had a bug in releasing, please ignore.
 
 Version 0.8.0
 -------------------
