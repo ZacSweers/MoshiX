@@ -21,7 +21,7 @@ _Applies to all KSP-using artifacts._
   explicit `public` modifiers.
 * **Enhancement:** Invoke constructor directly in generated adapters if all parameters with defaults are present in 
   the JSON. This allows generated adapters to avoid reflective lookup+invocation of the Kotlin synthetic defaults 
-  constructor that we otherwiseh have to use to support default parameter values.
+  constructor that we otherwise have to use to support default parameter values.
 
 #### moshi-sealed
 
