@@ -19,8 +19,8 @@ _Applies to all KSP-using artifacts._
 * **Fix:** Reserve property type simple names eagerly to avoid collisions like https://github.com/square/moshi/issues/1277
 * **Fix:** Include `"RedundantVisibilityModifier"` suppression in generated adapters to cover for KotlinPoet's
   explicit `public` modifiers.
-* **Enhancement:** Invoke constructor directly in generated adapters if all parameters with defaults are present in 
-  the JSON. This allows generated adapters to avoid reflective lookup+invocation of the Kotlin synthetic defaults 
+* **Enhancement:** Invoke constructor directly in generated adapters if all parameters with defaults are present in
+  the JSON. This allows generated adapters to avoid reflective lookup+invocation of the Kotlin synthetic defaults
   constructor that we otherwise have to use to support default parameter values.
 
 #### moshi-sealed
