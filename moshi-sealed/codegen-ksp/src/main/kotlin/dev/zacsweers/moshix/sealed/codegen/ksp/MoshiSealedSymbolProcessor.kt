@@ -20,7 +20,6 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
-import com.google.devtools.ksp.processing.impl.MessageCollectorBasedKSPLogger
 import com.google.devtools.ksp.symbol.ClassKind.OBJECT
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -37,7 +36,6 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
-import org.jetbrains.kotlin.analyzer.AnalysisResult.CompilationErrorException
 
 @AutoService(SymbolProcessor::class)
 public class MoshiSealedSymbolProcessor : SymbolProcessor {
@@ -287,15 +285,6 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
     } else {
       sequence
     }
-  }
-
-  override fun finish() {
-  }
-
-  override fun onError() {
-    // TODO temporary until KSP's logger makes errors fail the compilation and not just the build
-    (logger as? MessageCollectorBasedKSPLogger)?.reportAll()
-    throw CompilationErrorException()
   }
 }
 
