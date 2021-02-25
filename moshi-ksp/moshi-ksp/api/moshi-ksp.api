@@ -1,0 +1,13 @@
+public final class dev/zacsweers/moshix/ksp/JsonClassSymbolProcessor : com/google/devtools/ksp/processing/SymbolProcessor {
+	public static final field Companion Ldev/zacsweers/moshix/ksp/JsonClassSymbolProcessor$Companion;
+	public static final field OPTION_GENERATED Ljava/lang/String;
+	public fun <init> ()V
+	public fun finish ()V
+	public fun init (Ljava/util/Map;Lkotlin/KotlinVersion;Lcom/google/devtools/ksp/processing/CodeGenerator;Lcom/google/devtools/ksp/processing/KSPLogger;)V
+	public fun onError ()V
+	public fun process (Lcom/google/devtools/ksp/processing/Resolver;)Ljava/util/List;
+}
+
+public final class dev/zacsweers/moshix/ksp/JsonClassSymbolProcessor$Companion {
+}
+

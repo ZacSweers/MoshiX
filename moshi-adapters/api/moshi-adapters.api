@@ -1,0 +1,31 @@
+public abstract interface annotation class dev/zacsweers/moshix/adapters/AdaptedBy : java/lang/annotation/Annotation {
+	public abstract fun adapter ()Ljava/lang/Class;
+	public abstract fun nullSafe ()Z
+}
+
+public final class dev/zacsweers/moshix/adapters/AdaptedBy$Factory : com/squareup/moshi/JsonAdapter$Factory {
+	public fun <init> ()V
+	public fun create (Ljava/lang/reflect/Type;Ljava/util/Set;Lcom/squareup/moshi/Moshi;)Lcom/squareup/moshi/JsonAdapter;
+}
+
+public abstract interface annotation class dev/zacsweers/moshix/adapters/JsonString : java/lang/annotation/Annotation {
+}
+
+public final class dev/zacsweers/moshix/adapters/JsonString$Factory : com/squareup/moshi/JsonAdapter$Factory {
+	public fun <init> ()V
+	public fun create (Ljava/lang/reflect/Type;Ljava/util/Set;Lcom/squareup/moshi/Moshi;)Lcom/squareup/moshi/JsonAdapter;
+}
+
+public abstract interface annotation class dev/zacsweers/moshix/adapters/TrackUnknownKeys : java/lang/annotation/Annotation {
+}
+
+public final class dev/zacsweers/moshix/adapters/TrackUnknownKeys$Factory : com/squareup/moshi/JsonAdapter$Factory {
+	public fun <init> (Lkotlin/jvm/functions/Function2;Ldev/zacsweers/moshix/adapters/TrackUnknownKeys$UnknownKeysTracker;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function2;Ldev/zacsweers/moshix/adapters/TrackUnknownKeys$UnknownKeysTracker;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun create (Ljava/lang/reflect/Type;Ljava/util/Set;Lcom/squareup/moshi/Moshi;)Lcom/squareup/moshi/JsonAdapter;
+}
+
+public abstract interface class dev/zacsweers/moshix/adapters/TrackUnknownKeys$UnknownKeysTracker {
+	public abstract fun track (Ljava/lang/Class;Ljava/util/List;)V
+}
+

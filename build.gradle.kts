@@ -30,6 +30,15 @@ plugins {
   id("org.jetbrains.dokka") version Dependencies.Kotlin.dokkaVersion apply false
   id("com.vanniktech.maven.publish") version "0.13.0" apply false
   id("com.diffplug.spotless") version "5.9.0"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.4.0"
+}
+
+apiValidation {
+  ignoredProjects.addAll(listOf(
+    /* :moshi-ksp: */ "tests",
+    /* :moshi-sealed: */ "sample",
+    /* :moshi-sealed:sealed-interfaces-samples: */ "kotlin"
+  ))
 }
 
 spotless {
