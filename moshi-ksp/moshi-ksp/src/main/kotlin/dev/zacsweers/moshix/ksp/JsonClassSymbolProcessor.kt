@@ -21,7 +21,6 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
-import com.google.devtools.ksp.processing.impl.MessageCollectorBasedKSPLogger
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
@@ -31,7 +30,6 @@ import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.ksp.shade.api.AdapterGenerator
 import dev.zacsweers.moshix.ksp.shade.api.ProguardConfig
 import dev.zacsweers.moshix.ksp.shade.api.PropertyGenerator
-import org.jetbrains.kotlin.analyzer.AnalysisResult.CompilationErrorException
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 
@@ -139,9 +137,6 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     return emptyList()
   }
 
-  override fun finish() {
-  }
-
   private fun ProguardConfig.writeTo(codeGenerator: CodeGenerator, originatingKSFile: KSFile) {
     // TODO outputFile needs to be public
     val name = "META-INF/proguard/moshi-${targetClass.canonicalName}"
@@ -196,11 +191,5 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     }
 
     return AdapterGenerator(type, sortedProperties)
-  }
-
-  override fun onError() {
-    // TODO temporary until KSP's logger makes errors fail the compilation and not just the build
-    (logger as? MessageCollectorBasedKSPLogger)?.reportAll()
-    throw CompilationErrorException()
   }
 }
