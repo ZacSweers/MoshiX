@@ -23,7 +23,6 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.ClassKind.OBJECT
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSDeclarationContainer
 import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
@@ -168,7 +167,7 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
     val useDefaultNull = type.hasAnnotation(defaultNullAnnotation)
     val objectAdapters = mutableListOf<CodeBlock>()
     val seenLabels = mutableMapOf<String, ClassName>()
-    val sealedSubtypes = type.sealedSubtypes()
+    val sealedSubtypes = type.getSealedSubclasses()
       .mapTo(LinkedHashSet()) { subtype ->
         val className = subtype.toClassName()
         val isObject = subtype.classKind == OBJECT
@@ -266,25 +265,6 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
     val ksFile = preparedAdapter.spec.originatingKSFiles().single()
     preparedAdapter.spec.writeTo(codeGenerator)
     preparedAdapter.proguardConfig.writeTo(codeGenerator, ksFile)
-  }
-
-  private fun KSClassDeclaration.sealedSubtypes(): Set<KSClassDeclaration> {
-    // All sealed subtypes are guaranteed to to be in this file... somewhere
-    val targetSuperClass = asType().declaration
-    return containingFile?.allTypes()
-      ?.filter { it.superTypes.firstOrNull()?.resolve()?.declaration == targetSuperClass }
-      ?.toSet()
-      .orEmpty()
-  }
-
-  private fun KSDeclarationContainer.allTypes(): Sequence<KSClassDeclaration> {
-    val sequence = declarations.asSequence().filterIsInstance<KSClassDeclaration>()
-      .flatMap { it.allTypes() }
-    return if (this is KSClassDeclaration) {
-      sequence + this
-    } else {
-      sequence
-    }
   }
 }
 
