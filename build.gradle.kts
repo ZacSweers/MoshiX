@@ -34,11 +34,13 @@ plugins {
 }
 
 apiValidation {
-  ignoredProjects.addAll(listOf(
-    /* :moshi-ksp: */ "tests",
-    /* :moshi-sealed: */ "sample",
-    /* :moshi-sealed:sealed-interfaces-samples: */ "kotlin"
-  ))
+  ignoredProjects.addAll(
+    listOf(
+      /* :moshi-ksp: */ "tests",
+      /* :moshi-sealed: */ "sample",
+      /* :moshi-sealed:sealed-interfaces-samples: */ "kotlin"
+    )
+  )
 }
 
 spotless {
