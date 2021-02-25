@@ -17,12 +17,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-//  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
+  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
   kotlin("kapt")
 }
 
-// val useKsp = findProperty("moshix.useKsp")?.toString()?.toBoolean() ?: false
+val useKsp = findProperty("moshix.useKsp")?.toString()?.toBoolean() ?: false
 val generatedAnnotation = if (JavaVersion.current().isJava10Compatible) {
   "javax.annotation.processing.Generated"
 } else {
@@ -30,29 +30,31 @@ val generatedAnnotation = if (JavaVersion.current().isJava10Compatible) {
 }
 
 dependencies {
-//  if (useKsp) {
-//    ksp(project(":moshi-sealed:codegen-ksp"))
-//    ksp(project(":moshi-ksp:moshi-ksp"))
-//  } else {
-  kapt(project(":moshi-sealed:codegen"))
-  kapt(Dependencies.Moshi.codegen)
-//  }
+  if (useKsp) {
+    ksp(project(":moshi-sealed:codegen-ksp"))
+    ksp(project(":moshi-ksp:moshi-ksp"))
+    kspTest(project(":moshi-sealed:codegen-ksp"))
+    kspTest(project(":moshi-ksp:moshi-ksp"))
+  } else {
+    kapt(project(":moshi-sealed:codegen"))
+    kapt(Dependencies.Moshi.codegen)
+  }
 
   implementation(project(":moshi-sealed:runtime"))
   implementation(Dependencies.Moshi.kotlin)
   implementation(project(":moshi-sealed:reflect"))
   implementation(project(":moshi-sealed:metadata-reflect"))
 
-//  if (!useKsp) {
-  kaptTest(project(":moshi-sealed:codegen"))
-//  }
+  if (!useKsp) {
+    kaptTest(project(":moshi-sealed:codegen"))
+  }
   testImplementation(Dependencies.Testing.junit)
   testImplementation(Dependencies.Testing.truth)
 }
 
-// ksp {
-//  arg("moshi.generated", generatedAnnotation)
-// }
+ksp {
+  arg("moshi.generated", generatedAnnotation)
+}
 
 kapt {
   arguments {
