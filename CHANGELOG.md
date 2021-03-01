@@ -6,12 +6,22 @@ Version 0.9.2
 
 _2021-03-01_
 
-* Update KSP to `1.4.30-1.0.0-alpha03`.
-* Add tests for Kotlin 1.4.30's preview support for sealed interfaces. These won't be officially supported until
-  Kotlin 1.5, but they do appear to Just Work™️ since Kotlin reuses the same sealed APIs under the hood.
+#### KSP
+
+* Update KSP to `1.4.30-1.0.0-alpha04` in KSP-using libraries. Among other changes, these processors now run all 
+  errors through KSP's native `KSPLogger.error()` API now.
+
+#### moshi-ksp
+
 * **Fix:** Support function types as property types.
 * **Fix:** Support generic arrays when invoking defaults constructors.
 * Some small readability improvements to generated code.
+
+#### Moshi-sealed
+
+* Add tests for Kotlin 1.4.30's preview support for sealed interfaces. These won't be officially supported until
+  Kotlin 1.5, but they do appear to Just Work™️ since Kotlin reuses the same sealed APIs under the hood.
+* Support Kotlin 1.5's upcoming sealed interfaces in KSP.
 
 Version 0.9.1
 -------------
