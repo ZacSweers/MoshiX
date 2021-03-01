@@ -1,10 +1,22 @@
 Changelog
 =========
 
+Version 0.9.2
+-------------
+
+_2021-03-01_
+
+* Update KSP to `1.4.30-1.0.0-alpha03`.
+* Add tests for Kotlin 1.4.30's preview support for sealed interfaces. These won't be officially supported until
+  Kotlin 1.5, but they do appear to Just Work™️ since Kotlin reuses the same sealed APIs under the hood.
+* **Fix:** Support function types as property types.
+* **Fix:** Support generic arrays when invoking defaults constructors.
+* Some small readability improvements to generated code.
+
 Version 0.9.1
 -------------
 
-_20202-02-15_
+_2021-02-15_
 
 * Update to Kotlin `1.4.30`.
 
