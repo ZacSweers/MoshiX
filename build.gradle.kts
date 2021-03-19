@@ -145,6 +145,7 @@ subprojects {
         jvmTarget = Dependencies.Kotlin.jvmTarget
         @Suppress("SuspiciousCollectionReassignment")
         freeCompilerArgs += Dependencies.Kotlin.defaultFreeCompilerArgs
+        allWarningsAsErrors = true
       }
     }
     if (project.name != "sample" && !project.path.contains("sample")) {
