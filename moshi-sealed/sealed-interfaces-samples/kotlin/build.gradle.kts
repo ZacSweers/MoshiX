@@ -66,8 +66,9 @@ tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     languageVersion = "1.5"
     @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
-    // Temporary until 1.5 stable
-    allWarningsAsErrors = false
+    freeCompilerArgs += listOf(
+      "-Xopt-in=kotlin.ExperimentalStdlibApi",
+      "-Xsuppress-version-warnings"
+    )
   }
 }
