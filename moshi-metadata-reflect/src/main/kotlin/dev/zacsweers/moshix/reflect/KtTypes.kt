@@ -160,7 +160,7 @@ internal data class KtConstructor(
 
   companion object {
     fun primary(rawType: Class<*>, kmClass: KmClass): KtConstructor? {
-      val kmConstructor = kmClass.constructors.find { Flag.Constructor.IS_PRIMARY(it.flags) }
+      val kmConstructor = kmClass.constructors.find { !Flag.Constructor.IS_SECONDARY(it.flags) }
         ?: return null
       val kmConstructorSignature = kmConstructor.signature?.asString() ?: return null
       val constructorsBySignature = rawType.declaredConstructors.associateBy { it.jvmMethodSignature }
