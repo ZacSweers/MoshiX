@@ -8,7 +8,7 @@ _2021-03-01_
 
 #### KSP
 
-* Update KSP to `1.4.30-1.0.0-alpha04` in KSP-using libraries. Among other changes, these processors now run all 
+* Update KSP to `1.4.30-1.0.0-alpha04` in KSP-using libraries. Among other changes, these processors now run all
   errors through KSP's native `KSPLogger.error()` API now.
 
 #### moshi-ksp
