@@ -28,9 +28,9 @@ buildscript {
 plugins {
   kotlin("jvm") version Dependencies.Kotlin.version apply false
   id("org.jetbrains.dokka") version Dependencies.Kotlin.dokkaVersion apply false
-  id("com.vanniktech.maven.publish") version "0.13.0" apply false
-  id("com.diffplug.spotless") version "5.9.0"
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.4.0"
+  id("com.vanniktech.maven.publish") version "0.14.2" apply false
+  id("com.diffplug.spotless") version "5.11.0"
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.5.0"
 }
 
 apiValidation {
@@ -145,6 +145,7 @@ subprojects {
         jvmTarget = Dependencies.Kotlin.jvmTarget
         @Suppress("SuspiciousCollectionReassignment")
         freeCompilerArgs += Dependencies.Kotlin.defaultFreeCompilerArgs
+        allWarningsAsErrors = true
       }
     }
     if (project.name != "sample" && !project.path.contains("sample")) {
