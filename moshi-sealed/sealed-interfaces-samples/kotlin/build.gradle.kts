@@ -67,5 +67,7 @@ tasks.withType<KotlinCompile>().configureEach {
     languageVersion = "1.5"
     @Suppress("SuspiciousCollectionReassignment")
     freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
+    // Temporary until 1.5 stable
+    allWarningsAsErrors = false
   }
 }
