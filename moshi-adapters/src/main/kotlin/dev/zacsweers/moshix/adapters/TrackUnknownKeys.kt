@@ -24,7 +24,8 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.nextAnnotations
 import okio.Buffer
-import okio.Okio
+import okio.blackholeSink
+import okio.buffer
 import java.lang.reflect.Type
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
@@ -95,7 +96,7 @@ public annotation class TrackUnknownKeys {
 
         // Here's where we get clever.
         // Read the keys from the original JSON
-        val writer = JsonWriter.of(Okio.buffer(Okio.blackhole())).apply { serializeNulls = true }
+        val writer = JsonWriter.of(blackholeSink().buffer()).apply { serializeNulls = true }
         // TODO delegating JsonReader to pass through and get instance in the same way?
         val originalKeys = writer.use { reader.peekJson().readAndGetKeys(it) }
 
@@ -108,7 +109,7 @@ public annotation class TrackUnknownKeys {
         delegate.toJson(JsonWriter.of(buffer).apply { serializeNulls = false }, instance)
 
         // Parse the buffer
-        val parsed = JsonReader.of(buffer).readAndGetKeys(JsonWriter.of(Okio.buffer(Okio.blackhole())))
+        val parsed = JsonReader.of(buffer).readAndGetKeys(JsonWriter.of(blackholeSink().buffer()))
         val unknownKeys = originalKeys.filterNot { it in parsed }
         if (unknownKeys.isNotEmpty()) {
           tracker.track(clazz, unknownKeys)
