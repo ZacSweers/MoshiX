@@ -10,16 +10,13 @@ jobs:
       matrix:
         # No 9, 10, or 12 because Kapt
         java_version: [ 1.8, 11, 13, 14, 15 ]
-        kotlin_version: [ 1.4.30 ]
+        kotlin_version: [ 1.4.32 ]
         ksp_enabled: [ true, false ]
         ksp_incremental_enabled: [ true, false ]
         exclude:
           # Don't test incremental KSP if KSP itself isn't enabled
           - ksp_enabled: false
             ksp_incremental_enabled: true
-          # KSP not compatible with Kotlin 1.4.30 yet
-          - ksp_enabled: true
-            kotlin_version: 1.4.30-RC
       fail-fast: false
     env:
       MOSHIX_KOTLIN: ${{ matrix.kotlin_version }}

@@ -77,7 +77,7 @@ internal fun targetType(
   val typeVariables = type.typeParameters.map { it.toTypeVariableName(classTypeParamsResolver) }
   val appliedType = AppliedType.get(type)
 
-  val constructor = primaryConstructor(resolver, type, classTypeParamsResolver)
+  val constructor = primaryConstructor(resolver, type, classTypeParamsResolver, logger)
     ?: run {
       logger.error("No primary constructor found on $type", type)
       return null
@@ -143,6 +143,7 @@ internal fun primaryConstructor(
   resolver: Resolver,
   targetType: KSClassDeclaration,
   typeParameterResolver: TypeParameterResolver,
+  logger: KSPLogger
 ): TargetConstructor? {
   val primaryConstructor = targetType.primaryConstructor ?: return null
 
@@ -160,6 +161,10 @@ internal fun primaryConstructor(
   }
 
   val kmConstructorSignature: String = resolver.mapToJvmSignature(primaryConstructor)
+    ?: run {
+      logger.error("No primary constructor found.", primaryConstructor)
+      return null
+    }
   return TargetConstructor(
     parameters, primaryConstructor.getVisibility().asKModifier(),
     kmConstructorSignature
