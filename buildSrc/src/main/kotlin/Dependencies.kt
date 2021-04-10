@@ -16,13 +16,13 @@
 
 object Dependencies {
 
-  const val autoCommon = "com.google.auto:auto-common:0.11"
+  const val autoCommon = "com.google.auto:auto-common:1.0"
   const val asm = "org.ow2.asm:asm:7.1"
   const val ktlintVersion = "0.39.0"
 
   object AutoService {
-    const val annotations = "com.google.auto.service:auto-service-annotations:1.0-rc7"
-    const val processor = "com.google.auto.service:auto-service:1.0-rc7"
+    const val annotations = "com.google.auto.service:auto-service-annotations:1.0"
+    const val processor = "com.google.auto.service:auto-service:1.0"
     const val ksp = "dev.zacsweers.autoservice:auto-service-ksp:0.3.2"
   }
 
@@ -33,7 +33,7 @@ object Dependencies {
   }
 
   object Kotlin {
-    val version = System.getenv()["MOSHIX_KOTLIN"] ?: "1.4.31"
+    val version = System.getenv()["MOSHIX_KOTLIN"] ?: "1.4.32"
     const val dokkaVersion = "1.4.30"
     val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
     const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.2.0"
@@ -42,7 +42,7 @@ object Dependencies {
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
 
     object Ksp {
-      const val version = "1.4.30-1.0.0-alpha05"
+      const val version = "1.4.32-1.0.0-alpha07"
       const val api = "com.google.devtools.ksp:symbol-processing-api:$version"
       const val ksp = "com.google.devtools.ksp:symbol-processing:$version"
     }
@@ -56,7 +56,7 @@ object Dependencies {
   }
 
   object Moshi {
-    private const val version = "1.11.0"
+    private const val version = "1.12.0"
     const val moshi = "com.squareup.moshi:moshi:$version"
     const val kotlin = "com.squareup.moshi:moshi-kotlin:$version"
     const val codegen = "com.squareup.moshi:moshi-kotlin-codegen:$version"
@@ -79,6 +79,6 @@ object Dependencies {
     const val compileTesting = "com.github.tschuchortdev:kotlin-compile-testing:1.3.6"
     const val kspCompileTesting = "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.3.6"
     const val junit = "junit:junit:4.13.2"
-    const val truth = "com.google.truth:truth:1.1"
+    const val truth = "com.google.truth:truth:1.1.2"
   }
 }
