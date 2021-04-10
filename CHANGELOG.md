@@ -1,6 +1,16 @@
 Changelog
 =========
 
+Version 0.10.0
+-------------
+
+_2021-04-09_
+
+* Update KSP to `1.4.32-1.0.0-alpha07`.
+* `moshi-ksp` - Report missing primary constructor JVM signatures to `KSPLogger`.
+* Update Kotlin to `1.4.32`.
+* Update Moshi to `1.12.0`.
+
 Version 0.9.2
 -------------
 
