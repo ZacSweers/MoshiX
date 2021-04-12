@@ -38,7 +38,7 @@ In the below example, we have a `FunctionSpec` that defines the signature of a f
 by the `PolymorphicJsonAdapterFactory` to determine its type.
 
 ```kotlin
-@JsonClass(generateAdapter = false, generator = "sealed:type")
+@JsonClass(generateAdapter = true, generator = "sealed:type")
 sealed class Type(val type: String) {
   @TypeLabel("void")
   object VoidType : Type("void")
