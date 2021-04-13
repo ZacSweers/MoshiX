@@ -1,6 +1,6 @@
 # MoshiX
 
-Extensions for Moshi
+Extensions for [Moshi](https://github.com/square/moshi)
 
 * [moshi-adapters](https://github.com/ZacSweers/MoshiX/tree/main/moshi-adapters) - A collection of custom adapters for Moshi.
 * [moshi-ksp](https://github.com/ZacSweers/MoshiX/tree/main/moshi-ksp) - A [KSP](https://github.com/google/ksp) implementation of Moshi Kotlin Codegen.
