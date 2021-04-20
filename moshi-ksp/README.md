@@ -10,6 +10,10 @@ Add this dependency as a `ksp` dependency instead of the `moshi-kotlin-codegen` 
 
 [![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-ksp.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-ksp)
 ```diff
+plugins {
++  id("com.google.devtools.ksp").version("<version>")
+}
+
 dependencies {
 -  kapt("com.squareup.moshi:moshi-kotlin-codegen:<version>")
 +  ksp("dev.zacsweers.moshix:moshi-ksp:<version>")
