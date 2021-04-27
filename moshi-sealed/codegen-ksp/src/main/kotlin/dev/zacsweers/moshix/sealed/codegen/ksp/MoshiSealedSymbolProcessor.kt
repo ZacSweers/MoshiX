@@ -20,6 +20,7 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.ClassKind.OBJECT
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -34,11 +35,11 @@ import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATED
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 
-@AutoService(SymbolProcessor::class)
-public class MoshiSealedSymbolProcessor : SymbolProcessor {
-
+@AutoService(SymbolProcessorProvider::class)
+public class MoshiSealedSymbolProcessorProvider : SymbolProcessorProvider {
   public companion object {
     /**
      * This annotation processing argument can be specified to have a `@Generated` annotation
@@ -52,7 +53,25 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
      * We reuse Moshi's option for convenience so you don't have to declare multiple options.
      */
     public const val OPTION_GENERATED: String = "moshi.generated"
+  }
 
+  override fun create(
+    options: Map<String, String>,
+    kotlinVersion: KotlinVersion,
+    codeGenerator: CodeGenerator,
+    logger: KSPLogger
+  ): SymbolProcessor {
+    return MoshiSealedSymbolProcessor(codeGenerator, logger, options)
+  }
+}
+
+private class MoshiSealedSymbolProcessor(
+  private val codeGenerator: CodeGenerator,
+  private val logger: KSPLogger,
+  options: Map<String, String>
+) : SymbolProcessor {
+
+  private companion object {
     private val POSSIBLE_GENERATED_NAMES = setOf(
       "javax.annotation.processing.Generated",
       "javax.annotation.Generated"
@@ -88,23 +107,9 @@ public class MoshiSealedSymbolProcessor : SymbolProcessor {
     }
   }
 
-  private lateinit var codeGenerator: CodeGenerator
-  private lateinit var logger: KSPLogger
-  private var generatedOption: String? = null
-
-  override fun init(
-    options: Map<String, String>,
-    kotlinVersion: KotlinVersion,
-    codeGenerator: CodeGenerator,
-    logger: KSPLogger,
-  ) {
-    this.codeGenerator = codeGenerator
-    this.logger = logger
-
-    generatedOption = options[OPTION_GENERATED]?.also {
-      require(it in POSSIBLE_GENERATED_NAMES) {
-        "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
-      }
+  private val generatedOption = options[OPTION_GENERATED]?.also {
+    require(it in POSSIBLE_GENERATED_NAMES) {
+      "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
     }
   }
 

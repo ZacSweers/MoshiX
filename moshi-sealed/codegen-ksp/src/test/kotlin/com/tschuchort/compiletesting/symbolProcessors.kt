@@ -1,24 +1,9 @@
-/*
- * Copyright (C) 2021 Zac Sweers
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.tschuchort.compiletesting
 
 import com.google.devtools.ksp.AbstractKotlinSymbolProcessingExtension
 import com.google.devtools.ksp.KspOptions
 import com.google.devtools.ksp.processing.KSPLogger
-import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.processing.impl.MessageCollectorBasedKSPLogger
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
@@ -33,11 +18,11 @@ import java.io.File
  * The list of symbol processors for the kotlin compilation.
  * https://goo.gle/ksp
  */
-var KotlinCompilation.symbolProcessors: List<SymbolProcessor>
-  get() = getKspRegistrar().processors
+var KotlinCompilation.symbolProcessorProviders: List<SymbolProcessorProvider>
+  get() = getKspRegistrar().processorProviders
   set(value) {
     val registrar = getKspRegistrar()
-    registrar.processors = value
+    registrar.processorProviders = value
   }
 
 /**
@@ -112,14 +97,14 @@ private val KotlinCompilation.kspCachesDir: File
  */
 private class KspTestExtension(
   options: KspOptions,
-  private val inputProcessors: List<SymbolProcessor>,
+  private val testProcessorProviders: List<SymbolProcessorProvider>,
   logger: KSPLogger
 ) : AbstractKotlinSymbolProcessingExtension(
   options = options,
   logger = logger,
   testMode = false
 ) {
-  override fun loadProcessors() = inputProcessors
+  override fun loadProviders() = testProcessorProviders
 }
 
 /**
@@ -128,7 +113,7 @@ private class KspTestExtension(
 private class KspCompileTestingComponentRegistrar(
   private val compilation: KotlinCompilation
 ) : ComponentRegistrar {
-  var processors = emptyList<SymbolProcessor>()
+  var processorProviders = emptyList<SymbolProcessorProvider>()
 
   var options: MutableMap<String, String> = mutableMapOf()
 
@@ -136,7 +121,7 @@ private class KspCompileTestingComponentRegistrar(
   var incrementalLog: Boolean = false
 
   override fun registerProjectComponents(project: MockProject, configuration: CompilerConfiguration) {
-    if (processors.isEmpty()) {
+    if (processorProviders.isEmpty()) {
       return
     }
     val options = KspOptions.Builder().apply {
@@ -182,7 +167,7 @@ private class KspCompileTestingComponentRegistrar(
         compilation.verbose
       )
     )
-    val registrar = KspTestExtension(options, processors, messageCollectorBasedKSPLogger)
+    val registrar = KspTestExtension(options, processorProviders, messageCollectorBasedKSPLogger)
     AnalysisHandlerExtension.registerExtension(project, registrar)
   }
 }
