@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import com.diffplug.gradle.spotless.JavaExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -50,21 +51,20 @@ spotless {
     indentWithSpaces(2)
     endWithNewline()
   }
-  // GJF not compatible with JDK 15 yet
-//  if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)) {
-//    val configureCommonJavaFormat: JavaExtension.() -> Unit = {
-//      googleJavaFormat("1.9")
-//    }
-//    java {
-//      configureCommonJavaFormat()
-//      target("**/*.java")
-//      targetExclude(
-//        "**/spotless.java",
-//        "**/build/**"
-//      )
-//      licenseHeaderFile("spotless/spotless.java")
-//    }
-//  }
+  if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)) {
+    val configureCommonJavaFormat: JavaExtension.() -> Unit = {
+      googleJavaFormat("1.10.0")
+    }
+    java {
+      configureCommonJavaFormat()
+      target("**/*.java")
+      targetExclude(
+        "**/spotless.java",
+        "**/build/**"
+      )
+      licenseHeaderFile("spotless/spotless.java")
+    }
+  }
   kotlin {
     ktlint(Dependencies.ktlintVersion).userData(mapOf("indent_size" to "2"))
     target("**/*.kt")
@@ -95,23 +95,10 @@ subprojects {
   repositories {
     mavenCentral()
     google()
-    // Required for Dokka
-    exclusiveContent {
-      forRepository {
-        maven {
-          name = "JCenter"
-          setUrl("https://jcenter.bintray.com/")
-        }
-      }
-      filter {
-        includeModule("org.jetbrains.kotlinx", "kotlinx-html-jvm")
-        includeGroup("org.jetbrains.dokka")
-        includeModule("org.jetbrains", "markdown")
-      }
-    }
-    // Kotlin EAPs, only tested on CI shadow jobs
-    maven("https://dl.bintray.com/kotlin/kotlin-eap") {
-      name = "Kotlin-eap"
+    // Kotlin bootstrap repository, useful for testing against Kotlin dev builds. Usually only tested on CI shadow jobs
+    // https://kotlinlang.slack.com/archives/C0KLZSCHF/p1616514468003200?thread_ts=1616509748.001400&cid=C0KLZSCHF
+    maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap") {
+      name = "Kotlin-Bootstrap"
       content {
         // this repository *only* contains Kotlin artifacts (don't try others here)
         includeGroupByRegex("org\\.jetbrains.*")
