@@ -386,7 +386,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
       kspArgs[OPTION_GENERATED] = "javax.annotation.GeneratedBlerg"
     }.compile()
     assertThat(result.messages).contains(
-      "Invalid option value for ${OPTION_GENERATED}"
+      "Invalid option value for $OPTION_GENERATED"
     )
   }
 
