@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # No 9, 10, or 12 because Kapt
-        java_version: [ 1.8, 11, 13, 14, 15 ]
+        # No 12 because Kapt
+        java_version: [ 11, 13, 14, 15, 16 ]
         kotlin_version: [ 1.4.32 ]
         ksp_enabled: [ true, false ]
         ksp_incremental_enabled: [ true, false ]
@@ -44,4 +44,4 @@ jobs:
         run: |
           ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9 || true
           ./gradlew uploadArchives -PmavenCentralRepositoryUsername=${{ secrets.SONATYPE_USERNAME }} -PmavenCentralRepositoryPassword=${{ secrets.SONATYPE_PASSWORD }}
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java_version == '15' && !matrix.ksp_enabled
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java_version == '16' && !matrix.ksp_enabled
