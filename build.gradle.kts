@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import com.diffplug.gradle.spotless.JavaExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -51,8 +50,8 @@ spotless {
     indentWithSpaces(2)
     endWithNewline()
   }
-  // TODO re-enable when Spotless supports JDK 16
-  //  https://github.com/diffplug/spotless/issues/834
+  // TODO re-enable after GJF supports sealed
+  //  https://github.com/google/google-java-format/issues/603
 //  if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_16)) {
 //    val configureCommonJavaFormat: JavaExtension.() -> Unit = {
 //      googleJavaFormat("1.10.0")
