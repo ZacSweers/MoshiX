@@ -25,7 +25,7 @@ import java.util.Set;
 /**
  * A {@link JsonAdapter.Factory} that supports Java {@code record} classes via reflection.
  * <p>
- * <em>NOTE:</em> Java records are currently in preview.
+ * <em>NOTE:</em> Java records require JDK 16 or higher.
  */
 public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
 

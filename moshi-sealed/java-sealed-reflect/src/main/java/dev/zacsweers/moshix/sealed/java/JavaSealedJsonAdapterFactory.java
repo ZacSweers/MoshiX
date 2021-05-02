@@ -15,7 +15,7 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultNull;
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
 
 /**
- * A {@link JsonAdapter.Factory} that supports JDK 15+ Java {@code sealed} classes via reflection.
+ * A {@link JsonAdapter.Factory} that supports JDK 16+ Java {@code sealed} classes via reflection.
  * <p>
  * <em>NOTE:</em> Java sealed classes are currently in preview.
  */
