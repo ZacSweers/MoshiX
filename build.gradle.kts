@@ -51,7 +51,7 @@ spotless {
     indentWithSpaces(2)
     endWithNewline()
   }
-  if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)) {
+  if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_16)) {
     val configureCommonJavaFormat: JavaExtension.() -> Unit = {
       googleJavaFormat("1.10.0")
     }

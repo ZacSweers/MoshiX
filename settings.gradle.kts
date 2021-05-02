@@ -44,7 +44,7 @@ include(":moshi-sealed:metadata-reflect")
 include(":moshi-sealed:sample")
 include("moshi-sealed:sealed-interfaces-samples:kotlin")
 
-if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)) {
+if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_16)) {
   include(":moshi-records-reflect")
   include(":moshi-sealed:java-sealed-reflect")
   include(":moshi-sealed:sealed-interfaces-samples:java")
