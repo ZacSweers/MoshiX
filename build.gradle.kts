@@ -30,7 +30,7 @@ plugins {
   kotlin("jvm") version Dependencies.Kotlin.version apply false
   id("org.jetbrains.dokka") version Dependencies.Kotlin.dokkaVersion apply false
   id("com.vanniktech.maven.publish") version "0.14.2" apply false
-  id("com.diffplug.spotless") version "5.11.0"
+  id("com.diffplug.spotless") version "5.12.4"
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.5.0"
 }
 
@@ -51,20 +51,22 @@ spotless {
     indentWithSpaces(2)
     endWithNewline()
   }
-  if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_16)) {
-    val configureCommonJavaFormat: JavaExtension.() -> Unit = {
-      googleJavaFormat("1.10.0")
-    }
-    java {
-      configureCommonJavaFormat()
-      target("**/*.java")
-      targetExclude(
-        "**/spotless.java",
-        "**/build/**"
-      )
-      licenseHeaderFile("spotless/spotless.java")
-    }
-  }
+  // TODO re-enable when Spotless supports JDK 16
+  //  https://github.com/diffplug/spotless/issues/834
+//  if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_16)) {
+//    val configureCommonJavaFormat: JavaExtension.() -> Unit = {
+//      googleJavaFormat("1.10.0")
+//    }
+//    java {
+//      configureCommonJavaFormat()
+//      target("**/*.java")
+//      targetExclude(
+//        "**/spotless.java",
+//        "**/build/**"
+//      )
+//      licenseHeaderFile("spotless/spotless.java")
+//    }
+//  }
   kotlin {
     ktlint(Dependencies.ktlintVersion).userData(mapOf("indent_size" to "2"))
     target("**/*.kt")
