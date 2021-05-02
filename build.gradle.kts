@@ -132,7 +132,9 @@ subprojects {
         jvmTarget = Dependencies.Kotlin.jvmTarget
         @Suppress("SuspiciousCollectionReassignment")
         freeCompilerArgs += Dependencies.Kotlin.defaultFreeCompilerArgs
-        allWarningsAsErrors = true
+        // TODO disabled because Gradle's Kotlin handling is silly
+        //  https://github.com/gradle/gradle/issues/16779
+//        allWarningsAsErrors = true
       }
     }
     if (project.name != "sample" && !project.path.contains("sample")) {
