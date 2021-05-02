@@ -161,6 +161,40 @@ Gradle dependency:
 implementation "dev.zacsweers.moshix:moshi-sealed-metadata-reflect:{version}"
 ```
 
+#### Java `sealed` classes support
+
+Experimental support for Java `sealed` classes and interfaces in moshi-sealed via new
+`moshi-sealed-java-sealed-reflect` artifact.
+
+See `JavaSealedJsonAdapterFactory`.  Requires JDK 16 + `--enable-preview`.
+
+```java
+Moshi moshi = new Moshi.Builder()
+    .add(new JavaSealedJsonAdapterFactory())
+    .add(new RecordsJsonAdapterFactory())
+    .build();
+
+@JsonClass(generateAdapter = true, generator = "sealed:type")
+sealed interface MessageInterface
+    permits MessageInterface.Success, MessageInterface.Error {
+
+  @TypeLabel(label = "success", alternateLabels = {"successful"})
+  final record Success(String value) implements MessageInterface {
+  }
+
+  @TypeLabel(label = "error")
+  final record Error(Map<String, Object> error_logs) implements MessageInterface {
+  }
+}
+```
+
+Gradle dependency:
+
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-java-sealed-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-java-sealed-reflect)
+```gradle
+implementation "dev.zacsweers.moshix:moshi-sealed-java-sealed-reflect:{version}"
+```
+
 Snapshots of the development version are available in [Sonatype's snapshots repository][snapshots].
 
 License
