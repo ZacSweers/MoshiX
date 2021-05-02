@@ -12,10 +12,10 @@ Snapshots of the development version are available in [Sonatype's `snapshots` re
 
 ### Local development
 
-This project requires JDK 11 as a minimum due to tooling compatibility requirements to build against newer JDK 
+This project requires JDK 11 as a minimum due to tooling compatibility requirements to build against newer JDK
 APIs.
 
-If you want to develop anything targeting Java sealed classes or records, use JDK 16. By default, these projects will 
+If you want to develop anything targeting Java sealed classes or records, use JDK 16. By default, these projects will
 not be enabled unless the current JDK supports 16+.
 
 License
