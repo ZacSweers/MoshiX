@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.zacsweers.moshix.sealed.sample.interfaces
+package dev.zacsweers.moshix.sealed.sample
 
 import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 
 @JsonClass(generateAdapter = true, generator = "sealed:type")
-sealed interface Message {
+sealed interface SealedInterfaceMessage {
 
   @TypeLabel("success", ["successful"])
   @JsonClass(generateAdapter = true)
-  data class Success(val value: String) : Message
+  data class Success(val value: String) : SealedInterfaceMessage
 
   @TypeLabel("error")
   @JsonClass(generateAdapter = true)
-  data class Error(val error_logs: Map<String, Any>) : Message
+  data class Error(val error_logs: Map<String, Any>) : SealedInterfaceMessage
 
   @DefaultObject
-  object Unknown : Message
+  object Unknown : SealedInterfaceMessage
 }

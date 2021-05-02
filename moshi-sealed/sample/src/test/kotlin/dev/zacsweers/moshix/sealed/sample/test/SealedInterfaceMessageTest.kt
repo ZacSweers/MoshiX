@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.zacsweers.moshix.sealed.sample.interfaces
+package dev.zacsweers.moshix.sealed.sample.test
 
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonAdapter
@@ -25,6 +25,7 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.reflect.MetadataMoshiSealedJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.reflect.MoshiSealedJsonAdapterFactory
+import dev.zacsweers.moshix.sealed.sample.SealedInterfaceMessage
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -32,7 +33,7 @@ import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)
 @ExperimentalStdlibApi
-class MessageTest(type: Type) {
+class SealedInterfaceMessageTest(type: Type) {
 
   enum class Type(val moshi: Moshi = Moshi.Builder().build()) {
     REFLECT(
@@ -66,12 +67,12 @@ class MessageTest(type: Type) {
 
   @Test
   fun assertDefaultBehavior() {
-    val adapter = moshi.adapter<Message>()
+    val adapter = moshi.adapter<SealedInterfaceMessage>()
     assertPolymorphicBehavior(
       adapter,
-      Message.Success("Okay!"),
-      Message.Error(mapOf("order" to 66.0)),
-      Message.Unknown
+      SealedInterfaceMessage.Success("Okay!"),
+      SealedInterfaceMessage.Error(mapOf("order" to 66.0)),
+      SealedInterfaceMessage.Unknown
     )
   }
 

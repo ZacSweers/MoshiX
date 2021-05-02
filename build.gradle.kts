@@ -37,8 +37,7 @@ apiValidation {
   ignoredProjects.addAll(
     listOf(
       /* :moshi-ksp: */ "tests",
-      /* :moshi-sealed: */ "sample",
-      /* :moshi-sealed:sealed-interfaces-samples: */ "kotlin"
+      /* :moshi-sealed: */ "sample"
     )
   )
 }

@@ -42,7 +42,6 @@ include(":moshi-sealed:codegen-ksp")
 include(":moshi-sealed:reflect")
 include(":moshi-sealed:metadata-reflect")
 include(":moshi-sealed:sample")
-include("moshi-sealed:sealed-interfaces-samples:kotlin")
 
 if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_16)) {
   include(":moshi-records-reflect")
