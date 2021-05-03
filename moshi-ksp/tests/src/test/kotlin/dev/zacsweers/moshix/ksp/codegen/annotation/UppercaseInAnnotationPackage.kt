@@ -25,9 +25,9 @@ annotation class UppercaseInAnnotationPackage
 
 class UppercaseInAnnotationPackageJsonAdapter {
   @ToJson fun toJson(@UppercaseInAnnotationPackage s: String): String {
-    return s.toUpperCase(Locale.US)
+    return s.uppercase(Locale.US)
   }
   @FromJson @UppercaseInAnnotationPackage fun fromJson(s: String): String {
-    return s.toLowerCase(Locale.US)
+    return s.lowercase(Locale.US)
   }
 }
