@@ -4,7 +4,7 @@ Extensions for [Moshi](https://github.com/square/moshi)
 
 * [moshi-adapters](https://github.com/ZacSweers/MoshiX/tree/main/moshi-adapters) - A collection of custom adapters for Moshi.
 * [moshi-ksp](https://github.com/ZacSweers/MoshiX/tree/main/moshi-ksp) - A [KSP](https://github.com/google/ksp) implementation of Moshi Kotlin Codegen.
-* [moshi-moshi-records-reflect](https://github.com/ZacSweers/MoshiX/tree/main/moshi-records-reflect) - Reflective support for Java `record` classes (still in preview).
+* [moshi-records-reflect](https://github.com/ZacSweers/MoshiX/tree/main/moshi-records-reflect) - Reflective support for Java `record` classes.
 * [moshi-metadata-reflect](https://github.com/ZacSweers/MoshiX/tree/main/moshi-metadata-reflect) - A [kotlinx-metadata](https://github.com/JetBrains/kotlin/tree/master/libraries/kotlinx-metadata/jvm) based implementation of `KotlinJsonAdapterFactory`. This allows for reflective Moshi serialization on Kotlin classes without the cost of including kotlin-reflect.
 * [moshi-sealed](https://github.com/ZacSweers/MoshiX/tree/main/moshi-sealed) - Reflective and code gen implementations for serializing Kotlin sealed classes via Moshi polymorphic adapters.
 
