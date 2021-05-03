@@ -86,8 +86,8 @@ class MoshiSealedProcessorTest {
 
         public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 
-        public override fun toJson(writer: JsonWriter, value: BaseType?): Unit {
-          runtimeAdapter.toJson(writer, value)
+        public override fun toJson(writer: JsonWriter, value_: BaseType?): Unit {
+          runtimeAdapter.toJson(writer, value_)
         }
       }
       """.trimIndent()
