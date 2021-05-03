@@ -106,6 +106,7 @@ subprojects {
     }
   }
   val toolChainVersion = project.findProperty("moshix.javaLanguageVersion")?.toString() ?: "8"
+  val release = toolChainVersion.toInt()
   val usePreview = project.hasProperty("moshix.javaPreview")
   pluginManager.withPlugin("java") {
     configure<JavaPluginExtension> {
@@ -114,11 +115,13 @@ subprojects {
       }
     }
 
-    if (usePreview) {
-      project.tasks.withType<JavaCompile>().configureEach {
+    project.tasks.withType<JavaCompile>().configureEach {
+      options.release.set(release)
+      if (usePreview) {
         options.compilerArgs.add("--enable-preview")
       }
-
+    }
+    if (usePreview) {
       project.tasks.withType<Test>().configureEach {
         // TODO why doesn't add() work?
         //  jvmArgs!!.add("--enable-preview")
