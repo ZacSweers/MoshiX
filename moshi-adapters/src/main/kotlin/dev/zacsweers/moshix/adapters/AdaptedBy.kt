@@ -18,6 +18,7 @@ package dev.zacsweers.moshix.adapters
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonQualifier
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.createCustomAdapter
 import com.squareup.moshi.rawType
 import java.lang.reflect.Type
 import kotlin.annotation.AnnotationRetention.RUNTIME
@@ -114,10 +115,8 @@ public annotation class AdaptedBy(
             .newInstance() as JsonAdapter<*>
         }
         else -> {
-          error(
-            "Invalid attempt to bind an instance of ${javaClass.name} as a @AdaptedBy for $type. @AdaptedBy " +
-              "value must be a JsonAdapter or JsonAdapter.Factory."
-          )
+          val factory = createCustomAdapter(javaClass)
+          factory.create(type, nextAnnotations.orEmpty(), moshi)
         }
       } ?: return null
 

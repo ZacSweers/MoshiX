@@ -16,10 +16,12 @@
 package dev.zacsweers.moshix.adapters
 
 import com.google.common.truth.Truth.assertThat
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.ToJson
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.squareup.moshi.rawType
@@ -185,6 +187,73 @@ class AdaptedByTest {
       writer.value(value.value)
     }
   }
+
+  //region Testing custom Json adapter definition
+  @AdaptedBy(DirectionAdapter::class)
+  enum class Direction(val value: String) {
+    LEFT("left"),
+    RIGHT("right")
+  }
+
+  data class ClassUsingDirection(val direction: Direction?)
+
+  class DirectionAdapter {
+    @FromJson fun fromJson(json: String): Direction? {
+      if (json == "left") return Direction.LEFT
+      if (json == "right") return Direction.RIGHT
+      return null
+    }
+
+    @ToJson fun toJson(direction: Direction): String = direction.value
+  }
+
+  @Test
+  fun deserializeCustomAdapterAnnotatedClass() {
+    val adapter = moshi.adapter<ClassUsingDirection>()
+    val instance = adapter.fromJson(
+      """
+      {"direction":"left"}
+      """.trimIndent()
+    )
+    assertThat(instance).isEqualTo(ClassUsingDirection(Direction.LEFT))
+  }
+
+  @Test
+  fun serializeCustomAdapterAnnotatedClass() {
+    val adapter = moshi.adapter<ClassUsingDirection>()
+    val input = ClassUsingDirection(Direction.LEFT)
+    val instance = adapter.toJson(input)
+    assertThat(instance).isEqualTo(
+      """
+      {"direction":"left"}
+      """.trimIndent()
+    )
+  }
+
+  @Test
+  fun deserializeCustomAdapterAnnotatedClass_unknownValue() {
+    val adapter = moshi.adapter<ClassUsingDirection>()
+    val instance = adapter.fromJson(
+      """
+      {"direction":"top"}
+      """.trimIndent()
+    )
+    assertThat(instance).isEqualTo(ClassUsingDirection(null))
+  }
+
+  @Test
+  fun serializeCustomAdapterAnnotatedClass_nullValue() {
+    val adapter = moshi.adapter<ClassUsingDirection>()
+    val input = ClassUsingDirection(null)
+    val instance = adapter.toJson(input)
+    assertThat(instance).isEqualTo(
+      """
+      {}
+      """.trimIndent()
+    )
+  }
+  //endregion
+
   // TODO
   //  nullsafe
 }
