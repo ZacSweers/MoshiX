@@ -40,6 +40,8 @@ import kotlin.annotation.AnnotationTarget.TYPE
 import kotlin.properties.Delegates
 import kotlin.reflect.full.memberProperties
 
+typealias AtJson = Json
+
 @Suppress("UNUSED", "UNUSED_PARAMETER")
 class GeneratedAdaptersTest {
 
@@ -72,6 +74,32 @@ class GeneratedAdaptersTest {
   @JsonClass(generateAdapter = true)
   data class JsonAnnotation(@Json(name = "foo") val bar: String)
 
+  @Test
+  fun jsonAnnotationTypeAlias() {
+    val adapter = moshi.adapter<JsonAnnotationTypeAlias>()
+
+    // Read
+    @Language("JSON")
+    val json =
+      """{"foo": "bar"}"""
+
+    val instance = adapter.fromJson(json)!!
+    assertThat(instance.bar).isEqualTo("bar")
+
+    // Write
+    @Language("JSON")
+    val expectedJson =
+      """{"foo":"baz"}"""
+
+    assertThat(
+      adapter.toJson(
+        JsonAnnotationTypeAlias("baz")
+      )
+    ).isEqualTo(expectedJson)
+  }
+
+  @JsonClass(generateAdapter = true)
+  data class JsonAnnotationTypeAlias(@AtJson("foo") val bar: String)
   @Test
   fun jsonAnnotationWithDollarSign() {
     val adapter = moshi.adapter<JsonAnnotationWithDollarSign>()
