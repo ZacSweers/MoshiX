@@ -100,6 +100,7 @@ class GeneratedAdaptersTest {
 
   @JsonClass(generateAdapter = true)
   data class JsonAnnotationTypeAlias(@AtJson("foo") val bar: String)
+  
   @Test
   fun jsonAnnotationWithDollarSign() {
     val adapter = moshi.adapter<JsonAnnotationWithDollarSign>()
