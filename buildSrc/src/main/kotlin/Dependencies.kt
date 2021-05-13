@@ -36,7 +36,7 @@ object Dependencies {
     val version = System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.0"
     const val dokkaVersion = "1.4.32"
     val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
-    const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.2.0"
+    const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0"
     val compilerEmbeddable = "org.jetbrains.kotlin:kotlin-compiler-embeddable:$version"
     const val jvmTarget = "1.8"
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
