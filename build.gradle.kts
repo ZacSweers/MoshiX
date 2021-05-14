@@ -28,7 +28,7 @@ buildscript {
 plugins {
   kotlin("jvm") version Dependencies.Kotlin.version apply false
   id("org.jetbrains.dokka") version Dependencies.Kotlin.dokkaVersion apply false
-  id("com.vanniktech.maven.publish") version "0.14.2" apply false
+  id("com.vanniktech.maven.publish") version "0.15.1" apply false
   id("com.diffplug.spotless") version "5.12.4"
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.5.0"
 }
