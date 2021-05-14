@@ -653,7 +653,7 @@ typealias C = NullableA
 typealias D = C
 typealias E = D
 
-// Regression test for enum constants in annotations
+// Regression test for enum constants in annotations and array types
 // https://github.com/ZacSweers/MoshiX/issues/103
 @Retention(RUNTIME)
 @JsonQualifier
