@@ -40,6 +40,8 @@ import kotlin.annotation.AnnotationTarget.TYPE
 import kotlin.properties.Delegates
 import kotlin.reflect.full.memberProperties
 
+typealias AtJson = Json
+
 @Suppress("UNUSED", "UNUSED_PARAMETER")
 class GeneratedAdaptersTest {
 
@@ -1398,6 +1400,34 @@ class GeneratedAdaptersTest {
     @Transient
     val arity: (String.(String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String) -> Boolean)? = null,
   )
+
+  // Regression test for https://github.com/ZacSweers/MoshiX/issues/113
+  @Test
+  fun jsonAnnotationTypeAlias() {
+    val adapter = moshi.adapter<JsonAnnotationTypeAlias>()
+
+    // Read
+    @Language("JSON")
+    val json =
+      """{"foo": "bar"}"""
+
+    val instance = adapter.fromJson(json)!!
+    assertThat(instance.bar).isEqualTo("bar")
+
+    // Write
+    @Language("JSON")
+    val expectedJson =
+      """{"foo":"baz"}"""
+
+    assertThat(
+      adapter.toJson(
+        JsonAnnotationTypeAlias("baz")
+      )
+    ).isEqualTo(expectedJson)
+  }
+
+  @JsonClass(generateAdapter = true)
+  data class JsonAnnotationTypeAlias(@AtJson("foo") val bar: String)
 }
 
 // Regression test for https://github.com/square/moshi/issues/1022
