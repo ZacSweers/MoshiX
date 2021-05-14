@@ -146,10 +146,10 @@ private class JsonClassSymbolProcessor(
     // TODO outputFile needs to be public
     val name = "META-INF/proguard/moshi-${targetClass.canonicalName}"
     val file = codeGenerator.createNewFile(
-      Dependencies(false, originatingKSFile),
-      "",
-      name,
-      "pro"
+      dependencies = Dependencies(aggregating = false, originatingKSFile),
+      packageName = "",
+      fileName = name,
+      extensionName = "pro"
     )
     // Don't use writeTo(file) because that tries to handle directories under the hood
     OutputStreamWriter(file, StandardCharsets.UTF_8)

@@ -43,7 +43,7 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
     }
 
     var labels = new LinkedHashMap<String, Class<?>>();
-    for (var sealedSubclassDesc : rawType.permittedSubclasses()) {
+    for (var sealedSubclassDesc : rawType.getPermittedSubclasses()) {
       // TODO check for default object annotations - they don't work here!
       try {
         var sealedSubclass = Class.forName(toBinaryName(sealedSubclassDesc.descriptorString()));

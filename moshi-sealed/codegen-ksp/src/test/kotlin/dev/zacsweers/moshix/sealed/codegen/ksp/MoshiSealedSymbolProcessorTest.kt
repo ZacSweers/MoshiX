@@ -22,11 +22,13 @@ import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
 
+@Ignore("https://github.com/google/ksp/issues/427")
 @RunWith(Parameterized::class)
 class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
 

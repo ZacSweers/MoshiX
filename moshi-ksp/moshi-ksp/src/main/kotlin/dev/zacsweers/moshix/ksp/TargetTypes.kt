@@ -201,7 +201,7 @@ private fun declaredProperties(
   for (property in classDecl.getDeclaredProperties()) {
     val initialType = property.type.resolve()
     val resolvedType = if (initialType.declaration is KSTypeParameter) {
-      resolver.asMemberOf(property, originalType.asType())
+      property.asMemberOf(originalType.asType())
     } else {
       initialType
     }
@@ -236,16 +236,18 @@ private fun KSPropertyDeclaration.toPropertySpec(
         addAnnotation(Transient::class.java)
       }
       addAnnotations(
-        this@toPropertySpec.annotations.mapNotNull {
-          if ((it.annotationType.resolve().declaration as KSClassDeclaration).isJsonQualifier(
-              resolver
-            )
-          ) {
-            it.toAnnotationSpec(resolver)
-          } else {
-            null
+        this@toPropertySpec.annotations
+          .mapNotNull {
+            if ((it.annotationType.resolve().declaration as KSClassDeclaration).isJsonQualifier(
+                resolver
+              )
+            ) {
+              it.toAnnotationSpec(resolver)
+            } else {
+              null
+            }
           }
-        }
+          .asIterable()
       )
     }
     .build()

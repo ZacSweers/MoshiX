@@ -79,7 +79,7 @@ internal fun KSClassDeclaration.toClassName(): ClassName {
 internal fun KSTypeParameter.toTypeName(): TypeName {
   if (variance == STAR) return KpStar
   val typeVarName = name.getShortName()
-  val typeVarBounds = bounds.map { it.toTypeName() }
+  val typeVarBounds = bounds.map { it.toTypeName() }.toList()
   val typeVarVariance = when (variance) {
     COVARIANT -> KModifier.IN
     CONTRAVARIANT -> KModifier.OUT
