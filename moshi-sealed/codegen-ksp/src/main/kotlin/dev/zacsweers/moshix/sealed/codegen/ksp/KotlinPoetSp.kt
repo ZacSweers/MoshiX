@@ -20,6 +20,7 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Variance.CONTRAVARIANT
@@ -44,6 +45,9 @@ internal fun KSType.toTypeName(): TypeName {
     }
     is KSTypeParameter -> {
       (declaration as KSTypeParameter).toTypeName()
+    }
+    is KSTypeAlias -> {
+      (declaration as KSTypeAlias).type.resolve().toTypeName()
     }
     else -> error("Unsupported type: $declaration")
   }
