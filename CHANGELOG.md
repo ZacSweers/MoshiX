@@ -1,6 +1,67 @@
 Changelog
 =========
 
+Version 0.11.0
+-------------
+
+_2021-05-14_
+
+#### Project-wide
+
+* Update Kotlin to `1.5.0`.
+* Update deprecated Kotlin stdlib usages during `1.5.0` upgrade.
+* Support Java 16.
+* Update KotlinPoet to `1.8.0`.
+* Small documentation improvements.
+  
+#### All KSP artifacts
+
+* Update KSP to `1.5.0-1.0.0-alpha10`.
+* Switch to new `SymbolProcessorProvider` APIs.
+* Adopt new `Sequence`-based KSP APIs where possible.
+  
+#### All metadata-reflect artifacts
+
+* Update kotlinx-metadata to `0.3.0`.
+  
+#### moshi-ksp
+
+* **Fix:** Don't fail on annotations that are `typealias`'d.
+* **Fix:** Support enum entry values in copied `@JsonQualifier` annotations.
+* **Fix:** Support array values in copied `@JsonQualifier` annotations.
+* **Fix:** Support array values in copied `@JsonQualifier` annotations.
+
+#### moshi-sealed
+
+* **Enhancement:** sealed interfaces and package-wide sealed classes are fully supported in KSP, kapt, reflect, and 
+  metadata-reflect.
+* **Fix:** Make `moshi-adapters` an `api` dependency in `moshi-sealed-runtime`
+
+#### moshi-records-reflect
+
+* `RecordsJsonAdapterFactory` is no longer in preview and now built against JDK 16.
+* **New:** A dedicated README page can be found [here](https://github.com/ZacSweers/MoshiX/tree/main/moshi-records-reflect).
+
+```java
+final record Message(String value) {
+}
+
+public static void main(String[] args) {
+  Moshi moshi = new Moshi.Builder()
+    .add(new RecordsJsonAdapterFactory())
+    .build();
+  
+  JsonAdapter<Message> messageAdapter = moshi.adapter(Message.class);
+}
+```
+
+#### moshi-sealed: java-sealed-reflect
+
+* `JavaSealedJsonAdapterFactory` is now built against JDK 16. Note this feature is still in preview.
+* **New:** A dedicated README section can be found [here](https://github.com/ZacSweers/MoshiX/tree/main/moshi-sealed#java-sealed-classes-support).
+
+_Thanks to the following contributors for contributing to this release! [@remcomokveld](https://github.com/remcomokveld), [@martinbonnin](https://github.com/martinbonnin), and [@eneim](https://github.com/eneim)
+
 Version 0.10.0
 -------------
 
