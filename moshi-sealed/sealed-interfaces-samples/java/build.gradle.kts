@@ -21,7 +21,7 @@ plugins {
 val generatedAnnotation = "javax.annotation.processing.Generated"
 
 dependencies {
-  // TODO add when we suppose it in the processor
+  // TODO add when we support it in the processor
 //  annotationProcessor(project(":moshi-sealed:codegen"))
 //  testAnnotationProcessor(project(":moshi-sealed:codegen"))
   implementation(project(":moshi-records-reflect"))
