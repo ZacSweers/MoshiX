@@ -18,6 +18,7 @@ package dev.zacsweers.moshix.ksp
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.ClassKind.CLASS
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
@@ -25,6 +26,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSName
 import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.Origin.KOTLIN
 import com.google.devtools.ksp.symbol.Visibility
 import com.google.devtools.ksp.symbol.Visibility.INTERNAL
@@ -99,6 +101,14 @@ internal inline fun <reified T> KSAnnotation.getMember(name: String): T {
   }
 }
 
+internal fun KSType.unwrapTypeAlias(): KSType {
+  return if (this.declaration is KSTypeAlias) {
+    (this.declaration as KSTypeAlias).type.resolve()
+  } else {
+    this
+  }
+}
+
 internal fun Visibility.asKModifier(): KModifier {
   return when (this) {
     PUBLIC -> KModifier.PUBLIC
@@ -111,36 +121,49 @@ internal fun Visibility.asKModifier(): KModifier {
 }
 
 internal fun KSAnnotation.toAnnotationSpec(resolver: Resolver): AnnotationSpec {
-  val element = annotationType.resolve().declaration as KSClassDeclaration
+  val element = annotationType.resolve().unwrapTypeAlias().declaration as KSClassDeclaration
   // TODO support generic annotations
   val builder = AnnotationSpec.builder(element.toClassName())
   for (argument in arguments) {
     val member = CodeBlock.builder()
     val name = argument.name!!.getShortName()
     member.add("%L = ", name)
-    when (val value = argument.value!!) {
-      resolver.builtIns.arrayType -> {
-//        TODO("Arrays aren't supported yet")
-//        member.add("[⇥⇥")
-//        values.forEachIndexed { index, value ->
-//          if (index > 0) member.add(", ")
-//          value.accept(this, name)
-//        }
-//        member.add("⇤⇤]")
-      }
-      is KSType -> member.add("%T::class", value.toClassName())
-      // TODO is this the right way to handle an enum constant?
-      is KSName ->
-        member.add(
-          "%T.%L", ClassName.bestGuess(value.getQualifier()),
-          value.getShortName()
-        )
-      is KSAnnotation -> member.add("%L", value.toAnnotationSpec(resolver))
-      else -> member.add(memberForValue(value))
-    }
+    addValueToBlock(argument.value!!, resolver, member)
     builder.addMember(member.build())
   }
   return builder.build()
+}
+
+private fun addValueToBlock(value: Any, resolver: Resolver, member: CodeBlock.Builder) {
+  when (value) {
+    is List<*> -> {
+      // Array type
+      member.add("[⇥⇥")
+      value.forEachIndexed { index, innerValue ->
+        if (index > 0) member.add(", ")
+        addValueToBlock(innerValue!!, resolver, member)
+      }
+      member.add("⇤⇤]")
+    }
+    is KSType -> {
+      val unwrapped = value.unwrapTypeAlias()
+      val isEnum = (unwrapped.declaration as KSClassDeclaration).classKind == ClassKind.ENUM_ENTRY
+      if (isEnum) {
+        val parent = unwrapped.declaration.parentDeclaration as KSClassDeclaration
+        val entry = unwrapped.declaration.simpleName.getShortName()
+        member.add("%T.%L", parent.toClassName(), entry)
+      } else {
+        member.add("%T::class", unwrapped.toClassName())
+      }
+    }
+    is KSName ->
+      member.add(
+        "%T.%L", ClassName.bestGuess(value.getQualifier()),
+        value.getShortName()
+      )
+    is KSAnnotation -> member.add("%L", value.toAnnotationSpec(resolver))
+    else -> member.add(memberForValue(value))
+  }
 }
 
 /**

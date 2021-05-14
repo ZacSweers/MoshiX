@@ -20,6 +20,7 @@ plugins {
 }
 
 dependencies {
+  api(Dependencies.Moshi.adapters)
   api(Dependencies.Moshi.moshi)
 
   testImplementation(Dependencies.Testing.junit)

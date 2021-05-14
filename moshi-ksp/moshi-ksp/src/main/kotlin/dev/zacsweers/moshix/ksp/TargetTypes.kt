@@ -238,7 +238,7 @@ private fun KSPropertyDeclaration.toPropertySpec(
       addAnnotations(
         this@toPropertySpec.annotations
           .mapNotNull {
-            if ((it.annotationType.resolve().declaration as KSClassDeclaration).isJsonQualifier(
+            if ((it.annotationType.resolve().unwrapTypeAlias().declaration as KSClassDeclaration).isJsonQualifier(
                 resolver
               )
             ) {
