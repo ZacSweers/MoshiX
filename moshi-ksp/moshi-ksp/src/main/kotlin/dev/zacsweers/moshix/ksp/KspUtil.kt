@@ -18,6 +18,7 @@ package dev.zacsweers.moshix.ksp
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.ClassKind.CLASS
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
@@ -33,6 +34,7 @@ import com.google.devtools.ksp.symbol.Visibility.LOCAL
 import com.google.devtools.ksp.symbol.Visibility.PRIVATE
 import com.google.devtools.ksp.symbol.Visibility.PROTECTED
 import com.google.devtools.ksp.symbol.Visibility.PUBLIC
+import com.google.devtools.ksp.symbol.impl.kotlin.KSClassDeclarationImpl
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
@@ -128,8 +130,14 @@ internal fun KSAnnotation.toAnnotationSpec(resolver: Resolver): AnnotationSpec {
 //        }
 //        member.add("⇤⇤]")
       }
-      is KSType -> member.add("%T::class", value.toClassName())
-      // TODO is this the right way to handle an enum constant?
+      is KSType -> {
+        val isEnum = (value.declaration as KSClassDeclarationImpl).classKind == ClassKind.ENUM_ENTRY
+        if (isEnum) {
+          member.add("%T", value.toClassName())
+        } else {
+          member.add("%T::class", value.toClassName())
+        }
+      }
       is KSName ->
         member.add(
           "%T.%L", ClassName.bestGuess(value.getQualifier()),

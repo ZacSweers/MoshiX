@@ -22,6 +22,7 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonAdapter.Factory
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.JsonQualifier
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.Types
@@ -651,3 +652,12 @@ typealias NullableB = B?
 typealias C = NullableA
 typealias D = C
 typealias E = D
+
+// Regression test for enum constants in annotations
+// https://github.com/ZacSweers/MoshiX/issues/103
+@Retention(RUNTIME)
+@JsonQualifier
+annotation class UpperCase(val foo: Foo)
+enum class Foo { BAR, QUX, FOO }
+@JsonClass(generateAdapter = true)
+data class ClassWithQualifier(@UpperCase(foo = Foo.BAR) val a: Int)
