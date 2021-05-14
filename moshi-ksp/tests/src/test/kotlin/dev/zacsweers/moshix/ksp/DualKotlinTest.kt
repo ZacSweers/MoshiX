@@ -657,7 +657,10 @@ typealias E = D
 // https://github.com/ZacSweers/MoshiX/issues/103
 @Retention(RUNTIME)
 @JsonQualifier
-annotation class UpperCase(val foo: Foo)
+annotation class UpperCase(val foo: Array<Foo>)
 enum class Foo { BAR, QUX, FOO }
 @JsonClass(generateAdapter = true)
-data class ClassWithQualifier(@UpperCase(foo = Foo.BAR) val a: Int)
+data class ClassWithQualifier(
+  @UpperCase(foo = [Foo.BAR])
+  val a: Int
+)

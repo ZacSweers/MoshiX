@@ -34,7 +34,6 @@ import com.google.devtools.ksp.symbol.Visibility.LOCAL
 import com.google.devtools.ksp.symbol.Visibility.PRIVATE
 import com.google.devtools.ksp.symbol.Visibility.PROTECTED
 import com.google.devtools.ksp.symbol.Visibility.PUBLIC
-import com.google.devtools.ksp.symbol.impl.kotlin.KSClassDeclarationImpl
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
@@ -120,35 +119,41 @@ internal fun KSAnnotation.toAnnotationSpec(resolver: Resolver): AnnotationSpec {
     val member = CodeBlock.builder()
     val name = argument.name!!.getShortName()
     member.add("%L = ", name)
-    when (val value = argument.value!!) {
-      resolver.builtIns.arrayType -> {
-//        TODO("Arrays aren't supported yet")
-//        member.add("[⇥⇥")
-//        values.forEachIndexed { index, value ->
-//          if (index > 0) member.add(", ")
-//          value.accept(this, name)
-//        }
-//        member.add("⇤⇤]")
-      }
-      is KSType -> {
-        val isEnum = (value.declaration as KSClassDeclarationImpl).classKind == ClassKind.ENUM_ENTRY
-        if (isEnum) {
-          member.add("%T", value.toClassName())
-        } else {
-          member.add("%T::class", value.toClassName())
-        }
-      }
-      is KSName ->
-        member.add(
-          "%T.%L", ClassName.bestGuess(value.getQualifier()),
-          value.getShortName()
-        )
-      is KSAnnotation -> member.add("%L", value.toAnnotationSpec(resolver))
-      else -> member.add(memberForValue(value))
-    }
+    addValueToBlock(argument.value!!, resolver, member)
     builder.addMember(member.build())
   }
   return builder.build()
+}
+
+private fun addValueToBlock(value: Any, resolver: Resolver, member: CodeBlock.Builder) {
+  when (value) {
+    is List<*> -> {
+      // Array type
+      member.add("[⇥⇥")
+      value.forEachIndexed { index, innerValue ->
+        if (index > 0) member.add(", ")
+        addValueToBlock(innerValue!!, resolver, member)
+      }
+      member.add("⇤⇤]")
+    }
+    is KSType -> {
+      val isEnum = (value.declaration as KSClassDeclaration).classKind == ClassKind.ENUM_ENTRY
+      if (isEnum) {
+        val parent = value.declaration.parentDeclaration as KSClassDeclaration
+        val entry = value.declaration.simpleName.getShortName()
+        member.add("%T.%L", parent.toClassName(), entry)
+      } else {
+        member.add("%T::class", value.toClassName())
+      }
+    }
+    is KSName ->
+      member.add(
+        "%T.%L", ClassName.bestGuess(value.getQualifier()),
+        value.getShortName()
+      )
+    is KSAnnotation -> member.add("%L", value.toAnnotationSpec(resolver))
+    else -> member.add(memberForValue(value))
+  }
 }
 
 /**
