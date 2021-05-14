@@ -395,7 +395,6 @@ private fun Class<*>.header(): KotlinClassHeader? {
     KotlinClassHeader(
       kind = kind,
       metadataVersion = metadataVersion,
-      bytecodeVersion = bytecodeVersion,
       data1 = data1,
       data2 = data2,
       extraString = extraString,

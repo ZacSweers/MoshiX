@@ -17,17 +17,17 @@
 pluginManagement {
   repositories {
     mavenCentral()
-    gradlePluginPortal()
-    jcenter()
     google()
-    // Kotlin EAPs, only tested on CI shadow jobs
-    maven("https://dl.bintray.com/kotlin/kotlin-eap") {
-      name = "Kotlin-eap"
+    // Kotlin bootstrap repository, useful for testing against Kotlin dev builds. Usually only tested on CI shadow jobs
+    // https://kotlinlang.slack.com/archives/C0KLZSCHF/p1616514468003200?thread_ts=1616509748.001400&cid=C0KLZSCHF
+    maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap") {
+      name = "Kotlin-Bootstrap"
       content {
         // this repository *only* contains Kotlin artifacts (don't try others here)
         includeGroupByRegex("org\\.jetbrains.*")
       }
     }
+    gradlePluginPortal()
   }
 }
 
@@ -42,9 +42,8 @@ include(":moshi-sealed:codegen-ksp")
 include(":moshi-sealed:reflect")
 include(":moshi-sealed:metadata-reflect")
 include(":moshi-sealed:sample")
-include("moshi-sealed:sealed-interfaces-samples:kotlin")
 
-if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)) {
+if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_16)) {
   include(":moshi-records-reflect")
   include(":moshi-sealed:java-sealed-reflect")
   include(":moshi-sealed:sealed-interfaces-samples:java")

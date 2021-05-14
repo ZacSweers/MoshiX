@@ -21,21 +21,22 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.Origin.KOTLIN
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.moshi.JsonClass
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
 import dev.zacsweers.moshix.ksp.shade.api.AdapterGenerator
 import dev.zacsweers.moshix.ksp.shade.api.ProguardConfig
 import dev.zacsweers.moshix.ksp.shade.api.PropertyGenerator
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 
-@AutoService(SymbolProcessor::class)
-public class JsonClassSymbolProcessor : SymbolProcessor {
-
+@AutoService(SymbolProcessorProvider::class)
+public class JsonClassSymbolProcessorProvider : SymbolProcessorProvider {
   public companion object {
     /**
      * This annotation processing argument can be specified to have a `@Generated` annotation
@@ -47,32 +48,36 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
      *   * `"javax.annotation.Generated"` (JRE <9)
      */
     public const val OPTION_GENERATED: String = "moshi.generated"
+  }
 
-    private val POSSIBLE_GENERATED_NAMES = setOf(
+  override fun create(
+    options: Map<String, String>,
+    kotlinVersion: KotlinVersion,
+    codeGenerator: CodeGenerator,
+    logger: KSPLogger
+  ): SymbolProcessor {
+    return JsonClassSymbolProcessor(codeGenerator, logger, options)
+  }
+}
+
+private class JsonClassSymbolProcessor(
+  private val codeGenerator: CodeGenerator,
+  private val logger: KSPLogger,
+  options: Map<String, String>
+) : SymbolProcessor {
+
+  private companion object {
+    val POSSIBLE_GENERATED_NAMES = setOf(
       "javax.annotation.processing.Generated",
       "javax.annotation.Generated"
     )
 
-    private val JSON_CLASS_NAME = JsonClass::class.qualifiedName!!
+    val JSON_CLASS_NAME = JsonClass::class.qualifiedName!!
   }
 
-  private lateinit var codeGenerator: CodeGenerator
-  private lateinit var logger: KSPLogger
-  private var generatedOption: String? = null
-
-  override fun init(
-    options: Map<String, String>,
-    kotlinVersion: KotlinVersion,
-    codeGenerator: CodeGenerator,
-    logger: KSPLogger,
-  ) {
-    this.codeGenerator = codeGenerator
-    this.logger = logger
-
-    generatedOption = options[OPTION_GENERATED]?.also {
-      logger.check(it in POSSIBLE_GENERATED_NAMES) {
-        "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
-      }
+  private val generatedOption = options[OPTION_GENERATED]?.also {
+    logger.check(it in POSSIBLE_GENERATED_NAMES) {
+      "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
     }
   }
 
@@ -141,10 +146,10 @@ public class JsonClassSymbolProcessor : SymbolProcessor {
     // TODO outputFile needs to be public
     val name = "META-INF/proguard/moshi-${targetClass.canonicalName}"
     val file = codeGenerator.createNewFile(
-      Dependencies(false, originatingKSFile),
-      "",
-      name,
-      "pro"
+      dependencies = Dependencies(aggregating = false, originatingKSFile),
+      packageName = "",
+      fileName = name,
+      extensionName = "pro"
     )
     // Don't use writeTo(file) because that tries to handle directories under the hood
     OutputStreamWriter(file, StandardCharsets.UTF_8)

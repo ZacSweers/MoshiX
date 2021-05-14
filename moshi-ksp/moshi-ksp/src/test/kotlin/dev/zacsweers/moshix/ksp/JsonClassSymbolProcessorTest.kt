@@ -23,7 +23,8 @@ import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
-import com.tschuchort.compiletesting.symbolProcessors
+import com.tschuchort.compiletesting.symbolProcessorProviders
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +40,7 @@ import kotlin.reflect.KVariance.INVARIANT
 import kotlin.reflect.full.createType
 
 /** Execute kotlinc to confirm that either files are generated or errors are printed. */
+@Ignore("https://github.com/google/ksp/issues/427")
 @RunWith(Parameterized::class)
 class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
 
@@ -382,10 +384,10 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
           """
       )
     ).apply {
-      kspArgs[JsonClassSymbolProcessor.OPTION_GENERATED] = "javax.annotation.GeneratedBlerg"
+      kspArgs[OPTION_GENERATED] = "javax.annotation.GeneratedBlerg"
     }.compile()
     assertThat(result.messages).contains(
-      "Invalid option value for ${JsonClassSymbolProcessor.OPTION_GENERATED}"
+      "Invalid option value for $OPTION_GENERATED"
     )
   }
 
@@ -794,7 +796,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
       .apply {
         workingDir = temporaryFolder.root
         inheritClassPath = true
-        symbolProcessors = listOf(JsonClassSymbolProcessor())
+        symbolProcessorProviders = listOf(JsonClassSymbolProcessorProvider())
         sources = sourceFiles.asList()
         verbose = false
         kspIncremental = incremental

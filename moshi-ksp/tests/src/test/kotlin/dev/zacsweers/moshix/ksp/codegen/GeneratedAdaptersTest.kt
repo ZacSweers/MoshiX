@@ -1192,10 +1192,10 @@ class GeneratedAdaptersTest {
 
   class UppercaseJsonAdapter {
     @ToJson fun toJson(@Uppercase(inFrench = true) s: String): String {
-      return s.toUpperCase(Locale.US)
+      return s.uppercase(Locale.US)
     }
     @FromJson @Uppercase(inFrench = true) fun fromJson(s: String): String {
-      return s.toLowerCase(Locale.US)
+      return s.lowercase(Locale.US)
     }
   }
 

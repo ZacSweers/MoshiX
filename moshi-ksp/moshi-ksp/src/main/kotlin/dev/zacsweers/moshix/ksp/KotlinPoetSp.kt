@@ -121,7 +121,7 @@ internal fun KSTypeParameter.toTypeVariableName(
   typeParamResolver: TypeParameterResolver,
 ): TypeVariableName {
   val typeVarName = name.getShortName()
-  val typeVarBounds = bounds.map { it.toTypeName(typeParamResolver) }
+  val typeVarBounds = bounds.map { it.toTypeName(typeParamResolver) }.toList()
   val typeVarVariance = when (variance) {
     COVARIANT -> KModifier.OUT
     CONTRAVARIANT -> KModifier.IN

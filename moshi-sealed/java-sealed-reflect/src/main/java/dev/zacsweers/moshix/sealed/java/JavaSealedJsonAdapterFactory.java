@@ -15,7 +15,7 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultNull;
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
 
 /**
- * A {@link JsonAdapter.Factory} that supports JDK 15+ Java {@code sealed} classes via reflection.
+ * A {@link JsonAdapter.Factory} that supports JDK 16+ Java {@code sealed} classes via reflection.
  * <p>
  * <em>NOTE:</em> Java sealed classes are currently in preview.
  */
@@ -43,7 +43,7 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
     }
 
     var labels = new LinkedHashMap<String, Class<?>>();
-    for (var sealedSubclassDesc : rawType.permittedSubclasses()) {
+    for (var sealedSubclassDesc : rawType.getPermittedSubclasses()) {
       // TODO check for default object annotations - they don't work here!
       try {
         var sealedSubclass = Class.forName(toBinaryName(sealedSubclassDesc.descriptorString()));

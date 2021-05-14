@@ -29,7 +29,7 @@ plugins {
   kotlin("jvm") version Dependencies.Kotlin.version apply false
   id("org.jetbrains.dokka") version Dependencies.Kotlin.dokkaVersion apply false
   id("com.vanniktech.maven.publish") version "0.14.2" apply false
-  id("com.diffplug.spotless") version "5.11.0"
+  id("com.diffplug.spotless") version "5.12.4"
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.5.0"
 }
 
@@ -37,8 +37,7 @@ apiValidation {
   ignoredProjects.addAll(
     listOf(
       /* :moshi-ksp: */ "tests",
-      /* :moshi-sealed: */ "sample",
-      /* :moshi-sealed:sealed-interfaces-samples: */ "kotlin"
+      /* :moshi-sealed: */ "sample"
     )
   )
 }
@@ -50,10 +49,11 @@ spotless {
     indentWithSpaces(2)
     endWithNewline()
   }
-  // GJF not compatible with JDK 15 yet
-//  if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_15)) {
+  // TODO re-enable after GJF supports sealed
+  //  https://github.com/google/google-java-format/issues/603
+//  if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_16)) {
 //    val configureCommonJavaFormat: JavaExtension.() -> Unit = {
-//      googleJavaFormat("1.9")
+//      googleJavaFormat("1.10.0")
 //    }
 //    java {
 //      configureCommonJavaFormat()
@@ -95,23 +95,10 @@ subprojects {
   repositories {
     mavenCentral()
     google()
-    // Required for Dokka
-    exclusiveContent {
-      forRepository {
-        maven {
-          name = "JCenter"
-          setUrl("https://jcenter.bintray.com/")
-        }
-      }
-      filter {
-        includeModule("org.jetbrains.kotlinx", "kotlinx-html-jvm")
-        includeGroup("org.jetbrains.dokka")
-        includeModule("org.jetbrains", "markdown")
-      }
-    }
-    // Kotlin EAPs, only tested on CI shadow jobs
-    maven("https://dl.bintray.com/kotlin/kotlin-eap") {
-      name = "Kotlin-eap"
+    // Kotlin bootstrap repository, useful for testing against Kotlin dev builds. Usually only tested on CI shadow jobs
+    // https://kotlinlang.slack.com/archives/C0KLZSCHF/p1616514468003200?thread_ts=1616509748.001400&cid=C0KLZSCHF
+    maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap") {
+      name = "Kotlin-Bootstrap"
       content {
         // this repository *only* contains Kotlin artifacts (don't try others here)
         includeGroupByRegex("org\\.jetbrains.*")
@@ -119,6 +106,7 @@ subprojects {
     }
   }
   val toolChainVersion = project.findProperty("moshix.javaLanguageVersion")?.toString() ?: "8"
+  val release = toolChainVersion.toInt()
   val usePreview = project.hasProperty("moshix.javaPreview")
   pluginManager.withPlugin("java") {
     configure<JavaPluginExtension> {
@@ -127,11 +115,13 @@ subprojects {
       }
     }
 
-    if (usePreview) {
-      project.tasks.withType<JavaCompile>().configureEach {
+    project.tasks.withType<JavaCompile>().configureEach {
+      options.release.set(release)
+      if (usePreview) {
         options.compilerArgs.add("--enable-preview")
       }
-
+    }
+    if (usePreview) {
       project.tasks.withType<Test>().configureEach {
         // TODO why doesn't add() work?
         //  jvmArgs!!.add("--enable-preview")
@@ -145,7 +135,9 @@ subprojects {
         jvmTarget = Dependencies.Kotlin.jvmTarget
         @Suppress("SuspiciousCollectionReassignment")
         freeCompilerArgs += Dependencies.Kotlin.defaultFreeCompilerArgs
-        allWarningsAsErrors = true
+        // TODO disabled because Gradle's Kotlin handling is silly
+        //  https://github.com/gradle/gradle/issues/16779
+//        allWarningsAsErrors = true
       }
     }
     if (project.name != "sample" && !project.path.contains("sample")) {

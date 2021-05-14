@@ -21,14 +21,16 @@ import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
-import com.tschuchort.compiletesting.symbolProcessors
+import com.tschuchort.compiletesting.symbolProcessorProviders
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
 
+@Ignore("https://github.com/google/ksp/issues/427")
 @RunWith(Parameterized::class)
-class MoshiSealedSymbolProcessorTest(private val incremental: Boolean) {
+class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
 
   companion object {
     @JvmStatic
@@ -63,7 +65,7 @@ class MoshiSealedSymbolProcessorTest(private val incremental: Boolean) {
     val compilation = KotlinCompilation().apply {
       sources = listOf(source)
       inheritClassPath = true
-      symbolProcessors = listOf(MoshiSealedSymbolProcessor())
+      symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
       kspIncremental = incremental
     }
     val result = compilation.compile()
@@ -150,7 +152,7 @@ class MoshiSealedSymbolProcessorTest(private val incremental: Boolean) {
     val compilation = KotlinCompilation().apply {
       sources = listOf(source)
       inheritClassPath = true
-      symbolProcessors = listOf(MoshiSealedSymbolProcessor())
+      symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
       kspIncremental = incremental
     }
     val result = compilation.compile()
@@ -180,7 +182,7 @@ class MoshiSealedSymbolProcessorTest(private val incremental: Boolean) {
     val compilation = KotlinCompilation().apply {
       sources = listOf(source)
       inheritClassPath = true
-      symbolProcessors = listOf(MoshiSealedSymbolProcessor())
+      symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
       kspIncremental = incremental
     }
     val result = compilation.compile()
@@ -210,7 +212,7 @@ class MoshiSealedSymbolProcessorTest(private val incremental: Boolean) {
     val compilation = KotlinCompilation().apply {
       sources = listOf(source)
       inheritClassPath = true
-      symbolProcessors = listOf(MoshiSealedSymbolProcessor())
+      symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
       kspIncremental = incremental
     }
     val result = compilation.compile()

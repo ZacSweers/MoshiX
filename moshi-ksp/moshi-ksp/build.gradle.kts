@@ -17,8 +17,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
+  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   id("com.vanniktech.maven.publish")
 }
 
