@@ -312,6 +312,13 @@ class DualKotlinTest(useReflection: Boolean) {
       """{"i":6}"""
     val result = adapter.fromJson(testJson)!!
     assertThat(result.i).isEqualTo(6)
+
+    // TODO doesn't work yet.
+    //  need to invoke the constructor_impl$default static method, invoke constructor with result
+//    val testEmptyJson =
+//      """{}"""
+//    val result2 = adapter.fromJson(testEmptyJson)!!
+//    assertThat(result2.i).isEqualTo(0)
   }
 
   @JsonClass(generateAdapter = true)
@@ -638,12 +645,12 @@ data class GenericClass<T>(val value: T)
 
 // Has to be outside since inline classes are only allowed on top level
 @JsonClass(generateAdapter = true)
-inline class InlineClass(val i: Int)
+inline class InlineClass(val i: Int = 0)
 
 // Has to be outside since inline classes are only allowed on top level
 @JvmInline
 @JsonClass(generateAdapter = true)
-value class ValueClass(val i: Int)
+value class ValueClass(val i: Int = 0)
 
 typealias A = Int
 typealias NullableA = A?
