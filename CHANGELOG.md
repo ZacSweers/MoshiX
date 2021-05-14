@@ -29,7 +29,6 @@ _2021-05-14_
 * **Fix:** Don't fail on annotations that are `typealias`'d.
 * **Fix:** Support enum entry values in copied `@JsonQualifier` annotations.
 * **Fix:** Support array values in copied `@JsonQualifier` annotations.
-* **Fix:** Support array values in copied `@JsonQualifier` annotations.
 
 #### moshi-sealed
 
@@ -60,7 +59,7 @@ public static void main(String[] args) {
 * `JavaSealedJsonAdapterFactory` is now built against JDK 16. Note this feature is still in preview.
 * **New:** A dedicated README section can be found [here](https://github.com/ZacSweers/MoshiX/tree/main/moshi-sealed#java-sealed-classes-support).
 
-_Thanks to the following contributors for contributing to this release! [@remcomokveld](https://github.com/remcomokveld), [@martinbonnin](https://github.com/martinbonnin), and [@eneim](https://github.com/eneim)
+_Thanks to the following contributors for contributing to this release! [@remcomokveld](https://github.com/remcomokveld), [@martinbonnin](https://github.com/martinbonnin), and [@eneim](https://github.com/eneim)_
 
 Version 0.10.0
 -------------
