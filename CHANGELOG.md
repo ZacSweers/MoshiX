@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Version 0.11.1
+-------------
+
+_2021-05-27_
+
+* Update to KSP `1.5.10-1.0.0-beta01`
+* Update to Kotlin `1.5.10`
+
 Version 0.11.0
 -------------
 
