@@ -21,6 +21,7 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -50,20 +51,13 @@ public class JsonClassSymbolProcessorProvider : SymbolProcessorProvider {
     public const val OPTION_GENERATED: String = "moshi.generated"
   }
 
-  override fun create(
-    options: Map<String, String>,
-    kotlinVersion: KotlinVersion,
-    codeGenerator: CodeGenerator,
-    logger: KSPLogger
-  ): SymbolProcessor {
-    return JsonClassSymbolProcessor(codeGenerator, logger, options)
+  override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
+    return JsonClassSymbolProcessor(environment)
   }
 }
 
 private class JsonClassSymbolProcessor(
-  private val codeGenerator: CodeGenerator,
-  private val logger: KSPLogger,
-  options: Map<String, String>
+  environment: SymbolProcessorEnvironment
 ) : SymbolProcessor {
 
   private companion object {
@@ -75,7 +69,9 @@ private class JsonClassSymbolProcessor(
     val JSON_CLASS_NAME = JsonClass::class.qualifiedName!!
   }
 
-  private val generatedOption = options[OPTION_GENERATED]?.also {
+  private val codeGenerator = environment.codeGenerator
+  private val logger = environment.logger
+  private val generatedOption = environment.options[OPTION_GENERATED]?.also {
     logger.check(it in POSSIBLE_GENERATED_NAMES) {
       "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
     }
