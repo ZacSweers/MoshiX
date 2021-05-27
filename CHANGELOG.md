@@ -13,17 +13,17 @@ _2021-05-14_
 * Support Java 16.
 * Update KotlinPoet to `1.8.0`.
 * Small documentation improvements.
-  
+
 #### All KSP artifacts
 
 * Update KSP to `1.5.0-1.0.0-alpha10`.
 * Switch to new `SymbolProcessorProvider` APIs.
 * Adopt new `Sequence`-based KSP APIs where possible.
-  
+
 #### All metadata-reflect artifacts
 
 * Update kotlinx-metadata to `0.3.0`.
-  
+
 #### moshi-ksp
 
 * **Fix:** Don't fail on annotations that are `typealias`'d.
@@ -32,7 +32,7 @@ _2021-05-14_
 
 #### moshi-sealed
 
-* **Enhancement:** sealed interfaces and package-wide sealed classes are fully supported in KSP, kapt, reflect, and 
+* **Enhancement:** sealed interfaces and package-wide sealed classes are fully supported in KSP, kapt, reflect, and
   metadata-reflect.
 * **Fix:** Make `moshi-adapters` an `api` dependency in `moshi-sealed-runtime`
 
@@ -49,7 +49,7 @@ public static void main(String[] args) {
   Moshi moshi = new Moshi.Builder()
     .add(new RecordsJsonAdapterFactory())
     .build();
-  
+
   JsonAdapter<Message> messageAdapter = moshi.adapter(Message.class);
 }
 ```
