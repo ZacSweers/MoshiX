@@ -36,6 +36,7 @@ plugins {
 apiValidation {
   ignoredProjects.addAll(
     listOf(
+      /* :moshi-ksp: */ "extra-moshi-test-module",
       /* :moshi-ksp: */ "tests",
       /* :moshi-sealed: */ "sample"
     )
@@ -140,7 +141,7 @@ subprojects {
 //        allWarningsAsErrors = true
       }
     }
-    if (project.name != "sample" && !project.path.contains("sample")) {
+    if (project.name != "sample" && !project.path.contains("sample") && !project.path.contains("test")) {
       configure<KotlinProjectExtension> {
         explicitApi()
       }

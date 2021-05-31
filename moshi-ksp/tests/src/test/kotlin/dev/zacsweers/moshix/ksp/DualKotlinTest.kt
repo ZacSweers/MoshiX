@@ -27,6 +27,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.Types
 import com.squareup.moshi.adapter
+import dev.zacsweers.moshix.ksp.test.extra.AbstractClassInModuleA
 import dev.zacsweers.moshix.reflect.MetadataKotlinJsonAdapterFactory
 import org.intellij.lang.annotations.Language
 import org.junit.Assert.fail
@@ -671,3 +672,9 @@ data class ClassWithQualifier(
   @UpperCase(foo = [Foo.BAR])
   val a: Int
 )
+
+// Regression for https://github.com/ZacSweers/MoshiX/issues/120
+@JsonClass(generateAdapter = true)
+data class DataClassInModuleB(
+  val id : String
+) : AbstractClassInModuleA()

@@ -98,8 +98,12 @@ internal fun targetType(
     val classDecl = supertype.type
     if (!classDecl.isKotlinClass(resolver)) {
       logger.error(
-        "@JsonClass can't be applied to $type: supertype $supertype is not a Kotlin type.",
-          type
+        """
+        @JsonClass can't be applied to $type: supertype $supertype is not a Kotlin type.
+        Origin=${classDecl.origin}
+        Annotations=${classDecl.annotations.joinToString(prefix = "[", postfix = "]") { it.shortName.getShortName() }}
+        """.trimIndent(),
+        type
       )
       return null
     }
