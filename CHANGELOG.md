@@ -1,8 +1,15 @@
 Changelog
 =========
 
+Version 0.11.2
+--------------
+
+_2021-05-31_
+
+* `moshi-ksp` - Fix a bug where supertypes compiled outside the current compilation weren't recognized as Kotlin types.
+
 Version 0.11.1
--------------
+--------------
 
 _2021-05-27_
 
@@ -10,7 +17,7 @@ _2021-05-27_
 * Update to Kotlin `1.5.10`
 
 Version 0.11.0
--------------
+--------------
 
 _2021-05-14_
 
