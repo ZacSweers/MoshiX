@@ -28,6 +28,7 @@ import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.Origin.KOTLIN
+import com.google.devtools.ksp.symbol.Origin.KOTLIN_LIB
 import com.google.devtools.ksp.symbol.Visibility
 import com.google.devtools.ksp.symbol.Visibility.INTERNAL
 import com.google.devtools.ksp.symbol.Visibility.JAVA_PACKAGE
@@ -59,6 +60,7 @@ internal fun KSClassDeclaration.superclass(resolver: Resolver): KSType {
 
 internal fun KSClassDeclaration.isKotlinClass(resolver: Resolver): Boolean {
   return origin == KOTLIN ||
+    origin == KOTLIN_LIB ||
     hasAnnotation(resolver.getClassDeclarationByName<Metadata>().asType())
 }
 
