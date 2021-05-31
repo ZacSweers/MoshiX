@@ -96,7 +96,7 @@ internal inline fun <reified T> KSAnnotation.getMember(name: String): T {
     }
     is KSType -> argValue.toClassName() as T
     else -> {
-      argValue as? T ?: error("No value found for $name. Was ${matchingArg.value}")
+      argValue as? T ?: error("Null value found for @${shortName.getShortName()}.$name. All args -> $arguments")
     }
   }
 }
