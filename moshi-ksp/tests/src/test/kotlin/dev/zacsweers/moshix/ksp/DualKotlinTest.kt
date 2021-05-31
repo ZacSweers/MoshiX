@@ -662,7 +662,7 @@ typealias E = D
 
 // Regression test for enum constants in annotations and array types
 // https://github.com/ZacSweers/MoshiX/issues/103
-@Retention(RUNTIME)
+@Retention
 @JsonQualifier
 annotation class UpperCase(val foo: Array<Foo>)
 enum class Foo { BAR }
