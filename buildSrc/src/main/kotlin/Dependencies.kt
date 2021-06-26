@@ -18,7 +18,7 @@ object Dependencies {
 
   const val autoCommon = "com.google.auto:auto-common:1.0"
   const val asm = "org.ow2.asm:asm:7.1"
-  const val ktlintVersion = "0.39.0"
+  const val ktlintVersion = "0.41.0"
 
   object AutoService {
     const val annotations = "com.google.auto.service:auto-service-annotations:1.0"
@@ -33,7 +33,7 @@ object Dependencies {
   }
 
   object Kotlin {
-    val version = System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.10"
+    val version = System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.20"
     const val dokkaVersion = "1.4.32"
     val reflect = "org.jetbrains.kotlin:kotlin-reflect:$version"
     const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0"
@@ -42,14 +42,14 @@ object Dependencies {
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
 
     object Ksp {
-      const val version = "1.5.10-1.0.0-beta01"
+      const val version = "1.5.20-1.0.0-beta03"
       const val api = "com.google.devtools.ksp:symbol-processing-api:$version"
       const val ksp = "com.google.devtools.ksp:symbol-processing:$version"
     }
   }
 
   object KotlinPoet {
-    private const val version = "1.8.0"
+    private const val version = "1.9.0"
     const val kotlinPoet = "com.squareup:kotlinpoet:$version"
     const val metadata = "com.squareup:kotlinpoet-metadata-specs:$version"
     const val metadataSpecs = "com.squareup:kotlinpoet-metadata-specs:$version"
@@ -76,8 +76,8 @@ object Dependencies {
   }
 
   object Testing {
-    const val compileTesting = "com.github.tschuchortdev:kotlin-compile-testing:1.4.0"
-    const val kspCompileTesting = "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.4.0"
+    const val compileTesting = "com.github.tschuchortdev:kotlin-compile-testing:1.4.2"
+    const val kspCompileTesting = "com.github.tschuchortdev:kotlin-compile-testing-ksp:1.4.2"
     const val junit = "junit:junit:4.13.2"
     const val truth = "com.google.truth:truth:1.1.2"
   }
