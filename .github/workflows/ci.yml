@@ -10,7 +10,7 @@ jobs:
       matrix:
         # No 12 because Kapt
         java_version: [ 11, 13, 14, 15, 16 ]
-        kotlin_version: [ 1.5.0 ]
+        kotlin_version: [ 1.5.20 ]
         ksp_enabled: [ true, false ]
         ksp_incremental_enabled: [ true, false ]
         exclude:
