@@ -162,4 +162,12 @@ subprojects {
       }
     }
   }
+  // configuration required to produce unique META-INF/*.kotlin_module file names
+  tasks.withType<KotlinCompile> {
+    kotlinOptions {
+      if (project.hasProperty("POM_ARTIFACT_ID")) {
+        freeCompilerArgs = listOf("-module-name", project.property("POM_ARTIFACT_ID") as String)
+      }
+    }
+  }
 }
