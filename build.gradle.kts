@@ -162,7 +162,7 @@ subprojects {
       }
     }
   }
-  // configuration required to produce unique META-INF/*.kotlin_module file name
+  // configuration required to produce unique META-INF/*.kotlin_module file names
   tasks.withType<KotlinCompile> {
     kotlinOptions {
       if (project.hasProperty("POM_ARTIFACT_ID")) {
