@@ -19,6 +19,7 @@ import com.google.auto.service.AutoService
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.DelicateKotlinPoetApi
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
@@ -123,6 +124,7 @@ public class MoshiSealedProcessor : AbstractProcessor() {
   private lateinit var options: Map<String, String>
   private var generatedAnnotation: AnnotationSpec? = null
 
+  @OptIn(DelicateKotlinPoetApi::class)
   override fun init(processingEnv: ProcessingEnvironment) {
     super.init(processingEnv)
     filer = processingEnv.filer
@@ -136,7 +138,6 @@ public class MoshiSealedProcessor : AbstractProcessor() {
       }
       elements.getTypeElement(it)
     }?.let {
-      @Suppress("DEPRECATION")
       AnnotationSpec.builder(it.asClassName())
         .addMember("value = [%S]", MoshiSealedProcessor::class.java.canonicalName)
         .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
@@ -181,6 +182,7 @@ public class MoshiSealedProcessor : AbstractProcessor() {
     return false
   }
 
+  @OptIn(DelicateKotlinPoetApi::class)
   private fun prepareAdapter(element: TypeElement, typeLabel: String, kmClass: ImmutableKmClass): PreparedAdapter? {
     val sealedSubtypes = kmClass.sealedSubclasses
       .map {
@@ -192,12 +194,10 @@ public class MoshiSealedProcessor : AbstractProcessor() {
         it.getAnnotation(Metadata::class.java).toImmutableKmClass()
       }
     val defaultCodeBlockBuilder = CodeBlock.builder()
-    @Suppress("DEPRECATION")
     val adapterName = ClassName.bestGuess(generatedJsonAdapterName(element.asClassName().reflectionName())).simpleName
     val visibilityModifier = if (element.toImmutableKmClass().flags.isInternal) KModifier.INTERNAL else KModifier.PUBLIC
     val allocator = NameAllocator()
 
-    @Suppress("DEPRECATION")
     val targetType = element.asClassName()
     val moshiClass = Moshi::class
     val moshiParam = ParameterSpec.builder(allocator.newName("moshi"), moshiClass).build()
@@ -255,7 +255,6 @@ public class MoshiSealedProcessor : AbstractProcessor() {
         return null
       }
 
-      @Suppress("DEPRECATION")
       val className = type.asClassName()
       val mainLabel = labelAnnotation.label
       seenLabels.put(mainLabel, className)?.let { prev ->
