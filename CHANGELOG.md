@@ -6,10 +6,13 @@ Version 0.12.0
 
 _2021-07-15_
 
-* KSP updated to `1.5.21-1.0.0-beta05`.
-* Kotlin updated to `1.5.21`.
-* `moshi-ksp` and moshi-sealed's codegen both support a new `moshi.generateProguardRules` option. This can be set to
-`false` to disable proguard rule generation.
+* Update to KSP `1.5.21-1.0.0-beta05`.
+* Update to Kotlin `1.5.21`.
+* Update to Dokka `1.5.0`.
+* Update to KotlinPoet `1.9.0`.
+* Test against JDK 17 early access previews.
+* **New:** `moshi-ksp` and moshi-sealed's codegen both support a new `moshi.generateProguardRules` option. This can be 
+  set to `false` to disable proguard rule generation.
 * **Fix:** Artifacts now ship with a `-module-name` attribute set to their artifact ID to help avoid module name 
   collisions.
   
