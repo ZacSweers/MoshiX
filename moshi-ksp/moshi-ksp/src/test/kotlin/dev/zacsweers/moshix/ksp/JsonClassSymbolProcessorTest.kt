@@ -24,8 +24,8 @@ import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
-import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test

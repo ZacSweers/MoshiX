@@ -132,8 +132,6 @@ class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
     }
   }
 
-
-
   @Test
   fun disableProguardGeneration() {
     val source = kotlin(

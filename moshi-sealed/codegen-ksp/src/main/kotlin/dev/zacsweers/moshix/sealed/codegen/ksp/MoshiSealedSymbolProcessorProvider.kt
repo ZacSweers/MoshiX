@@ -34,8 +34,8 @@ import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
-import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATED
+import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 
 @AutoService(SymbolProcessorProvider::class)

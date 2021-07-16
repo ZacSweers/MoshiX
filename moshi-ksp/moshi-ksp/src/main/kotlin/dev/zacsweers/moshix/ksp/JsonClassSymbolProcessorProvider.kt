@@ -29,8 +29,8 @@ import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.Origin.KOTLIN
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.moshi.JsonClass
-import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import dev.zacsweers.moshix.ksp.shade.api.AdapterGenerator
 import dev.zacsweers.moshix.ksp.shade.api.ProguardConfig
 import dev.zacsweers.moshix.ksp.shade.api.PropertyGenerator
