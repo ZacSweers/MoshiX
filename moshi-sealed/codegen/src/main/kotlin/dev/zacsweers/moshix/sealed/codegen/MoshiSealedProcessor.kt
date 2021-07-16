@@ -84,6 +84,13 @@ public class MoshiSealedProcessor : AbstractProcessor() {
      */
     public const val OPTION_GENERATED: String = "moshi.generated"
 
+    /**
+     * This boolean processing option can control proguard rule generation.
+     * Normally, this is not recommended unless end-users build their own JsonAdapter look-up tool.
+     * This is enabled by default.
+     */
+    public const val OPTION_GENERATE_PROGUARD_RULES: String = "moshi.generateProguardRules"
+
     private val POSSIBLE_GENERATED_NAMES = setOf(
       "javax.annotation.processing.Generated",
       "javax.annotation.Generated"
@@ -123,6 +130,7 @@ public class MoshiSealedProcessor : AbstractProcessor() {
   private lateinit var types: Types
   private lateinit var options: Map<String, String>
   private var generatedAnnotation: AnnotationSpec? = null
+  private var generateProguardConfig = true
 
   @OptIn(DelicateKotlinPoetApi::class)
   override fun init(processingEnv: ProcessingEnvironment) {
@@ -132,6 +140,7 @@ public class MoshiSealedProcessor : AbstractProcessor() {
     elements = processingEnv.elementUtils
     types = processingEnv.typeUtils
     options = processingEnv.options
+    generateProguardConfig = processingEnv.options[OPTION_GENERATE_PROGUARD_RULES]?.toBooleanStrictOrNull() ?: true
     generatedAnnotation = processingEnv.options[OPTION_GENERATED]?.let {
       require(it in POSSIBLE_GENERATED_NAMES) {
         "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
@@ -362,14 +371,18 @@ public class MoshiSealedProcessor : AbstractProcessor() {
       .addType(classBuilder.build())
       .build()
 
-    val proguardConfig = ProguardConfig(
-      targetClass = targetType,
-      adapterName = adapterName,
-      adapterConstructorParams = listOf(moshiClass.asClassName().reflectionName())
-    )
+    val proguardConfig = if (generateProguardConfig) {
+      ProguardConfig(
+        targetClass = targetType,
+        adapterName = adapterName,
+        adapterConstructorParams = listOf(moshiClass.asClassName().reflectionName())
+      )
+    } else {
+      null
+    }
 
     return PreparedAdapter(fileSpec, proguardConfig)
   }
 }
 
-internal data class PreparedAdapter(val spec: FileSpec, val proguardConfig: ProguardConfig)
+internal data class PreparedAdapter(val spec: FileSpec, val proguardConfig: ProguardConfig?)

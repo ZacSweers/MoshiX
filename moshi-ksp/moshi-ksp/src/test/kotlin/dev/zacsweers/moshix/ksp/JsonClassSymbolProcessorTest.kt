@@ -25,6 +25,7 @@ import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
 import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -389,6 +390,27 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
     assertThat(result.messages).contains(
       "Invalid option value for $OPTION_GENERATED"
     )
+  }
+
+  @Test
+  fun disableProguardGeneration() {
+    val compilation = prepareCompilation(
+      kotlin(
+        "source.kt",
+        """
+          package test
+          import com.squareup.moshi.JsonClass
+
+          @JsonClass(generateAdapter = true)
+          data class Foo(val a: Int)
+          """
+      )
+    ).apply {
+      kspArgs[OPTION_GENERATE_PROGUARD_RULES] = "false"
+    }
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    assertThat(compilation.kspSourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()).isEmpty()
   }
 
   @Test

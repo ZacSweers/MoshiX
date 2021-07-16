@@ -1,6 +1,7 @@
 public final class dev/zacsweers/moshix/sealed/codegen/MoshiSealedProcessor : javax/annotation/processing/AbstractProcessor {
 	public static final field Companion Ldev/zacsweers/moshix/sealed/codegen/MoshiSealedProcessor$Companion;
 	public static final field OPTION_GENERATED Ljava/lang/String;
+	public static final field OPTION_GENERATE_PROGUARD_RULES Ljava/lang/String;
 	public fun <init> ()V
 	public fun getSupportedAnnotationTypes ()Ljava/util/Set;
 	public fun getSupportedSourceVersion ()Ljavax/lang/model/SourceVersion;

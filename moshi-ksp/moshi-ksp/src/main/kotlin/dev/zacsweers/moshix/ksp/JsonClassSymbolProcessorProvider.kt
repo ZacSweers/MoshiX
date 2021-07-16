@@ -30,6 +30,7 @@ import com.google.devtools.ksp.symbol.Origin.KOTLIN
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import dev.zacsweers.moshix.ksp.shade.api.AdapterGenerator
 import dev.zacsweers.moshix.ksp.shade.api.ProguardConfig
 import dev.zacsweers.moshix.ksp.shade.api.PropertyGenerator
@@ -40,7 +41,7 @@ import java.nio.charset.StandardCharsets
 public class JsonClassSymbolProcessorProvider : SymbolProcessorProvider {
   public companion object {
     /**
-     * This annotation processing argument can be specified to have a `@Generated` annotation
+     * This processing option can be specified to have a `@Generated` annotation
      * included in the generated code. It is not encouraged unless you need it for static analysis
      * reasons and not enabled by default.
      *
@@ -49,6 +50,13 @@ public class JsonClassSymbolProcessorProvider : SymbolProcessorProvider {
      *   * `"javax.annotation.Generated"` (JRE <9)
      */
     public const val OPTION_GENERATED: String = "moshi.generated"
+
+    /**
+     * This boolean processing option can disable proguard rule generation.
+     * Normally, this is not recommended unless end-users build their own JsonAdapter look-up tool.
+     * This is enabled by default.
+     */
+    public const val OPTION_GENERATE_PROGUARD_RULES: String = "moshi.generateProguardRules"
   }
 
   override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
@@ -76,6 +84,7 @@ private class JsonClassSymbolProcessor(
       "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
     }
   }
+  private val generateProguardRules = environment.options[OPTION_GENERATE_PROGUARD_RULES]?.toBooleanStrictOrNull() ?: true
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val generatedAnnotation = generatedOption?.let {
@@ -119,7 +128,7 @@ private class JsonClassSymbolProcessor(
         val adapterGenerator = adapterGenerator(logger, resolver, type) ?: return emptyList()
         try {
           val preparedAdapter = adapterGenerator
-            .prepare { spec ->
+            .prepare(generateProguardRules) { spec ->
               spec.toBuilder()
                 .apply {
                   generatedAnnotation?.let(::addAnnotation)

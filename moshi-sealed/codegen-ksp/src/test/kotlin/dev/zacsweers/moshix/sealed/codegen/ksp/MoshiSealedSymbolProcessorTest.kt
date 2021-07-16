@@ -19,9 +19,11 @@ import com.google.common.truth.Truth.assertThat
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
+import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
+import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -128,6 +130,37 @@ class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
         else -> error("Unrecognized proguard file: $generatedFile")
       }
     }
+  }
+
+  @Test
+  fun disableProguardGeneration() {
+    val source = kotlin(
+      "BaseType.kt",
+      """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a", ["aa"])
+        class TypeA : BaseType()
+        @TypeLabel("b")
+        class TypeB : BaseType()
+      }
+    """
+    )
+
+    val compilation = KotlinCompilation().apply {
+      sources = listOf(source)
+      inheritClassPath = true
+      symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
+      kspIncremental = incremental
+      kspArgs[OPTION_GENERATE_PROGUARD_RULES] = "false"
+    }
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(ExitCode.OK)
+    assertThat(result.generatedFiles.filter { it.extension == "pro" }).isEmpty()
   }
 
   @Test
