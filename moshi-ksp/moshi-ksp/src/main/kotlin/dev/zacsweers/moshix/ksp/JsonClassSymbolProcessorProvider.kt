@@ -29,7 +29,7 @@ import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.Origin.KOTLIN
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.moshi.JsonClass
-import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_ENABLE_PROGUARD_GENERATION
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
 import dev.zacsweers.moshix.ksp.shade.api.AdapterGenerator
 import dev.zacsweers.moshix.ksp.shade.api.ProguardConfig
@@ -52,11 +52,11 @@ public class JsonClassSymbolProcessorProvider : SymbolProcessorProvider {
     public const val OPTION_GENERATED: String = "moshi.generated"
 
     /**
-     * This processing option can disable proguard rule generation.
+     * This boolean processing option can disable proguard rule generation.
      * Normally, this is not recommended unless end-users build their own JsonAdapter look-up tool.
      * This is enabled by default.
      */
-    public const val OPTION_ENABLE_PROGUARD_GENERATION: String = "moshi.enableProguardGeneration"
+    public const val OPTION_GENERATE_PROGUARD_RULES: String = "moshi.generateProguardRules"
   }
 
   override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
@@ -84,7 +84,7 @@ private class JsonClassSymbolProcessor(
       "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
     }
   }
-  private val generatedProguard = environment.options[OPTION_ENABLE_PROGUARD_GENERATION]?.toBooleanStrictOrNull() ?: true
+  private val generateProguardRules = environment.options[OPTION_GENERATE_PROGUARD_RULES]?.toBooleanStrictOrNull() ?: true
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val generatedAnnotation = generatedOption?.let {
@@ -128,7 +128,7 @@ private class JsonClassSymbolProcessor(
         val adapterGenerator = adapterGenerator(logger, resolver, type) ?: return emptyList()
         try {
           val preparedAdapter = adapterGenerator
-            .prepare(generatedProguard) { spec ->
+            .prepare(generateProguardRules) { spec ->
               spec.toBuilder()
                 .apply {
                   generatedAnnotation?.let(::addAnnotation)
@@ -137,9 +137,7 @@ private class JsonClassSymbolProcessor(
                 .build()
             }
           preparedAdapter.spec.writeTo(codeGenerator)
-          if (generatedProguard) {
-            preparedAdapter.proguardConfig?.writeTo(codeGenerator, originatingFile)
-          }
+          preparedAdapter.proguardConfig?.writeTo(codeGenerator, originatingFile)
         } catch (e: Exception) {
           logger.error(
             "Error preparing ${type.simpleName.asString()}: ${e.stackTrace.joinToString("\n")}"

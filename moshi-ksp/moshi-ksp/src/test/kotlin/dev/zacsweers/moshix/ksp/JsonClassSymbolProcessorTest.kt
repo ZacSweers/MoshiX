@@ -24,7 +24,7 @@ import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
-import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_ENABLE_PROGUARD_GENERATION
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
 import org.junit.Ignore
 import org.junit.Rule
@@ -393,7 +393,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
   }
 
   @Test
-  fun disableProguardGenerating() {
+  fun disableProguardGeneration() {
     val compilation = prepareCompilation(
       kotlin(
         "source.kt",
@@ -406,7 +406,7 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
           """
       )
     ).apply {
-      kspArgs[OPTION_ENABLE_PROGUARD_GENERATION] = "false"
+      kspArgs[OPTION_GENERATE_PROGUARD_RULES] = "false"
     }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)

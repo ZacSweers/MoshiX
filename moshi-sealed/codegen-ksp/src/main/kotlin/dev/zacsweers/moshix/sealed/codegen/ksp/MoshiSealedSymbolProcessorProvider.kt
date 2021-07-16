@@ -34,6 +34,7 @@ import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATED
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 
@@ -52,6 +53,13 @@ public class MoshiSealedSymbolProcessorProvider : SymbolProcessorProvider {
      * We reuse Moshi's option for convenience so you don't have to declare multiple options.
      */
     public const val OPTION_GENERATED: String = "moshi.generated"
+
+    /**
+     * This boolean processing option can control proguard rule generation.
+     * Normally, this is not recommended unless end-users build their own JsonAdapter look-up tool.
+     * This is enabled by default.
+     */
+    public const val OPTION_GENERATE_PROGUARD_RULES: String = "moshi.generateProguardRules"
   }
 
   override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
@@ -106,6 +114,7 @@ private class MoshiSealedSymbolProcessor(
       "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
     }
   }
+  private val generateProguardConfig = environment.options[OPTION_GENERATE_PROGUARD_RULES]?.toBooleanStrictOrNull() ?: true
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val generatedAnnotation = generatedOption?.let {
@@ -255,7 +264,8 @@ private class MoshiSealedSymbolProcessor(
       useDefaultNull = useDefaultNull,
       generatedAnnotation = generatedAnnotation,
       subtypes = sealedSubtypes,
-      objectAdapters = objectAdapters
+      objectAdapters = objectAdapters,
+      generateProguardConfig = generateProguardConfig
     ) {
       addAnnotation(COMMON_SUPPRESS)
       addOriginatingKSFile(type.containingFile!!)
@@ -263,8 +273,8 @@ private class MoshiSealedSymbolProcessor(
 
     val ksFile = preparedAdapter.spec.originatingKSFiles().single()
     preparedAdapter.spec.writeTo(codeGenerator)
-    preparedAdapter.proguardConfig.writeTo(codeGenerator, ksFile)
+    preparedAdapter.proguardConfig?.writeTo(codeGenerator, ksFile)
   }
 }
 
-internal data class PreparedAdapter(val spec: FileSpec, val proguardConfig: ProguardConfig)
+internal data class PreparedAdapter(val spec: FileSpec, val proguardConfig: ProguardConfig?)

@@ -52,6 +52,7 @@ internal fun createType(
   generatedAnnotation: AnnotationSpec?,
   subtypes: Set<Subtype>,
   objectAdapters: List<CodeBlock>,
+  generateProguardConfig: Boolean,
   typeSpecHook: TypeSpec.Builder.() -> Unit
 ): PreparedAdapter {
   val defaultCodeBlockBuilder = CodeBlock.builder()
@@ -170,11 +171,15 @@ internal fun createType(
     .addType(classBuilder.build())
     .build()
 
-  val proguardConfig = ProguardConfig(
-    targetClass = targetType,
-    adapterName = adapterName,
-    adapterConstructorParams = listOf(Moshi::class.asClassName().reflectionName())
-  )
+  val proguardConfig = if (generateProguardConfig) {
+    ProguardConfig(
+      targetClass = targetType,
+      adapterName = adapterName,
+      adapterConstructorParams = listOf(Moshi::class.asClassName().reflectionName())
+    )
+  } else {
+    null
+  }
 
   return PreparedAdapter(fileSpec, proguardConfig)
 }

@@ -20,6 +20,7 @@ import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
+import dev.zacsweers.moshix.sealed.codegen.MoshiSealedProcessor.Companion.OPTION_GENERATE_PROGUARD_RULES
 import org.junit.Test
 import java.io.File
 
@@ -110,6 +111,36 @@ class MoshiSealedProcessorTest {
         else -> error("Unrecognized proguard file: $file")
       }
     }
+  }
+
+  @Test
+  fun disableProguardGeneration() {
+    val source = kotlin(
+      "BaseType.kt",
+      """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a", ["aa"])
+        class TypeA : BaseType()
+        @TypeLabel("b")
+        class TypeB : BaseType()
+      }
+    """
+    )
+
+    val compilation = KotlinCompilation().apply {
+      sources = listOf(source)
+      inheritClassPath = true
+      annotationProcessors = listOf(MoshiSealedProcessor())
+      kaptArgs[OPTION_GENERATE_PROGUARD_RULES] = "false"
+    }
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(ExitCode.OK)
+    assertThat(result.generatedFiles.filter { it.extension == "pro" }).isEmpty()
   }
 
   @Test
