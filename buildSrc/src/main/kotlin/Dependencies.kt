@@ -39,7 +39,7 @@ object Dependencies {
     const val metadata = "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.3.0"
     val compilerEmbeddable = "org.jetbrains.kotlin:kotlin-compiler-embeddable:$version"
     const val jvmTarget = "1.8"
-    val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive")
+    val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive", "-Xopt-in=kotlin.RequiresOptIn")
 
     object Ksp {
       const val version = "1.5.21-1.0.0-beta05"

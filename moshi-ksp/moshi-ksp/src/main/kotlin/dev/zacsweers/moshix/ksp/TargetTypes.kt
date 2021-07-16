@@ -238,7 +238,7 @@ private fun KSPropertyDeclaration.toPropertySpec(
     .addModifiers(modifiers.map { KModifier.valueOf(it.name) })
     .apply {
       if (hasAnnotation(resolver.getClassDeclarationByName<Transient>().asType())) {
-        addAnnotation(Transient::class.java)
+        addAnnotation(Transient::class)
       }
       addAnnotations(
         this@toPropertySpec.annotations
