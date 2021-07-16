@@ -24,8 +24,8 @@ import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
+import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_ENABLE_PROGUARD_GENERATION
 import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
-import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_PROGUARD_CODE_GENERATED
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -394,25 +394,23 @@ class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
 
   @Test
   fun disableProguardGenerating() {
-    val result = prepareCompilation(
-        kotlin(
-          "source.kt",
-          """
+    val compilation = prepareCompilation(
+      kotlin(
+        "source.kt",
+        """
           package test
           import com.squareup.moshi.JsonClass
-    
+
           @JsonClass(generateAdapter = true)
           data class Foo(val a: Int)
           """
-        )
+      )
     ).apply {
-        kaptArgs[OPTION_PROGUARD_CODE_GENERATED] = "true"
-    }.compile()
-    assertThat(result.messages).contains(
-        "Moshi will not generate Proguard rule." +
-          " obfuscation will break your application" +
-          " unless having your own JsonAdapter look-up tool"
-    )
+      kspArgs[OPTION_ENABLE_PROGUARD_GENERATION] = "false"
+    }
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    assertThat(compilation.kspSourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()).isEmpty()
   }
 
   @Test
