@@ -166,7 +166,7 @@ subprojects {
   tasks.withType<KotlinCompile> {
     kotlinOptions {
       if (project.hasProperty("POM_ARTIFACT_ID")) {
-        freeCompilerArgs = listOf("-module-name", project.property("POM_ARTIFACT_ID") as String)
+        moduleName = project.property("POM_ARTIFACT_ID") as String
       }
     }
   }
