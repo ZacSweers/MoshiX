@@ -25,6 +25,7 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import java.lang.reflect.Type
+import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
 private val UNSET = Any()
@@ -58,7 +59,19 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
 
       val objectSubtypes = mutableMapOf<Class<*>, Any>()
       val labels = mutableMapOf<String, Class<*>>()
+
       for (sealedSubclass in rawTypeKotlin.sealedSubclasses) {
+        if (sealedSubclass.isSealed) {
+          // For nested sealed classes, extract their labels and route to their adapter
+          val clazz = sealedSubclass.java
+          for (label in sealedSubclass.walkTypeLabels()) {
+            labels.put(label, clazz)?.let { prev ->
+              error("Duplicate nested label '$label' defined for $clazz and $prev.")
+            }
+          }
+          continue
+        }
+
         val objectInstance = sealedSubclass.objectInstance
         val isAnnotatedDefaultObject =
             sealedSubclass.java.isAnnotationPresent(DefaultObject::class.java)
@@ -131,4 +144,15 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
     }
     return null
   }
+}
+
+private fun KClass<*>.walkTypeLabels(): Set<String> {
+  val labels = mutableSetOf<String>()
+  for (subtype in sealedSubclasses) {
+    subtype.findAnnotation<TypeLabel>()?.let {
+      labels += it.label
+      labels += it.alternateLabels
+    }
+  }
+  return labels
 }
