@@ -339,6 +339,15 @@ public class MoshiSealedProcessor : AbstractProcessor() {
           .addMember("%S", "UNCHECKED_CAST")
           .build()
       )
+      .apply {
+        if (objectAdapters.isNotEmpty()) {
+          addAnnotation(
+            AnnotationSpec.builder(ClassName("kotlin", "OptIn"))
+              .addMember("%T::class", ClassName("kotlin", "ExperimentalStdlibApi"))
+              .build()
+          )
+        }
+      }
       .initializer(runtimeAdapterInitializer.build())
       .build()
 
