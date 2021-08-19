@@ -1,6 +1,19 @@
 Changelog
 =========
 
+Version 0.12.1
+--------------
+
+_2021-08-19_
+
+* Update to KSP `1.5.21-1.0.0-beta07`.
+* **Fix:** Previously if you had a `@JsonClass`-annotated Java file with a custom generator, `moshi-ksp` would error 
+  out anyway due to it not being a Kotlin class. This is now fixed and it will safely ignore these files.
+* **Fix:** Generate missing `@OptIn(ExperimentalStdLibApi::class)` annotations in `moshi-sealed` when `object` 
+  adapters are used, as we use Moshi's reified `addAdapter` extension.
+
+Thanks to [@gabrielittner](https://github.com/gabrielittner) for contributing to this release!
+
 Version 0.12.0
 --------------
 
