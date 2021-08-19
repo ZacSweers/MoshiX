@@ -42,7 +42,7 @@ object Dependencies {
     val defaultFreeCompilerArgs = listOf("-Xjsr305=strict", "-progressive", "-Xopt-in=kotlin.RequiresOptIn")
 
     object Ksp {
-      const val version = "1.5.21-1.0.0-beta06"
+      const val version = "1.5.21-1.0.0-beta07"
       const val api = "com.google.devtools.ksp:symbol-processing-api:$version"
       const val ksp = "com.google.devtools.ksp:symbol-processing:$version"
     }

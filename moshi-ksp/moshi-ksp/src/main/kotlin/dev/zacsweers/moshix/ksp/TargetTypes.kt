@@ -32,6 +32,7 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.Modifier
+import com.google.devtools.ksp.symbol.Origin
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.PropertySpec
@@ -45,14 +46,18 @@ import dev.zacsweers.moshix.ksp.shade.api.TargetType
 
 /** Returns a target type for `element`, or null if it cannot be used with code gen. */
 internal fun targetType(
-  type: KSClassDeclaration,
+  type: KSDeclaration,
   resolver: Resolver,
   logger: KSPLogger,
 ): TargetType? {
+  if (type !is KSClassDeclaration) {
+    logger.error("@JsonClass can't be applied to ${type.qualifiedName?.asString()}: must be a Kotlin class", type)
+    return null
+  }
   logger.check(type.classKind != ClassKind.ENUM_CLASS, type) {
     "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.qualifiedName?.asString()}: code gen for enums is not supported or necessary"
   }
-  logger.check(type.classKind == CLASS, type) {
+  logger.check(type.classKind == CLASS && type.origin == Origin.KOTLIN, type) {
     "@JsonClass can't be applied to ${type.qualifiedName?.asString()}: must be a Kotlin class"
   }
   logger.check(Modifier.INNER !in type.modifiers, type) {

@@ -18,6 +18,7 @@ package dev.zacsweers.moshix.ksp
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.TypeName
@@ -55,7 +56,7 @@ private val TargetProperty.isVisible: Boolean
 internal fun TargetProperty.generator(
   logger: KSPLogger,
   resolver: Resolver,
-  originalType: KSClassDeclaration
+  originalType: KSDeclaration
 ): PropertyGenerator? {
   if (isTransient) {
     if (!hasDefault) {
