@@ -24,9 +24,8 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFile
-import com.google.devtools.ksp.symbol.Origin.KOTLIN
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.ksp.JsonClassSymbolProcessorProvider.Companion.OPTION_GENERATED
@@ -110,11 +109,11 @@ private class JsonClassSymbolProcessor(
     resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME)
       .asSequence()
       .forEach { type ->
-        logger.check(type is KSClassDeclaration && type.origin == KOTLIN, type) {
-          "@JsonClass can't be applied to $type: must be a Kotlin class"
-        }
         // For the smart cast
-        if (type !is KSClassDeclaration) return@forEach
+        if (type !is KSDeclaration) {
+          logger.error("@JsonClass can't be applied to $type: must be a Kotlin class", type)
+          return@forEach
+        }
 
         val jsonClassAnnotation = type.findAnnotationWithType(jsonClassType) ?: return@forEach
 
@@ -171,7 +170,7 @@ private class JsonClassSymbolProcessor(
   private fun adapterGenerator(
     logger: KSPLogger,
     resolver: Resolver,
-    originalType: KSClassDeclaration,
+    originalType: KSDeclaration,
   ): AdapterGenerator? {
     val type = targetType(originalType, resolver, logger) ?: return null
 
