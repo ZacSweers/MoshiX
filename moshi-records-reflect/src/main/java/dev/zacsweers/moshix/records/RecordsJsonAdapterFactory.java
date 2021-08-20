@@ -107,6 +107,7 @@ public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
     try {
       //noinspection unchecked
       constructor = (Constructor<Object>) rawType.getDeclaredConstructor(constructorParams);
+      constructor.setAccessible(true);
     } catch (NoSuchMethodException e) {
       throw new AssertionError(e);
     }
