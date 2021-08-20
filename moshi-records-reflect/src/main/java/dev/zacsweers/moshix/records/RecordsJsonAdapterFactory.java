@@ -17,6 +17,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -85,7 +86,10 @@ public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
           }
         }
       }
-      var adapter = moshi.adapter(componentType, annotations);
+      if (qualifiers == null) {
+        qualifiers = Collections.emptySet();
+      }
+      var adapter = moshi.adapter(componentType, qualifiers);
       var accessor = component.getAccessor();
       var componentBinding = new ComponentBinding<>(name, jsonName, adapter, accessor);
       var replaced = bindings.put(jsonName, componentBinding);
@@ -102,7 +106,8 @@ public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
     Constructor<Object> constructor;
     try {
       //noinspection unchecked
-      constructor = (Constructor<Object>) rawType.getConstructor(constructorParams);
+      constructor = (Constructor<Object>) rawType.getDeclaredConstructor(constructorParams);
+      constructor.setAccessible(true);
     } catch (NoSuchMethodException e) {
       throw new AssertionError(e);
     }
