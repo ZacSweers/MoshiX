@@ -35,6 +35,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.WildcardTypeName
+import dev.zacsweers.moshix.ksp.shade.api.rawType
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets.UTF_8
 import com.squareup.kotlinpoet.STAR as KpStar
@@ -49,7 +50,20 @@ internal fun KSType.toTypeName(typeParamResolver: TypeParameterResolver): TypeNa
   val type = when (val decl = declaration) {
     is KSClassDeclaration -> decl.toTypeName(arguments.map { it.toTypeName(typeParamResolver) })
     is KSTypeParameter -> typeParamResolver[decl.name.getShortName()]
-    is KSTypeAlias -> decl.type.resolve().toTypeName(typeParamResolver)
+    is KSTypeAlias -> {
+      val extraResolver = if (decl.typeParameters.isEmpty()) {
+        typeParamResolver
+      } else {
+        decl.typeParameters.toTypeParameterResolver(typeParamResolver)
+      }
+      val args = arguments.map { it.toTypeName(typeParamResolver) }
+      val firstPass = decl.type.resolve().toTypeName(extraResolver).copy(nullable = isMarkedNullable)
+      return if (args.isNotEmpty()) {
+        firstPass.rawType().parameterizedBy(args).copy(nullable = firstPass.isNullable)
+      } else {
+        firstPass
+      }
+    }
     else -> error("Unsupported type: $declaration")
   }
 
@@ -78,7 +92,10 @@ internal fun List<KSTypeParameter>.toTypeParameterResolver(
   val typeParamResolver = { id: String ->
     parametersMap[id]
       ?: fallback?.get(id)
-      ?: throw IllegalStateException("No type argument found for $id! Anaylzing $sourceType")
+      ?: throw IllegalStateException(
+        "No type argument found for $id! Analyzing $sourceType with known parameters " +
+          "${parametersMap.keys}"
+      )
   }
 
   val resolver = object : TypeParameterResolver {
