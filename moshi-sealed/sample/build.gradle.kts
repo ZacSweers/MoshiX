@@ -17,7 +17,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
+  alias(libs.plugins.ksp)
   kotlin("jvm")
   kotlin("kapt")
 }
@@ -37,19 +37,19 @@ dependencies {
     kspTest(project(":moshi-ksp:moshi-ksp"))
   } else {
     kapt(project(":moshi-sealed:codegen"))
-    kapt(Dependencies.Moshi.codegen)
+    kapt(libs.moshi.codegen)
   }
 
   implementation(project(":moshi-sealed:runtime"))
-  implementation(Dependencies.Moshi.kotlin)
+  implementation(libs.moshi.kotlin)
   implementation(project(":moshi-sealed:reflect"))
   implementation(project(":moshi-sealed:metadata-reflect"))
 
   if (!useKsp) {
     kaptTest(project(":moshi-sealed:codegen"))
   }
-  testImplementation(Dependencies.Testing.junit)
-  testImplementation(Dependencies.Testing.truth)
+  testImplementation(libs.junit)
+  testImplementation(libs.truth)
 }
 
 ksp {

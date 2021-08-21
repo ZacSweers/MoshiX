@@ -30,10 +30,10 @@ tasks.named<KotlinCompile>("compileTestKotlin") {
 }
 
 dependencies {
-  implementation(Dependencies.Kotlin.metadata)
-  implementation(Dependencies.Moshi.moshi)
-  kaptTest(Dependencies.Moshi.codegen)
+  implementation(libs.kotlin.metadata)
+  implementation(libs.moshi)
+  kaptTest(libs.moshi.codegen)
   testImplementation("org.assertj:assertj-core:3.11.1")
-  testImplementation(Dependencies.Testing.junit)
-  testImplementation(Dependencies.Testing.truth)
+  testImplementation(libs.junit)
+  testImplementation(libs.truth)
 }

@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm")
-  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
+  alias(libs.plugins.ksp)
   id("com.vanniktech.maven.publish")
 }
 
@@ -30,25 +30,24 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 dependencies {
-  implementation(Dependencies.AutoService.annotations)
-  ksp(Dependencies.AutoService.ksp)
+  implementation(libs.autoService)
+  ksp(libs.autoService.ksp)
   // For access to MessageCollectorBasedKSPLogger
-  compileOnly(Dependencies.Kotlin.Ksp.ksp)
-  compileOnly(Dependencies.Kotlin.Ksp.api)
-  compileOnly(Dependencies.Kotlin.compilerEmbeddable)
+  compileOnly(libs.ksp)
+  compileOnly(libs.ksp.api)
+  compileOnly(libs.kotlin.compilerEmbeddable)
 
-  implementation(Dependencies.asm)
-  implementation(Dependencies.KotlinPoet.kotlinPoet)
-  implementation(Dependencies.Moshi.moshi)
+  implementation(libs.asm)
+  implementation(libs.kotlinpoet)
+  implementation(libs.moshi)
 
-  testImplementation(Dependencies.Kotlin.Ksp.api)
-  testImplementation(Dependencies.Testing.truth)
-  testImplementation(Dependencies.Testing.junit)
-  testImplementation(Dependencies.Kotlin.Ksp.ksp)
-  testImplementation(Dependencies.Kotlin.reflect)
+  testImplementation(libs.ksp.api)
+  testImplementation(libs.ksp)
+  testImplementation(libs.truth)
+  testImplementation(libs.junit)
+  testImplementation(libs.kotlin.reflect)
   // TODO re-enable with new release
 //  testImplementation(Dependencies.Testing.kspCompileTesting)
-  testImplementation(Dependencies.Kotlin.Ksp.ksp)
-  testImplementation(Dependencies.Testing.compileTesting)
-  testImplementation(Dependencies.Kotlin.compilerEmbeddable)
+  testImplementation(libs.kotlinCompileTesting)
+  testImplementation(libs.kotlin.compilerEmbeddable)
 }

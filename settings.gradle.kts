@@ -46,3 +46,5 @@ include(":moshi-sealed:reflect")
 include(":moshi-sealed:runtime")
 include(":moshi-sealed:sample")
 include(":moshi-sealed:sealed-interfaces-samples:java")
+
+enableFeaturePreview("VERSION_CATALOGS")

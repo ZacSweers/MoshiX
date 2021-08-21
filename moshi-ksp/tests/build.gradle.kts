@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm")
-  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
+  alias(libs.plugins.ksp)
 }
 
 val generatedAnnotation = if (JavaVersion.current().isJava10Compatible) {
@@ -38,11 +38,11 @@ sourceSets {
 dependencies {
   kspTest(project(":moshi-ksp:moshi-ksp"))
   testImplementation(project(":moshi-ksp:extra-moshi-test-module"))
-  testImplementation(Dependencies.Moshi.moshi)
+  testImplementation(libs.moshi)
   testImplementation(project(":moshi-metadata-reflect"))
-  testImplementation(Dependencies.Testing.junit)
-  testImplementation(Dependencies.Testing.truth)
-  testImplementation(Dependencies.Kotlin.reflect)
+  testImplementation(libs.junit)
+  testImplementation(libs.truth)
+  testImplementation(libs.kotlin.reflect)
 }
 
 ksp {
