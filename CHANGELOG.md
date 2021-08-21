@@ -8,7 +8,7 @@ _2021-08-20_
 
 * **Fix:** `RecordsJsonAdapterFactory` now properly respects `@JsonQualifier` annotations on components.
 * **Fix:** `RecordsJsonAdapterFactory` now supports non-public constructors (i.e. package or file-private).
-* **Fix:** Crash in `moshi-ksp` when dealing with generic typealias properites.
+* **Fix:** Crash in `moshi-ksp` when dealing with generic typealias properties.
 
 Version 0.12.1
 --------------
