@@ -41,6 +41,7 @@ import kotlin.reflect.KVariance.INVARIANT
 import kotlin.reflect.full.createType
 
 /** Execute kotlinc to confirm that either files are generated or errors are printed. */
+@Ignore("https://github.com/google/ksp/issues/427")
 @RunWith(Parameterized::class)
 class JsonClassSymbolProcessorTest(private val incremental: Boolean) {
 
