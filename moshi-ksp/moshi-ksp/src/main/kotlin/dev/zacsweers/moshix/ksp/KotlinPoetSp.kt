@@ -58,8 +58,8 @@ internal fun KSType.toTypeName(typeParamResolver: TypeParameterResolver): TypeNa
       }
       val args = arguments.map { it.toTypeName(typeParamResolver) }
       val firstPass = decl.type.resolve().toTypeName(extraResolver).copy(nullable = isMarkedNullable)
-      return if (args.isNotEmpty()) {
-        firstPass.rawType().parameterizedBy(args).copy(nullable = firstPass.isNullable)
+      if (args.isNotEmpty()) {
+        firstPass.rawType().parameterizedBy(args)
       } else {
         firstPass
       }
