@@ -21,16 +21,16 @@ import java.net.URL
 
 buildscript {
   dependencies {
-    classpath(kotlin("gradle-plugin", version = Dependencies.Kotlin.version))
+    classpath(kotlin("gradle-plugin", version = (System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.21")))
   }
 }
 
 plugins {
-  kotlin("jvm") version Dependencies.Kotlin.version apply false
-  id("org.jetbrains.dokka") version Dependencies.Kotlin.dokkaVersion apply false
-  id("com.vanniktech.maven.publish") version "0.17.0" apply false
-  id("com.diffplug.spotless") version "5.14.1"
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.6.0"
+  kotlin("jvm") version (System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.21") apply false
+  alias(libs.plugins.dokka) apply false
+  alias(libs.plugins.mavenPublish) apply false
+  alias(libs.plugins.spotless)
+  alias(libs.plugins.kotlinBinaryCompatibilityValidator)
 }
 
 apiValidation {
@@ -67,7 +67,7 @@ spotless {
 //    }
 //  }
   kotlin {
-    ktlint(Dependencies.ktlintVersion).userData(mapOf("indent_size" to "2"))
+    ktlint(libs.versions.ktlint.get()).userData(mapOf("indent_size" to "2"))
     target("**/*.kt")
     trimTrailingWhitespace()
     endWithNewline()
@@ -84,7 +84,7 @@ spotless {
 //    configureCommonKotlinFormat()
 //  }
   kotlinGradle {
-    ktlint(Dependencies.ktlintVersion).userData(mapOf("indent_size" to "2"))
+    ktlint(libs.versions.ktlint.get()).userData(mapOf("indent_size" to "2"))
     target("**/*.gradle.kts")
     trimTrailingWhitespace()
     endWithNewline()
@@ -133,9 +133,9 @@ subprojects {
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
     tasks.withType<KotlinCompile>().configureEach {
       kotlinOptions {
-        jvmTarget = Dependencies.Kotlin.jvmTarget
+        jvmTarget = libs.versions.jvmTarget.get()
         @Suppress("SuspiciousCollectionReassignment")
-        freeCompilerArgs += Dependencies.Kotlin.defaultFreeCompilerArgs
+        freeCompilerArgs += listOf("-Xjsr305=strict", "-progressive", "-Xopt-in=kotlin.RequiresOptIn")
         // TODO disabled because Gradle's Kotlin handling is silly
         //  https://github.com/gradle/gradle/issues/16779
 //        allWarningsAsErrors = true

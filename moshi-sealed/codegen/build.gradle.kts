@@ -24,20 +24,19 @@ plugins {
 }
 
 dependencies {
-  implementation(Dependencies.AutoService.annotations)
-  kapt(Dependencies.AutoService.processor)
-  kapt(Dependencies.Incap.processor)
-  compileOnly(Dependencies.Incap.annotations)
+  implementation(libs.autoService)
+  kapt(libs.autoService.processor)
+  kapt(libs.incap.processor)
+  compileOnly(libs.incap)
 
-  implementation(Dependencies.autoCommon)
-  implementation(Dependencies.KotlinPoet.kotlinPoet)
-  implementation(Dependencies.KotlinPoet.metadata)
-  implementation(Dependencies.KotlinPoet.metadataSpecs)
-  implementation(Dependencies.Moshi.adapters)
-  implementation(Dependencies.Moshi.moshi)
+  implementation(libs.autoCommon)
+  implementation(libs.kotlinpoet)
+  implementation(libs.kotlinpoet.metadataSpecs)
+  implementation(libs.moshi.adapters)
+  implementation(libs.moshi)
   implementation(project(":moshi-sealed:runtime"))
 
-  testImplementation(Dependencies.Testing.compileTesting)
-  testImplementation(Dependencies.Testing.truth)
-  testImplementation(Dependencies.Testing.junit)
+  testImplementation(libs.kotlinCompileTesting)
+  testImplementation(libs.truth)
+  testImplementation(libs.junit)
 }

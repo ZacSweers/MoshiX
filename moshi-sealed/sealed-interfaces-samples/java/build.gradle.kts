@@ -27,10 +27,10 @@ dependencies {
   implementation(project(":moshi-records-reflect"))
   implementation(project(":moshi-sealed:java-sealed-reflect"))
   implementation(project(":moshi-sealed:runtime"))
-  implementation(Dependencies.Moshi.adapters)
+  implementation(libs.moshi.adapters)
 //  implementation(project(":moshi-sealed:reflect"))
-  testImplementation(Dependencies.Testing.junit)
-  testImplementation(Dependencies.Testing.truth)
+  testImplementation(libs.junit)
+  testImplementation(libs.truth)
 }
 
 // ksp {

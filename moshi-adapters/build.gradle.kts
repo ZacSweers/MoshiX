@@ -30,13 +30,13 @@ tasks.named<KotlinCompile>("compileTestKotlin") {
 }
 
 dependencies {
-  implementation(Dependencies.Moshi.moshi)
-  kaptTest(Dependencies.Moshi.codegen)
-  testImplementation(Dependencies.Moshi.kotlin)
-  testImplementation(Dependencies.OkHttp.okHttp)
-  testImplementation(Dependencies.OkHttp.mockWebServer)
-  testImplementation(Dependencies.Retrofit.retrofit)
-  testImplementation(Dependencies.Retrofit.moshiConverter)
-  testImplementation(Dependencies.Testing.junit)
-  testImplementation(Dependencies.Testing.truth)
+  implementation(libs.moshi)
+  kaptTest(libs.moshi.codegen)
+  testImplementation(libs.moshi.kotlin)
+  testImplementation(libs.okhttp)
+  testImplementation(libs.okhttp.mockwebserver)
+  testImplementation(libs.retrofit)
+  testImplementation(libs.retrofit.moshi)
+  testImplementation(libs.junit)
+  testImplementation(libs.truth)
 }

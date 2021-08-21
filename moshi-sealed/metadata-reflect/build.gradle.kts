@@ -21,7 +21,7 @@ plugins {
 
 dependencies {
   implementation(project(":moshi-sealed:runtime"))
-  api(Dependencies.Moshi.moshi)
-  api(Dependencies.Moshi.adapters)
-  implementation(Dependencies.Kotlin.metadata)
+  api(libs.moshi)
+  api(libs.moshi.adapters)
+  implementation(libs.kotlin.metadata)
 }
