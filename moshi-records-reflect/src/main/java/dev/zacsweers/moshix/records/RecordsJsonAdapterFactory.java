@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 Zac Sweers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.zacsweers.moshix.records;
 
 import com.squareup.moshi.Json;
@@ -7,7 +22,6 @@ import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.JsonWriter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -25,15 +39,16 @@ import java.util.Set;
 
 /**
  * A {@link JsonAdapter.Factory} that supports Java {@code record} classes via reflection.
- * <p>
- * <em>NOTE:</em> Java records require JDK 16 or higher.
+ *
+ * <p><em>NOTE:</em> Java records require JDK 16 or higher.
  */
 public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
 
   @Override
-  public JsonAdapter<?> create(
-      Type type, Set<? extends Annotation> annotations, Moshi moshi) {
-    if (!annotations.isEmpty()) { return null; }
+  public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
+    if (!annotations.isEmpty()) {
+      return null;
+    }
 
     if (!(type instanceof Class) && !(type instanceof ParameterizedType)) {
       return null;
@@ -52,7 +67,9 @@ public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
         mappedTypeArgs.put(typeVarName, materialized);
       }
     }
-    if (!rawType.isRecord()) { return null; }
+    if (!rawType.isRecord()) {
+      return null;
+    }
     var components = rawType.getRecordComponents();
     var bindings = new LinkedHashMap<String, ComponentBinding<?>>();
     var constructorParams = new Class<?>[components.length];
@@ -68,7 +85,8 @@ public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
         }
         var mappedType = mappedTypeArgs.get(typeVarName);
         if (mappedType == null) {
-          throw new AssertionError("No materialized type argument found for type '" + typeVarName + "'");
+          throw new AssertionError(
+              "No materialized type argument found for type '" + typeVarName + "'");
         }
         componentType = mappedType;
       }
@@ -114,8 +132,8 @@ public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
     return new ComponentBindingAdapter<>(constructor, bindings).nullSafe();
   }
 
-  private record ComponentBinding<T>(String name, String jsonName, JsonAdapter<T> adapter, Method accessor) {
-  }
+  private record ComponentBinding<T>(
+      String name, String jsonName, JsonAdapter<T> adapter, Method accessor) {}
 
   private static class ComponentBindingAdapter<T> extends JsonAdapter<T> {
 
@@ -126,14 +144,15 @@ public final class RecordsJsonAdapterFactory implements JsonAdapter.Factory {
 
     @SuppressWarnings("ToArrayCallWithZeroLengthArrayArgument")
     public ComponentBindingAdapter(
-        Constructor<T> constructor,
-        Map<String, ComponentBinding<?>> componentBindings
-    ) {
+        Constructor<T> constructor, Map<String, ComponentBinding<?>> componentBindings) {
       this.constructor = constructor;
       this.targetClass = constructor.getDeclaringClass().getSimpleName();
       //noinspection unchecked
-      this.componentBindingsArray = componentBindings.values().toArray(new ComponentBinding[componentBindings.size()]);
-      this.options = JsonReader.Options.of(componentBindings.keySet().toArray(new String[componentBindings.size()]));
+      this.componentBindingsArray =
+          componentBindings.values().toArray(new ComponentBinding[componentBindings.size()]);
+      this.options =
+          JsonReader.Options.of(
+              componentBindings.keySet().toArray(new String[componentBindings.size()]));
     }
 
     @Override

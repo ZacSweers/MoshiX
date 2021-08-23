@@ -1,11 +1,24 @@
+/*
+ * Copyright (C) 2021 Zac Sweers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.zacsweers.moshix.sealed.sample.java;
 
 import com.squareup.moshi.JsonClass;
-
-import java.util.Map;
-
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull;
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
+import java.util.Map;
 
 // @DefaultObject is not possible in java
 @DefaultNull
@@ -13,12 +26,11 @@ import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
 sealed interface MessageWithNullDefault
     permits MessageWithNullDefault.Success, MessageWithNullDefault.Error {
 
-  @TypeLabel(label = "success", alternateLabels = {"successful"})
-  final record Success(String value) implements MessageWithNullDefault {
-  }
+  @TypeLabel(
+      label = "success",
+      alternateLabels = {"successful"})
+  final record Success(String value) implements MessageWithNullDefault {}
 
   @TypeLabel(label = "error")
-  final record Error(Map<String, Object> error_logs) implements
-      MessageWithNullDefault {
-  }
+  final record Error(Map<String, Object> error_logs) implements MessageWithNullDefault {}
 }

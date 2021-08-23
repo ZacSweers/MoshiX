@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 Zac Sweers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.zacsweers.moshix.sealed.java;
 
 import com.squareup.moshi.JsonAdapter;
@@ -5,19 +20,17 @@ import com.squareup.moshi.JsonClass;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory;
-
+import dev.zacsweers.moshix.sealed.annotations.DefaultNull;
+import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-import dev.zacsweers.moshix.sealed.annotations.DefaultNull;
-import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
-
 /**
  * A {@link JsonAdapter.Factory} that supports JDK 16+ Java {@code sealed} classes via reflection.
- * <p>
- * <em>NOTE:</em> Java sealed classes are currently in preview.
+ *
+ * <p><em>NOTE:</em> Java sealed classes are currently in preview.
  */
 public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
 
@@ -26,16 +39,23 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
   private static final Object UNSET = new Object();
 
   @Override
-  public JsonAdapter<?> create(
-      Type type, Set<? extends Annotation> annotations, Moshi moshi) {
-    if (!annotations.isEmpty()) { return null; }
+  public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
+    if (!annotations.isEmpty()) {
+      return null;
+    }
 
     var rawType = Types.getRawType(type);
-    if (!rawType.isSealed()) { return null; }
+    if (!rawType.isSealed()) {
+      return null;
+    }
     var jsonClass = rawType.getAnnotation(JsonClass.class);
-    if (jsonClass == null) { return null; }
+    if (jsonClass == null) {
+      return null;
+    }
     var generator = jsonClass.generator();
-    if (!generator.startsWith("sealed:")) { return null; }
+    if (!generator.startsWith("sealed:")) {
+      return null;
+    }
     var typeLabel = generator.substring(SEALED_PREFIX_LENGTH);
     var defaultObject = UNSET;
     if (rawType.isAnnotationPresent(DefaultNull.class)) {
@@ -55,20 +75,33 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
         }
 
         if (sealedSubclass.getTypeParameters().length > 0) {
-          throw new IllegalStateException("Moshi-sealed subtypes cannot be generic: " + sealedSubclass.getCanonicalName());
+          throw new IllegalStateException(
+              "Moshi-sealed subtypes cannot be generic: " + sealedSubclass.getCanonicalName());
         }
 
         var label = labelAnnotation.label();
         var prevMain = labels.put(label, sealedSubclass);
         if (prevMain != null) {
           throw new IllegalStateException(
-              "Duplicate label '" + label + "' defined for " + sealedSubclass + " and " + prevMain + ".");
+              "Duplicate label '"
+                  + label
+                  + "' defined for "
+                  + sealedSubclass
+                  + " and "
+                  + prevMain
+                  + ".");
         }
         for (var alternate : labelAnnotation.alternateLabels()) {
           var prev = labels.put(alternate, sealedSubclass);
           if (prev != null) {
             throw new IllegalStateException(
-                "Duplicate alternate label '" + label + "' defined for " + sealedSubclass + " and " + prev + ".");
+                "Duplicate alternate label '"
+                    + label
+                    + "' defined for "
+                    + sealedSubclass
+                    + " and "
+                    + prev
+                    + ".");
           }
         }
       } catch (ClassNotFoundException e) {
@@ -78,7 +111,8 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    PolymorphicJsonAdapterFactory<Object> factory = PolymorphicJsonAdapterFactory.of((Class) rawType, typeLabel);
+    PolymorphicJsonAdapterFactory<Object> factory =
+        PolymorphicJsonAdapterFactory.of((Class) rawType, typeLabel);
     for (var entry : labels.entrySet()) {
       factory = factory.withSubtype(entry.getValue(), entry.getKey());
     }
@@ -90,7 +124,6 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
   }
 
   private static String toBinaryName(String descriptor) {
-    return descriptor.substring(1, descriptor.length() - 1)
-        .replace('/', '.');
+    return descriptor.substring(1, descriptor.length() - 1).replace('/', '.');
   }
 }
