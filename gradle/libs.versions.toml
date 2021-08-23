@@ -16,6 +16,7 @@
 autoService = "1.0"
 dokka = "1.5.0"
 incap = "0.3"
+gjf = "1.11.0"
 kotlinCompileTesting = "1.4.3"
 kotlin = "1.5.21"
 jvmTarget = "1.8"

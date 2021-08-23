@@ -50,22 +50,15 @@ spotless {
     indentWithSpaces(2)
     endWithNewline()
   }
-  // TODO re-enable after GJF supports sealed
-  //  https://github.com/google/google-java-format/issues/603
-//  if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_16)) {
-//    val configureCommonJavaFormat: JavaExtension.() -> Unit = {
-//      googleJavaFormat("1.10.0")
-//    }
-//    java {
-//      configureCommonJavaFormat()
-//      target("**/*.java")
-//      targetExclude(
-//        "**/spotless.java",
-//        "**/build/**"
-//      )
-//      licenseHeaderFile("spotless/spotless.java")
-//    }
-//  }
+  java {
+    googleJavaFormat(libs.versions.gjf.get())
+    target("**/*.java")
+    targetExclude(
+      "**/spotless.java",
+      "**/build/**"
+    )
+    licenseHeaderFile("spotless/spotless.java")
+  }
   kotlin {
     ktlint(libs.versions.ktlint.get()).userData(mapOf("indent_size" to "2"))
     target("**/*.kt")
