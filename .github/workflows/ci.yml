@@ -36,7 +36,7 @@ jobs:
       - name: Install JDK
         uses: actions/setup-java@v2
         with:
-          distribution: 'adopt'
+          distribution: 'zulu'
           java-version: ${{ matrix.java_version }}
       - name: Build project
         run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} -Pksp.incremental=${{ matrix.ksp_incremental_enabled }} --stacktrace
