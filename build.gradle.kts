@@ -21,12 +21,12 @@ import java.net.URL
 
 buildscript {
   dependencies {
-    classpath(kotlin("gradle-plugin", version = (System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.21")))
+    classpath(kotlin("gradle-plugin", version = (System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.30")))
   }
 }
 
 plugins {
-  kotlin("jvm") version (System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.21") apply false
+  kotlin("jvm") version (System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.30") apply false
   alias(libs.plugins.dokka) apply false
   alias(libs.plugins.mavenPublish) apply false
   alias(libs.plugins.spotless)
