@@ -32,4 +32,3 @@ class MoshiKspTest {
   @JsonClass(generateAdapter = true)
   data class SimpleImpl(override val a : String, val b : String) : Any(), SimpleInterface
 }
-

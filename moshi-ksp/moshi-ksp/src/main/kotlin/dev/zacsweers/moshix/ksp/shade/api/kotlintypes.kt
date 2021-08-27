@@ -200,6 +200,10 @@ internal fun List<TypeName>.toTypeVariableResolver(
     override val parametersMap: Map<String, TypeVariableName> = parametersMap
 
     override operator fun get(index: String): TypeVariableName = typeParamResolver(index)
+
+    override fun toString(): String {
+      return parametersMap.toString()
+    }
   }
 
   // Fill the parametersMap. Need to do sequentially and allow for referencing previously defined params
@@ -209,6 +213,12 @@ internal fun List<TypeName>.toTypeVariableResolver(
     // replacement later that may add bounds referencing this.
     val id = typeVar.name
     parametersMap[id] = TypeVariableName(id)
+  }
+
+  // Fill the parametersMap. Need to do sequentially and allow for referencing previously defined params
+  for (typeVar in this) {
+    check(typeVar is TypeVariableName)
+    val id = typeVar.name
     // Now replace it with the full version.
     parametersMap[id] = typeVar.deepCopy(null) { it.stripTypeVarVariance(resolver) }
   }

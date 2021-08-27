@@ -110,6 +110,10 @@ internal fun List<KSTypeParameter>.toTypeParameterResolver(
     // replacement later that may add bounds referencing this.
     val id = typeVar.name.getShortName()
     parametersMap[id] = TypeVariableName(id)
+  }
+
+  for (typeVar in this) {
+    val id = typeVar.name.getShortName()
     // Now replace it with the full version.
     parametersMap[id] = typeVar.toTypeVariableName(resolver)
   }
