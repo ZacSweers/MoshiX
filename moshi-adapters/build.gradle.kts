@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm")
-  kotlin("kapt")
+  alias(libs.plugins.ksp)
   id("com.vanniktech.maven.publish")
 }
 
@@ -31,7 +31,7 @@ tasks.named<KotlinCompile>("compileTestKotlin") {
 
 dependencies {
   implementation(libs.moshi)
-  kaptTest(libs.moshi.codegen)
+  kspTest(project(":moshi-ksp"))
   testImplementation(libs.moshi.kotlin)
   testImplementation(libs.okhttp)
   testImplementation(libs.okhttp.mockwebserver)

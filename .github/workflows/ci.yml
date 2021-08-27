@@ -43,5 +43,5 @@ jobs:
       - name: Upload snapshot (main only)
         run: |
           ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9 || true
-          ./gradlew publishAllPublicationsToMavenCentralRepository -PmavenCentralUsername=${{ secrets.SONATYPE_USERNAME }} -PmavenCentralPassword=${{ secrets.SONATYPE_PASSWORD }}
+          ./gradlew publish -PmavenCentralUsername=${{ secrets.SONATYPE_USERNAME }} -PmavenCentralPassword=${{ secrets.SONATYPE_PASSWORD }}
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java_version == '16' && !matrix.ksp_enabled

@@ -15,19 +15,14 @@
  */
 
 plugins {
-  // TODO use ksp version again when ksp supports 1.4.30
-  //  https://github.com/google/ksp/issues/267
-//  id("com.google.devtools.ksp") version Dependencies.Kotlin.Ksp.version
   kotlin("jvm")
-  kotlin("kapt")
+  alias(libs.plugins.ksp)
   id("com.vanniktech.maven.publish")
 }
 
 dependencies {
   implementation(libs.autoService)
-  kapt(libs.autoService.processor)
-  kapt(libs.incap.processor)
-  compileOnly(libs.incap)
+  ksp(libs.autoService.ksp)
 
   implementation(libs.autoCommon)
   implementation(libs.kotlinpoet)

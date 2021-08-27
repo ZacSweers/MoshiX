@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm")
-  kotlin("kapt")
+  alias(libs.plugins.ksp)
   id("com.vanniktech.maven.publish")
 }
 
@@ -32,8 +32,8 @@ tasks.named<KotlinCompile>("compileTestKotlin") {
 dependencies {
   implementation(libs.kotlin.metadata)
   implementation(libs.moshi)
-  kaptTest(libs.moshi.codegen)
-  testImplementation("org.assertj:assertj-core:3.11.1")
+  kspTest(project(":moshi-ksp"))
+  testImplementation("org.assertj:assertj-core:3.20.2")
   testImplementation(libs.junit)
   testImplementation(libs.truth)
 }

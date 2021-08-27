@@ -49,8 +49,6 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.codegen.MoshiSealedProcessor.Companion.OPTION_GENERATED
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
-import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
-import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Filer
 import javax.annotation.processing.Messager
@@ -65,7 +63,6 @@ import javax.lang.model.util.Types
 import javax.tools.Diagnostic
 
 @KotlinPoetMetadataPreview
-@IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.AGGREGATING)
 @SupportedOptions(OPTION_GENERATED)
 @AutoService(Processor::class)
 public class MoshiSealedProcessor : AbstractProcessor() {
