@@ -23,11 +23,6 @@ plugins {
 }
 
 val useKsp = findProperty("moshix.useKsp")?.toString()?.toBoolean() ?: false
-val generatedAnnotation = if (JavaVersion.current().isJava10Compatible) {
-  "javax.annotation.processing.Generated"
-} else {
-  "javax.annotation.Generated"
-}
 
 dependencies {
   if (useKsp) {
@@ -57,11 +52,11 @@ dependencies {
 //  arg("moshi.generated", generatedAnnotation)
 // }
 
-// kapt {
-//  arguments {
-//    arg("moshi.generated", generatedAnnotation)
-//  }
-// }
+kapt {
+  arguments {
+    arg("moshi.generated", "javax.annotation.processing.Generated")
+  }
+}
 
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
