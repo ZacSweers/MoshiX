@@ -1,6 +1,21 @@
 Changelog
 =========
 
+Version 0.13.0
+--------------
+
+_2021-08-27_
+
+* Update Kotlin to `1.5.30`.
+* Update KSP to `1.5.30-1.0.0-beta08`.
+* **Enhancement:** `RecordsJsonAdapterFactory` is now aligned with the upstreamed implementation on Moshi itself. 
+  * Note that this is now _soft-deprecated_ and will be fully deprecated once Moshi's next release is out with formal support.
+  * This includes using a few more modern language APIs like `MethodHandle` and better unpacking of different runtime exceptions. Full details can be found in the [PR](https://github.com/square/moshi/pull/1381).
+* **Fix:** Avoid implicitly converting elements to KotlinPoet in `CodeBlock`s to avoid noisy logging.
+* **Fix:** Improve self-referencing type variables parsing in `moshi-ksp` (see [#125](https://github.com/ZacSweers/MoshiX/pull/125) and [#151](https://github.com/ZacSweers/MoshiX/pull/151)).
+
+Special thanks to [@yigit](https://github.com/yigit) for contributing to this release!
+
 Version 0.12.2
 --------------
 
