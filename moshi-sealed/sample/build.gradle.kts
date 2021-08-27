@@ -52,15 +52,16 @@ dependencies {
   testImplementation(libs.truth)
 }
 
-ksp {
-  arg("moshi.generated", generatedAnnotation)
-}
+// TODO https://github.com/google/ksp/issues/593
+// ksp {
+//  arg("moshi.generated", generatedAnnotation)
+// }
 
-kapt {
-  arguments {
-    arg("moshi.generated", generatedAnnotation)
-  }
-}
+// kapt {
+//  arguments {
+//    arg("moshi.generated", generatedAnnotation)
+//  }
+// }
 
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
