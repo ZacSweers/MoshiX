@@ -37,8 +37,7 @@ dependencies {
   testImplementation(libs.ksp)
   testImplementation(libs.truth)
   testImplementation(libs.junit)
-  // TODO re-enable with new release
-//  testImplementation(Dependencies.Testing.kspCompileTesting)
   testImplementation(libs.kotlinCompileTesting)
+  testImplementation(libs.kotlinCompileTesting.ksp)
   testImplementation(libs.kotlin.compilerEmbeddable)
 }

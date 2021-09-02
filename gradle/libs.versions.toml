@@ -21,7 +21,7 @@ kotlinCompileTesting = "1.4.3"
 kotlin = "1.5.30"
 jvmTarget = "1.8"
 kotlinpoet = "1.9.0"
-ksp = "1.5.30-1.0.0-beta08"
+ksp = "1.5.30-1.0.0-beta09"
 ktlint = "0.41.0"
 moshi = "1.12.0"
 okhttp = "4.9.1"
@@ -31,8 +31,8 @@ retrofit = "2.9.0"
 dokka = { id = "org.jetbrains.dokka", version = "1.5.0" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.17.0" }
-spotless = { id = "com.diffplug.spotless", version = "5.14.2" }
-kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.7.0" }
+spotless = { id = "com.diffplug.spotless", version = "5.14.3" }
+kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.7.1" }
 
 [libraries]
 asm = { module = "org.ow2.asm:asm", version = "9.2" }
