@@ -16,9 +16,6 @@
 package dev.zacsweers.moshix.sealed.codegen
 
 import com.squareup.kotlinpoet.ClassName
-import javax.annotation.processing.Filer
-import javax.lang.model.element.Element
-import javax.tools.StandardLocation
 
 /**
  * Represents a proguard configuration for a given spec. This covers two main areas:
@@ -36,16 +33,9 @@ internal data class ProguardConfig(
   val adapterName: String,
   val adapterConstructorParams: List<String>
 ) {
-  private val outputFile = "META-INF/proguard/moshi-sealed-${targetClass.canonicalName}.pro"
+  internal val outputFile = "META-INF/proguard/moshi-sealed-${targetClass.canonicalName}.pro"
 
-  /** Writes this to `filer`. */
-  fun writeTo(filer: Filer, vararg originatingElements: Element) {
-    filer.createResource(StandardLocation.CLASS_OUTPUT, "", outputFile, *originatingElements)
-      .openWriter()
-      .use(::writeTo)
-  }
-
-  private fun writeTo(out: Appendable): Unit = out.run {
+  internal fun writeTo(out: Appendable): Unit = out.run {
     //
     // -if class {the target class}
     // -keepnames class {the target class}

@@ -57,10 +57,12 @@ import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
 import javax.annotation.processing.SupportedOptions
 import javax.lang.model.SourceVersion
+import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 import javax.tools.Diagnostic
+import javax.tools.StandardLocation
 
 @KotlinPoetMetadataPreview
 @SupportedOptions(OPTION_GENERATED)
@@ -390,4 +392,9 @@ public class MoshiSealedProcessor : AbstractProcessor() {
   }
 }
 
-internal data class PreparedAdapter(val spec: FileSpec, val proguardConfig: ProguardConfig?)
+/** Writes this to `filer`. */
+internal fun ProguardConfig.writeTo(filer: Filer, vararg originatingElements: Element) {
+  filer.createResource(StandardLocation.CLASS_OUTPUT, "", outputFile, *originatingElements)
+    .openWriter()
+    .use(::writeTo)
+}

@@ -23,6 +23,10 @@ plugins {
 dependencies {
   implementation(libs.autoService)
   ksp(libs.autoService.ksp)
+  // For access to MessageCollectorBasedKSPLogger
+  compileOnly(libs.ksp)
+  compileOnly(libs.ksp.api)
+  compileOnly(libs.kotlin.compilerEmbeddable)
 
   implementation(libs.autoCommon)
   implementation(libs.kotlinpoet)
@@ -31,7 +35,11 @@ dependencies {
   implementation(libs.moshi)
   implementation(project(":moshi-sealed:runtime"))
 
-  testImplementation(libs.kotlinCompileTesting)
+  testImplementation(libs.ksp.api)
+  testImplementation(libs.ksp)
   testImplementation(libs.truth)
   testImplementation(libs.junit)
+  testImplementation(libs.kotlinCompileTesting)
+  testImplementation(libs.kotlinCompileTesting.ksp)
+  testImplementation(libs.kotlin.compilerEmbeddable)
 }
