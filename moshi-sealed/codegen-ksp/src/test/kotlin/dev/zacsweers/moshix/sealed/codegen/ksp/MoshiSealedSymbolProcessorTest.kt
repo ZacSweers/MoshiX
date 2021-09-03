@@ -24,13 +24,11 @@ import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
 import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
 
-@Ignore("https://github.com/google/ksp/issues/427")
 @RunWith(Parameterized::class)
 class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
 
@@ -106,8 +104,8 @@ class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
 
         public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 
-        public override fun toJson(writer: JsonWriter, value: BaseType?): Unit {
-          runtimeAdapter.toJson(writer, value)
+        public override fun toJson(writer: JsonWriter, value_: BaseType?): Unit {
+          runtimeAdapter.toJson(writer, value_)
         }
       }
       """.trimIndent()
@@ -280,8 +278,8 @@ class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
     }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
-    val generatedSourcesDir = compilation.kaptSourceDir
-    val generatedFile = File(generatedSourcesDir, "test/BaseTypeJsonAdapter.kt")
+    val generatedSourcesDir = compilation.kspSourcesDir
+    val generatedFile = File(generatedSourcesDir, "kotlin/test/BaseTypeJsonAdapter.kt")
     assertThat(generatedFile.exists()).isTrue()
     //language=kotlin
     assertThat(generatedFile.readText().trim()).isEqualTo(
