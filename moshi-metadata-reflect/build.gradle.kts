@@ -32,7 +32,7 @@ tasks.named<KotlinCompile>("compileTestKotlin") {
 dependencies {
   implementation(libs.kotlin.metadata)
   implementation(libs.moshi)
-  kspTest(project(":moshi-ksp"))
+  kspTest(project(":moshi-ksp:moshi-ksp"))
   testImplementation("org.assertj:assertj-core:3.20.2")
   testImplementation(libs.junit)
   testImplementation(libs.truth)
