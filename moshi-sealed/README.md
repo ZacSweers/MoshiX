@@ -101,16 +101,17 @@ natively.
 
 ##### KSP support
 
-There is an experimental [KSP](https://github.com/google/ksp) implementation available as `moshi-sealed-ksp`.
+There is an experimental [KSP](https://github.com/google/ksp) implementation available in the `moshi-sealed-codegen`
+artifact.
 Note that KSP itself is experimental, so expect this API to break regularly.
 
-Add this dependency as a `ksp` dependency instead of the `moshi-sealed-codegen` dependency.
+Add this dependency as a `ksp` dependency.
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-ksp.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-ksp)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-codegen.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-codegen)
 ```diff
 dependencies {
 -  kapt("dev.zacsweers.moshix:moshi-sealed-codegen:<version>")
-+  ksp("dev.zacsweers.moshix:moshi-sealed-ksp:<version>")
++  ksp("dev.zacsweers.moshix:moshi-sealed-codegen:<version>")
 }
 ```
 

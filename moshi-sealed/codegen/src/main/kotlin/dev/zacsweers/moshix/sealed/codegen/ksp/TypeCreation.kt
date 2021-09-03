@@ -36,6 +36,8 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
+import dev.zacsweers.moshix.sealed.codegen.PreparedAdapter
+import dev.zacsweers.moshix.sealed.codegen.ProguardConfig
 import dev.zacsweers.moshix.sealed.codegen.ksp.Subtype.ClassType
 import dev.zacsweers.moshix.sealed.codegen.ksp.Subtype.ObjectType
 

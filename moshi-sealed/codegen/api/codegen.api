@@ -12,3 +12,14 @@ public final class dev/zacsweers/moshix/sealed/codegen/MoshiSealedProcessor : ja
 public final class dev/zacsweers/moshix/sealed/codegen/MoshiSealedProcessor$Companion {
 }
 
+public final class dev/zacsweers/moshix/sealed/codegen/ksp/MoshiSealedSymbolProcessorProvider : com/google/devtools/ksp/processing/SymbolProcessorProvider {
+	public static final field Companion Ldev/zacsweers/moshix/sealed/codegen/ksp/MoshiSealedSymbolProcessorProvider$Companion;
+	public static final field OPTION_GENERATED Ljava/lang/String;
+	public static final field OPTION_GENERATE_PROGUARD_RULES Ljava/lang/String;
+	public fun <init> ()V
+	public fun create (Lcom/google/devtools/ksp/processing/SymbolProcessorEnvironment;)Lcom/google/devtools/ksp/processing/SymbolProcessor;
+}
+
+public final class dev/zacsweers/moshix/sealed/codegen/ksp/MoshiSealedSymbolProcessorProvider$Companion {
+}
+
