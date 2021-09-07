@@ -7,7 +7,7 @@ Version 0.14.0
 _2021-09-07_
 
 * Update KSP to `1.5.30-1.0.0` stable!
-* `moshi-sealed-ksp` has now been merged into `moshi-sealed-codegen`. This artifact can be used for both `kapt` and 
+* `moshi-sealed-ksp` has now been merged into `moshi-sealed-codegen`. This artifact can be used for both `kapt` and
   `ksp`.
 * `moshi-ksp` is now _soft-deprecated_ and will be fully deprecated once Moshi's next release is out with formal support.
 
