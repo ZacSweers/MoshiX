@@ -21,12 +21,6 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
-val generatedAnnotation = if (JavaVersion.current().isJava10Compatible) {
-  "javax.annotation.processing.Generated"
-} else {
-  "javax.annotation.Generated"
-}
-
 sourceSets {
   test {
     java {
@@ -45,10 +39,9 @@ dependencies {
   testImplementation(libs.kotlin.reflect)
 }
 
-// TODO https://github.com/google/ksp/issues/593
-// ksp {
-//  arg("moshi.generated", generatedAnnotation)
-// }
+ksp {
+  arg("moshi.generated", "javax.annotation.processing.Generated")
+}
 
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
