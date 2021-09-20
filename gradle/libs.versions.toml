@@ -14,13 +14,12 @@
 
 [versions]
 autoService = "1.0"
-dokka = "1.5.0"
 incap = "0.3"
 gjf = "1.11.0"
 kotlinCompileTesting = "1.4.4"
-kotlin = "1.5.30"
+kotlin = "1.5.31"
 jvmTarget = "1.8"
-kotlinpoet = "1.9.0"
+kotlinpoet = "1.10.0"
 ksp = "1.5.30-1.0.0"
 ktlint = "0.41.0"
 moshi = "1.12.0"
@@ -28,10 +27,10 @@ okhttp = "4.9.1"
 retrofit = "2.9.0"
 
 [plugins]
-dokka = { id = "org.jetbrains.dokka", version = "1.5.0" }
+dokka = { id = "org.jetbrains.dokka", version = "1.5.30" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.17.0" }
-spotless = { id = "com.diffplug.spotless", version = "5.14.3" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.18.0" }
+spotless = { id = "com.diffplug.spotless", version = "5.15.0" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.7.1" }
 
 [libraries]
@@ -53,7 +52,8 @@ kotlin-metadata = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", versi
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
-kotlinpoet-metadataSpecs = { module = "com.squareup:kotlinpoet-metadata-specs", version.ref = "kotlinpoet" }
+kotlinpoet-metadata = { module = "com.squareup:kotlinpoet-metadata", version.ref = "kotlinpoet" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
 
 ksp = { module = "com.google.devtools.ksp:symbol-processing", version.ref = "ksp" }
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }

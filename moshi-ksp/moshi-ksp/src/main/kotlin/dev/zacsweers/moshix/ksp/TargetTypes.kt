@@ -34,9 +34,16 @@ import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Origin
 import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.ksp.TypeParameterResolver
+import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
+import com.squareup.kotlinpoet.ksp.toTypeParameterResolver
+import com.squareup.kotlinpoet.ksp.toTypeVariableName
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonQualifier
 import dev.zacsweers.moshix.ksp.shade.api.TargetConstructor
@@ -77,7 +84,7 @@ internal fun targetType(
   }
 
   val classTypeParamsResolver = type.typeParameters.toTypeParameterResolver(
-    sourceType = type.qualifiedName!!.asString()
+    sourceTypeHint = type.qualifiedName!!.asString()
   )
   val typeVariables = type.typeParameters.map { it.toTypeVariableName(classTypeParamsResolver) }
   val appliedType = AppliedType.get(type)
@@ -139,13 +146,21 @@ internal fun targetType(
     if (forceInternal) KModifier.INTERNAL else visibility
   }
   return TargetType(
-    typeName = type.toTypeName(typeVariables),
+    typeName = type.toClassName().withTypeArguments(typeVariables),
     constructor = constructor,
     properties = properties,
     typeVariables = typeVariables,
     isDataClass = Modifier.DATA in type.modifiers,
     visibility = resolvedVisibility
   )
+}
+
+private fun ClassName.withTypeArguments(arguments: List<TypeName>): TypeName {
+  return if (arguments.isEmpty()) {
+    this
+  } else {
+    this.parameterizedBy(arguments)
+  }
 }
 
 @OptIn(KspExperimental::class)
