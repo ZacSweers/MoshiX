@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java_version: [ 16, 17-ea ]
+        java_version: [ 17 ]
         kotlin_version: [ 1.5.30 ]
         ksp_enabled: [ true, false ]
         ksp_incremental_enabled: [ true, false ]
@@ -44,4 +44,4 @@ jobs:
         run: |
           ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9 || true
           ./gradlew publish -PmavenCentralUsername=${{ secrets.SONATYPE_USERNAME }} -PmavenCentralPassword=${{ secrets.SONATYPE_PASSWORD }}
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java_version == '16' && !matrix.ksp_enabled
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java_version == '17' && !matrix.ksp_enabled
