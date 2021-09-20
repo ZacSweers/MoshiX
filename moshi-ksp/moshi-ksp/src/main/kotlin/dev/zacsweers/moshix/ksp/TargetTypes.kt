@@ -252,7 +252,7 @@ private fun KSPropertyDeclaration.toPropertySpec(
 ): PropertySpec {
   return PropertySpec.builder(
     name = simpleName.getShortName(),
-    type = resolvedType.toTypeName(typeParameterResolver)
+    type = resolvedType.toTypeName(typeParameterResolver).unwrapTypeAlias()
   )
     .mutable(isMutable)
     .addModifiers(modifiers.map { KModifier.valueOf(it.name) })
@@ -280,23 +280,4 @@ private fun KSPropertyDeclaration.toPropertySpec(
 
 private fun String.escapeDollarSigns(): String {
   return replace("\$", "\${\'\$\'}")
-}
-
-internal fun TypeName.unwrapTypeAlias(): TypeName {
-  // TODO do we need to unwrap?
-  return this
-//  return mapTypes<ClassName> {
-//    tag<TypeNameAliasTag>()?.type?.let { unwrappedType ->
-//      // If any type is nullable, then the whole thing is nullable
-//      var isAnyNullable = isNullable
-//      // Keep track of all annotations across type levels. Sort them too for consistency.
-//      val runningAnnotations = TreeSet<AnnotationSpec>(compareBy { it.toString() }).apply {
-//        addAll(annotations)
-//      }
-//      val nestedUnwrappedType = unwrappedType.unwrapTypeAlias()
-//      runningAnnotations.addAll(nestedUnwrappedType.annotations)
-//      isAnyNullable = isAnyNullable || nestedUnwrappedType.isNullable
-//      nestedUnwrappedType.copy(nullable = isAnyNullable, annotations = runningAnnotations.toList())
-//    }
-//  }
 }
