@@ -6,6 +6,11 @@ Version 0.14.1
 
 _2021-09-21_
 
+* Build against JDK 17. 
+  * This means that `moshi-sealed-java-sealed-reflect`'s support of `sealed` classes in Java is now out of preview 
+    and requires Java 17 to use.
+  * `moshi-records-reflect` still targets Java 16 for maximum compatibility.
+  * All other artifacts still target Java 8.
 * Update Kotlin to `1.5.31`
 * Update KotlinPoet to `1.10.1`
 

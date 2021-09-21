@@ -6,7 +6,7 @@ Releasing
 3. `git commit -am "Prepare for release X.Y.Z."` (where X.Y.Z is the new version)
 4. `git tag -a X.Y.Z -m "Version X.Y.Z"` (where X.Y.Z is the new version)
 5. `./gradlew clean publish --no-daemon --no-parallel && ./gradlew closeAndReleaseRepository`
-   * Make sure to run this with JDK 16
+   * Make sure to run this with JDK 17
 6. Update the `gradle.properties` to the next SNAPSHOT version.
 7. `git commit -am "Prepare next development version."`
 8. `git push && git push --tags`

@@ -99,8 +99,9 @@ subprojects {
       }
     }
   }
-  val toolChainVersion = project.findProperty("moshix.javaLanguageVersion")?.toString() ?: "11"
-  val release = toolChainVersion.toInt()
+  val toolChainVersion = project.findProperty("moshix.javaLanguageVersion")?.toString() ?: "8"
+  val releaseVersion = project.findProperty("moshix.javaReleaseVersion")?.toString() ?: "8"
+  val release = releaseVersion.toInt()
   pluginManager.withPlugin("java") {
     configure<JavaPluginExtension> {
       toolchain {
