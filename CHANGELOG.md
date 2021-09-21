@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Version 0.14.1
+--------------
+
+_2021-09-21_
+
+* Update Kotlin to `1.5.31`
+* Update KotlinPoet to `1.10.1`
+
 Version 0.14.0
 --------------
 
