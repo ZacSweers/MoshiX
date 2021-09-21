@@ -24,6 +24,7 @@ import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.WildcardTypeName
 import com.squareup.kotlinpoet.tag
 import com.squareup.kotlinpoet.tags.TypeAliasTag
+import dev.zacsweers.moshix.ksp.shade.api.deepCopy
 import java.util.TreeSet
 
 /*
@@ -45,23 +46,30 @@ internal fun TypeName.unwrapTypeAliasReal(): TypeName {
   } ?: this
 }
 
-// TypeVariableName gets a special overload because these usually need to be kept in a type-safe
-// manner.
-internal fun TypeVariableName.unwrapTypeAlias(): TypeVariableName {
-  return TypeVariableName(
-    name = name,
-    bounds = bounds.map { it.unwrapTypeAlias() },
-    variance = variance
-  )
-    .copy(nullable = isNullable, annotations = annotations, tags = tags)
-}
-
 internal fun TypeName.unwrapTypeAlias(): TypeName {
   return when (this) {
     is ClassName -> unwrapTypeAliasReal()
-    is ParameterizedTypeName -> unwrapTypeAliasReal()
-    is TypeVariableName -> unwrapTypeAlias()
-    is WildcardTypeName -> unwrapTypeAliasReal()
+    is ParameterizedTypeName -> {
+      if (TypeAliasTag::class in tags) {
+        unwrapTypeAliasReal()
+      } else {
+        deepCopy(TypeName::unwrapTypeAlias)
+      }
+    }
+    is TypeVariableName -> {
+      if (TypeAliasTag::class in tags) {
+        unwrapTypeAliasReal()
+      } else {
+        deepCopy(transform = TypeName::unwrapTypeAlias)
+      }
+    }
+    is WildcardTypeName -> {
+      if (TypeAliasTag::class in tags) {
+        unwrapTypeAliasReal()
+      } else {
+        deepCopy(TypeName::unwrapTypeAlias)
+      }
+    }
     is LambdaTypeName -> unwrapTypeAliasReal()
     else -> throw UnsupportedOperationException("Type '${javaClass.simpleName}' is illegal. Only classes, parameterized types, wildcard types, or type variables are allowed.")
   }
