@@ -32,6 +32,10 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.ksp.addOriginatingKSFile
+import com.squareup.kotlinpoet.ksp.originatingKSFiles
+import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.writeTo
 import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
@@ -275,7 +279,7 @@ private class MoshiSealedSymbolProcessor(
     }
 
     val ksFile = preparedAdapter.spec.originatingKSFiles().single()
-    preparedAdapter.spec.writeTo(codeGenerator)
+    preparedAdapter.spec.writeTo(codeGenerator, aggregating = true)
     preparedAdapter.proguardConfig?.writeTo(codeGenerator, ksFile)
   }
 }

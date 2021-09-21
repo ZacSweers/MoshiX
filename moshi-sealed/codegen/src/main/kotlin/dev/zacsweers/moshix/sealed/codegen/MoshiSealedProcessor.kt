@@ -31,12 +31,11 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.joinToCode
-import com.squareup.kotlinpoet.metadata.ImmutableKmClass
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.squareup.kotlinpoet.metadata.isInternal
 import com.squareup.kotlinpoet.metadata.isObject
 import com.squareup.kotlinpoet.metadata.isSealed
-import com.squareup.kotlinpoet.metadata.toImmutableKmClass
+import com.squareup.kotlinpoet.metadata.toKmClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonReader
@@ -49,6 +48,7 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.codegen.MoshiSealedProcessor.Companion.OPTION_GENERATED
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
+import kotlinx.metadata.KmClass
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Filer
 import javax.annotation.processing.Messager
@@ -176,8 +176,8 @@ public class MoshiSealedProcessor : AbstractProcessor() {
           return@forEach
         }
         val typeLabel = generator.removePrefix("sealed:")
-        val kmClass = type.getAnnotation(Metadata::class.java).toImmutableKmClass()
-        if (!kmClass.isSealed) {
+        val kmClass = type.getAnnotation(Metadata::class.java).toKmClass()
+        if (!kmClass.flags.isSealed) {
           messager.printMessage(Diagnostic.Kind.ERROR, "Must be a sealed class!", type)
           return@forEach
         }
@@ -191,7 +191,7 @@ public class MoshiSealedProcessor : AbstractProcessor() {
   }
 
   @OptIn(DelicateKotlinPoetApi::class)
-  private fun prepareAdapter(element: TypeElement, typeLabel: String, kmClass: ImmutableKmClass): PreparedAdapter? {
+  private fun prepareAdapter(element: TypeElement, typeLabel: String, kmClass: KmClass): PreparedAdapter? {
     val sealedSubtypes = kmClass.sealedSubclasses
       .map {
         // Canonicalize
@@ -199,11 +199,11 @@ public class MoshiSealedProcessor : AbstractProcessor() {
       }
       .map { elements.getTypeElement(it) }
       .associateWithTo(LinkedHashMap()) {
-        it.getAnnotation(Metadata::class.java).toImmutableKmClass()
+        it.getAnnotation(Metadata::class.java).toKmClass()
       }
     val defaultCodeBlockBuilder = CodeBlock.builder()
     val adapterName = ClassName.bestGuess(generatedJsonAdapterName(element.asClassName().reflectionName())).simpleName
-    val visibilityModifier = if (element.toImmutableKmClass().flags.isInternal) KModifier.INTERNAL else KModifier.PUBLIC
+    val visibilityModifier = if (element.toKmClass().flags.isInternal) KModifier.INTERNAL else KModifier.PUBLIC
     val allocator = NameAllocator()
 
     val targetType = element.asClassName()

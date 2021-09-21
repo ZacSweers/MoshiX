@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
   kotlin("jvm")
   alias(libs.plugins.ksp)
   id("com.vanniktech.maven.publish")
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+  kotlinOptions {
+    freeCompilerArgs = freeCompilerArgs + "-Xopt-in=com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview"
+  }
 }
 
 dependencies {
@@ -30,7 +38,8 @@ dependencies {
 
   implementation(libs.autoCommon)
   implementation(libs.kotlinpoet)
-  implementation(libs.kotlinpoet.metadataSpecs)
+  implementation(libs.kotlinpoet.metadata)
+  implementation(libs.kotlinpoet.ksp)
   implementation(libs.moshi.adapters)
   implementation(libs.moshi)
   implementation(project(":moshi-sealed:runtime"))
