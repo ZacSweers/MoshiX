@@ -28,20 +28,21 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.Types
 import com.squareup.moshi.adapter
-import org.assertj.core.api.Assertions
-import org.junit.Assert.fail
-import org.junit.Ignore
-import org.junit.Test
 import java.io.ByteArrayOutputStream
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.WildcardType
 import java.util.Locale
 import java.util.SimpleTimeZone
 import kotlin.annotation.AnnotationRetention.RUNTIME
+import org.assertj.core.api.Assertions
+import org.junit.Assert.fail
+import org.junit.Ignore
+import org.junit.Test
 
 @Suppress("UNUSED", "UNUSED_PARAMETER")
 class KotlinJsonAdapterTest {
-  @Test fun constructorParameters() {
+  @Test
+  fun constructorParameters() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<ConstructorParameters>()
 
@@ -55,7 +56,8 @@ class KotlinJsonAdapterTest {
 
   class ConstructorParameters(var a: Int, var b: Int)
 
-  @Test fun properties() {
+  @Test
+  fun properties() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<Properties>()
 
@@ -74,7 +76,8 @@ class KotlinJsonAdapterTest {
     var b: Int = -1
   }
 
-  @Test fun constructorParametersAndProperties() {
+  @Test
+  fun constructorParametersAndProperties() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<ConstructorParametersAndProperties>()
 
@@ -91,7 +94,8 @@ class KotlinJsonAdapterTest {
     var b: Int = -1
   }
 
-  @Test fun immutableConstructorParameters() {
+  @Test
+  fun immutableConstructorParameters() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<ImmutableConstructorParameters>()
 
@@ -105,7 +109,8 @@ class KotlinJsonAdapterTest {
 
   class ImmutableConstructorParameters(val a: Int, val b: Int)
 
-  @Test fun immutableProperties() {
+  @Test
+  fun immutableProperties() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<ImmutableProperties>()
 
@@ -122,7 +127,8 @@ class KotlinJsonAdapterTest {
     val b = b
   }
 
-  @Test fun constructorDefaults() {
+  @Test
+  fun constructorDefaults() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<ConstructorDefaultValues>()
 
@@ -136,7 +142,8 @@ class KotlinJsonAdapterTest {
 
   class ConstructorDefaultValues(var a: Int = -1, var b: Int = -2)
 
-  @Test fun duplicatedValueParameter() {
+  @Test
+  fun duplicatedValueParameter() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<DuplicateValueParameter>()
 
@@ -150,7 +157,8 @@ class KotlinJsonAdapterTest {
 
   class DuplicateValueParameter(var a: Int = -1, var b: Int = -2)
 
-  @Test fun duplicatedValueProperty() {
+  @Test
+  fun duplicatedValueProperty() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<DuplicateValueProperty>()
 
@@ -167,7 +175,8 @@ class KotlinJsonAdapterTest {
     var b: Int = -2
   }
 
-  @Test fun explicitNull() {
+  @Test
+  fun explicitNull() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<ExplicitNull>()
 
@@ -182,7 +191,8 @@ class KotlinJsonAdapterTest {
 
   class ExplicitNull(var a: Int?, var b: Int?)
 
-  @Test fun absentNull() {
+  @Test
+  fun absentNull() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<AbsentNull>()
 
@@ -197,7 +207,8 @@ class KotlinJsonAdapterTest {
 
   class AbsentNull(var a: Int?, var b: Int?)
 
-  @Test fun repeatedValue() {
+  @Test
+  fun repeatedValue() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<RepeatedValue>()
 
@@ -211,11 +222,10 @@ class KotlinJsonAdapterTest {
 
   class RepeatedValue(var a: Int, var b: Int?)
 
-  @Test fun constructorParameterWithQualifier() {
-    val moshi = Moshi.Builder()
-      .add(MetadataKotlinJsonAdapterFactory())
-      .add(UppercaseJsonAdapter())
-      .build()
+  @Test
+  fun constructorParameterWithQualifier() {
+    val moshi =
+        Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).add(UppercaseJsonAdapter()).build()
     val jsonAdapter = moshi.adapter<ConstructorParameterWithQualifier>()
 
     val encoded = ConstructorParameterWithQualifier("Android", "Banana")
@@ -228,11 +238,10 @@ class KotlinJsonAdapterTest {
 
   class ConstructorParameterWithQualifier(@Uppercase var a: String, var b: String)
 
-  @Test fun propertyWithQualifier() {
-    val moshi = Moshi.Builder()
-      .add(MetadataKotlinJsonAdapterFactory())
-      .add(UppercaseJsonAdapter())
-      .build()
+  @Test
+  fun propertyWithQualifier() {
+    val moshi =
+        Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).add(UppercaseJsonAdapter()).build()
     val jsonAdapter = moshi.adapter<PropertyWithQualifier>()
 
     val encoded = PropertyWithQualifier()
@@ -250,7 +259,8 @@ class KotlinJsonAdapterTest {
     var b: String = ""
   }
 
-  @Test fun constructorParameterWithJsonName() {
+  @Test
+  fun constructorParameterWithJsonName() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<ConstructorParameterWithJsonName>()
 
@@ -264,7 +274,8 @@ class KotlinJsonAdapterTest {
 
   class ConstructorParameterWithJsonName(@Json(name = "key a") var a: Int, var b: Int)
 
-  @Test fun propertyWithJsonName() {
+  @Test
+  fun propertyWithJsonName() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<PropertyWithJsonName>()
 
@@ -283,7 +294,8 @@ class KotlinJsonAdapterTest {
     var b: Int = -1
   }
 
-  @Test fun transientConstructorParameter() {
+  @Test
+  fun transientConstructorParameter() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<TransientConstructorParameter>()
 
@@ -297,7 +309,8 @@ class KotlinJsonAdapterTest {
 
   class TransientConstructorParameter(@Transient var a: Int = -1, var b: Int = -1)
 
-  @Test fun multipleTransientConstructorParameters() {
+  @Test
+  fun multipleTransientConstructorParameters() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter(MultipleTransientConstructorParameters::class.java)
 
@@ -310,21 +323,30 @@ class KotlinJsonAdapterTest {
     assertThat(decoded.c).isEqualTo(-1)
   }
 
-  class MultipleTransientConstructorParameters(@Transient var a: Int = -1, var b: Int = -1, @Transient var c: Int = -1)
+  class MultipleTransientConstructorParameters(
+      @Transient var a: Int = -1,
+      var b: Int = -1,
+      @Transient var c: Int = -1
+  )
 
-  @Test fun requiredTransientConstructorParameterFails() {
+  @Test
+  fun requiredTransientConstructorParameterFails() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     try {
       moshi.adapter<RequiredTransientConstructorParameter>()
       fail()
     } catch (expected: IllegalArgumentException) {
-      assertThat(expected).hasMessageThat().contains("No default value for transient constructor parameter 'a' on type '${RequiredTransientConstructorParameter::class.qualifiedName}'")
+      assertThat(expected)
+          .hasMessageThat()
+          .contains(
+              "No default value for transient constructor parameter 'a' on type '${RequiredTransientConstructorParameter::class.qualifiedName}'")
     }
   }
 
   class RequiredTransientConstructorParameter(@Transient var a: Int)
 
-  @Test fun transientProperty() {
+  @Test
+  fun transientProperty() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<TransientProperty>()
 
@@ -352,16 +374,18 @@ class KotlinJsonAdapterTest {
     }
   }
 
-  @Test fun constructorParametersAndPropertiesWithSameNamesMustHaveSameTypes() {
+  @Test
+  fun constructorParametersAndPropertiesWithSameNamesMustHaveSameTypes() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     try {
       moshi.adapter<ConstructorParameterWithSameNameAsPropertyButDifferentType>()
       fail()
     } catch (expected: IllegalArgumentException) {
-      assertThat(expected).hasMessageThat().contains(
-        "'a' has a constructor parameter of type " +
-          "kotlin.Int but a property of type kotlin.String."
-      )
+      assertThat(expected)
+          .hasMessageThat()
+          .contains(
+              "'a' has a constructor parameter of type " +
+                  "kotlin.Int but a property of type kotlin.String.")
     }
   }
 
@@ -369,7 +393,8 @@ class KotlinJsonAdapterTest {
     var a = "boo"
   }
 
-  @Test fun supertypeConstructorParameters() {
+  @Test
+  fun supertypeConstructorParameters() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<SubtypeConstructorParameters>()
 
@@ -385,7 +410,8 @@ class KotlinJsonAdapterTest {
 
   class SubtypeConstructorParameters(a: Int, var b: Int) : SupertypeConstructorParameters(a)
 
-  @Test fun supertypeProperties() {
+  @Test
+  fun supertypeProperties() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<SubtypeProperties>()
 
@@ -407,7 +433,8 @@ class KotlinJsonAdapterTest {
     var b: Int = -1
   }
 
-  @Test fun extendsPlatformClassWithPrivateField() {
+  @Test
+  fun extendsPlatformClassWithPrivateField() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<ExtendsPlatformClassWithPrivateField>()
 
@@ -441,19 +468,22 @@ class KotlinJsonAdapterTest {
     fun count() = count
   }
 
-  @Test fun platformTypeThrows() {
+  @Test
+  fun platformTypeThrows() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     try {
       moshi.adapter<Triple<*, *, *>>()
       fail()
     } catch (e: IllegalArgumentException) {
-      assertThat(e).hasMessageThat().contains(
-        "Platform class kotlin.Triple in kotlin.Triple<?, ?, ?> requires explicit JsonAdapter to be registered"
-      )
+      assertThat(e)
+          .hasMessageThat()
+          .contains(
+              "Platform class kotlin.Triple in kotlin.Triple<?, ?, ?> requires explicit JsonAdapter to be registered")
     }
   }
 
-  @Test fun privateConstructorParameters() {
+  @Test
+  fun privateConstructorParameters() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<PrivateConstructorParameters>()
 
@@ -470,7 +500,8 @@ class KotlinJsonAdapterTest {
     fun b() = b
   }
 
-  @Test fun privateConstructor() {
+  @Test
+  fun privateConstructor() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<PrivateConstructor>()
 
@@ -490,7 +521,8 @@ class KotlinJsonAdapterTest {
     }
   }
 
-  @Test fun privateProperties() {
+  @Test
+  fun privateProperties() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<PrivateProperties>()
 
@@ -521,7 +553,8 @@ class KotlinJsonAdapterTest {
     }
   }
 
-  @Test fun unsettablePropertyIgnored() {
+  @Test
+  fun unsettablePropertyIgnored() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<UnsettableProperty>()
 
@@ -539,7 +572,8 @@ class KotlinJsonAdapterTest {
     var b: Int = -1
   }
 
-  @Test fun getterOnlyNoBackingField() {
+  @Test
+  fun getterOnlyNoBackingField() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<GetterOnly>()
 
@@ -557,7 +591,8 @@ class KotlinJsonAdapterTest {
       get() = a + b
   }
 
-  @Test fun getterAndSetterNoBackingField() {
+  @Test
+  fun getterAndSetterNoBackingField() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<GetterAndSetter>()
 
@@ -585,21 +620,24 @@ class KotlinJsonAdapterTest {
       }
   }
 
-  @Test fun nonPropertyConstructorParameter() {
+  @Test
+  fun nonPropertyConstructorParameter() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     try {
       moshi.adapter<NonPropertyConstructorParameter>()
       fail()
     } catch (expected: IllegalArgumentException) {
-      assertThat(expected).hasMessageThat().contains(
-        "No property for required constructor parameter 'a' on type '${NonPropertyConstructorParameter::class.qualifiedName}'"
-      )
+      assertThat(expected)
+          .hasMessageThat()
+          .contains(
+              "No property for required constructor parameter 'a' on type '${NonPropertyConstructorParameter::class.qualifiedName}'")
     }
   }
 
   class NonPropertyConstructorParameter(a: Int, val b: Int)
 
-  @Test fun kotlinEnumsAreNotCovered() {
+  @Test
+  fun kotlinEnumsAreNotCovered() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val adapter = moshi.adapter<UsingEnum>()
 
@@ -609,78 +647,89 @@ class KotlinJsonAdapterTest {
   data class UsingEnum(val e: KotlinEnum)
 
   enum class KotlinEnum {
-    A, B
+    A,
+    B
   }
 
-  @Test fun interfacesNotSupported() {
+  @Test
+  fun interfacesNotSupported() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     try {
       moshi.adapter<Interface>()
       fail()
     } catch (e: IllegalArgumentException) {
-      assertThat(e).hasMessageThat().contains(
-        "No JsonAdapter for interface " +
-          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$Interface (with no annotations)"
-      )
+      assertThat(e)
+          .hasMessageThat()
+          .contains(
+              "No JsonAdapter for interface " +
+                  "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$Interface (with no annotations)")
     }
   }
 
   interface Interface
 
-  @Test fun abstractClassesNotSupported() {
+  @Test
+  fun abstractClassesNotSupported() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     try {
       moshi.adapter<AbstractClass>()
       fail()
     } catch (e: IllegalArgumentException) {
-      assertThat(e).hasMessageThat().contains(
-        "Cannot serialize abstract class " +
-          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$AbstractClass"
-      )
+      assertThat(e)
+          .hasMessageThat()
+          .contains(
+              "Cannot serialize abstract class " +
+                  "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$AbstractClass")
     }
   }
 
   abstract class AbstractClass(val a: Int)
 
-  @Test fun innerClassesNotSupported() {
+  @Test
+  fun innerClassesNotSupported() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     try {
       moshi.adapter<InnerClass>()
       fail()
     } catch (e: IllegalArgumentException) {
-      assertThat(e).hasMessageThat().contains(
-        "Cannot serialize inner class " +
-          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$InnerClass"
-      )
+      assertThat(e)
+          .hasMessageThat()
+          .contains(
+              "Cannot serialize inner class " +
+                  "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$InnerClass")
     }
   }
 
   inner class InnerClass(val a: Int)
 
-  @Test fun localClassesNotSupported() {
+  @Test
+  fun localClassesNotSupported() {
     class LocalClass(val a: Int)
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     try {
       moshi.adapter<LocalClass>()
       fail()
     } catch (e: IllegalArgumentException) {
-      assertThat(e).hasMessageThat().contains(
-        "Cannot serialize local class or object expression " +
-          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$localClassesNotSupported\$LocalClass"
-      )
+      assertThat(e)
+          .hasMessageThat()
+          .contains(
+              "Cannot serialize local class or object expression " +
+                  "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$localClassesNotSupported\$LocalClass")
     }
   }
 
-  @Test fun objectDeclarationsNotSupported() {
+  @Test
+  fun objectDeclarationsNotSupported() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     try {
       moshi.adapter<ObjectDeclaration>()
       fail()
     } catch (e: IllegalArgumentException) {
-      assertThat(e).hasMessageThat().contains(
-        "Cannot serialize object declaration " +
-          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$ObjectDeclaration"
-      )
+      assertThat(e)
+          .hasMessageThat()
+          .contains(
+              "Cannot serialize object declaration " +
+                  "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$ObjectDeclaration")
     }
   }
 
@@ -688,10 +737,12 @@ class KotlinJsonAdapterTest {
     var a = 5
   }
 
-  @Test fun anonymousClassesNotSupported() {
-    val expression = object : Any() {
-      var a = 5
-    }
+  @Test
+  fun anonymousClassesNotSupported() {
+    val expression =
+        object : Any() {
+          var a = 5
+        }
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     try {
       moshi.adapter(expression.javaClass)
@@ -699,34 +750,62 @@ class KotlinJsonAdapterTest {
     } catch (e: IllegalArgumentException) {
       // anonymous/local classes are slightly different in bytecode across JVM versions
       val javaVersion = System.getProperty("java.version")
-      val type = if (javaVersion.startsWith("1.8")) {
-        "local class or object expression"
-      } else {
-        "anonymous class"
-      }
-      assertThat(e).hasMessageThat().contains(
-        "Cannot serialize $type " +
-          "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$anonymousClassesNotSupported" +
-          "\$expression$1"
-      )
+      val type =
+          if (javaVersion.startsWith("1.8")) {
+            "local class or object expression"
+          } else {
+            "anonymous class"
+          }
+      assertThat(e)
+          .hasMessageThat()
+          .contains(
+              "Cannot serialize $type " +
+                  "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$anonymousClassesNotSupported" +
+                  "\$expression$1")
     }
   }
 
-  @Test fun manyProperties32() {
+  @Test
+  fun manyProperties32() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<ManyProperties32>()
 
-    val encoded = ManyProperties32(
-      101, 102, 103, 104, 105,
-      106, 107, 108, 109, 110,
-      111, 112, 113, 114, 115,
-      116, 117, 118, 119, 120,
-      121, 122, 123, 124, 125,
-      126, 127, 128, 129, 130,
-      131, 132
-    )
-    val json = (
-      """
+    val encoded =
+        ManyProperties32(
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132)
+    val json =
+        ("""
         |{
         |"v01":101,"v02":102,"v03":103,"v04":104,"v05":105,
         |"v06":106,"v07":107,"v08":108,"v09":109,"v10":110,
@@ -736,8 +815,9 @@ class KotlinJsonAdapterTest {
         |"v26":126,"v27":127,"v28":128,"v29":129,"v30":130,
         |"v31":131,"v32":132
         |}
-        |"""
-      ).trimMargin().replace("\n", "")
+        |""")
+            .trimMargin()
+            .replace("\n", "")
 
     assertThat(jsonAdapter.toJson(encoded)).isEqualTo(json)
 
@@ -747,55 +827,82 @@ class KotlinJsonAdapterTest {
   }
 
   class ManyProperties32(
-    var v01: Int,
-    var v02: Int,
-    var v03: Int,
-    var v04: Int,
-    var v05: Int,
-    var v06: Int,
-    var v07: Int,
-    var v08: Int,
-    var v09: Int,
-    var v10: Int,
-    var v11: Int,
-    var v12: Int,
-    var v13: Int,
-    var v14: Int,
-    var v15: Int,
-    var v16: Int,
-    var v17: Int,
-    var v18: Int,
-    var v19: Int,
-    var v20: Int,
-    var v21: Int,
-    var v22: Int,
-    var v23: Int,
-    var v24: Int,
-    var v25: Int,
-    var v26: Int,
-    var v27: Int,
-    var v28: Int,
-    var v29: Int,
-    var v30: Int,
-    var v31: Int,
-    var v32: Int
+      var v01: Int,
+      var v02: Int,
+      var v03: Int,
+      var v04: Int,
+      var v05: Int,
+      var v06: Int,
+      var v07: Int,
+      var v08: Int,
+      var v09: Int,
+      var v10: Int,
+      var v11: Int,
+      var v12: Int,
+      var v13: Int,
+      var v14: Int,
+      var v15: Int,
+      var v16: Int,
+      var v17: Int,
+      var v18: Int,
+      var v19: Int,
+      var v20: Int,
+      var v21: Int,
+      var v22: Int,
+      var v23: Int,
+      var v24: Int,
+      var v25: Int,
+      var v26: Int,
+      var v27: Int,
+      var v28: Int,
+      var v29: Int,
+      var v30: Int,
+      var v31: Int,
+      var v32: Int
   )
 
-  @Test fun manyProperties33() {
+  @Test
+  fun manyProperties33() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val jsonAdapter = moshi.adapter<ManyProperties33>()
 
-    val encoded = ManyProperties33(
-      101, 102, 103, 104, 105,
-      106, 107, 108, 109, 110,
-      111, 112, 113, 114, 115,
-      116, 117, 118, 119, 120,
-      121, 122, 123, 124, 125,
-      126, 127, 128, 129, 130,
-      131, 132, 133
-    )
-    val json = (
-      """
+    val encoded =
+        ManyProperties33(
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133)
+    val json =
+        ("""
         |{
         |"v01":101,"v02":102,"v03":103,"v04":104,"v05":105,
         |"v06":106,"v07":107,"v08":108,"v09":109,"v10":110,
@@ -805,8 +912,9 @@ class KotlinJsonAdapterTest {
         |"v26":126,"v27":127,"v28":128,"v29":129,"v30":130,
         |"v31":131,"v32":132,"v33":133
         |}
-        |"""
-      ).trimMargin().replace("\n", "")
+        |""")
+            .trimMargin()
+            .replace("\n", "")
 
     assertThat(jsonAdapter.toJson(encoded)).isEqualTo(json)
 
@@ -817,74 +925,70 @@ class KotlinJsonAdapterTest {
   }
 
   class ManyProperties33(
-    var v01: Int,
-    var v02: Int,
-    var v03: Int,
-    var v04: Int,
-    var v05: Int,
-    var v06: Int,
-    var v07: Int,
-    var v08: Int,
-    var v09: Int,
-    var v10: Int,
-    var v11: Int,
-    var v12: Int,
-    var v13: Int,
-    var v14: Int,
-    var v15: Int,
-    var v16: Int,
-    var v17: Int,
-    var v18: Int,
-    var v19: Int,
-    var v20: Int,
-    var v21: Int,
-    var v22: Int,
-    var v23: Int,
-    var v24: Int,
-    var v25: Int,
-    var v26: Int,
-    var v27: Int,
-    var v28: Int,
-    var v29: Int,
-    var v30: Int,
-    var v31: Int,
-    var v32: Int,
-    var v33: Int
+      var v01: Int,
+      var v02: Int,
+      var v03: Int,
+      var v04: Int,
+      var v05: Int,
+      var v06: Int,
+      var v07: Int,
+      var v08: Int,
+      var v09: Int,
+      var v10: Int,
+      var v11: Int,
+      var v12: Int,
+      var v13: Int,
+      var v14: Int,
+      var v15: Int,
+      var v16: Int,
+      var v17: Int,
+      var v18: Int,
+      var v19: Int,
+      var v20: Int,
+      var v21: Int,
+      var v22: Int,
+      var v23: Int,
+      var v24: Int,
+      var v25: Int,
+      var v26: Int,
+      var v27: Int,
+      var v28: Int,
+      var v29: Int,
+      var v30: Int,
+      var v31: Int,
+      var v32: Int,
+      var v33: Int
   )
 
   data class Box<out T>(val data: T)
 
-  @Test fun genericTypes() {
+  @Test
+  fun genericTypes() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
-    val stringBoxAdapter = moshi.adapter<Box<String>>(
-      Types.newParameterizedTypeWithOwner(
-        KotlinJsonAdapterTest::class.java,
-        Box::class.java,
-        String::class.java
-      )
-    )
+    val stringBoxAdapter =
+        moshi.adapter<Box<String>>(
+            Types.newParameterizedTypeWithOwner(
+                KotlinJsonAdapterTest::class.java, Box::class.java, String::class.java))
     assertThat(stringBoxAdapter.fromJson("""{"data":"hello"}""")).isEqualTo(Box("hello"))
     assertThat(stringBoxAdapter.toJson(Box("hello"))).isEqualTo("""{"data":"hello"}""")
   }
 
   data class NestedGenerics<R, C, out V>(val value: Map<R, Map<C, List<V>>>)
 
-  @Test fun nestedGenericTypes() {
+  @Test
+  fun nestedGenericTypes() {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
-    val type = Types.newParameterizedTypeWithOwner(
-      KotlinJsonAdapterTest::class.java,
-      NestedGenerics::class.java,
-      String::class.java,
-      Int::class.javaObjectType,
-      Types.newParameterizedTypeWithOwner(
-        KotlinJsonAdapterTest::class.java,
-        Box::class.java,
-        String::class.java
-      )
-    )
+    val type =
+        Types.newParameterizedTypeWithOwner(
+            KotlinJsonAdapterTest::class.java,
+            NestedGenerics::class.java,
+            String::class.java,
+            Int::class.javaObjectType,
+            Types.newParameterizedTypeWithOwner(
+                KotlinJsonAdapterTest::class.java, Box::class.java, String::class.java))
     val adapter = moshi.adapter<NestedGenerics<String, Int, Box<String>>>(type).indent("  ")
     val json =
-      """
+        """
       |{
       |  "value": {
       |    "hello": {
@@ -905,31 +1009,25 @@ class KotlinJsonAdapterTest {
     assertThat(adapter.toJson(value)).isEqualTo(json)
   }
 
-  @Test fun mixingReflectionAndCodegen() {
-    val moshi = Moshi.Builder()
-      .add(MetadataKotlinJsonAdapterFactory())
-      .build()
+  @Test
+  fun mixingReflectionAndCodegen() {
+    val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val generatedAdapter = moshi.adapter<UsesGeneratedAdapter>()
     val reflectionAdapter = moshi.adapter<UsesReflectionAdapter>()
 
     assertThat(generatedAdapter.toString())
-      .isEqualTo("GeneratedJsonAdapter(KotlinJsonAdapterTest.UsesGeneratedAdapter).nullSafe()")
+        .isEqualTo("GeneratedJsonAdapter(KotlinJsonAdapterTest.UsesGeneratedAdapter).nullSafe()")
     assertThat(reflectionAdapter.toString())
-      .isEqualTo(
-        "KotlinJsonAdapter(dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest" +
-          ".UsesReflectionAdapter).nullSafe()"
-      )
+        .isEqualTo(
+            "KotlinJsonAdapter(dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest" +
+                ".UsesReflectionAdapter).nullSafe()")
   }
 
-  @JsonClass(generateAdapter = true)
-  class UsesGeneratedAdapter(var a: Int, var b: Int)
+  @JsonClass(generateAdapter = true) class UsesGeneratedAdapter(var a: Int, var b: Int)
 
-  @JsonClass(generateAdapter = false)
-  class UsesReflectionAdapter(var a: Int, var b: Int)
+  @JsonClass(generateAdapter = false) class UsesReflectionAdapter(var a: Int, var b: Int)
 
-  @Retention(RUNTIME)
-  @JsonQualifier
-  annotation class Uppercase
+  @Retention(RUNTIME) @JsonQualifier annotation class Uppercase
 
   class UppercaseJsonAdapter {
     @ToJson
@@ -945,48 +1043,50 @@ class KotlinJsonAdapterTest {
 
   data class HasNullableBoolean(val boolean: Boolean?)
 
-  @Test fun nullablePrimitivesUseBoxedPrimitiveAdapters() {
-    val moshi = Moshi.Builder()
-      .add(
-        JsonAdapter.Factory { type, _, _ ->
-          if (Boolean::class.javaObjectType == type) {
-            return@Factory object : JsonAdapter<Boolean?>() {
-              override fun fromJson(reader: JsonReader): Boolean? {
-                if (reader.peek() != JsonReader.Token.BOOLEAN) {
-                  reader.skipValue()
-                  return null
-                }
-                return reader.nextBoolean()
-              }
+  @Test
+  fun nullablePrimitivesUseBoxedPrimitiveAdapters() {
+    val moshi =
+        Moshi.Builder()
+            .add(
+                JsonAdapter.Factory { type, _, _ ->
+                  if (Boolean::class.javaObjectType == type) {
+                    return@Factory object : JsonAdapter<Boolean?>() {
+                      override fun fromJson(reader: JsonReader): Boolean? {
+                        if (reader.peek() != JsonReader.Token.BOOLEAN) {
+                          reader.skipValue()
+                          return null
+                        }
+                        return reader.nextBoolean()
+                      }
 
-              override fun toJson(writer: JsonWriter, value: Boolean?) {
-                writer.value(value)
-              }
-            }
-          }
-          null
-        }
-      )
-      .add(MetadataKotlinJsonAdapterFactory())
-      .build()
+                      override fun toJson(writer: JsonWriter, value: Boolean?) {
+                        writer.value(value)
+                      }
+                    }
+                  }
+                  null
+                })
+            .add(MetadataKotlinJsonAdapterFactory())
+            .build()
     val adapter = moshi.adapter<HasNullableBoolean>().serializeNulls()
     assertThat(adapter.fromJson("""{"boolean":"not a boolean"}"""))
-      .isEqualTo(HasNullableBoolean(null))
+        .isEqualTo(HasNullableBoolean(null))
     assertThat(adapter.toJson(HasNullableBoolean(null))).isEqualTo("""{"boolean":null}""")
   }
 
-  @Test fun adaptersAreNullSafe() {
-    val moshi = Moshi.Builder()
-      .add(MetadataKotlinJsonAdapterFactory())
-      .build()
+  @Test
+  fun adaptersAreNullSafe() {
+    val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
 
-    // TODO in CR: We had to mark this as nullable, vs before the jsonadapter factory would always run
+    // TODO in CR: We had to mark this as nullable, vs before the jsonadapter factory would always
+    // run
     val adapter = moshi.adapter<HasNullableBoolean?>()
     assertThat(adapter.fromJson("null")).isNull()
     assertThat(adapter.toJson(null)).isEqualTo("null")
   }
 
-  @Test fun kotlinClassesWithoutAdapterAreRefused() {
+  @Test
+  fun kotlinClassesWithoutAdapterAreRefused() {
     val moshi = Moshi.Builder().build()
     try {
       moshi.adapter<PlainKotlinClass>()
@@ -998,148 +1098,147 @@ class KotlinJsonAdapterTest {
 
   class PlainKotlinClass
 
-  @Test fun mapOfStringToStandardReflectionWildcards() {
+  @Test
+  fun mapOfStringToStandardReflectionWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToStandardReflection::class.java,
-      """{"map":{"key":"value"}}""",
-      MapOfStringToStandardReflection(mapOf("key" to "value"))
-    )
+        MapOfStringToStandardReflection::class.java,
+        """{"map":{"key":"value"}}""",
+        MapOfStringToStandardReflection(mapOf("key" to "value")))
   }
 
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToStandardReflection(val map: Map<String, String> = mapOf())
 
-  @Test fun mapOfStringToStandardCodegenWildcards() {
+  @Test
+  fun mapOfStringToStandardCodegenWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToStandardCodegen::class.java,
-      """{"map":{"key":"value"}}""",
-      MapOfStringToStandardCodegen(mapOf("key" to "value"))
-    )
+        MapOfStringToStandardCodegen::class.java,
+        """{"map":{"key":"value"}}""",
+        MapOfStringToStandardCodegen(mapOf("key" to "value")))
   }
 
   @JsonClass(generateAdapter = true)
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToStandardCodegen(val map: Map<String, String> = mapOf())
 
-  @Test fun mapOfStringToEnumReflectionWildcards() {
+  @Test
+  fun mapOfStringToEnumReflectionWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToEnumReflection::class.java,
-      """{"map":{"key":"A"}}""",
-      MapOfStringToEnumReflection(mapOf("key" to KotlinEnum.A))
-    )
+        MapOfStringToEnumReflection::class.java,
+        """{"map":{"key":"A"}}""",
+        MapOfStringToEnumReflection(mapOf("key" to KotlinEnum.A)))
   }
 
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToEnumReflection(val map: Map<String, KotlinEnum> = mapOf())
 
-  @Test fun mapOfStringToEnumCodegenWildcards() {
+  @Test
+  fun mapOfStringToEnumCodegenWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToEnumCodegen::class.java,
-      """{"map":{"key":"A"}}""",
-      MapOfStringToEnumCodegen(mapOf("key" to KotlinEnum.A))
-    )
+        MapOfStringToEnumCodegen::class.java,
+        """{"map":{"key":"A"}}""",
+        MapOfStringToEnumCodegen(mapOf("key" to KotlinEnum.A)))
   }
 
   @JsonClass(generateAdapter = true)
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToEnumCodegen(val map: Map<String, KotlinEnum> = mapOf())
 
-  @Test fun mapOfStringToCollectionReflectionWildcards() {
+  @Test
+  fun mapOfStringToCollectionReflectionWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToCollectionReflection::class.java,
-      """{"map":{"key":[]}}""",
-      MapOfStringToCollectionReflection(mapOf("key" to listOf()))
-    )
+        MapOfStringToCollectionReflection::class.java,
+        """{"map":{"key":[]}}""",
+        MapOfStringToCollectionReflection(mapOf("key" to listOf())))
   }
 
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToCollectionReflection(val map: Map<String, List<Int>> = mapOf())
 
-  @Test fun mapOfStringToCollectionCodegenWildcards() {
+  @Test
+  fun mapOfStringToCollectionCodegenWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToCollectionCodegen::class.java,
-      """{"map":{"key":[]}}""",
-      MapOfStringToCollectionCodegen(mapOf("key" to listOf()))
-    )
+        MapOfStringToCollectionCodegen::class.java,
+        """{"map":{"key":[]}}""",
+        MapOfStringToCollectionCodegen(mapOf("key" to listOf())))
   }
 
   @JsonClass(generateAdapter = true)
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToCollectionCodegen(val map: Map<String, List<Int>> = mapOf())
 
-  @Test fun mapOfStringToMapReflectionWildcards() {
+  @Test
+  fun mapOfStringToMapReflectionWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToMapReflection::class.java,
-      """{"map":{"key":{}}}""",
-      MapOfStringToMapReflection(mapOf("key" to mapOf()))
-    )
+        MapOfStringToMapReflection::class.java,
+        """{"map":{"key":{}}}""",
+        MapOfStringToMapReflection(mapOf("key" to mapOf())))
   }
 
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToMapReflection(val map: Map<String, Map<String, Int>> = mapOf())
 
-  @Test fun mapOfStringToMapCodegenWildcards() {
+  @Test
+  fun mapOfStringToMapCodegenWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToMapCodegen::class.java,
-      """{"map":{"key":{}}}""",
-      MapOfStringToMapCodegen(mapOf("key" to mapOf()))
-    )
+        MapOfStringToMapCodegen::class.java,
+        """{"map":{"key":{}}}""",
+        MapOfStringToMapCodegen(mapOf("key" to mapOf())))
   }
 
   @JsonClass(generateAdapter = true)
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToMapCodegen(val map: Map<String, Map<String, Int>> = mapOf())
 
-  @Test fun mapOfStringToArrayReflectionWildcards() {
+  @Test
+  fun mapOfStringToArrayReflectionWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToArrayReflection::class.java,
-      """{"map":{"key":[]}}""",
-      MapOfStringToArrayReflection(mapOf("key" to arrayOf()))
-    )
+        MapOfStringToArrayReflection::class.java,
+        """{"map":{"key":[]}}""",
+        MapOfStringToArrayReflection(mapOf("key" to arrayOf())))
   }
 
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToArrayReflection(val map: Map<String, Array<Int>> = mapOf())
 
-  @Test fun mapOfStringToArrayCodegenWildcards() {
+  @Test
+  fun mapOfStringToArrayCodegenWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToArrayCodegen::class.java,
-      """{"map":{"key":[]}}""",
-      MapOfStringToArrayCodegen(mapOf("key" to arrayOf()))
-    )
+        MapOfStringToArrayCodegen::class.java,
+        """{"map":{"key":[]}}""",
+        MapOfStringToArrayCodegen(mapOf("key" to arrayOf())))
   }
 
   @JsonClass(generateAdapter = true)
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToArrayCodegen(val map: Map<String, Array<Int>> = mapOf())
 
-  @Test fun mapOfStringToClassReflectionWildcards() {
+  @Test
+  fun mapOfStringToClassReflectionWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToClassReflection::class.java,
-      """{"map":{"key":{"a":19,"b":42}}}""",
-      MapOfStringToClassReflection(mapOf("key" to ConstructorParameters(19, 42)))
-    )
+        MapOfStringToClassReflection::class.java,
+        """{"map":{"key":{"a":19,"b":42}}}""",
+        MapOfStringToClassReflection(mapOf("key" to ConstructorParameters(19, 42))))
   }
 
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToClassReflection(val map: Map<String, ConstructorParameters> = mapOf())
 
-  @Test fun mapOfStringToClassCodegenWildcards() {
+  @Test
+  fun mapOfStringToClassCodegenWildcards() {
     mapWildcardsParameterizedTest(
-      MapOfStringToClassCodegen::class.java,
-      """{"map":{"key":{"a":19,"b":42}}}""",
-      MapOfStringToClassCodegen(mapOf("key" to ConstructorParameters(19, 42)))
-    )
+        MapOfStringToClassCodegen::class.java,
+        """{"map":{"key":{"a":19,"b":42}}}""",
+        MapOfStringToClassCodegen(mapOf("key" to ConstructorParameters(19, 42))))
   }
 
   @JsonClass(generateAdapter = true)
   @JvmSuppressWildcards(suppress = false)
   data class MapOfStringToClassCodegen(val map: Map<String, ConstructorParameters> = mapOf())
 
-  @Test fun sealedClassesAreRejected() {
-    val moshi = Moshi.Builder()
-      .add(MetadataKotlinJsonAdapterFactory())
-      .build()
+  @Test
+  fun sealedClassesAreRejected() {
+    val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
 
     try {
       moshi.adapter<SealedClass>()

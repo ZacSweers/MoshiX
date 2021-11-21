@@ -18,7 +18,8 @@ pluginManagement {
   repositories {
     mavenCentral()
     google()
-    // Kotlin bootstrap repository, useful for testing against Kotlin dev builds. Usually only tested on CI shadow jobs
+    // Kotlin bootstrap repository, useful for testing against Kotlin dev builds. Usually only
+    // tested on CI shadow jobs
     // https://kotlinlang.slack.com/archives/C0KLZSCHF/p1616514468003200?thread_ts=1616509748.001400&cid=C0KLZSCHF
     maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap") {
       name = "Kotlin-Bootstrap"
@@ -32,18 +33,31 @@ pluginManagement {
 }
 
 rootProject.name = "moshix-root"
+
 include(":moshi-adapters")
+
 include(":moshi-ksp:extra-moshi-test-module")
+
 include(":moshi-ksp:moshi-ksp")
+
 include(":moshi-ksp:tests")
+
 include(":moshi-metadata-reflect")
+
 include(":moshi-records-reflect")
+
 include(":moshi-sealed:codegen")
+
 include(":moshi-sealed:java-sealed-reflect")
+
 include(":moshi-sealed:metadata-reflect")
+
 include(":moshi-sealed:reflect")
+
 include(":moshi-sealed:runtime")
+
 include(":moshi-sealed:sample")
+
 include(":moshi-sealed:sealed-interfaces-samples:java")
 
 enableFeaturePreview("VERSION_CATALOGS")

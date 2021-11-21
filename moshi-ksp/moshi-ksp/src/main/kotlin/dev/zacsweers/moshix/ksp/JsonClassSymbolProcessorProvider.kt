@@ -43,20 +43,20 @@ import java.nio.charset.StandardCharsets
 public class JsonClassSymbolProcessorProvider : SymbolProcessorProvider {
   public companion object {
     /**
-     * This processing option can be specified to have a `@Generated` annotation
-     * included in the generated code. It is not encouraged unless you need it for static analysis
-     * reasons and not enabled by default.
+     * This processing option can be specified to have a `@Generated` annotation included in the
+     * generated code. It is not encouraged unless you need it for static analysis reasons and not
+     * enabled by default.
      *
      * Note that this can only be one of the following values:
-     *   * `"javax.annotation.processing.Generated"` (JRE 9+)
-     *   * `"javax.annotation.Generated"` (JRE <9)
+     * * `"javax.annotation.processing.Generated"` (JRE 9+)
+     * * `"javax.annotation.Generated"` (JRE <9)
      */
     public const val OPTION_GENERATED: String = "moshi.generated"
 
     /**
-     * This boolean processing option can disable proguard rule generation.
-     * Normally, this is not recommended unless end-users build their own JsonAdapter look-up tool.
-     * This is enabled by default.
+     * This boolean processing option can disable proguard rule generation. Normally, this is not
+     * recommended unless end-users build their own JsonAdapter look-up tool. This is enabled by
+     * default.
      */
     public const val OPTION_GENERATE_PROGUARD_RULES: String = "moshi.generateProguardRules"
   }
@@ -66,114 +66,106 @@ public class JsonClassSymbolProcessorProvider : SymbolProcessorProvider {
   }
 }
 
-private class JsonClassSymbolProcessor(
-  environment: SymbolProcessorEnvironment
-) : SymbolProcessor {
+private class JsonClassSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor {
 
   private companion object {
-    val POSSIBLE_GENERATED_NAMES = setOf(
-      "javax.annotation.processing.Generated",
-      "javax.annotation.Generated"
-    )
+    val POSSIBLE_GENERATED_NAMES =
+        setOf("javax.annotation.processing.Generated", "javax.annotation.Generated")
 
     val JSON_CLASS_NAME = JsonClass::class.qualifiedName!!
   }
 
   private val codeGenerator = environment.codeGenerator
   private val logger = environment.logger
-  private val generatedOption = environment.options[OPTION_GENERATED]?.also {
-    logger.check(it in POSSIBLE_GENERATED_NAMES) {
-      "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
-    }
-  }
-  private val generateProguardRules = environment.options[OPTION_GENERATE_PROGUARD_RULES]?.toBooleanStrictOrNull() ?: true
+  private val generatedOption =
+      environment.options[OPTION_GENERATED]?.also {
+        logger.check(it in POSSIBLE_GENERATED_NAMES) {
+          "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
+        }
+      }
+  private val generateProguardRules =
+      environment.options[OPTION_GENERATE_PROGUARD_RULES]?.toBooleanStrictOrNull() ?: true
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
-    val generatedAnnotation = generatedOption?.let {
-      val annotationType = resolver.getClassDeclarationByName(resolver.getKSNameFromString(it))
-        ?: run {
-          logger.error("Generated annotation type doesn't exist: $it")
-          return emptyList()
-        }
-      AnnotationSpec.builder(annotationType.toClassName())
-        .addMember("value = [%S]", JsonClassSymbolProcessor::class.java.canonicalName)
-        .addMember("comments = %S", "https://github.com/square/moshi")
-        .build()
-    }
-
-    val jsonClassType = resolver.getClassDeclarationByName(
-      resolver.getKSNameFromString(JSON_CLASS_NAME)
-    )
-      ?.asType()
-      ?: run {
-        logger.error("JsonClass type not found on the classpath.")
-        return emptyList()
-      }
-    resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME)
-      .asSequence()
-      .forEach { type ->
-        // For the smart cast
-        if (type !is KSDeclaration) {
-          logger.error("@JsonClass can't be applied to $type: must be a Kotlin class", type)
-          return@forEach
+    val generatedAnnotation =
+        generatedOption?.let {
+          val annotationType =
+              resolver.getClassDeclarationByName(resolver.getKSNameFromString(it))
+                  ?: run {
+                    logger.error("Generated annotation type doesn't exist: $it")
+                    return emptyList()
+                  }
+          AnnotationSpec.builder(annotationType.toClassName())
+              .addMember("value = [%S]", JsonClassSymbolProcessor::class.java.canonicalName)
+              .addMember("comments = %S", "https://github.com/square/moshi")
+              .build()
         }
 
-        val jsonClassAnnotation = type.findAnnotationWithType(jsonClassType) ?: return@forEach
-
-        val generator = jsonClassAnnotation.getMember<String>("generator")
-
-        if (generator.isNotEmpty()) return@forEach
-
-        if (!jsonClassAnnotation.getMember<Boolean>("generateAdapter")) return@forEach
-
-        val originatingFile = type.containingFile!!
-        val adapterGenerator = adapterGenerator(logger, resolver, type) ?: return emptyList()
-        try {
-          val preparedAdapter = adapterGenerator
-            .prepare(generateProguardRules) { spec ->
-              spec.toBuilder()
-                .apply {
-                  generatedAnnotation?.let(::addAnnotation)
-                }
-                .addOriginatingKSFile(originatingFile)
-                .build()
+    val jsonClassType =
+        resolver.getClassDeclarationByName(resolver.getKSNameFromString(JSON_CLASS_NAME))?.asType()
+            ?: run {
+              logger.error("JsonClass type not found on the classpath.")
+              return emptyList()
             }
-          preparedAdapter.spec.writeTo(codeGenerator, aggregating = false)
-          preparedAdapter.proguardConfig?.writeTo(codeGenerator, originatingFile)
-        } catch (e: Exception) {
-          logger.error(
-            "Error preparing ${type.simpleName.asString()}: ${e.stackTrace.joinToString("\n")}"
-          )
-        }
+    resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME).asSequence().forEach { type ->
+      // For the smart cast
+      if (type !is KSDeclaration) {
+        logger.error("@JsonClass can't be applied to $type: must be a Kotlin class", type)
+        return@forEach
       }
+
+      val jsonClassAnnotation = type.findAnnotationWithType(jsonClassType) ?: return@forEach
+
+      val generator = jsonClassAnnotation.getMember<String>("generator")
+
+      if (generator.isNotEmpty()) return@forEach
+
+      if (!jsonClassAnnotation.getMember<Boolean>("generateAdapter")) return@forEach
+
+      val originatingFile = type.containingFile!!
+      val adapterGenerator = adapterGenerator(logger, resolver, type) ?: return emptyList()
+      try {
+        val preparedAdapter =
+            adapterGenerator.prepare(generateProguardRules) { spec ->
+              spec.toBuilder()
+                  .apply { generatedAnnotation?.let(::addAnnotation) }
+                  .addOriginatingKSFile(originatingFile)
+                  .build()
+            }
+        preparedAdapter.spec.writeTo(codeGenerator, aggregating = false)
+        preparedAdapter.proguardConfig?.writeTo(codeGenerator, originatingFile)
+      } catch (e: Exception) {
+        logger.error(
+            "Error preparing ${type.simpleName.asString()}: ${e.stackTrace.joinToString("\n")}")
+      }
+    }
     return emptyList()
   }
 
   private fun ProguardConfig.writeTo(codeGenerator: CodeGenerator, originatingKSFile: KSFile) {
     // TODO outputFile needs to be public
     val name = "META-INF/proguard/moshi-${targetClass.canonicalName}"
-    val file = codeGenerator.createNewFile(
-      dependencies = Dependencies(aggregating = false, originatingKSFile),
-      packageName = "",
-      fileName = name,
-      extensionName = "pro"
-    )
+    val file =
+        codeGenerator.createNewFile(
+            dependencies = Dependencies(aggregating = false, originatingKSFile),
+            packageName = "",
+            fileName = name,
+            extensionName = "pro")
     // Don't use writeTo(file) because that tries to handle directories under the hood
-    OutputStreamWriter(file, StandardCharsets.UTF_8)
-      .use {
-        // TODO writeTo(Appendable) needs to be public
-        ProguardConfig::class.java.getDeclaredMethod("writeTo", Appendable::class.java)
-          .apply {
-            isAccessible = true
-          }
+    OutputStreamWriter(file, StandardCharsets.UTF_8).use {
+      // TODO writeTo(Appendable) needs to be public
+      ProguardConfig::class
+          .java
+          .getDeclaredMethod("writeTo", Appendable::class.java)
+          .apply { isAccessible = true }
           .invoke(this, it)
-      }
+    }
   }
 
   private fun adapterGenerator(
-    logger: KSPLogger,
-    resolver: Resolver,
-    originalType: KSDeclaration,
+      logger: KSPLogger,
+      resolver: Resolver,
+      originalType: KSDeclaration,
   ): AdapterGenerator? {
     val type = targetType(originalType, resolver, logger) ?: return null
 
@@ -194,13 +186,14 @@ private class JsonClassSymbolProcessor(
     }
 
     // Sort properties so that those with constructor parameters come first.
-    val sortedProperties = properties.values.sortedBy {
-      if (it.hasConstructorParameter) {
-        it.target.parameterIndex
-      } else {
-        Integer.MAX_VALUE
-      }
-    }
+    val sortedProperties =
+        properties.values.sortedBy {
+          if (it.hasConstructorParameter) {
+            it.target.parameterIndex
+          } else {
+            Integer.MAX_VALUE
+          }
+        }
 
     return AdapterGenerator(type, sortedProperties)
   }

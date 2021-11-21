@@ -24,12 +24,12 @@ import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
+import java.lang.reflect.Type
 import kotlinx.metadata.ClassName
 import kotlinx.metadata.Flag
 import kotlinx.metadata.KmClass
 import kotlinx.metadata.jvm.KotlinClassHeader
 import kotlinx.metadata.jvm.KotlinClassMetadata
-import java.lang.reflect.Type
 
 /** Classes annotated with this are eligible for this adapter. */
 private val KOTLIN_METADATA = Metadata::class.java
@@ -38,9 +38,9 @@ private val UNSET = Any()
 
 public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
   override fun create(
-    type: Type,
-    annotations: MutableSet<out Annotation>,
-    moshi: Moshi
+      type: Type,
+      annotations: MutableSet<out Annotation>,
+      moshi: Moshi
   ): JsonAdapter<*>? {
     if (annotations.isNotEmpty()) {
       return null
@@ -88,13 +88,15 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
             if (defaultObjectInstance == null) {
               error("Can not have both @DefaultObject and @DefaultNull: $sealedSubclass")
             } else {
-              error("Can only have one @DefaultObject: $sealedSubclass and ${defaultObjectInstance.javaClass} are both annotated")
+              error(
+                  "Can only have one @DefaultObject: $sealedSubclass and ${defaultObjectInstance.javaClass} are both annotated")
             }
           }
         } else {
-          val labelAnnotation = checkNotNull(sealedSubclass.getAnnotation(TypeLabel::class.java)) {
-            "Sealed subtypes must be annotated with @TypeLabel to define their label $sealedSubclass"
-          }
+          val labelAnnotation =
+              checkNotNull(sealedSubclass.getAnnotation(TypeLabel::class.java)) {
+                "Sealed subtypes must be annotated with @TypeLabel to define their label $sealedSubclass"
+              }
 
           check(sealedSubclass.typeParameters.isEmpty()) {
             "Moshi-sealed subtypes cannot be generic: $sealedSubclass"
@@ -115,31 +117,32 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         }
       }
 
-      val delegateMoshi = if (objectSubtypes.isEmpty()) {
-        moshi
-      } else {
-        moshi.newBuilder()
-          .apply {
-            for ((subtype, instance) in objectSubtypes) {
-              add(subtype, ObjectJsonAdapter(instance))
-            }
+      val delegateMoshi =
+          if (objectSubtypes.isEmpty()) {
+            moshi
+          } else {
+            moshi
+                .newBuilder()
+                .apply {
+                  for ((subtype, instance) in objectSubtypes) {
+                    add(subtype, ObjectJsonAdapter(instance))
+                  }
+                }
+                .build()
           }
-          .build()
-      }
 
       @Suppress("UNCHECKED_CAST")
       val seed = PolymorphicJsonAdapterFactory.of(rawType as Class<Any>?, typeLabel)
-      val polymorphicFactory = labels.entries
-        .fold(seed) { factory, (label, subtype) ->
-          factory.withSubtype(subtype, label)
-        }
-        .let { factory ->
-          if (defaultObjectInstance !== UNSET) {
-            factory.withDefaultValue(defaultObjectInstance)
-          } else {
-            factory
-          }
-        }
+      val polymorphicFactory =
+          labels.entries
+              .fold(seed) { factory, (label, subtype) -> factory.withSubtype(subtype, label) }
+              .let { factory ->
+                if (defaultObjectInstance !== UNSET) {
+                  factory.withDefaultValue(defaultObjectInstance)
+                } else {
+                  factory
+                }
+              }
 
       return polymorphicFactory.create(rawType, annotations, delegateMoshi)
     }
@@ -151,14 +154,13 @@ private fun Class<*>.header(): KotlinClassHeader? {
   val metadata = getAnnotation(KOTLIN_METADATA) ?: return null
   return with(metadata) {
     KotlinClassHeader(
-      kind = kind,
-      metadataVersion = metadataVersion,
-      data1 = data1,
-      data2 = data2,
-      extraString = extraString,
-      packageName = packageName,
-      extraInt = extraInt
-    )
+        kind = kind,
+        metadataVersion = metadataVersion,
+        data1 = data1,
+        data2 = data2,
+        extraString = extraString,
+        packageName = packageName,
+        extraInt = extraInt)
   }
 }
 

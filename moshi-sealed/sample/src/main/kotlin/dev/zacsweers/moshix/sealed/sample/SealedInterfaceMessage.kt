@@ -30,6 +30,5 @@ sealed interface SealedInterfaceMessage {
   @JsonClass(generateAdapter = true)
   data class Error(val error_logs: Map<String, Any>) : SealedInterfaceMessage
 
-  @DefaultObject
-  object Unknown : SealedInterfaceMessage
+  @DefaultObject object Unknown : SealedInterfaceMessage
 }

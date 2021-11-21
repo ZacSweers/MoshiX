@@ -35,17 +35,17 @@ class ObjectSerializationTest(type: Type) {
 
   enum class Type(val moshi: Moshi = Moshi.Builder().build()) {
     REFLECT(
-      moshi = Moshi.Builder()
-        .add(MoshiSealedJsonAdapterFactory())
-        .addLast(KotlinJsonAdapterFactory())
-        .build()
-    ),
+        moshi =
+            Moshi.Builder()
+                .add(MoshiSealedJsonAdapterFactory())
+                .addLast(KotlinJsonAdapterFactory())
+                .build()),
     METADATA_REFLECT(
-      moshi = Moshi.Builder()
-        .add(MetadataMoshiSealedJsonAdapterFactory())
-        .addLast(KotlinJsonAdapterFactory())
-        .build()
-    ),
+        moshi =
+            Moshi.Builder()
+                .add(MetadataMoshiSealedJsonAdapterFactory())
+                .addLast(KotlinJsonAdapterFactory())
+                .build()),
     CODEGEN
   }
 
@@ -53,11 +53,7 @@ class ObjectSerializationTest(type: Type) {
     @JvmStatic
     @Parameters(name = "{0}")
     fun data(): Collection<Array<*>> {
-      return listOf(
-        arrayOf(Type.REFLECT),
-        arrayOf(Type.METADATA_REFLECT),
-        arrayOf(Type.CODEGEN)
-      )
+      return listOf(arrayOf(Type.REFLECT), arrayOf(Type.METADATA_REFLECT), arrayOf(Type.CODEGEN))
     }
   }
 
@@ -65,8 +61,9 @@ class ObjectSerializationTest(type: Type) {
 
   @Test
   fun smokeTest() {
-    //language=json
-    val json = """
+    // language=json
+    val json =
+        """
      {
        "name": "tacoFactory",
        "returnType": { "type": "void" },
@@ -79,12 +76,11 @@ class ObjectSerializationTest(type: Type) {
 
     val functionSpec = moshi.adapter<FunctionSpec>().fromJson(json)
     checkNotNull(functionSpec)
-    assertThat(functionSpec).isEqualTo(
-      FunctionSpec(
-        name = "tacoFactory",
-        returnType = VoidType,
-        parameters = mapOf("param1" to IntType, "param2" to BooleanType)
-      )
-    )
+    assertThat(functionSpec)
+        .isEqualTo(
+            FunctionSpec(
+                name = "tacoFactory",
+                returnType = VoidType,
+                parameters = mapOf("param1" to IntType, "param2" to BooleanType)))
   }
 }

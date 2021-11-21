@@ -25,25 +25,18 @@ class TrackUnknownKeysTest {
 
   @Test
   fun simpleCase() {
-    //language=JSON
+    // language=JSON
     val json = "{\"a\":1,\"b\":2,\"c\":3}"
 
     val tracker = RecordingKeysTracker()
-    val moshi = Builder()
-      .add(TrackUnknownKeys.Factory(tracker = tracker))
-      .build()
+    val moshi = Builder().add(TrackUnknownKeys.Factory(tracker = tracker)).build()
 
     val example = moshi.adapter<Letters>().fromJson(json)!!
     assertThat(example).isEqualTo(Letters(1, 2))
     tracker.assertUnknown<Letters>("c")
   }
 
-  @TrackUnknownKeys
-  @JsonClass(generateAdapter = true)
-  data class Letters(
-    val a: Int,
-    val b: Int
-  )
+  @TrackUnknownKeys @JsonClass(generateAdapter = true) data class Letters(val a: Int, val b: Int)
 
   class RecordingKeysTracker : TrackUnknownKeys.UnknownKeysTracker {
 

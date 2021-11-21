@@ -48,15 +48,10 @@ dependencies {
 }
 
 val generatedAnnotation = "javax.annotation.processing.Generated"
-ksp {
-  arg("moshi.generated", generatedAnnotation)
-}
 
-kapt {
-  arguments {
-    arg("moshi.generated", generatedAnnotation)
-  }
-}
+ksp { arg("moshi.generated", generatedAnnotation) }
+
+kapt { arguments { arg("moshi.generated", generatedAnnotation) } }
 
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {

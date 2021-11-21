@@ -23,15 +23,13 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.squareup.moshi.rawType
-import org.junit.Test
 import java.lang.reflect.Type
+import org.junit.Test
 
 class AdaptedByTest {
 
-  private val moshi = Moshi.Builder()
-    .add(AdaptedBy.Factory())
-    .addLast(KotlinJsonAdapterFactory())
-    .build()
+  private val moshi =
+      Moshi.Builder().add(AdaptedBy.Factory()).addLast(KotlinJsonAdapterFactory()).build()
 
   @Test
   fun adapterProperty() {
@@ -47,13 +45,9 @@ class AdaptedByTest {
     assertThat(instance).isEqualTo(StringAliasHolderFactory(StringAlias("value")))
   }
 
-  data class StringAliasHolderAdapter(
-    @AdaptedBy(StringAliasAdapter::class) val alias: StringAlias
-  )
+  data class StringAliasHolderAdapter(@AdaptedBy(StringAliasAdapter::class) val alias: StringAlias)
 
-  data class StringAliasHolderFactory(
-    @AdaptedBy(StringAliasFactory::class) val alias: StringAlias
-  )
+  data class StringAliasHolderFactory(@AdaptedBy(StringAliasFactory::class) val alias: StringAlias)
 
   data class StringAlias(val value: String)
 
@@ -88,8 +82,7 @@ class AdaptedByTest {
     assertThat(instance).isEqualTo(AnnotatedStringAlias("value"))
   }
 
-  @AdaptedBy(AnnotatedStringAliasAdapter::class)
-  data class AnnotatedStringAlias(val value: String)
+  @AdaptedBy(AnnotatedStringAliasAdapter::class) data class AnnotatedStringAlias(val value: String)
 
   class AnnotatedStringAliasAdapter : JsonAdapter<AnnotatedStringAlias>() {
     override fun fromJson(reader: JsonReader): AnnotatedStringAlias? {
@@ -143,17 +136,15 @@ class AdaptedByTest {
   fun classUsingAnnotatedClassesAsProperties() {
     val adapter = moshi.adapter<ClassUsingAnnotatedClasses>()
     val instance = adapter.fromJson("{\"alias1\":\"value\",\"alias2\":\"value\"}")
-    assertThat(instance).isEqualTo(
-      ClassUsingAnnotatedClasses(
-        AnnotatedStringAlias("value"),
-        AnnotatedFactoryStringAlias("value")
-      )
-    )
+    assertThat(instance)
+        .isEqualTo(
+            ClassUsingAnnotatedClasses(
+                AnnotatedStringAlias("value"), AnnotatedFactoryStringAlias("value")))
   }
 
   data class ClassUsingAnnotatedClasses(
-    val alias1: AnnotatedStringAlias,
-    val alias2: AnnotatedFactoryStringAlias
+      val alias1: AnnotatedStringAlias,
+      val alias2: AnnotatedFactoryStringAlias
   )
 
   @Test
@@ -168,12 +159,13 @@ class AdaptedByTest {
 
   class NullHandlingStringAliasAdapter : JsonAdapter<NullHandlingStringAlias>() {
     override fun fromJson(reader: JsonReader): NullHandlingStringAlias? {
-      val value = if (reader.peek() == JsonReader.Token.NULL) {
-        reader.nextNull<String>()
-        "null"
-      } else {
-        reader.nextString()
-      }
+      val value =
+          if (reader.peek() == JsonReader.Token.NULL) {
+            reader.nextNull<String>()
+            "null"
+          } else {
+            reader.nextString()
+          }
       return NullHandlingStringAlias(value)
     }
 

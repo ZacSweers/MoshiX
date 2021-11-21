@@ -36,14 +36,14 @@ internal fun TypeName.unwrapTypeAliasReal(): TypeName {
     // If any type is nullable, then the whole thing is nullable
     var isAnyNullable = isNullable
     // Keep track of all annotations across type levels. Sort them too for consistency.
-    val runningAnnotations = TreeSet<AnnotationSpec>(compareBy { it.toString() }).apply {
-      addAll(annotations)
-    }
+    val runningAnnotations =
+        TreeSet<AnnotationSpec>(compareBy { it.toString() }).apply { addAll(annotations) }
     val nestedUnwrappedType = unwrappedType.unwrapTypeAlias()
     runningAnnotations.addAll(nestedUnwrappedType.annotations)
     isAnyNullable = isAnyNullable || nestedUnwrappedType.isNullable
     nestedUnwrappedType.copy(nullable = isAnyNullable, annotations = runningAnnotations.toList())
-  } ?: this
+  }
+      ?: this
 }
 
 internal fun TypeName.unwrapTypeAlias(): TypeName {
@@ -71,6 +71,8 @@ internal fun TypeName.unwrapTypeAlias(): TypeName {
       }
     }
     is LambdaTypeName -> unwrapTypeAliasReal()
-    else -> throw UnsupportedOperationException("Type '${javaClass.simpleName}' is illegal. Only classes, parameterized types, wildcard types, or type variables are allowed.")
+    else ->
+        throw UnsupportedOperationException(
+            "Type '${javaClass.simpleName}' is illegal. Only classes, parameterized types, wildcard types, or type variables are allowed.")
   }
 }

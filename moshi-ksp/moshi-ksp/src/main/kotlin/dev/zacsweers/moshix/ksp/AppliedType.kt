@@ -30,14 +30,12 @@ private val OBJECT_CLASS = java.lang.Object::class.asClassName()
  * A concrete type like `List<String>` with enough information to know how to resolve its type
  * variables.
  */
-internal class AppliedType private constructor(
-  val type: KSClassDeclaration,
-  val typeName: TypeName = type.toClassName()
-) {
+internal class AppliedType
+private constructor(val type: KSClassDeclaration, val typeName: TypeName = type.toClassName()) {
 
   /** Returns all supertypes of this, recursively. Includes both interface and class supertypes. */
   fun supertypes(
-    resolver: Resolver,
+      resolver: Resolver,
   ): LinkedHashSet<AppliedType> {
     val result: LinkedHashSet<AppliedType> = LinkedHashSet()
     result.add(this)

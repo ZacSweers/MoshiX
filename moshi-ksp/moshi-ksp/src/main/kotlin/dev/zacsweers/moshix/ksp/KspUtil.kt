@@ -56,13 +56,14 @@ internal fun KSClassDeclaration.superclass(resolver: Resolver): KSType {
   return getAllSuperTypes().firstOrNull {
     val decl = it.declaration
     decl is KSClassDeclaration && decl.classKind == CLASS
-  } ?: resolver.builtIns.anyType
+  }
+      ?: resolver.builtIns.anyType
 }
 
 internal fun KSClassDeclaration.isKotlinClass(resolver: Resolver): Boolean {
   return origin == KOTLIN ||
-    origin == KOTLIN_LIB ||
-    hasAnnotation(resolver.getClassDeclarationByName<Metadata>().asType())
+      origin == KOTLIN_LIB ||
+      hasAnnotation(resolver.getClassDeclarationByName<Metadata>().asType())
 }
 
 internal fun KSAnnotated.hasAnnotation(target: KSType): Boolean {
@@ -70,7 +71,7 @@ internal fun KSAnnotated.hasAnnotation(target: KSType): Boolean {
 }
 
 internal inline fun <reified T : Annotation> KSAnnotated.findAnnotationWithType(
-  resolver: Resolver,
+    resolver: Resolver,
 ): KSAnnotation? {
   return findAnnotationWithType(resolver.getClassDeclarationByName<T>().asType())
 }
@@ -80,10 +81,10 @@ internal fun KSAnnotated.findAnnotationWithType(target: KSType): KSAnnotation? {
 }
 
 internal inline fun <reified T> KSAnnotation.getMember(name: String): T {
-  val matchingArg = arguments.find { it.name?.asString() == name }
-    ?: error(
-      "No member name found for '$name'. All arguments: ${arguments.map { it.name?.asString() }}"
-    )
+  val matchingArg =
+      arguments.find { it.name?.asString() == name }
+          ?: error(
+              "No member name found for '$name'. All arguments: ${arguments.map { it.name?.asString() }}")
   return when (val argValue = matchingArg.value) {
     is List<*> -> {
       if (argValue.isEmpty()) {
@@ -99,7 +100,9 @@ internal inline fun <reified T> KSAnnotation.getMember(name: String): T {
     }
     is KSType -> argValue.toClassName() as T
     else -> {
-      argValue as? T ?: error("Null value found for @${shortName.getShortName()}.$name. All args -> $arguments")
+      argValue as? T
+          ?: error(
+              "Null value found for @${shortName.getShortName()}.$name. All args -> $arguments")
     }
   }
 }
@@ -160,28 +163,26 @@ private fun addValueToBlock(value: Any, resolver: Resolver, member: CodeBlock.Bu
       }
     }
     is KSName ->
-      member.add(
-        "%T.%L", ClassName.bestGuess(value.getQualifier()),
-        value.getShortName()
-      )
+        member.add("%T.%L", ClassName.bestGuess(value.getQualifier()), value.getShortName())
     is KSAnnotation -> member.add("%L", value.toAnnotationSpec(resolver))
     else -> member.add(memberForValue(value))
   }
 }
 
 /**
- * Creates a [CodeBlock] with parameter `format` depending on the given `value` object.
- * Handles a number of special cases, such as appending "f" to `Float` values, and uses
- * `%L` for other types.
+ * Creates a [CodeBlock] with parameter `format` depending on the given `value` object. Handles a
+ * number of special cases, such as appending "f" to `Float` values, and uses `%L` for other types.
  */
-internal fun memberForValue(value: Any) = when (value) {
-  is Class<*> -> CodeBlock.of("%T::class", value)
-  is Enum<*> -> CodeBlock.of("%T.%L", value.javaClass, value.name)
-  is String -> CodeBlock.of("%S", value)
-  is Float -> CodeBlock.of("%Lf", value)
-//  is Char -> CodeBlock.of("'%L'", characterLiteralWithoutSingleQuotes(value)) // TODO public?
-  else -> CodeBlock.of("%L", value)
-}
+internal fun memberForValue(value: Any) =
+    when (value) {
+      is Class<*> -> CodeBlock.of("%T::class", value)
+      is Enum<*> -> CodeBlock.of("%T.%L", value.javaClass, value.name)
+      is String -> CodeBlock.of("%S", value)
+      is Float -> CodeBlock.of("%Lf", value)
+      //  is Char -> CodeBlock.of("'%L'", characterLiteralWithoutSingleQuotes(value)) // TODO
+      // public?
+      else -> CodeBlock.of("%L", value)
+    }
 
 internal inline fun KSPLogger.check(condition: Boolean, message: () -> String) {
   check(condition, null, message)

@@ -25,10 +25,10 @@ plugins {
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += listOf(
-      "-Xopt-in=kotlin.RequiresOptIn",
-      "-Xopt-in=com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview"
-    )
+    freeCompilerArgs +=
+        listOf(
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xopt-in=com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview")
   }
 }
 

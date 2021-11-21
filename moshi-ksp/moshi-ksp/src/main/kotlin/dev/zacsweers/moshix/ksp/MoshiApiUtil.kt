@@ -29,24 +29,22 @@ import dev.zacsweers.moshix.ksp.shade.api.PropertyGenerator
 import dev.zacsweers.moshix.ksp.shade.api.TargetProperty
 import dev.zacsweers.moshix.ksp.shade.api.rawType
 
-private val VISIBILITY_MODIFIERS = setOf(
-  KModifier.INTERNAL,
-  KModifier.PRIVATE,
-  KModifier.PROTECTED,
-  KModifier.PUBLIC
-)
+private val VISIBILITY_MODIFIERS =
+    setOf(KModifier.INTERNAL, KModifier.PRIVATE, KModifier.PROTECTED, KModifier.PUBLIC)
 
 internal fun Collection<KModifier>.visibility(): KModifier {
   return find { it in VISIBILITY_MODIFIERS } ?: KModifier.PUBLIC
 }
 
-private val TargetProperty.isTransient get() = propertySpec.annotations.any { it.typeName == Transient::class.asClassName() }
-private val TargetProperty.isSettable get() = propertySpec.mutable || parameter != null
+private val TargetProperty.isTransient
+  get() = propertySpec.annotations.any { it.typeName == Transient::class.asClassName() }
+private val TargetProperty.isSettable
+  get() = propertySpec.mutable || parameter != null
 private val TargetProperty.isVisible: Boolean
   get() {
     return visibility == KModifier.INTERNAL ||
-      visibility == KModifier.PROTECTED ||
-      visibility == KModifier.PUBLIC
+        visibility == KModifier.PROTECTED ||
+        visibility == KModifier.PUBLIC
   }
 
 /**
@@ -54,26 +52,20 @@ private val TargetProperty.isVisible: Boolean
  * cannot be used with code gen, or if no codegen is necessary for this property.
  */
 internal fun TargetProperty.generator(
-  logger: KSPLogger,
-  resolver: Resolver,
-  originalType: KSDeclaration
+    logger: KSPLogger,
+    resolver: Resolver,
+    originalType: KSDeclaration
 ): PropertyGenerator? {
   if (isTransient) {
     if (!hasDefault) {
-      logger.error(
-        "No default value for transient property $name",
-        originalType
-      )
+      logger.error("No default value for transient property $name", originalType)
       return null
     }
     return PropertyGenerator(this, DelegateKey(type, emptyList()), true)
   }
 
   if (!isVisible) {
-    logger.error(
-      "property $name is not visible",
-      originalType
-    )
+    logger.error("property $name is not visible", originalType)
     return null
   }
 
@@ -89,32 +81,24 @@ internal fun TargetProperty.generator(
     val annotationElement = resolver.getClassDeclarationByName(qualifierRawType.canonicalName)
     annotationElement.findAnnotationWithType<Retention>(resolver)?.let {
       // TODO this is super hacky but I don't know how else to compare enums here
-      if (it.getMember<TypeName>("value") != AnnotationRetention::class.asClassName().nestedClass("RUNTIME")) {
-        logger.error(
-          "JsonQualifier @${qualifierRawType.simpleName} must have RUNTIME retention"
-        )
+      if (it.getMember<TypeName>("value") !=
+          AnnotationRetention::class.asClassName().nestedClass("RUNTIME")) {
+        logger.error("JsonQualifier @${qualifierRawType.simpleName} must have RUNTIME retention")
       }
     }
     annotationElement.findAnnotationWithType<Target>(resolver)?.let {
       // TODO this is super hacky but I don't know how else to compare enums here
-      if (AnnotationTarget::class.asClassName().nestedClass("FIELD") !in it.getMember<List<TypeName>>("allowedTargets")) {
-        logger.error(
-          "JsonQualifier @${qualifierRawType.simpleName} must support FIELD target"
-        )
+      if (AnnotationTarget::class.asClassName().nestedClass("FIELD") !in
+          it.getMember<List<TypeName>>("allowedTargets")) {
+        logger.error("JsonQualifier @${qualifierRawType.simpleName} must support FIELD target")
       }
     }
   }
 
-  val jsonQualifierSpecs = qualifiers.map {
-    it.toBuilder()
-      .useSiteTarget(AnnotationSpec.UseSiteTarget.FIELD)
-      .build()
-  }
+  val jsonQualifierSpecs =
+      qualifiers.map { it.toBuilder().useSiteTarget(AnnotationSpec.UseSiteTarget.FIELD).build() }
 
-  return PropertyGenerator(
-    this,
-    DelegateKey(type, jsonQualifierSpecs)
-  )
+  return PropertyGenerator(this, DelegateKey(type, jsonQualifierSpecs))
 }
 
 internal fun KSClassDeclaration.isJsonQualifier(resolver: Resolver): Boolean {

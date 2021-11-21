@@ -21,12 +21,12 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.nextAnnotations
-import okio.BufferedSource
 import java.lang.reflect.Type
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.annotation.AnnotationTarget.FUNCTION
 import kotlin.annotation.AnnotationTarget.PROPERTY
+import okio.BufferedSource
 
 /**
  * A [JsonQualifier] for use with [String] properties to indicate that their value should be
@@ -58,7 +58,7 @@ public annotation class JsonString {
 
     private class JsonStringJsonAdapter : JsonAdapter<String>() {
       override fun fromJson(reader: JsonReader): String =
-        reader.nextSource().use(BufferedSource::readUtf8)
+          reader.nextSource().use(BufferedSource::readUtf8)
 
       override fun toJson(writer: JsonWriter, value: String?) {
         writer.valueSink().use { sink -> sink.writeUtf8(checkNotNull(value)) }

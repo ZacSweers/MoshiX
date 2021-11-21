@@ -21,6 +21,4 @@ import kotlin.annotation.AnnotationTarget.CLASS
 /**
  * Use this annotation to specify that a given sealed type's deserialization should default to null.
  */
-@Target(CLASS)
-@Retention(RUNTIME)
-public annotation class DefaultNull
+@Target(CLASS) @Retention(RUNTIME) public annotation class DefaultNull

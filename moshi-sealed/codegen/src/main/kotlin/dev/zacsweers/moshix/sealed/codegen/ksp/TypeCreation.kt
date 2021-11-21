@@ -47,45 +47,42 @@ internal sealed class Subtype(val className: TypeName) {
 }
 
 internal fun createType(
-  targetType: ClassName,
-  isInternal: Boolean,
-  typeLabel: String,
-  useDefaultNull: Boolean,
-  generatedAnnotation: AnnotationSpec?,
-  subtypes: Set<Subtype>,
-  objectAdapters: List<CodeBlock>,
-  generateProguardConfig: Boolean,
-  typeSpecHook: TypeSpec.Builder.() -> Unit
+    targetType: ClassName,
+    isInternal: Boolean,
+    typeLabel: String,
+    useDefaultNull: Boolean,
+    generatedAnnotation: AnnotationSpec?,
+    subtypes: Set<Subtype>,
+    objectAdapters: List<CodeBlock>,
+    generateProguardConfig: Boolean,
+    typeSpecHook: TypeSpec.Builder.() -> Unit
 ): PreparedAdapter {
   val defaultCodeBlockBuilder = CodeBlock.builder()
-  val adapterName = ClassName.bestGuess(
-    Types.generatedJsonAdapterName(targetType.reflectionName())
-  ).simpleName
+  val adapterName =
+      ClassName.bestGuess(Types.generatedJsonAdapterName(targetType.reflectionName())).simpleName
   val visibilityModifier = if (isInternal) KModifier.INTERNAL else KModifier.PUBLIC
   val allocator = NameAllocator()
 
-  val moshiParam = ParameterSpec.builder(allocator.newName("moshi"), Moshi::class)
-    .build()
+  val moshiParam = ParameterSpec.builder(allocator.newName("moshi"), Moshi::class).build()
   val jsonAdapterType = JsonAdapter::class.asClassName().parameterizedBy(targetType)
 
-  val classBuilder = TypeSpec.classBuilder(adapterName)
-    .addModifiers(visibilityModifier)
-    .superclass(jsonAdapterType)
-    .primaryConstructor(FunSpec.constructorBuilder().addParameter(moshiParam).build())
+  val classBuilder =
+      TypeSpec.classBuilder(adapterName)
+          .addModifiers(visibilityModifier)
+          .superclass(jsonAdapterType)
+          .primaryConstructor(FunSpec.constructorBuilder().addParameter(moshiParam).build())
 
   classBuilder.typeSpecHook()
 
-  generatedAnnotation?.let {
-    classBuilder.addAnnotation(it)
-  }
+  generatedAnnotation?.let { classBuilder.addAnnotation(it) }
 
-  val runtimeAdapterInitializer = CodeBlock.builder()
-    .add(
-      "%T.of(%T::class.java, %S)«\n",
-      PolymorphicJsonAdapterFactory::class,
-      targetType,
-      typeLabel
-    )
+  val runtimeAdapterInitializer =
+      CodeBlock.builder()
+          .add(
+              "%T.of(%T::class.java, %S)«\n",
+              PolymorphicJsonAdapterFactory::class,
+              targetType,
+              typeLabel)
 
   if (useDefaultNull) {
     defaultCodeBlockBuilder.add("null")
@@ -99,10 +96,7 @@ internal fun createType(
       is ClassType -> {
         for (label in subtype.labels) {
           runtimeAdapterInitializer.add(
-            "  .withSubtype(%T::class.java, %S)\n",
-            subtype.className,
-            label
-          )
+              "  .withSubtype(%T::class.java, %S)\n", subtype.className, label)
         }
       }
     }
@@ -112,85 +106,76 @@ internal fun createType(
     runtimeAdapterInitializer.add("  .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
   }
 
-  val moshiArg = if (objectAdapters.isEmpty()) {
-    CodeBlock.of("%N", moshiParam)
-  } else {
-    CodeBlock.builder()
-      .add("%N.newBuilder()\n", moshiParam)
-      .apply {
-        add("%L\n", objectAdapters.joinToCode("\n", prefix = "    "))
-      }
-      .add(".build()")
-      .build()
-  }
-  runtimeAdapterInitializer.add(
-    "  .create(%T::class.java, %M(), %L)·as·%T\n»",
-    targetType,
-    MemberName("kotlin.collections", "emptySet"),
-    moshiArg,
-    jsonAdapterType
-  )
-
-  val runtimeAdapterProperty = PropertySpec.builder(
-    allocator.newName("runtimeAdapter"),
-    jsonAdapterType,
-    KModifier.PRIVATE
-  )
-    .addAnnotation(
-      AnnotationSpec.builder(Suppress::class)
-        .addMember("%S", "UNCHECKED_CAST")
-        .build()
-    )
-    .apply {
-      if (objectAdapters.isNotEmpty()) {
-        addAnnotation(
-          AnnotationSpec.builder(ClassName("kotlin", "OptIn"))
-            .addMember("%T::class", ClassName("kotlin", "ExperimentalStdlibApi"))
+  val moshiArg =
+      if (objectAdapters.isEmpty()) {
+        CodeBlock.of("%N", moshiParam)
+      } else {
+        CodeBlock.builder()
+            .add("%N.newBuilder()\n", moshiParam)
+            .apply { add("%L\n", objectAdapters.joinToCode("\n", prefix = "    ")) }
+            .add(".build()")
             .build()
-        )
       }
-    }
-    .initializer(runtimeAdapterInitializer.build())
-    .build()
+  runtimeAdapterInitializer.add(
+      "  .create(%T::class.java, %M(), %L)·as·%T\n»",
+      targetType,
+      MemberName("kotlin.collections", "emptySet"),
+      moshiArg,
+      jsonAdapterType)
+
+  val runtimeAdapterProperty =
+      PropertySpec.builder(allocator.newName("runtimeAdapter"), jsonAdapterType, KModifier.PRIVATE)
+          .addAnnotation(
+              AnnotationSpec.builder(Suppress::class).addMember("%S", "UNCHECKED_CAST").build())
+          .apply {
+            if (objectAdapters.isNotEmpty()) {
+              addAnnotation(
+                  AnnotationSpec.builder(ClassName("kotlin", "OptIn"))
+                      .addMember("%T::class", ClassName("kotlin", "ExperimentalStdlibApi"))
+                      .build())
+            }
+          }
+          .initializer(runtimeAdapterInitializer.build())
+          .build()
 
   val nullableTargetType = targetType.copy(nullable = true)
   val readerParam = ParameterSpec(allocator.newName("reader"), JsonReader::class.asClassName())
   val writerParam = ParameterSpec(allocator.newName("writer"), JsonWriter::class.asClassName())
   val valueParam = ParameterSpec(allocator.newName("value"), nullableTargetType)
-  classBuilder.addProperty(runtimeAdapterProperty)
-    .addFunction(
-      FunSpec.builder("fromJson")
-        .addModifiers(KModifier.OVERRIDE)
-        .addParameter(readerParam)
-        .returns(nullableTargetType)
-        .addStatement("return %N.fromJson(%N)", runtimeAdapterProperty, readerParam)
-        .build()
-    )
-    .addFunction(
-      FunSpec.builder("toJson")
-        .addModifiers(KModifier.OVERRIDE)
-        .addParameter(writerParam)
-        .addParameter(valueParam)
-        .addStatement("%N.toJson(%N, %N)", runtimeAdapterProperty, writerParam, valueParam)
-        .build()
-    )
+  classBuilder
+      .addProperty(runtimeAdapterProperty)
+      .addFunction(
+          FunSpec.builder("fromJson")
+              .addModifiers(KModifier.OVERRIDE)
+              .addParameter(readerParam)
+              .returns(nullableTargetType)
+              .addStatement("return %N.fromJson(%N)", runtimeAdapterProperty, readerParam)
+              .build())
+      .addFunction(
+          FunSpec.builder("toJson")
+              .addModifiers(KModifier.OVERRIDE)
+              .addParameter(writerParam)
+              .addParameter(valueParam)
+              .addStatement("%N.toJson(%N, %N)", runtimeAdapterProperty, writerParam, valueParam)
+              .build())
 
   // TODO how do generics work?
-  val fileSpec = FileSpec.builder(targetType.packageName, adapterName)
-    .indent("  ")
-    .addComment("Code generated by moshi-sealed. Do not edit.")
-    .addType(classBuilder.build())
-    .build()
+  val fileSpec =
+      FileSpec.builder(targetType.packageName, adapterName)
+          .indent("  ")
+          .addComment("Code generated by moshi-sealed. Do not edit.")
+          .addType(classBuilder.build())
+          .build()
 
-  val proguardConfig = if (generateProguardConfig) {
-    ProguardConfig(
-      targetClass = targetType,
-      adapterName = adapterName,
-      adapterConstructorParams = listOf(Moshi::class.asClassName().reflectionName())
-    )
-  } else {
-    null
-  }
+  val proguardConfig =
+      if (generateProguardConfig) {
+        ProguardConfig(
+            targetClass = targetType,
+            adapterName = adapterName,
+            adapterConstructorParams = listOf(Moshi::class.asClassName().reflectionName()))
+      } else {
+        null
+      }
 
   return PreparedAdapter(fileSpec, proguardConfig)
 }

@@ -21,13 +21,7 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
-sourceSets {
-  test {
-    java {
-      srcDir("build/generated/ksp/test/kotlin")
-    }
-  }
-}
+sourceSets { test { java { srcDir("build/generated/ksp/test/kotlin") } } }
 
 dependencies {
   kspTest(project(":moshi-ksp:moshi-ksp"))
@@ -39,9 +33,7 @@ dependencies {
   testImplementation(libs.kotlin.reflect)
 }
 
-ksp {
-  arg("moshi.generated", "javax.annotation.processing.Generated")
-}
+ksp { arg("moshi.generated", "javax.annotation.processing.Generated") }
 
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {

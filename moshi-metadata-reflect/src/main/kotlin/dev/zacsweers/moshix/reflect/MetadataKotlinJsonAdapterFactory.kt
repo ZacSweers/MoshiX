@@ -25,6 +25,10 @@ import com.squareup.moshi.Types
 import com.squareup.moshi.internal.Util
 import com.squareup.moshi.internal.Util.generatedAdapter
 import com.squareup.moshi.internal.Util.resolve
+import java.lang.reflect.Field
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
+import java.lang.reflect.Type
 import kotlinx.metadata.Flag
 import kotlinx.metadata.KmClass
 import kotlinx.metadata.KmFlexibleTypeUpperBound
@@ -39,17 +43,13 @@ import kotlinx.metadata.jvm.fieldSignature
 import kotlinx.metadata.jvm.getterSignature
 import kotlinx.metadata.jvm.setterSignature
 import kotlinx.metadata.jvm.syntheticMethodForAnnotations
-import java.lang.reflect.Field
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import java.lang.reflect.Type
 
 /** Classes annotated with this are eligible for this adapter. */
 private val KOTLIN_METADATA = Metadata::class.java
 
 /**
- * Placeholder value used when a field is absent from the JSON. Note that this code
- * distinguishes between absent values and present-but-null values.
+ * Placeholder value used when a field is absent from the JSON. Note that this code distinguishes
+ * between absent values and present-but-null values.
  */
 private val ABSENT_VALUE = Any()
 
@@ -58,10 +58,10 @@ private val ABSENT_VALUE = Any()
  * constructor, and then by setting any additional properties that exist, if any.
  */
 internal class KotlinJsonAdapter<T>(
-  private val constructor: KtConstructor,
-  private val allBindings: List<Binding<T, Any?>?>,
-  private val nonTransientBindings: List<Binding<T, Any?>>,
-  private val options: JsonReader.Options
+    private val constructor: KtConstructor,
+    private val allBindings: List<Binding<T, Any?>?>,
+    private val nonTransientBindings: List<Binding<T, Any?>>,
+    private val options: JsonReader.Options
 ) : JsonAdapter<T>() {
 
   override fun fromJson(reader: JsonReader): T {
@@ -81,19 +81,13 @@ internal class KotlinJsonAdapter<T>(
 
       val propertyIndex = binding.propertyIndex
       if (values[propertyIndex] !== ABSENT_VALUE) {
-        throw JsonDataException(
-          "Multiple values for '${binding.property.name}' at ${reader.path}"
-        )
+        throw JsonDataException("Multiple values for '${binding.property.name}' at ${reader.path}")
       }
 
       values[propertyIndex] = binding.adapter.fromJson(reader)
 
       if (values[propertyIndex] == null && !binding.property.km.returnType.isNullable) {
-        throw Util.unexpectedNull(
-          binding.property.name,
-          binding.jsonName,
-          reader
-        )
+        throw Util.unexpectedNull(binding.property.name, binding.jsonName, reader)
       }
     }
     reader.endObject()
@@ -105,10 +99,7 @@ internal class KotlinJsonAdapter<T>(
         if (!param.declaresDefaultValue) {
           if (!param.isNullable) {
             throw Util.missingProperty(
-              constructor.parameters[i].name,
-              allBindings[i]?.jsonName,
-              reader
-            )
+                constructor.parameters[i].name, allBindings[i]?.jsonName, reader)
           }
           values[i] = null // Replace absent with null.
         }
@@ -144,11 +135,11 @@ internal class KotlinJsonAdapter<T>(
   override fun toString() = "KotlinJsonAdapter(${constructor.type.canonicalName})"
 
   data class Binding<K, P>(
-    val name: String,
-    val jsonName: String?,
-    val adapter: JsonAdapter<P>,
-    val property: KtProperty,
-    val propertyIndex: Int = property.parameter?.index ?: -1
+      val name: String,
+      val jsonName: String?,
+      val adapter: JsonAdapter<P>,
+      val property: KtProperty,
+      val propertyIndex: Int = property.parameter?.index ?: -1
   ) {
 
     fun get(value: K): Any? {
@@ -175,20 +166,19 @@ internal class KotlinJsonAdapter<T>(
 
   /** A simple [Map] that uses parameter indexes instead of sorting or hashing. */
   class IndexedParameterMap(
-    private val parameterKeys: List<KtParameter>,
-    private val parameterValues: Array<Any?>
+      private val parameterKeys: List<KtParameter>,
+      private val parameterValues: Array<Any?>
   ) : AbstractMutableMap<KtParameter, Any?>() {
 
     override fun put(key: KtParameter, value: Any?): Any? = null
 
     override val entries: MutableSet<MutableMap.MutableEntry<KtParameter, Any?>>
       get() {
-        val allPossibleEntries = parameterKeys.mapIndexed { index, value ->
-          SimpleEntry<KtParameter, Any?>(value, parameterValues[index])
-        }
-        return allPossibleEntries.filterTo(mutableSetOf()) {
-          it.value !== ABSENT_VALUE
-        }
+        val allPossibleEntries =
+            parameterKeys.mapIndexed { index, value ->
+              SimpleEntry<KtParameter, Any?>(value, parameterValues[index])
+            }
+        return allPossibleEntries.filterTo(mutableSetOf()) { it.value !== ABSENT_VALUE }
       }
 
     override fun containsKey(key: KtParameter) = parameterValues[key.index] !== ABSENT_VALUE
@@ -201,8 +191,11 @@ internal class KotlinJsonAdapter<T>(
 }
 
 public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
-  override fun create(type: Type, annotations: MutableSet<out Annotation>, moshi: Moshi):
-    JsonAdapter<*>? {
+  override fun create(
+      type: Type,
+      annotations: MutableSet<out Annotation>,
+      moshi: Moshi
+  ): JsonAdapter<*>? {
     if (annotations.isNotEmpty()) return null
 
     val rawType = Types.getRawType(type)
@@ -228,12 +221,8 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
 
     val kmClass = rawType.header()?.toKmClass() ?: return null
 
-    require(!Flag.IS_ABSTRACT(kmClass.flags)) {
-      "Cannot serialize abstract class ${rawType.name}"
-    }
-    require(!Flag.Class.IS_INNER(kmClass.flags)) {
-      "Cannot serialize inner class ${rawType.name}"
-    }
+    require(!Flag.IS_ABSTRACT(kmClass.flags)) { "Cannot serialize abstract class ${rawType.name}" }
+    require(!Flag.Class.IS_INNER(kmClass.flags)) { "Cannot serialize inner class ${rawType.name}" }
     require(!Flag.Class.IS_OBJECT(kmClass.flags)) {
       "Cannot serialize object declaration ${rawType.name}"
     }
@@ -247,12 +236,13 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
     val ktConstructor = KtConstructor.primary(rawType, kmClass) ?: return null
 
     // TODO this doesn't cover platform types
-    val allPropertiesSequence = kmClass.properties.asSequence() +
-      generateSequence(rawType) { it.superclass }
-        .mapNotNull { it.header()?.toKmClass() }
-        .flatMap { it.properties.asSequence() }
-        .filterNot { Flag.IS_PRIVATE(it.flags) || Flag.IS_PRIVATE_TO_THIS(it.flags) }
-        .filter { Flag.Property.IS_VAR(it.flags) }
+    val allPropertiesSequence =
+        kmClass.properties.asSequence() +
+            generateSequence(rawType) { it.superclass }
+                .mapNotNull { it.header()?.toKmClass() }
+                .flatMap { it.properties.asSequence() }
+                .filterNot { Flag.IS_PRIVATE(it.flags) || Flag.IS_PRIVATE_TO_THIS(it.flags) }
+                .filter { Flag.Property.IS_VAR(it.flags) }
 
     val signatureSearcher = JvmSignatureSearcher(rawType)
     val bindingsByName = LinkedHashMap<String, KotlinJsonAdapter.Binding<Any, Any?>>()
@@ -283,32 +273,28 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
       val setterMethod = signatureSearcher.setter(property)
       val annotationsMethod = signatureSearcher.syntheticMethodForAnnotations(property)
 
-      val ktProperty = KtProperty(
-        km = property,
-        jvmField = propertyField,
-        jvmGetter = getterMethod,
-        jvmSetter = setterMethod,
-        jvmAnnotationsMethod = annotationsMethod,
-        parameter = ktParameter
-      )
+      val ktProperty =
+          KtProperty(
+              km = property,
+              jvmField = propertyField,
+              jvmGetter = getterMethod,
+              jvmSetter = setterMethod,
+              jvmAnnotationsMethod = annotationsMethod,
+              parameter = ktParameter)
       val allAnnotations = ktProperty.annotations.toMutableList()
       val jsonAnnotation = allAnnotations.filterIsInstance<Json>().firstOrNull()
 
       val name = jsonAnnotation?.name ?: property.name
       val resolvedPropertyType = resolve(type, rawType, ktProperty.javaType)
-      val adapter = moshi.adapter<Any>(
-        resolvedPropertyType,
-        Util.jsonAnnotations(allAnnotations.toTypedArray()),
-        property.name
-      )
+      val adapter =
+          moshi.adapter<Any>(
+              resolvedPropertyType,
+              Util.jsonAnnotations(allAnnotations.toTypedArray()),
+              property.name)
 
       @Suppress("UNCHECKED_CAST")
-      bindingsByName[property.name] = KotlinJsonAdapter.Binding(
-        name,
-        jsonAnnotation?.name ?: name,
-        adapter,
-        ktProperty
-      )
+      bindingsByName[property.name] =
+          KotlinJsonAdapter.Binding(name, jsonAnnotation?.name ?: name, adapter, ktProperty)
     }
 
     val bindings = ArrayList<KotlinJsonAdapter.Binding<Any, Any?>?>()
@@ -338,10 +324,10 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
         // Note we don't check abbreviatedType because typealiases and their backing types are equal
         // for our purposes.
         arguments valueEquals other.arguments &&
-          classifier == other.classifier &&
-          flags == other.flags &&
-          flexibleTypeUpperBound valueEquals other.flexibleTypeUpperBound &&
-          outerType valueEquals other.outerType
+            classifier == other.classifier &&
+            flags == other.flags &&
+            flexibleTypeUpperBound valueEquals other.flexibleTypeUpperBound &&
+            outerType valueEquals other.outerType
       }
       else -> false
     }
@@ -368,21 +354,19 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
     return when {
       this === other -> true
       this != null && other != null -> {
-        variance == other.variance &&
-          type valueEquals other.type
+        variance == other.variance && type valueEquals other.type
       }
       else -> false
     }
   }
 
   private infix fun KmFlexibleTypeUpperBound?.valueEquals(
-    other: KmFlexibleTypeUpperBound?
+      other: KmFlexibleTypeUpperBound?
   ): Boolean {
     return when {
       this === other -> true
       this != null && other != null -> {
-        typeFlexibilityId == other.typeFlexibilityId &&
-          type valueEquals other.type
+        typeFlexibilityId == other.typeFlexibilityId && type valueEquals other.type
       }
       else -> false
     }
@@ -393,14 +377,13 @@ private fun Class<*>.header(): KotlinClassHeader? {
   val metadata = getAnnotation(KOTLIN_METADATA) ?: return null
   return with(metadata) {
     KotlinClassHeader(
-      kind = kind,
-      metadataVersion = metadataVersion,
-      data1 = data1,
-      data2 = data2,
-      extraString = extraString,
-      packageName = packageName,
-      extraInt = extraInt
-    )
+        kind = kind,
+        metadataVersion = metadataVersion,
+        data1 = data1,
+        data2 = data2,
+        extraString = extraString,
+        packageName = packageName,
+        extraInt = extraInt)
   }
 }
 
@@ -415,29 +398,17 @@ private fun KotlinClassHeader.toKmClass(): KmClass? {
 
 private class JvmSignatureSearcher(private val clazz: Class<*>) {
 
-  fun syntheticMethodForAnnotations(
-    kmProperty: KmProperty
-  ): Method? = kmProperty.syntheticMethodForAnnotations?.let { signature ->
-    findMethod(clazz, signature)
-  }
+  fun syntheticMethodForAnnotations(kmProperty: KmProperty): Method? =
+      kmProperty.syntheticMethodForAnnotations?.let { signature -> findMethod(clazz, signature) }
 
-  fun getter(
-    kmProperty: KmProperty
-  ): Method? = kmProperty.getterSignature?.let { signature ->
-    findMethod(clazz, signature)
-  }
+  fun getter(kmProperty: KmProperty): Method? =
+      kmProperty.getterSignature?.let { signature -> findMethod(clazz, signature) }
 
-  fun setter(
-    kmProperty: KmProperty
-  ): Method? = kmProperty.setterSignature?.let { signature ->
-    findMethod(clazz, signature)
-  }
+  fun setter(kmProperty: KmProperty): Method? =
+      kmProperty.setterSignature?.let { signature -> findMethod(clazz, signature) }
 
-  fun field(
-    kmProperty: KmProperty
-  ): Field? = kmProperty.fieldSignature?.let { signature ->
-    findField(clazz, signature)
-  }
+  fun field(kmProperty: KmProperty): Field? =
+      kmProperty.fieldSignature?.let { signature -> findField(clazz, signature) }
 
   private fun findMethod(sourceClass: Class<*>, signature: JvmMethodSignature): Method {
     val parameterTypes = signature.decodeParameterTypes()

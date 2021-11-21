@@ -14,6 +14,4 @@
  * limitations under the License.
  */
 
-plugins {
-  kotlin("jvm")
-}
+plugins { kotlin("jvm") }
