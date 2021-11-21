@@ -60,7 +60,7 @@ spotless {
     licenseHeaderFile("spotless/spotless.java")
   }
   kotlin {
-    ktlint(libs.versions.ktlint.get()).userData(mapOf("indent_size" to "2"))
+    ktfmt("0.30")
     target("**/*.kt")
     trimTrailingWhitespace()
     endWithNewline()
@@ -77,7 +77,7 @@ spotless {
 //    configureCommonKotlinFormat()
 //  }
   kotlinGradle {
-    ktlint(libs.versions.ktlint.get()).userData(mapOf("indent_size" to "2"))
+    ktfmt("0.30")
     target("**/*.gradle.kts")
     trimTrailingWhitespace()
     endWithNewline()
