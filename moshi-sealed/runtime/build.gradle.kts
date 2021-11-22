@@ -22,6 +22,7 @@ plugins {
 dependencies {
   api(libs.moshi.adapters)
   api(libs.moshi)
+  api(libs.moshi.kotlin)
 
   testImplementation(libs.junit)
   testImplementation(libs.truth)
