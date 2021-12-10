@@ -27,9 +27,9 @@ val useKsp = findProperty("moshix.useKsp")?.toString()?.toBoolean() ?: false
 dependencies {
   if (useKsp) {
     ksp(project(":moshi-sealed:codegen"))
-    ksp(project(":moshi-ksp:moshi-ksp"))
+    ksp(libs.moshi.codegen)
     kspTest(project(":moshi-sealed:codegen"))
-    kspTest(project(":moshi-ksp:moshi-ksp"))
+    kspTest(libs.moshi.codegen)
   } else {
     kapt(project(":moshi-sealed:codegen"))
     kapt(libs.moshi.codegen)
@@ -48,15 +48,10 @@ dependencies {
 }
 
 val generatedAnnotation = "javax.annotation.processing.Generated"
-ksp {
-  arg("moshi.generated", generatedAnnotation)
-}
 
-kapt {
-  arguments {
-    arg("moshi.generated", generatedAnnotation)
-  }
-}
+ksp { arg("moshi.generated", generatedAnnotation) }
+
+kapt { arguments { arg("moshi.generated", generatedAnnotation) } }
 
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {

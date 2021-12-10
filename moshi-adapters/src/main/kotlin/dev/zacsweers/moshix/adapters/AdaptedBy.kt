@@ -27,8 +27,8 @@ import kotlin.annotation.AnnotationTarget.PROPERTY
 import kotlin.reflect.KClass
 
 /**
- * An annotation that indicates the Moshi [JsonAdapter] or [JsonAdapter.Factory] to use
- * with a class or property. The adapter class must have a public default constructor.
+ * An annotation that indicates the Moshi [JsonAdapter] or [JsonAdapter.Factory] to use with a class
+ * or property. The adapter class must have a public default constructor.
  *
  * Here is an example of how this annotation is used:
  * ```
@@ -55,8 +55,8 @@ import kotlin.reflect.KClass
  * }
  * ```
  *
- * Since `User` class specified `UserJsonAdapter` in `@AdaptedBy` annotation, it
- * will be invoked to encode/decode `User` instances.
+ * Since `User` class specified `UserJsonAdapter` in `@AdaptedBy` annotation, it will be invoked to
+ * encode/decode `User` instances.
  *
  * Here is an example of how to apply this annotation to a property as a [JsonQualifier].
  *
@@ -66,21 +66,17 @@ import kotlin.reflect.KClass
  * )
  * ```
  *
- * The class referenced by this annotation must be either a [JsonAdapter]
- * or a [JsonAdapter.Factory].
- * Using [JsonAdapter.Factory] makes it possible to delegate
- * to the enclosing [Moshi] instance.
+ * The class referenced by this annotation must be either a [JsonAdapter] or a [JsonAdapter.Factory]
+ * . Using [JsonAdapter.Factory] makes it possible to delegate to the enclosing [Moshi] instance.
  *
  * @property adapter Either a [JsonAdapter] or [JsonAdapter.Factory].
- * @property nullSafe Set to false to be able to handle null values within the adapter, default value is true.
+ * @property nullSafe Set to false to be able to handle null values within the adapter, default
+ * value is true.
  */
 @JsonQualifier
 @Retention(RUNTIME)
 @Target(CLASS, PROPERTY, FIELD)
-public annotation class AdaptedBy(
-  val adapter: KClass<*>,
-  val nullSafe: Boolean = true
-) {
+public annotation class AdaptedBy(val adapter: KClass<*>, val nullSafe: Boolean = true) {
   public class Factory : JsonAdapter.Factory {
     override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
       var adaptedBy: AdaptedBy?
@@ -103,23 +99,22 @@ public annotation class AdaptedBy(
       if (adaptedBy == null) return null
       val adapterClass = adaptedBy.adapter
       val javaClass = adapterClass.java
-      val adapter = when {
-        JsonAdapter.Factory::class.java.isAssignableFrom(javaClass) -> {
-          val factory = javaClass.getDeclaredConstructor()
-            .newInstance() as JsonAdapter.Factory
-          factory.create(type, nextAnnotations.orEmpty(), moshi)
-        }
-        JsonAdapter::class.java.isAssignableFrom(javaClass) -> {
-          javaClass.getDeclaredConstructor()
-            .newInstance() as JsonAdapter<*>
-        }
-        else -> {
-          error(
-            "Invalid attempt to bind an instance of ${javaClass.name} as a @AdaptedBy for $type. @AdaptedBy " +
-              "value must be a JsonAdapter or JsonAdapter.Factory."
-          )
-        }
-      } ?: return null
+      val adapter =
+          when {
+            JsonAdapter.Factory::class.java.isAssignableFrom(javaClass) -> {
+              val factory = javaClass.getDeclaredConstructor().newInstance() as JsonAdapter.Factory
+              factory.create(type, nextAnnotations.orEmpty(), moshi)
+            }
+            JsonAdapter::class.java.isAssignableFrom(javaClass) -> {
+              javaClass.getDeclaredConstructor().newInstance() as JsonAdapter<*>
+            }
+            else -> {
+              error(
+                  "Invalid attempt to bind an instance of ${javaClass.name} as a @AdaptedBy for $type. @AdaptedBy " +
+                      "value must be a JsonAdapter or JsonAdapter.Factory.")
+            }
+          }
+              ?: return null
 
       return if (adaptedBy.nullSafe) {
         adapter.nullSafe()

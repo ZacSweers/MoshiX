@@ -172,7 +172,6 @@ See `JavaSealedJsonAdapterFactory`.  Requires JDK 16 + `--enable-preview`.
 ```java
 Moshi moshi = new Moshi.Builder()
     .add(new JavaSealedJsonAdapterFactory())
-    .add(new RecordsJsonAdapterFactory())
     .build();
 
 @JsonClass(generateAdapter = true, generator = "sealed:type")

@@ -30,6 +30,5 @@ sealed class Message {
   @JsonClass(generateAdapter = true)
   data class Error(val error_logs: Map<String, Any>) : Message()
 
-  @DefaultObject
-  object Unknown : Message()
+  @DefaultObject object Unknown : Message()
 }

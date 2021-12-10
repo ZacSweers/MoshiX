@@ -33,88 +33,83 @@ import retrofit2.http.GET
 class JsonStringTest {
   @Test
   fun simpleCase() {
-    //language=JSON
+    // language=JSON
     val json = "{\"type\":1,\"rawJson\":{\"a\":2,\"b\":3,\"c\":[1,2,3]}}"
 
-    val moshi = Builder()
-      .add(JsonString.Factory())
-      .build()
+    val moshi = Builder().add(JsonString.Factory()).build()
 
     val example = moshi.adapter<ExampleClass>().fromJson(json)!!
 
     assertThat(example.type).isEqualTo(1)
 
-    //language=JSON
+    // language=JSON
     assertThat(example.rawJson).isEqualTo("{\"a\":2,\"b\":3,\"c\":[1,2,3]}")
   }
 
   @JsonClass(generateAdapter = true)
   data class ExampleClass(
-    val type: Int,
-    @JsonString val rawJson: String,
+      val type: Int,
+      @JsonString val rawJson: String,
   )
 
   @Test
   fun nullableCase() {
-    //language=JSON
+    // language=JSON
     val json = "{\"type\":1,\"rawJson\":null}"
 
-    val moshi = Builder()
-      .add(JsonString.Factory())
-      .build()
+    val moshi = Builder().add(JsonString.Factory()).build()
 
     val example = moshi.adapter<NullableExampleClass>().fromJson(json)!!
 
     assertThat(example.type).isEqualTo(1)
 
-    //language=JSON
+    // language=JSON
     assertThat(example.rawJson).isNull()
   }
 
   @JsonClass(generateAdapter = true)
   data class NullableExampleClass(
-    val type: Int,
-    @JsonString val rawJson: String?,
+      val type: Int,
+      @JsonString val rawJson: String?,
   )
 
   @Test
   fun retrofitServiceMethodCase() {
-    //language=JSON
+    // language=JSON
     val json = "{\"a\":2,\"b\":3,\"c\":[1,2,3]}"
 
-    val moshi = Builder()
-      .add(JsonString.Factory())
-      .build()
+    val moshi = Builder().add(JsonString.Factory()).build()
 
     val server = MockWebServer()
     server.enqueue(MockResponse().setBody(json))
     server.enqueue(MockResponse().setBody(json))
     server.start()
 
-    val aService = Retrofit.Builder()
-      .baseUrl(server.url("/"))
-      .addConverterFactory(MoshiConverterFactory.create(moshi))
-      .build()
-      .create<AService>()
+    val aService =
+        Retrofit.Builder()
+            .baseUrl(server.url("/"))
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create<AService>()
 
     assertThat(aService.aJsonStringMethod().execute().body()).isEqualTo(json)
 
-    val exception = assertThrows(JsonDataException::class.java) {
-      aService.aNonJsonStringMethod().execute().body()
-    }
+    val exception =
+        assertThrows(JsonDataException::class.java) {
+          aService.aNonJsonStringMethod().execute().body()
+        }
 
-    assertThat(exception).hasMessageThat().contains("Expected a string but was BEGIN_OBJECT at path \$")
+    assertThat(exception)
+        .hasMessageThat()
+        .contains("Expected a string but was BEGIN_OBJECT at path \$")
 
     server.shutdown()
   }
 
   interface AService {
 
-    @JsonString
-    @GET("/")
-    fun aJsonStringMethod(): Call<String>
+    @JsonString @GET("/") fun aJsonStringMethod(): Call<String>
 
-    @GET("/")
-    fun aNonJsonStringMethod(): Call<String>
+    @GET("/") fun aNonJsonStringMethod(): Call<String>
   }
 }

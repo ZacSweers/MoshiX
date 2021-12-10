@@ -23,23 +23,23 @@ import com.squareup.moshi.JsonReader.Token
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.nextAnnotations
-import okio.Buffer
-import okio.blackholeSink
-import okio.buffer
 import java.lang.reflect.Type
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
 import kotlin.annotation.AnnotationTarget.FUNCTION
 import kotlin.annotation.AnnotationTarget.PROPERTY
+import okio.Buffer
+import okio.blackholeSink
+import okio.buffer
 
 /**
  * An annotation to help track unknown keys in JSON.
  *
- * Note that this adapter is slow because it must parse the entire JSON object ahead of time, then writes and re-reads
- * it.
+ * Note that this adapter is slow because it must parse the entire JSON object ahead of time, then
+ * writes and re-reads it.
  *
- * In general, it is not recommended to use this adapter in production unless absolutely necessary or to sample its
- * usage. This should be used for debugging/logging information only.
+ * In general, it is not recommended to use this adapter in production unless absolutely necessary
+ * or to sample its usage. This should be used for debugging/logging information only.
  *
  * Usage:
  * ```
@@ -66,27 +66,35 @@ public annotation class TrackUnknownKeys {
   }
 
   /**
-   * @param shouldTrack a function to compute if a given class and annotation set should be tracked. Defaults to
+   * @param shouldTrack a function to compute if a given class and annotation set should be tracked.
+   * Defaults to
+   * ```
    *                    checking for the [TrackUnknownKeys] annotation.
-   * @param tracker a callback function for tracking unknown names for a given class.
+   * @param tracker
+   * ```
+   * a callback function for tracking unknown names for a given class.
    */
   public class Factory(
-    private val shouldTrack: (clazz: Class<*>, annotations: Set<Annotation>) -> Boolean = { _, _ -> true },
-    private val tracker: UnknownKeysTracker
+      private val shouldTrack: (clazz: Class<*>, annotations: Set<Annotation>) -> Boolean =
+          { _, _ ->
+        true
+      },
+      private val tracker: UnknownKeysTracker
   ) : JsonAdapter.Factory {
     override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
       if (type !is Class<*>) return null
       val nextAnnotations = annotations.nextAnnotations<TrackUnknownKeys>()
-      if (nextAnnotations == null && !type.isAnnotationPresent(TrackUnknownKeys::class.java)) return null
+      if (nextAnnotations == null && !type.isAnnotationPresent(TrackUnknownKeys::class.java))
+          return null
       if (!shouldTrack(type, annotations)) return null
       val delegate = moshi.nextAdapter<Any>(this, type, nextAnnotations ?: annotations)
       return TrackUnknownKeysJsonAdapter(delegate, type, tracker)
     }
 
     private class TrackUnknownKeysJsonAdapter<T>(
-      private val delegate: JsonAdapter<T>,
-      private val clazz: Class<*>,
-      private val tracker: UnknownKeysTracker
+        private val delegate: JsonAdapter<T>,
+        private val clazz: Class<*>,
+        private val tracker: UnknownKeysTracker
     ) : JsonAdapter<T>() {
       override fun fromJson(reader: JsonReader): T? {
         val token = reader.peek()

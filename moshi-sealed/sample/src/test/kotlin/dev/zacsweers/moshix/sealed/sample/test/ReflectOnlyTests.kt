@@ -34,27 +34,24 @@ class ReflectOnlyTests(type: Type) {
 
   enum class Type(val moshi: Moshi = Moshi.Builder().build()) {
     REFLECT(
-      moshi = Moshi.Builder()
-        .add(MoshiSealedJsonAdapterFactory())
-        .addLast(KotlinJsonAdapterFactory())
-        .build()
-    ),
+        moshi =
+            Moshi.Builder()
+                .add(MoshiSealedJsonAdapterFactory())
+                .addLast(KotlinJsonAdapterFactory())
+                .build()),
     METADATA_REFLECT(
-      moshi = Moshi.Builder()
-        .add(MetadataMoshiSealedJsonAdapterFactory())
-        .addLast(KotlinJsonAdapterFactory())
-        .build()
-    )
+        moshi =
+            Moshi.Builder()
+                .add(MetadataMoshiSealedJsonAdapterFactory())
+                .addLast(KotlinJsonAdapterFactory())
+                .build())
   }
 
   companion object {
     @JvmStatic
     @Parameterized.Parameters(name = "{0}")
     fun data(): Collection<Array<*>> {
-      return listOf(
-        arrayOf(Type.REFLECT),
-        arrayOf(Type.METADATA_REFLECT)
-      )
+      return listOf(arrayOf(Type.REFLECT), arrayOf(Type.METADATA_REFLECT))
     }
   }
 
@@ -72,11 +69,9 @@ class ReflectOnlyTests(type: Type) {
 
   @JsonClass(generateAdapter = false, generator = "sealed:type")
   sealed class DuplicateLabels {
-    @TypeLabel("a")
-    class TypeA : DuplicateLabels()
+    @TypeLabel("a") class TypeA : DuplicateLabels()
 
-    @TypeLabel("a")
-    class TypeB : DuplicateLabels()
+    @TypeLabel("a") class TypeB : DuplicateLabels()
   }
 
   @Test
@@ -91,11 +86,9 @@ class ReflectOnlyTests(type: Type) {
 
   @JsonClass(generateAdapter = false, generator = "sealed:type")
   sealed class DuplicateAlternateLabels {
-    @TypeLabel("a", alternateLabels = ["aa"])
-    class TypeA : DuplicateAlternateLabels()
+    @TypeLabel("a", alternateLabels = ["aa"]) class TypeA : DuplicateAlternateLabels()
 
-    @TypeLabel("b", alternateLabels = ["aa"])
-    class TypeB : DuplicateAlternateLabels()
+    @TypeLabel("b", alternateLabels = ["aa"]) class TypeB : DuplicateAlternateLabels()
   }
 
   @Test
@@ -104,18 +97,19 @@ class ReflectOnlyTests(type: Type) {
       moshi.adapter<GenericSubtypes<String>>()
       fail()
     } catch (e: IllegalStateException) {
-      assertThat(e).hasMessageThat().contains("Moshi-sealed subtypes cannot be generic: class dev.zacsweers.moshix.sealed.sample.test.ReflectOnlyTests\$GenericSubtypes\$TypeB")
+      assertThat(e)
+          .hasMessageThat()
+          .contains(
+              "Moshi-sealed subtypes cannot be generic: class dev.zacsweers.moshix.sealed.sample.test.ReflectOnlyTests\$GenericSubtypes\$TypeB")
     }
   }
 
   @JsonClass(generateAdapter = false, generator = "sealed:type")
   sealed class GenericSubtypes<T> {
     // This form is ok
-    @TypeLabel("a")
-    class TypeA : GenericSubtypes<String>()
+    @TypeLabel("a") class TypeA : GenericSubtypes<String>()
 
     // This form is not ok
-    @TypeLabel("b")
-    class TypeB<T> : GenericSubtypes<T>()
+    @TypeLabel("b") class TypeB<T> : GenericSubtypes<T>()
   }
 }

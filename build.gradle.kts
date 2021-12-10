@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
+import java.net.URL
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.net.URL
 
 buildscript {
   dependencies {
-    classpath(kotlin("gradle-plugin", version = (System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.30")))
+    classpath(
+        kotlin(
+            "gradle-plugin",
+            version = (System.getenv()["MOSHIX_KOTLIN"] ?: libs.versions.kotlin.get())))
   }
 }
 
 plugins {
-  kotlin("jvm") version (System.getenv()["MOSHIX_KOTLIN"] ?: "1.5.30") apply false
+  kotlin("jvm") version (System.getenv()["MOSHIX_KOTLIN"] ?: libs.versions.kotlin.get()) apply false
   alias(libs.plugins.dokka) apply false
   alias(libs.plugins.mavenPublish) apply false
   alias(libs.plugins.spotless)
@@ -34,14 +37,13 @@ plugins {
 }
 
 apiValidation {
-  ignoredProjects.addAll(
-    listOf(
-      /* :moshi-ksp: */ "extra-moshi-test-module",
-      /* :moshi-ksp: */ "tests",
-      /* :moshi-sealed: */ "sample"
-    )
-  )
+  ignoredProjects +=
+      listOf(
+          /* :moshi-sealed: */
+          "sample")
 }
+
+repositories { mavenCentral() }
 
 spotless {
   format("misc") {
@@ -53,35 +55,33 @@ spotless {
   java {
     googleJavaFormat(libs.versions.gjf.get())
     target("**/*.java")
-    targetExclude(
-      "**/spotless.java",
-      "**/build/**"
-    )
+    targetExclude("**/spotless.java", "**/build/**")
     licenseHeaderFile("spotless/spotless.java")
   }
   kotlin {
-    ktlint(libs.versions.ktlint.get()).userData(mapOf("indent_size" to "2"))
+    ktfmt("0.30")
     target("**/*.kt")
     trimTrailingWhitespace()
     endWithNewline()
-    licenseHeaderFile("spotless/spotless.kt")
-      .updateYearWithLatest(false)
+    licenseHeaderFile("spotless/spotless.kt").updateYearWithLatest(false)
     targetExclude(
-      "**/Dependencies.kt", "**/spotless.kt", "**/build/**", "**/moshi-ksp/tests/**",
-      "**/moshi-ksp/moshi-ksp/src/main/kotlin/dev/zacsweers/moshix/ksp/shade/**"
+        "**/Dependencies.kt",
+        "**/spotless.kt",
+        "**/build/**",
     )
   }
-//  format("externalKotlin", KotlinExtension::class.java) {
-//    // These don't use our spotless config for header files since we don't want to overwrite the
-//    // existing copyright headers.
-//    configureCommonKotlinFormat()
-//  }
+  //  format("externalKotlin", KotlinExtension::class.java) {
+  //    // These don't use our spotless config for header files since we don't want to overwrite the
+  //    // existing copyright headers.
+  //    configureCommonKotlinFormat()
+  //  }
   kotlinGradle {
-    ktlint(libs.versions.ktlint.get()).userData(mapOf("indent_size" to "2"))
+    ktfmt("0.30")
     target("**/*.gradle.kts")
     trimTrailingWhitespace()
     endWithNewline()
-    licenseHeaderFile("spotless/spotless.kts", "(import|plugins|buildscript|dependencies|pluginManagement)")
+    licenseHeaderFile(
+        "spotless/spotless.kts", "(import|plugins|buildscript|dependencies|pluginManagement)")
   }
 }
 
@@ -89,7 +89,8 @@ subprojects {
   repositories {
     mavenCentral()
     google()
-    // Kotlin bootstrap repository, useful for testing against Kotlin dev builds. Usually only tested on CI shadow jobs
+    // Kotlin bootstrap repository, useful for testing against Kotlin dev builds. Usually only
+    // tested on CI shadow jobs
     // https://kotlinlang.slack.com/archives/C0KLZSCHF/p1616514468003200?thread_ts=1616509748.001400&cid=C0KLZSCHF
     maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap") {
       name = "Kotlin-Bootstrap"
@@ -99,35 +100,29 @@ subprojects {
       }
     }
   }
-  val toolChainVersion = project.findProperty("moshix.javaLanguageVersion")?.toString() ?: "8"
   val releaseVersion = project.findProperty("moshix.javaReleaseVersion")?.toString() ?: "8"
   val release = releaseVersion.toInt()
   pluginManager.withPlugin("java") {
-    configure<JavaPluginExtension> {
-      toolchain {
-        languageVersion.set(JavaLanguageVersion.of(toolChainVersion))
-      }
-    }
+    configure<JavaPluginExtension> { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
 
-    project.tasks.withType<JavaCompile>().configureEach {
-      options.release.set(release)
-    }
+    project.tasks.withType<JavaCompile>().configureEach { options.release.set(release) }
   }
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
     tasks.withType<KotlinCompile>().configureEach {
       kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
         @Suppress("SuspiciousCollectionReassignment")
-        freeCompilerArgs += listOf("-Xjsr305=strict", "-progressive", "-Xopt-in=kotlin.RequiresOptIn")
+        freeCompilerArgs +=
+            listOf("-Xjsr305=strict", "-progressive", "-Xopt-in=kotlin.RequiresOptIn")
         // TODO disabled because Gradle's Kotlin handling is silly
         //  https://github.com/gradle/gradle/issues/16779
-//        allWarningsAsErrors = true
+        //        allWarningsAsErrors = true
       }
     }
-    if (project.name != "sample" && !project.path.contains("sample") && !project.path.contains("test")) {
-      configure<KotlinProjectExtension> {
-        explicitApi()
-      }
+    if (project.name != "sample" &&
+        !project.path.contains("sample") &&
+        !project.path.contains("test")) {
+      configure<KotlinProjectExtension> { explicitApi() }
     }
   }
   pluginManager.withPlugin("com.vanniktech.maven.publish") {
@@ -136,12 +131,8 @@ subprojects {
       outputDirectory.set(rootProject.rootDir.resolve("docs/0.x"))
       dokkaSourceSets.configureEach {
         skipDeprecated.set(true)
-        externalDocumentationLink {
-          url.set(URL("https://square.github.io/okio/2.x/okio/"))
-        }
-        externalDocumentationLink {
-          url.set(URL("https://square.github.io/moshi/1.x/moshi/"))
-        }
+        externalDocumentationLink { url.set(URL("https://square.github.io/okio/2.x/okio/")) }
+        externalDocumentationLink { url.set(URL("https://square.github.io/moshi/1.x/moshi/")) }
       }
     }
   }

@@ -15,25 +15,26 @@
  */
 package dev.zacsweers.moshix.reflect
 
-import kotlinx.metadata.jvm.JvmMethodSignature
 import java.lang.reflect.Constructor
+import kotlinx.metadata.jvm.JvmMethodSignature
 
-private val PRIMITIVE_CLASS_TO_DESC = mapOf(
-  Byte::class.javaPrimitiveType to 'B',
-  Char::class.javaPrimitiveType to 'C',
-  Double::class.javaPrimitiveType to 'D',
-  Float::class.javaPrimitiveType to 'F',
-  Int::class.javaPrimitiveType to 'I',
-  Long::class.javaPrimitiveType to 'J',
-  Short::class.javaPrimitiveType to 'S',
-  Boolean::class.javaPrimitiveType to 'Z',
-  Void::class.javaPrimitiveType to 'V'
-)
+private val PRIMITIVE_CLASS_TO_DESC =
+    mapOf(
+        Byte::class.javaPrimitiveType to 'B',
+        Char::class.javaPrimitiveType to 'C',
+        Double::class.javaPrimitiveType to 'D',
+        Float::class.javaPrimitiveType to 'F',
+        Int::class.javaPrimitiveType to 'I',
+        Long::class.javaPrimitiveType to 'J',
+        Short::class.javaPrimitiveType to 'S',
+        Boolean::class.javaPrimitiveType to 'Z',
+        Void::class.javaPrimitiveType to 'V')
 
 internal val Class<*>.descriptor: String
   get() {
     return when {
-      isPrimitive -> PRIMITIVE_CLASS_TO_DESC[this]?.toString() ?: throw RuntimeException("Unrecognized primitive $this")
+      isPrimitive -> PRIMITIVE_CLASS_TO_DESC[this]?.toString()
+              ?: throw RuntimeException("Unrecognized primitive $this")
       isArray -> "[${componentType.descriptor}"
       else -> "L$name;".replace('.', '/')
     }
@@ -137,10 +138,15 @@ internal fun JvmMethodSignature.decodeParameterTypes(): List<Class<*>> {
 }
 
 /**
- * Returns the JVM signature in the form "<init>$MethodDescriptor", for example: `"<init>(Ljava/lang/Object;)V")`.
+ * Returns the JVM signature in the form "<init>$MethodDescriptor", for example:
+ * `"<init>(Ljava/lang/Object;)V")`.
  *
  * Useful for comparing with [JvmMethodSignature].
  *
- * For reference, see the [JVM specification, section 4.3](http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.3).
+ * For reference, see the
+ * [JVM specification, section 4.3](http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.3)
+ * .
  */
-internal val Constructor<*>.jvmMethodSignature: String get() = "<init>${parameterTypes.joinToString(separator = "", prefix = "(", postfix = ")V") { it.descriptor }}"
+internal val Constructor<*>.jvmMethodSignature: String
+  get() =
+      "<init>${parameterTypes.joinToString(separator = "", prefix = "(", postfix = ")V") { it.descriptor }}"

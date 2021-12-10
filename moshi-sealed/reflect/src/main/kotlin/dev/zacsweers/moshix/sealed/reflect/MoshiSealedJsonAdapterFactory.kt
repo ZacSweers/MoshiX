@@ -31,9 +31,9 @@ private val UNSET = Any()
 
 public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
   override fun create(
-    type: Type,
-    annotations: MutableSet<out Annotation>,
-    moshi: Moshi
+      type: Type,
+      annotations: MutableSet<out Annotation>,
+      moshi: Moshi
   ): JsonAdapter<*>? {
     if (annotations.isNotEmpty()) {
       return null
@@ -64,7 +64,8 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       val labels = mutableMapOf<String, Class<*>>()
       for (sealedSubclass in rawTypeKotlin.sealedSubclasses) {
         val objectInstance = sealedSubclass.objectInstance
-        val isAnnotatedDefaultObject = sealedSubclass.java.isAnnotationPresent(DefaultObject::class.java)
+        val isAnnotatedDefaultObject =
+            sealedSubclass.java.isAnnotationPresent(DefaultObject::class.java)
         if (isAnnotatedDefaultObject) {
           if (objectInstance == null) {
             error("Must be an object type to use as a @DefaultObject: $sealedSubclass")
@@ -74,14 +75,15 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
             if (defaultObjectInstance == null) {
               error("Can not have both @DefaultObject and @DefaultNull: $sealedSubclass")
             } else {
-              error("Can only have one @DefaultObject: $sealedSubclass and ${defaultObjectInstance.javaClass} are both annotated")
+              error(
+                  "Can only have one @DefaultObject: $sealedSubclass and ${defaultObjectInstance.javaClass} are both annotated")
             }
           }
         } else {
-          val labelAnnotation = sealedSubclass.findAnnotation<TypeLabel>()
-            ?: throw IllegalArgumentException(
-              "Sealed subtypes must be annotated with @TypeLabel to define their label ${sealedSubclass.qualifiedName}"
-            )
+          val labelAnnotation =
+              sealedSubclass.findAnnotation<TypeLabel>()
+                  ?: throw IllegalArgumentException(
+                      "Sealed subtypes must be annotated with @TypeLabel to define their label ${sealedSubclass.qualifiedName}")
           val clazz = sealedSubclass.java
 
           check(clazz.typeParameters.isEmpty()) {
@@ -103,30 +105,31 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         }
       }
 
-      val delegateMoshi = if (objectSubtypes.isEmpty()) {
-        moshi
-      } else {
-        moshi.newBuilder()
-          .apply {
-            for ((subtype, instance) in objectSubtypes) {
-              add(subtype, ObjectJsonAdapter(instance))
-            }
+      val delegateMoshi =
+          if (objectSubtypes.isEmpty()) {
+            moshi
+          } else {
+            moshi
+                .newBuilder()
+                .apply {
+                  for ((subtype, instance) in objectSubtypes) {
+                    add(subtype, ObjectJsonAdapter(instance))
+                  }
+                }
+                .build()
           }
-          .build()
-      }
       @Suppress("UNCHECKED_CAST")
       val seed = PolymorphicJsonAdapterFactory.of(rawType as Class<Any>?, typeLabel)
-      val polymorphicFactory = labels.entries
-        .fold(seed) { factory, (label, subtype) ->
-          factory.withSubtype(subtype, label)
-        }
-        .let { factory ->
-          if (defaultObjectInstance !== UNSET) {
-            factory.withDefaultValue(defaultObjectInstance)
-          } else {
-            factory
-          }
-        }
+      val polymorphicFactory =
+          labels.entries
+              .fold(seed) { factory, (label, subtype) -> factory.withSubtype(subtype, label) }
+              .let { factory ->
+                if (defaultObjectInstance !== UNSET) {
+                  factory.withDefaultValue(defaultObjectInstance)
+                } else {
+                  factory
+                }
+              }
 
       return polymorphicFactory.create(rawType, annotations, delegateMoshi)
     }

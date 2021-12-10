@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-plugins {
-  `java-library`
-}
+plugins { `java-library` }
 
 val generatedAnnotation = "javax.annotation.processing.Generated"
 
 dependencies {
   // TODO add when we support it in the processor
-//  annotationProcessor(project(":moshi-sealed:codegen"))
-//  testAnnotationProcessor(project(":moshi-sealed:codegen"))
-  implementation(project(":moshi-records-reflect"))
+  //  annotationProcessor(project(":moshi-sealed:codegen"))
+  //  testAnnotationProcessor(project(":moshi-sealed:codegen"))
+  implementation(libs.moshi)
   implementation(project(":moshi-sealed:java-sealed-reflect"))
   implementation(project(":moshi-sealed:runtime"))
   implementation(libs.moshi.adapters)
-//  implementation(project(":moshi-sealed:reflect"))
+  //  implementation(project(":moshi-sealed:reflect"))
   testImplementation(libs.junit)
   testImplementation(libs.truth)
 }
