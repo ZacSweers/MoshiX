@@ -22,7 +22,6 @@ plugins {
 dependencies {
   implementation(project(":moshi-sealed:runtime"))
   implementation(libs.moshi.adapters)
-  testImplementation(project(":moshi-records-reflect"))
   testImplementation(libs.junit)
   testImplementation(libs.truth)
 }

@@ -31,7 +31,7 @@ tasks.named<KotlinCompile>("compileTestKotlin") {
 
 dependencies {
   implementation(libs.moshi)
-  kspTest(project(":moshi-ksp:moshi-ksp"))
+  kspTest(libs.moshi.codegen)
   testImplementation(libs.moshi.kotlin)
   testImplementation(libs.okhttp)
   testImplementation(libs.okhttp.mockwebserver)

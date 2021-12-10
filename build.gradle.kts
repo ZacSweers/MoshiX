@@ -39,10 +39,6 @@ plugins {
 apiValidation {
   ignoredProjects +=
       listOf(
-          /* :moshi-ksp: */
-          "extra-moshi-test-module",
-          /* :moshi-ksp: */
-          "tests",
           /* :moshi-sealed: */
           "sample")
 }
@@ -72,8 +68,7 @@ spotless {
         "**/Dependencies.kt",
         "**/spotless.kt",
         "**/build/**",
-        "**/moshi-ksp/tests/**",
-        "**/moshi-ksp/moshi-ksp/src/main/kotlin/dev/zacsweers/moshix/ksp/shade/**")
+    )
   }
   //  format("externalKotlin", KotlinExtension::class.java) {
   //    // These don't use our spotless config for header files since we don't want to overwrite the

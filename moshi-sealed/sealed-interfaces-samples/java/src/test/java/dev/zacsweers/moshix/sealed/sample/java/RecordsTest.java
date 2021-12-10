@@ -24,7 +24,6 @@ import com.squareup.moshi.JsonQualifier;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.ToJson;
 import com.squareup.moshi.Types;
-import dev.zacsweers.moshix.records.RecordsJsonAdapterFactory;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.util.Arrays;
@@ -36,7 +35,7 @@ import org.junit.Test;
 
 public final class RecordsTest {
 
-  private final Moshi moshi = new Moshi.Builder().add(new RecordsJsonAdapterFactory()).build();
+  private final Moshi moshi = new Moshi.Builder().build();
 
   @Test
   public void smokeTest() throws IOException {

@@ -22,18 +22,13 @@ import com.google.common.collect.ImmutableMap;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
-import dev.zacsweers.moshix.records.RecordsJsonAdapterFactory;
 import dev.zacsweers.moshix.sealed.java.JavaSealedJsonAdapterFactory;
 import java.io.IOException;
 import org.junit.Test;
 
 public final class JavaSealedJsonAdapterFactoryTest {
 
-  private final Moshi moshi =
-      new Moshi.Builder()
-          .add(new JavaSealedJsonAdapterFactory())
-          .add(new RecordsJsonAdapterFactory())
-          .build();
+  private final Moshi moshi = new Moshi.Builder().add(new JavaSealedJsonAdapterFactory()).build();
 
   @Test
   public void assertDefaultBehavior_interface() throws IOException {

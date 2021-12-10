@@ -22,7 +22,7 @@ dependencies {
   // TODO add when we support it in the processor
   //  annotationProcessor(project(":moshi-sealed:codegen"))
   //  testAnnotationProcessor(project(":moshi-sealed:codegen"))
-  implementation(project(":moshi-records-reflect"))
+  implementation(libs.moshi)
   implementation(project(":moshi-sealed:java-sealed-reflect"))
   implementation(project(":moshi-sealed:runtime"))
   implementation(libs.moshi.adapters)

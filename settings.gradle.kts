@@ -34,30 +34,16 @@ pluginManagement {
 
 rootProject.name = "moshix-root"
 
-include(":moshi-adapters")
-
-include(":moshi-ksp:extra-moshi-test-module")
-
-include(":moshi-ksp:moshi-ksp")
-
-include(":moshi-ksp:tests")
-
-include(":moshi-metadata-reflect")
-
-include(":moshi-records-reflect")
-
-include(":moshi-sealed:codegen")
-
-include(":moshi-sealed:java-sealed-reflect")
-
-include(":moshi-sealed:metadata-reflect")
-
-include(":moshi-sealed:reflect")
-
-include(":moshi-sealed:runtime")
-
-include(":moshi-sealed:sample")
-
-include(":moshi-sealed:sealed-interfaces-samples:java")
+include(
+    ":moshi-adapters",
+    ":moshi-metadata-reflect",
+    ":moshi-sealed:codegen",
+    ":moshi-sealed:java-sealed-reflect",
+    ":moshi-sealed:metadata-reflect",
+    ":moshi-sealed:reflect",
+    ":moshi-sealed:runtime",
+    ":moshi-sealed:sample",
+    ":moshi-sealed:sealed-interfaces-samples:java",
+)
 
 enableFeaturePreview("VERSION_CATALOGS")
