@@ -15,7 +15,7 @@
 [versions]
 autoService = "1.0"
 incap = "0.3"
-gjf = "1.11.0"
+gjf = "1.13.0"
 kotlinCompileTesting = "1.4.6"
 kotlin = "1.6.0"
 javaRelease = "8"
