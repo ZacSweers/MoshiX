@@ -24,19 +24,17 @@ kotlinpoet = "1.10.2"
 ksp = "1.6.0-1.0.1"
 ktlint = "0.41.0"
 moshi = "1.13.0"
-okhttp = "4.9.1"
+okhttp = "4.9.3"
 retrofit = "2.9.0"
 
 [plugins]
-dokka = { id = "org.jetbrains.dokka", version = "1.5.31" }
+dokka = { id = "org.jetbrains.dokka", version = "1.6.0" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.18.0" }
 spotless = { id = "com.diffplug.spotless", version = "6.0.4" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.7.1" }
 
 [libraries]
-asm = { module = "org.ow2.asm:asm", version = "9.2" }
-
 autoCommon = { module = "com.google.auto:auto-common", version = "1.1" }
 
 autoService = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
