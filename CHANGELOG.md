@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Version 0.15.0
+--------------
+
+* Update to Moshi `1.13.0`
+* **Removed:** The `moshi-ksp` artifact has been upstreamed to Moshi itself as is no longer published.
+* **Removed:** The `moshi-records-reflect` artifact has been upstreamed to Moshi itself as is no longer published.
+* Update to Kotlin `1.6.0`
+* Update to KotlinPoet `1.10.2`
+
 Version 0.14.1
 --------------
 
