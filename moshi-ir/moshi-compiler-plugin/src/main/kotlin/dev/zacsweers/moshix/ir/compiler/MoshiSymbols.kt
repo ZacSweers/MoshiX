@@ -29,6 +29,8 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
 import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrPackageFragment
+import org.jetbrains.kotlin.ir.declarations.IrProperty
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.types.IrType
@@ -128,6 +130,17 @@ internal class MoshiSymbols(
                 }
           }
           .symbol
+
+  val arrayGet =
+    pluginContext.irBuiltIns.arrayClass.owner.declarations
+      .filterIsInstance<IrSimpleFunction>()
+      .single { it.name.asString() == "get" }
+
+  val arraySizeGetter =
+    pluginContext.irBuiltIns.arrayClass.owner.declarations
+      .filterIsInstance<IrProperty>()
+      .single { it.name.asString() == "size" }
+      .getter!!
 
   private fun createPackage(packageName: String): IrPackageFragment =
       IrExternalPackageFragmentImpl.createEmptyExternalPackageFragment(
