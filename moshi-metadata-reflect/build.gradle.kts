@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm")
-  alias(libs.plugins.ksp)
+  id("com.google.devtools.ksp")
   id("com.vanniktech.maven.publish")
 }
 
