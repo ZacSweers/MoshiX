@@ -15,6 +15,11 @@
  */
 package dev.zacsweers.moshix.ir.compiler
 
+import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
+import dev.zacsweers.moshix.ir.compiler.util.irConstructorBody
+import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
+import dev.zacsweers.moshix.ir.compiler.util.isSubclassOfFqName
+import dev.zacsweers.moshix.ir.compiler.util.overridesFunctionIn
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
