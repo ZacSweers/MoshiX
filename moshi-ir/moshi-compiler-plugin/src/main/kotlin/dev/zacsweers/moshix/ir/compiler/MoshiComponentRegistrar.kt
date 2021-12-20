@@ -16,7 +16,6 @@
 package dev.zacsweers.moshix.ir.compiler
 
 import com.google.auto.service.AutoService
-//import com.intellij.mock.MockProject
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -29,8 +28,8 @@ import org.jetbrains.kotlin.name.FqName
 public class MoshiComponentRegistrar : ComponentRegistrar {
 
   override fun registerProjectComponents(
-    project: MockProject,
-    configuration: CompilerConfiguration
+      project: MockProject,
+      configuration: CompilerConfiguration
   ) {
 
     if (configuration[KEY_ENABLED] == false) return
@@ -40,8 +39,6 @@ public class MoshiComponentRegistrar : ComponentRegistrar {
     val fqGeneratedAnnotation = configuration[KEY_GENERATED_ANNOTATION]?.let(::FqName)
 
     IrGenerationExtension.registerExtension(
-        project,
-        MoshiIrGenerationExtension(messageCollector, fqGeneratedAnnotation)
-    )
+        project, MoshiIrGenerationExtension(messageCollector, fqGeneratedAnnotation))
   }
 }

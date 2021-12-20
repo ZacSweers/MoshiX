@@ -1,11 +1,11 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright (C) 2020 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package dev.zacsweers.moshix.ir.compiler
 
+import java.util.Locale
+import kotlin.math.abs
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrBuiltIns
@@ -109,31 +110,28 @@ import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.resolve.descriptorUtil.isAnnotationConstructor
 import org.jetbrains.kotlin.types.Variance
 import org.jetbrains.kotlin.utils.Printer
-import java.util.Locale
-import kotlin.math.abs
 
 internal fun IrElement.dumpSrc(): String {
   val sb = StringBuilder()
   accept(IrSourcePrinterVisitor(sb, "%tab%"), null)
-  return sb
-    .toString()
-    // replace tabs at beginning of line with white space
-    .replace(Regex("\\n(%tab%)+", RegexOption.MULTILINE)) {
-      val size = it.range.last - it.range.first - 1
-      "\n" + (0..(size / 5)).joinToString("") { "  " }
-    }
-    // tabs that are inserted in the middle of lines should be replaced with empty strings
-    .replace(Regex("%tab%", RegexOption.MULTILINE), "")
-    // remove empty lines
-    .replace(Regex("\\n(\\s)*$", RegexOption.MULTILINE), "")
-    // brackets with comma on new line
-    .replace(Regex("}\\n(\\s)*,", RegexOption.MULTILINE), "},")
+  return sb.toString()
+      // replace tabs at beginning of line with white space
+      .replace(Regex("\\n(%tab%)+", RegexOption.MULTILINE)) {
+        val size = it.range.last - it.range.first - 1
+        "\n" + (0..(size / 5)).joinToString("") { "  " }
+      }
+      // tabs that are inserted in the middle of lines should be replaced with empty strings
+      .replace(Regex("%tab%", RegexOption.MULTILINE), "")
+      // remove empty lines
+      .replace(Regex("\\n(\\s)*$", RegexOption.MULTILINE), "")
+      // brackets with comma on new line
+      .replace(Regex("}\\n(\\s)*,", RegexOption.MULTILINE), "},")
 }
 
 @Suppress("DEPRECATION")
 internal class IrSourcePrinterVisitor(
-  out: Appendable,
-  indentUnit: String = "  ",
+    out: Appendable,
+    indentUnit: String = "  ",
 ) : IrElementVisitorVoid {
   private val printer = Printer(out, indentUnit)
 
@@ -167,12 +165,12 @@ internal class IrSourcePrinterVisitor(
   }
 
   override fun visitModuleFragment(declaration: IrModuleFragment) {
-//        println("// MODULE: ${declaration.name}")
+    //        println("// MODULE: ${declaration.name}")
     declaration.files.printJoin()
   }
 
   override fun visitFile(declaration: IrFile) {
-//        println("// FILE: ${declaration.fileEntry.name}")
+    //        println("// FILE: ${declaration.fileEntry.name}")
     declaration.declarations.printJoin("\n")
   }
 
@@ -199,10 +197,8 @@ internal class IrSourcePrinterVisitor(
     if (declaration.overriddenSymbols.isNotEmpty()) {
       print("override ")
     } else {
-      if (
-        declaration.visibility != DescriptorVisibilities.PUBLIC &&
-        declaration.visibility != DescriptorVisibilities.LOCAL
-      ) {
+      if (declaration.visibility != DescriptorVisibilities.PUBLIC &&
+          declaration.visibility != DescriptorVisibilities.LOCAL) {
         print(declaration.visibility.toString().toLowerCase(Locale.ROOT))
         print(" ")
       }
@@ -230,9 +226,7 @@ internal class IrSourcePrinterVisitor(
     print(")")
     if (!declaration.returnType.isUnit()) {
       print(": ")
-      print(
-        declaration.returnType.renderSrc()
-      )
+      print(declaration.returnType.renderSrc())
     }
     print(" ")
     declaration.printBody()
@@ -243,9 +237,7 @@ internal class IrSourcePrinterVisitor(
     if (body.statements.isEmpty()) {
       println("{ }")
     } else {
-      bracedBlock {
-        body.print()
-      }
+      bracedBlock { body.print() }
     }
   }
 
@@ -281,9 +273,7 @@ internal class IrSourcePrinterVisitor(
           val fn = arg.symbol.owner
           if (fn.origin == IrBuiltIns.BUILTIN_OPERATOR) {
             when (fn.name.asString()) {
-              "equals",
-              "EQEQ",
-              "EQEQEQ" -> {
+              "equals", "EQEQ", "EQEQEQ" -> {
                 val prevIsInNotCall = isInNotCall
                 isInNotCall = true
                 arg.print()
@@ -294,59 +284,65 @@ internal class IrSourcePrinterVisitor(
           }
         }
       }
-      val opSymbol = when (name) {
-        "contains" -> "in"
-        "equals" -> if (isInNotCall) "!=" else "=="
-        "plus" -> "+"
-        "not" -> "!"
-        "minus" -> "-"
-        "times" -> "*"
-        "div" -> "/"
-        "rem" -> "%"
-        "rangeTo" -> ".."
-        "plusAssign" -> "+="
-        "minusAssign" -> "-="
-        "timesAssign" -> "*="
-        "divAssign" -> "/="
-        "remAssign" -> "%="
-        "inc" -> "++"
-        "dec" -> "--"
-        "greater" -> ">"
-        "less" -> "<"
-        "lessOrEqual" -> "<="
-        "greaterOrEqual" -> ">="
-        "EQEQ" -> if (isInNotCall) "!=" else "=="
-        "EQEQEQ" -> if (isInNotCall) "!==" else "==="
-        "OROR" -> "||"
-        // no names for
-        "invoke", "get", "set" -> ""
-        "iterator", "hasNext", "next", "getValue", "setValue" -> name
-        "CHECK_NOT_NULL" -> "!!"
-        else -> error("Unhandled operator $name")
-      }
+      val opSymbol =
+          when (name) {
+            "contains" -> "in"
+            "equals" -> if (isInNotCall) "!=" else "=="
+            "plus" -> "+"
+            "not" -> "!"
+            "minus" -> "-"
+            "times" -> "*"
+            "div" -> "/"
+            "rem" -> "%"
+            "rangeTo" -> ".."
+            "plusAssign" -> "+="
+            "minusAssign" -> "-="
+            "timesAssign" -> "*="
+            "divAssign" -> "/="
+            "remAssign" -> "%="
+            "inc" -> "++"
+            "dec" -> "--"
+            "greater" -> ">"
+            "less" -> "<"
+            "lessOrEqual" -> "<="
+            "greaterOrEqual" -> ">="
+            "EQEQ" -> if (isInNotCall) "!=" else "=="
+            "EQEQEQ" -> if (isInNotCall) "!==" else "==="
+            "OROR" -> "||"
+            // no names for
+            "invoke",
+            "get",
+            "set" -> ""
+            "iterator", "hasNext", "next", "getValue", "setValue" -> name
+            "CHECK_NOT_NULL" -> "!!"
+            else -> error("Unhandled operator $name")
+          }
 
-      val printBinary = when (name) {
-        "equals",
-        "EQEQ",
-        "EQEQEQ" -> when {
-          expression.dispatchReceiver?.type?.isInt() == true -> true
-          expression.extensionReceiver?.type?.isInt() == true -> true
-          expression.valueArgumentsCount > 0 &&
-            expression.getValueArgument(0)?.type?.isInt() == true -> true
-          else -> false
-        }
-        else -> false
-      }
+      val printBinary =
+          when (name) {
+            "equals", "EQEQ", "EQEQEQ" ->
+                when {
+                  expression.dispatchReceiver?.type?.isInt() == true -> true
+                  expression.extensionReceiver?.type?.isInt() == true -> true
+                  expression.valueArgumentsCount > 0 &&
+                      expression.getValueArgument(0)?.type?.isInt() == true -> true
+                  else -> false
+                }
+            else -> false
+          }
       val prevPrintBinary = printIntsAsBinary
       printIntsAsBinary = printBinary
       when (name) {
         // unary prefx
-        "unaryPlus", "unaryMinus", "not" -> {
+        "unaryPlus",
+        "unaryMinus",
+        "not" -> {
           print(opSymbol)
           (expression.dispatchReceiver ?: expression.extensionReceiver)?.print()
         }
         // unary postfix
-        "inc", "dec" -> {
+        "inc",
+        "dec" -> {
           (expression.dispatchReceiver ?: expression.extensionReceiver)?.print()
           print(opSymbol)
         }
@@ -378,7 +374,12 @@ internal class IrSourcePrinterVisitor(
           expression.getValueArgument(1)?.print()
         }
         // builtin static operators
-        "greater", "less", "lessOrEqual", "greaterOrEqual", "EQEQ", "EQEQEQ" -> {
+        "greater",
+        "less",
+        "lessOrEqual",
+        "greaterOrEqual",
+        "EQEQ",
+        "EQEQEQ" -> {
           expression.getValueArgument(0)?.print()
           print(" $opSymbol ")
           expression.getValueArgument(1)?.print()
@@ -405,8 +406,7 @@ internal class IrSourcePrinterVisitor(
       if (name == "xor" || name == "and" || name == "or") {
         printIntsAsBinary = true
       }
-      expression.dispatchReceiver?.print()
-        ?: expression.extensionReceiver?.print()
+      expression.dispatchReceiver?.print() ?: expression.extensionReceiver?.print()
       print(" $name ")
       expression.getValueArgument(0)?.print()
       printIntsAsBinary = prev
@@ -415,12 +415,10 @@ internal class IrSourcePrinterVisitor(
 
     val dispatchReceiver = expression.dispatchReceiver
     val extensionReceiver = expression.extensionReceiver
-    val dispatchIsSpecial = dispatchReceiver.let {
-      it is IrGetValue && it.symbol.owner.name.isSpecial
-    }
-    val extensionIsSpecial = extensionReceiver.let {
-      it is IrGetValue && it.symbol.owner.name.isSpecial
-    }
+    val dispatchIsSpecial =
+        dispatchReceiver.let { it is IrGetValue && it.symbol.owner.name.isSpecial }
+    val extensionIsSpecial =
+        extensionReceiver.let { it is IrGetValue && it.symbol.owner.name.isSpecial }
 
     if (dispatchReceiver != null && !dispatchIsSpecial) {
       dispatchReceiver.print()
@@ -448,14 +446,13 @@ internal class IrSourcePrinterVisitor(
   private fun IrAnnotationContainer.printAnnotations(onePerLine: Boolean = false) {
     if (annotations.isNotEmpty()) {
       annotations.printJoin(if (onePerLine) "\n" else " ")
-      if (onePerLine) println()
-      else print(" ")
+      if (onePerLine) println() else print(" ")
     }
   }
 
   private fun IrFunctionAccessExpression.printArgumentList(
-    forceParameterNames: Boolean = false,
-    forceSingleLine: Boolean = false
+      forceParameterNames: Boolean = false,
+      forceSingleLine: Boolean = false
   ) {
     val arguments = mutableListOf<IrExpression>()
     val paramNames = mutableListOf<String>()
@@ -465,11 +462,10 @@ internal class IrSourcePrinterVisitor(
       val arg = getValueArgument(i)
       if (arg != null) {
         val param = symbol.owner.valueParameters[i]
-        val isTrailingLambda = i == symbol.owner.valueParameters.size - 1 &&
-          (
-            arg is IrFunctionExpression ||
-              (arg is IrBlock && arg.origin == IrStatementOrigin.LAMBDA)
-            )
+        val isTrailingLambda =
+            i == symbol.owner.valueParameters.size - 1 &&
+                (arg is IrFunctionExpression ||
+                    (arg is IrBlock && arg.origin == IrStatementOrigin.LAMBDA))
         if (isTrailingLambda) {
           trailingLambda = arg
         } else {
@@ -533,9 +529,7 @@ internal class IrSourcePrinterVisitor(
     } else {
       println()
     }
-    indented {
-      body?.print()
-    }
+    indented { body?.print() }
     println()
     println("}")
   }
@@ -590,22 +584,22 @@ internal class IrSourcePrinterVisitor(
     }
     print(name)
 
-    val printArgumentList = if (!isAnnotation) true else {
-      var hasArguments = false
-      for (i in 0 until expression.valueArgumentsCount) {
-        val arg = expression.getValueArgument(i)
-        if (arg != null) {
-          hasArguments = true
-          break
+    val printArgumentList =
+        if (!isAnnotation) true
+        else {
+          var hasArguments = false
+          for (i in 0 until expression.valueArgumentsCount) {
+            val arg = expression.getValueArgument(i)
+            if (arg != null) {
+              hasArguments = true
+              break
+            }
+          }
+          hasArguments
         }
-      }
-      hasArguments
-    }
     if (printArgumentList) {
       expression.printArgumentList(
-        forceParameterNames = isAnnotation,
-        forceSingleLine = isAnnotation
-      )
+          forceParameterNames = isAnnotation, forceSingleLine = isAnnotation)
     }
   }
 
@@ -630,17 +624,15 @@ internal class IrSourcePrinterVisitor(
   }
 
   override fun visitVararg(expression: IrVararg) {
-    expression
-      .elements
-      .forEachIndexed { index, it ->
-        if (it is IrSpreadElement) {
-          print("*")
-          it.expression.print()
-        } else if (it is IrExpression) {
-          it.print()
-        }
-        if (index < expression.elements.size - 1) print(", ")
+    expression.elements.forEachIndexed { index, it ->
+      if (it is IrSpreadElement) {
+        print("*")
+        it.expression.print()
+      } else if (it is IrExpression) {
+        it.print()
       }
+      if (index < expression.elements.size - 1) print(", ")
+    }
   }
 
   override fun visitWhen(expression: IrWhen) {
@@ -661,48 +653,35 @@ internal class IrSourcePrinterVisitor(
         rhs.print()
       }
       isIf -> {
-        val singleLine = expression.branches.all {
-          it.result is IrConst<*> || it.result is IrGetValue
-        }
+        val singleLine =
+            expression.branches.all { it.result is IrConst<*> || it.result is IrGetValue }
         expression.branches.forEachIndexed { index, branch ->
-          val isElse = index == expression.branches.size - 1 &&
-            (branch.condition as? IrConst<*>)?.value == true
+          val isElse =
+              index == expression.branches.size - 1 &&
+                  (branch.condition as? IrConst<*>)?.value == true
           when {
             index == 0 -> {
               print("if (")
               branch.condition.print()
-              if (singleLine)
-                print(") ")
-              else
-                println(") {")
+              if (singleLine) print(") ") else println(") {")
             }
             isElse -> {
-              if (singleLine)
-                print(" else ")
-              else
-                println("} else {")
+              if (singleLine) print(" else ") else println("} else {")
             }
             else -> {
-              if (singleLine)
-                print(" else if (")
-              else
-                print("} else if (")
+              if (singleLine) print(" else if (") else print("} else if (")
               branch.condition.print()
-              if (singleLine)
-                print(") ")
-              else
-                println(") {")
+              if (singleLine) print(") ") else println(") {")
             }
           }
-          if (singleLine)
-            branch.result.print()
-          else indented {
-            branch.result.print()
-            println()
-          }
+          if (singleLine) branch.result.print()
+          else
+              indented {
+                branch.result.print()
+                println()
+              }
         }
-        if (!singleLine)
-          println("}")
+        if (!singleLine) println("}")
       }
       else -> {
         print("when ")
@@ -716,9 +695,7 @@ internal class IrSourcePrinterVisitor(
               it.condition.print()
             }
             print(" -> ")
-            bracedBlock {
-              it.result.print()
-            }
+            bracedBlock { it.result.print() }
           }
         }
       }
@@ -784,14 +761,16 @@ internal class IrSourcePrinterVisitor(
       IrStatementOrigin.SAFE_CALL -> {
         val lhs = expression.statements[0] as IrVariable
         val rhsStatement = expression.statements[1]
-        val rhs = when (rhsStatement) {
-          is IrBlock -> {
-            rhsStatement.statements[1]
-          }
-          else -> {
-            rhsStatement
-          }
-        } as IrWhen
+        val rhs =
+            when (rhsStatement) {
+              is IrBlock -> {
+                rhsStatement.statements[1]
+              }
+              else -> {
+                rhsStatement
+              }
+            } as
+                IrWhen
         val call = rhs.branches.last().result as? IrCall
         if (call == null) {
           expression.statements.printJoin("\n")
@@ -836,10 +815,8 @@ internal class IrSourcePrinterVisitor(
   }
 
   override fun visitField(declaration: IrField) {
-    if (
-      declaration.visibility != DescriptorVisibilities.PUBLIC &&
-      declaration.visibility != DescriptorVisibilities.LOCAL
-    ) {
+    if (declaration.visibility != DescriptorVisibilities.PUBLIC &&
+        declaration.visibility != DescriptorVisibilities.LOCAL) {
       print(declaration.visibility.toString().toLowerCase(Locale.ROOT))
       print(" ")
     }
@@ -910,9 +887,9 @@ internal class IrSourcePrinterVisitor(
     }
     print(declaration.name)
     print(": ")
-    val type = declaration.backingField?.type
-      ?: declaration.getter?.returnType
-      ?: error("Couldn't find return type")
+    val type =
+        declaration.backingField?.type
+            ?: declaration.getter?.returnType ?: error("Couldn't find return type")
     print(type.renderSrc())
     declaration.backingField?.let { field ->
       field.initializer?.let { initializer ->
@@ -927,9 +904,7 @@ internal class IrSourcePrinterVisitor(
           it.printAnnotations()
           println()
           println("get() {")
-          indented {
-            it.body?.accept(this, null)
-          }
+          indented { it.body?.accept(this, null) }
           println()
           println("}")
         }
@@ -939,9 +914,7 @@ internal class IrSourcePrinterVisitor(
           println()
           it.printAnnotations()
           println("set(value) {")
-          indented {
-            it.body?.accept(this, null)
-          }
+          indented { it.body?.accept(this, null) }
           println()
           println("}")
         }
@@ -973,24 +946,25 @@ internal class IrSourcePrinterVisitor(
   }
 
   override fun <T> visitConst(expression: IrConst<T>) {
-    val result = when (expression.kind) {
-      is IrConstKind.Null -> "${expression.value}"
-      is IrConstKind.Boolean -> "${expression.value}"
-      is IrConstKind.Char -> "'${expression.value}'"
-      is IrConstKind.Byte -> "${expression.value}"
-      is IrConstKind.Short -> "${expression.value}"
-      is IrConstKind.Int -> {
-        if (printIntsAsBinary) {
-          intAsBinaryString(expression.value as Int)
-        } else {
-          "${expression.value}"
+    val result =
+        when (expression.kind) {
+          is IrConstKind.Null -> "${expression.value}"
+          is IrConstKind.Boolean -> "${expression.value}"
+          is IrConstKind.Char -> "'${expression.value}'"
+          is IrConstKind.Byte -> "${expression.value}"
+          is IrConstKind.Short -> "${expression.value}"
+          is IrConstKind.Int -> {
+            if (printIntsAsBinary) {
+              intAsBinaryString(expression.value as Int)
+            } else {
+              "${expression.value}"
+            }
+          }
+          is IrConstKind.Long -> "${expression.value}L"
+          is IrConstKind.Float -> "${expression.value}f"
+          is IrConstKind.Double -> "${expression.value}"
+          is IrConstKind.String -> "\"${expression.value}\""
         }
-      }
-      is IrConstKind.Long -> "${expression.value}L"
-      is IrConstKind.Float -> "${expression.value}f"
-      is IrConstKind.Double -> "${expression.value}"
-      is IrConstKind.String -> "\"${expression.value}\""
-    }
     print(result)
   }
 
@@ -999,23 +973,19 @@ internal class IrSourcePrinterVisitor(
   }
 
   private fun IrClass.correspondingProperty(param: IrValueParameter): IrProperty? {
-    return declarations
-      .mapNotNull { it as? IrProperty }
-      .firstOrNull {
-        if (it.name == param.name) {
-          val init = it.backingField?.initializer?.expression as? IrGetValue
-          init?.origin == IrStatementOrigin.INITIALIZE_PROPERTY_FROM_PARAMETER
-        } else false
-      }
+    return declarations.mapNotNull { it as? IrProperty }.firstOrNull {
+      if (it.name == param.name) {
+        val init = it.backingField?.initializer?.expression as? IrGetValue
+        init?.origin == IrStatementOrigin.INITIALIZE_PROPERTY_FROM_PARAMETER
+      } else false
+    }
   }
 
   override fun visitClass(declaration: IrClass) {
     val primaryConstructor = declaration.primaryConstructor
     declaration.printAnnotations(onePerLine = true)
-    if (
-      declaration.visibility != DescriptorVisibilities.PUBLIC &&
-      declaration.visibility != DescriptorVisibilities.LOCAL
-    ) {
+    if (declaration.visibility != DescriptorVisibilities.PUBLIC &&
+        declaration.visibility != DescriptorVisibilities.LOCAL) {
       print(declaration.visibility.toString().toLowerCase(Locale.ROOT))
       print(" ")
     }
@@ -1067,14 +1037,12 @@ internal class IrSourcePrinterVisitor(
       print(declaration.superTypes.joinToString(", ") { it.renderSrc() })
       print(" ")
     }
-    val nonParamDeclarations = declaration
-      .declarations
-      .filter { it != primaryConstructor && !ctorProperties.contains(it) }
-      .filter { it.origin != IrDeclarationOrigin.FAKE_OVERRIDE }
+    val nonParamDeclarations =
+        declaration.declarations
+            .filter { it != primaryConstructor && !ctorProperties.contains(it) }
+            .filter { it.origin != IrDeclarationOrigin.FAKE_OVERRIDE }
     if (nonParamDeclarations.isNotEmpty()) {
-      bracedBlock {
-        nonParamDeclarations.printJoin("\n")
-      }
+      bracedBlock { nonParamDeclarations.printJoin("\n") }
     } else {
       println()
     }
@@ -1091,13 +1059,12 @@ internal class IrSourcePrinterVisitor(
       print(superTypes.joinToString(", ") { it.renderSrc() })
       print(" ")
     }
-    val printableDeclarations = declarations
-      .filter { it !is IrConstructor }
-      .filter { it.origin != IrDeclarationOrigin.FAKE_OVERRIDE }
+    val printableDeclarations =
+        declarations.filter { it !is IrConstructor }.filter {
+          it.origin != IrDeclarationOrigin.FAKE_OVERRIDE
+        }
     if (printableDeclarations.isNotEmpty()) {
-      bracedBlock {
-        printableDeclarations.printJoin("\n")
-      }
+      bracedBlock { printableDeclarations.printJoin("\n") }
     } else {
       println()
     }
@@ -1121,8 +1088,8 @@ internal class IrSourcePrinterVisitor(
 
   override fun visitTypeParameter(declaration: IrTypeParameter) {
     print(declaration.name)
-    val isNonEmpty = declaration.superTypes.isNotEmpty() &&
-      !declaration.superTypes[0].isNullableAny()
+    val isNonEmpty =
+        declaration.superTypes.isNotEmpty() && !declaration.superTypes[0].isNullableAny()
     if (isNonEmpty) {
       print(": ")
       print(declaration.superTypes.joinToString(", ") { it.renderSrc() })
@@ -1183,12 +1150,10 @@ internal class IrSourcePrinterVisitor(
     val function = expression.symbol.owner
     val dispatchReceiver = expression.dispatchReceiver
     val extensionReceiver = expression.extensionReceiver
-    val dispatchIsSpecial = dispatchReceiver.let {
-      it is IrGetValue && it.symbol.owner.name.isSpecial
-    }
-    val extensionIsSpecial = extensionReceiver.let {
-      it is IrGetValue && it.symbol.owner.name.isSpecial
-    }
+    val dispatchIsSpecial =
+        dispatchReceiver.let { it is IrGetValue && it.symbol.owner.name.isSpecial }
+    val extensionIsSpecial =
+        extensionReceiver.let { it is IrGetValue && it.symbol.owner.name.isSpecial }
 
     if (dispatchReceiver != null && !dispatchIsSpecial) {
       dispatchReceiver.print()
@@ -1224,9 +1189,7 @@ internal class IrSourcePrinterVisitor(
     print("<<LOCALDELPROP>>")
   }
 
-  override fun visitLocalDelegatedPropertyReference(
-    expression: IrLocalDelegatedPropertyReference
-  ) {
+  override fun visitLocalDelegatedPropertyReference(expression: IrLocalDelegatedPropertyReference) {
     print("<<LOCALDELPROPREF>>")
   }
 
@@ -1248,24 +1211,18 @@ internal class IrSourcePrinterVisitor(
 
   override fun visitTry(aTry: IrTry) {
     println("try {")
-    indented {
-      aTry.tryResult.print()
-    }
+    indented { aTry.tryResult.print() }
     println()
     if (aTry.catches.isNotEmpty()) {
       aTry.catches.forEach {
         println("} catch() {")
-        indented {
-          it.print()
-        }
+        indented { it.print() }
         println()
       }
     }
     aTry.finallyExpression?.let {
       println("} finally {")
-      indented {
-        it.print()
-      }
+      indented { it.print() }
       println()
     }
     println("}")
@@ -1275,87 +1232,77 @@ internal class IrSourcePrinterVisitor(
     print("<<TYPEALIAS>>")
   }
 
-  private fun IrType.renderSrc() =
-    "${renderTypeAnnotations(annotations)}${renderTypeInner()}"
+  private fun IrType.renderSrc() = "${renderTypeAnnotations(annotations)}${renderTypeInner()}"
 
   @OptIn(ObsoleteDescriptorBasedAPI::class)
   private fun IrType.renderTypeInner() =
-    when (this) {
-      is IrDynamicType -> "dynamic"
-
-      is IrErrorType -> "IrErrorType"
-
-      is IrSimpleType -> buildTrimEnd {
-        append(classifier.descriptor.name)
-        if (arguments.isNotEmpty()) {
-          append(
-            arguments.joinToString(prefix = "<", postfix = ">", separator = ", ") {
-              it.renderTypeArgument()
+      when (this) {
+        is IrDynamicType -> "dynamic"
+        is IrErrorType -> "IrErrorType"
+        is IrSimpleType ->
+            buildTrimEnd {
+              append(classifier.descriptor.name)
+              if (arguments.isNotEmpty()) {
+                append(
+                    arguments.joinToString(prefix = "<", postfix = ">", separator = ", ") {
+                      it.renderTypeArgument()
+                    })
+              }
+              if (hasQuestionMark) {
+                append('?')
+              }
+              abbreviation?.let { append(it.renderTypeAbbreviation()) }
             }
-          )
-        }
-        if (hasQuestionMark) {
-          append('?')
-        }
-        abbreviation?.let {
-          append(it.renderTypeAbbreviation())
-        }
+        else -> "{${javaClass.simpleName} $this}"
       }
 
-      else -> "{${javaClass.simpleName} $this}"
-    }
+  private inline fun buildTrimEnd(fn: StringBuilder.() -> Unit): String = buildString(fn).trimEnd()
 
-  private inline fun buildTrimEnd(fn: StringBuilder.() -> Unit): String =
-    buildString(fn).trimEnd()
-
-  private fun IrTypeAbbreviation.renderTypeAbbreviation(): String =
-    buildString {
-      append("{ ")
-      append(renderTypeAnnotations(annotations))
-      append(typeAlias.renderTypeAliasFqn())
-      if (arguments.isNotEmpty()) {
-        append(
+  private fun IrTypeAbbreviation.renderTypeAbbreviation(): String = buildString {
+    append("{ ")
+    append(renderTypeAnnotations(annotations))
+    append(typeAlias.renderTypeAliasFqn())
+    if (arguments.isNotEmpty()) {
+      append(
           arguments.joinToString(prefix = "<", postfix = ">", separator = ", ") {
             it.renderTypeArgument()
-          }
-        )
-      }
-      if (hasQuestionMark) {
-        append('?')
-      }
-      append(" }")
+          })
     }
+    if (hasQuestionMark) {
+      append('?')
+    }
+    append(" }")
+  }
 
   private fun IrTypeArgument.renderTypeArgument(): String =
-    when (this) {
-      is IrStarProjection -> "*"
-
-      is IrTypeProjection -> buildTrimEnd {
-        append(variance.label)
-        if (variance != Variance.INVARIANT) append(' ')
-        append(type.renderSrc())
+      when (this) {
+        is IrStarProjection -> "*"
+        is IrTypeProjection ->
+            buildTrimEnd {
+              append(variance.label)
+              if (variance != Variance.INVARIANT) append(' ')
+              append(type.renderSrc())
+            }
+        else -> "IrTypeArgument[$this]"
       }
-
-      else -> "IrTypeArgument[$this]"
-    }
 
   private fun renderTypeAnnotations(annotations: List<IrConstructorCall>) =
-    if (annotations.isEmpty())
-      ""
-    else
-      annotations.joinToString(prefix = "", postfix = " ", separator = " ") {
-        "@[${renderAsAnnotation(it)}]"
-      }
+      if (annotations.isEmpty()) ""
+      else
+          annotations.joinToString(prefix = "", postfix = " ", separator = " ") {
+            "@[${renderAsAnnotation(it)}]"
+          }
 
   private fun renderAsAnnotation(irAnnotation: IrConstructorCall): String =
-    StringBuilder().also { it.renderAsAnnotation(irAnnotation) }.toString()
+      StringBuilder().also { it.renderAsAnnotation(irAnnotation) }.toString()
 
   private fun StringBuilder.renderAsAnnotation(irAnnotation: IrConstructorCall) {
-    val annotationClassName = try {
-      irAnnotation.symbol.owner.parentAsClass.name.asString()
-    } catch (e: Exception) {
-      "<unbound>"
-    }
+    val annotationClassName =
+        try {
+          irAnnotation.symbol.owner.parentAsClass.name.asString()
+        } catch (e: Exception) {
+          "<unbound>"
+        }
     append(annotationClassName)
 
     if (irAnnotation.valueArgumentsCount == 0) return
@@ -1378,10 +1325,8 @@ internal class IrSourcePrinterVisitor(
 
   @OptIn(ObsoleteDescriptorBasedAPI::class)
   private fun IrTypeAliasSymbol.renderTypeAliasFqn(): String =
-    if (isBound)
-      StringBuilder().also { owner.renderDeclarationFqn(it) }.toString()
-    else
-      "<unbound $this: ${this.descriptor}>"
+      if (isBound) StringBuilder().also { owner.renderDeclarationFqn(it) }.toString()
+      else "<unbound $this: ${this.descriptor}>"
 
   private fun IrDeclaration.renderDeclarationFqn(sb: StringBuilder) {
     renderDeclarationParentFqn(sb)
@@ -1412,20 +1357,16 @@ internal class IrSourcePrinterVisitor(
       val owner = symbol.owner
       if (owner is IrFunction) {
         (0 until expectedCount).map {
-          if (it < owner.valueParameters.size)
-            owner.valueParameters[it].name.asString()
-          else
-            "${it + 1}"
+          if (it < owner.valueParameters.size) owner.valueParameters[it].name.asString()
+          else "${it + 1}"
         }
       } else {
         getPlaceholderParameterNames(expectedCount)
       }
-    } else
-      getPlaceholderParameterNames(expectedCount)
+    } else getPlaceholderParameterNames(expectedCount)
   }
 
-  private fun getPlaceholderParameterNames(expectedCount: Int) =
-    (1..expectedCount).map { "$it" }
+  private fun getPlaceholderParameterNames(expectedCount: Int) = (1..expectedCount).map { "$it" }
 
   private fun StringBuilder.renderAsAnnotationArgument(irElement: IrElement?) {
     when (irElement) {
@@ -1437,9 +1378,7 @@ internal class IrSourcePrinterVisitor(
         append('\'')
       }
       is IrVararg -> {
-        appendListWith(irElement.elements, "[", "]", ", ") {
-          renderAsAnnotationArgument(it)
-        }
+        appendListWith(irElement.elements, "[", "]", ", ") { renderAsAnnotationArgument(it) }
       }
       else -> append(irElement.accept(this@IrSourcePrinterVisitor, null))
     }
@@ -1451,11 +1390,11 @@ internal class IrSourcePrinterVisitor(
 }
 
 private inline fun <T> StringBuilder.appendListWith(
-  list: List<T>,
-  prefix: String,
-  postfix: String,
-  separator: String,
-  renderItem: StringBuilder.(T) -> Unit
+    list: List<T>,
+    prefix: String,
+    postfix: String,
+    separator: String,
+    renderItem: StringBuilder.(T) -> Unit
 ) {
   append(prefix)
   var isFirst = true

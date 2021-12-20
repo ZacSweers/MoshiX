@@ -455,10 +455,7 @@ internal class MoshiIrVisitor(
                 +irReturn(
                     irCall(declaration.primaryConstructor!!.symbol).apply {
                       for ((index, prop) in properties.withIndex()) {
-                        putValueArgument(
-                          index,
-                          irGet(localVars.getValue(prop.name.asString()))
-                        )
+                        putValueArgument(index, irGet(localVars.getValue(prop.name.asString())))
                       }
                     })
               }
@@ -491,8 +488,9 @@ internal class MoshiIrVisitor(
                     irGet(value),
                     irThrow(
                         irCall(
-                          // TODO why can't I use kotlin.NullPointerException here?
-                            pluginContext.referenceClass(FqName("kotlin.KotlinNullPointerException"))!!
+                            // TODO why can't I use kotlin.NullPointerException here?
+                            pluginContext.referenceClass(
+                                    FqName("kotlin.KotlinNullPointerException"))!!
                                 .constructors.first { it.descriptor.valueParameters.size == 1 })
                             .apply {
                               putValueArgument(
@@ -502,13 +500,10 @@ internal class MoshiIrVisitor(
                             }),
                     irBlock {})
                 // Cast it up to the actual type
-                val castValue = irTemporary(
-                  irImplicitCast(
-                    irGet(value),
-                    declaration.defaultType.makeNotNull()
-                  ),
-                  "castValue"
-                )
+                val castValue =
+                    irTemporary(
+                        irImplicitCast(irGet(value), declaration.defaultType.makeNotNull()),
+                        "castValue")
                 +irCall(moshiSymbols.jsonWriter.getSimpleFunction("beginObject")!!).apply {
                   dispatchReceiver = irGet(writer)
                 }
@@ -520,14 +515,18 @@ internal class MoshiIrVisitor(
                   // adapter.toJson(writer, value.prop)
                   +irCall(moshiSymbols.jsonAdapter.getSimpleFunction("toJson")!!).apply {
                     // adapter.
-                    dispatchReceiver = irGetField(irGet(dispatchReceiverParameter!!), adapterProperties.getValue(property.type))
+                    dispatchReceiver =
+                        irGetField(
+                            irGet(dispatchReceiverParameter!!),
+                            adapterProperties.getValue(property.type))
                     // writer
                     putValueArgument(0, irGet(writer))
                     // value.prop
-                    putValueArgument(1,
-                      irCall(declaration.getPropertyGetter(property.name.asString())!!).apply {
-                        dispatchReceiver = irGet(castValue)
-                      })
+                    putValueArgument(
+                        1,
+                        irCall(declaration.getPropertyGetter(property.name.asString())!!).apply {
+                          dispatchReceiver = irGet(castValue)
+                        })
                   }
                 }
                 +irCall(moshiSymbols.jsonWriter.getSimpleFunction("endObject")!!).apply {

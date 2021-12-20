@@ -33,10 +33,7 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
   override fun getPluginArtifact(): SubpluginArtifact =
       SubpluginArtifact(
-          groupId = "dev.zacsweers.moshix",
-          artifactId = "moshi-compiler-plugin",
-          version = VERSION
-      )
+          groupId = "dev.zacsweers.moshix", artifactId = "moshi-compiler-plugin", version = VERSION)
 
   override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
 
@@ -49,10 +46,10 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
     return project.provider {
       buildList {
-          add(SubpluginOption(key = "enabled", value = extension.enabled.get().toString()))
-          if (generatedAnnotation != null) {
-            add(SubpluginOption(key = "generatedAnnotation", value = generatedAnnotation))
-          }
+        add(SubpluginOption(key = "enabled", value = extension.enabled.get().toString()))
+        if (generatedAnnotation != null) {
+          add(SubpluginOption(key = "generatedAnnotation", value = generatedAnnotation))
+        }
       }
     }
   }

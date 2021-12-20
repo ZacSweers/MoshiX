@@ -37,21 +37,16 @@ class MoshiPluginTest {
             kotlin(
                 "SimpleClass.kt",
                 """
-          package dev.zacsweers.redacted.compiler.test
+          package dev.zacsweers.moshix.ir.compiler.test
 
           import com.squareup.moshi.JsonClass
 
           @JsonClass(generateAdapter = true)
           data class SimpleClass<T>(val a: Int, val b: T)
           """))
-    //    // Kotlin reports an error message from IR as an internal error for some reason, so we
-    // just
-    //    // check "not ok"
+    // Kotlin reports an error message from IR as an internal error for some reason, so we just
+    // check "not ok"
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
-    //
-    //    // Full log is something like this:
-    //    // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    //    assertThat(result.messages).contains("@Redacted is only supported on data classes!")
   }
 
   private fun prepareCompilation(vararg sourceFiles: SourceFile): KotlinCompilation {
