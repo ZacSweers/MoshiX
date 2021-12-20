@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Zac Sweers
+ * Copyright (C) 2021 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
   kotlin("jvm")
-  id("com.google.devtools.ksp")
-  id("com.vanniktech.maven.publish")
-}
-
-tasks.named<KotlinCompile>("compileTestKotlin") {
-  kotlinOptions {
-    @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
-  }
+  id("dev.zacsweers.moshix")
 }
 
 dependencies {
-  implementation(libs.kotlin.metadata)
-  implementation(libs.moshi)
-  kspTest(libs.moshi.codegen)
-  testImplementation("org.assertj:assertj-core:3.20.2")
-  testImplementation(libs.junit)
-  testImplementation(libs.truth)
+  testImplementation("junit:junit:4.13.2")
+  testImplementation("com.google.truth:truth:1.1.3")
+  testImplementation("com.squareup.moshi:moshi:1.13.0")
+  testImplementation(kotlin("reflect"))
+}
+
+configurations.configureEach {
+  resolutionStrategy.dependencySubstitution {
+    substitute(module("dev.zacsweers.moshix:moshi-compiler-plugin"))
+        .using(project(":moshi-ir:moshi-compiler-plugin"))
+  }
 }

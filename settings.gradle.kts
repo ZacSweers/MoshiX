@@ -36,6 +36,8 @@ rootProject.name = "moshix-root"
 
 include(
     ":moshi-adapters",
+    ":moshi-ir:moshi-compiler-plugin",
+    ":moshi-ir:playground",
     ":moshi-metadata-reflect",
     ":moshi-sealed:codegen",
     ":moshi-sealed:java-sealed-reflect",
@@ -45,5 +47,11 @@ include(
     ":moshi-sealed:sample",
     ":moshi-sealed:sealed-interfaces-samples:java",
 )
+
+includeBuild("moshi-ir/moshi-gradle-plugin") {
+  dependencySubstitution {
+    substitute(module("dev.zacsweers.moshix:moshi-gradle-plugin")).using(project(":"))
+  }
+}
 
 enableFeaturePreview("VERSION_CATALOGS")

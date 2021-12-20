@@ -13,27 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:JvmName("Version")
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+package dev.zacsweers.moshi.ir.gradle
 
-plugins {
-  kotlin("jvm")
-  id("com.google.devtools.ksp")
-  id("com.vanniktech.maven.publish")
-}
-
-tasks.named<KotlinCompile>("compileTestKotlin") {
-  kotlinOptions {
-    @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
-  }
-}
-
-dependencies {
-  implementation(libs.kotlin.metadata)
-  implementation(libs.moshi)
-  kspTest(libs.moshi.codegen)
-  testImplementation("org.assertj:assertj-core:3.20.2")
-  testImplementation(libs.junit)
-  testImplementation(libs.truth)
-}
+internal const val VERSION = "$projectVersion"
