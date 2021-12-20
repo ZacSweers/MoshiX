@@ -22,6 +22,7 @@ import dev.zacsweers.moshix.ir.compiler.util.isSubclassOfFqName
 import dev.zacsweers.moshix.ir.compiler.util.overridesFunctionIn
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
+import org.jetbrains.kotlin.backend.common.ir.addFakeOverrides
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irIfThen
 import org.jetbrains.kotlin.backend.common.lower.irThrow
@@ -92,6 +93,7 @@ import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
+import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.typeWith
@@ -102,12 +104,14 @@ import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.getPropertyGetter
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
+import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.source.getPsi
+import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.getClassFqNameUnsafe
 
 internal const val LOG_PREFIX = "*** MOSHI (IR):"
 private val JSON_ANNOTATION = FqName("com.squareup.moshi.Json")
@@ -586,7 +590,23 @@ internal class MoshiIrVisitor(
               }
         }
 
-    // TODO toString()
+    // toString that returns "GeneratedJsonAdapter(<target>)"
+    adapterCls.addOverride(
+      FqName("kotlin.Any"),
+      Name.identifier("toString").identifier,
+      pluginContext.irBuiltIns.stringType,
+      modality = Modality.OPEN,
+    ).apply {
+      body = DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
+        +irReturn(
+          irConcat().apply {
+            addArgument(irString("JsonAdapter("))
+            addArgument(irString(declaration.name.identifier))
+            addArgument(irString(")"))
+          }
+        )
+      }
+    }
 
     return adapterCls
   }
@@ -598,23 +618,6 @@ internal class MoshiIrVisitor(
   ): IrType =
       pluginContext.referenceClass(FqName(qualifiedName))!!.createType(
           hasQuestionMark = nullable, arguments = arguments)
-
-  private fun IrFunction.reflectivelySetFakeOverride(isFakeOverride: Boolean) {
-    with(javaClass.getDeclaredField("isFakeOverride")) {
-      isAccessible = true
-      setBoolean(this@reflectivelySetFakeOverride, isFakeOverride)
-    }
-  }
-
-  /**
-   * Only works properly after [IrFunction.mutateWithNewDispatchReceiverParameterForParentClass] has
-   * been called on [irFunction].
-   */
-  private fun IrBlockBodyBuilder.receiver(irFunction: IrFunction) =
-      IrGetValueImpl(irFunction.dispatchReceiverParameter!!)
-
-  private fun IrBlockBodyBuilder.IrGetValueImpl(irParameter: IrValueParameter) =
-      IrGetValueImpl(startOffset, endOffset, irParameter.type, irParameter.symbol)
 
   private fun log(message: String) {
     messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")

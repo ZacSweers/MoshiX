@@ -32,6 +32,8 @@ class IrPlayground {
   fun simple() {
     val moshi = Moshi.Builder().build()
     val adapter = moshi.adapter<SimpleClass<String>>()
+    assertThat(adapter.toString()).isEqualTo("JsonAdapter(SimpleClass).nullSafe()")
+
     val instance = adapter.fromJson("""{"a":3,"b":"there"}""")
     println(instance.toString())
     println(adapter.toJson(SimpleClass(3, "there")))
