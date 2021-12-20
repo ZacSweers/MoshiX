@@ -42,8 +42,11 @@ plugins {
 apiValidation {
   ignoredProjects +=
       listOf(
+          /* :moshi-ir: */
+          "playground",
           /* :moshi-sealed: */
-          "sample")
+          "sample",
+      )
 }
 
 repositories { mavenCentral() }

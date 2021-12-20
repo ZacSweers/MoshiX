@@ -132,6 +132,7 @@ internal class MoshiIrVisitor(
     declaration.getAnnotation(JSON_CLASS_ANNOTATION)?.let { call ->
       call.getValueArgument(0)?.let { argument ->
         // This is generateAdapter
+        @Suppress("UNCHECKED_CAST")
         if (!(argument as IrConst<Boolean>).value) {
           return super.visitClassNew(declaration)
         }
@@ -618,6 +619,7 @@ internal class MoshiIrVisitor(
 }
 
 private fun IrAnnotationContainer.jsonName(): String? {
+  @Suppress("UNCHECKED_CAST")
   return (getAnnotation(JSON_ANNOTATION)?.getValueArgument(0) as? IrConst<String>?)?.value
 }
 
