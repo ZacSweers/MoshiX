@@ -138,12 +138,22 @@ internal class MoshiIrVisitor(
 
   override fun visitClassNew(declaration: IrClass): IrStatement {
     declaration.getAnnotation(JSON_CLASS_ANNOTATION)?.let { call ->
-      call.getValueArgument(0)?.let { argument ->
+      call.getValueArgument(0)?.let { generateAdapter ->
         // This is generateAdapter
         @Suppress("UNCHECKED_CAST")
-        if (!(argument as IrConst<Boolean>).value) {
+        if (!(generateAdapter as IrConst<Boolean>).value) {
           return super.visitClassNew(declaration)
         }
+
+        if (call.valueArgumentsCount == 2) {
+          call.getValueArgument(1)?.let { generator ->
+            @Suppress("UNCHECKED_CAST")
+            if ((generator as IrConst<String>).value.isNotBlank()) {
+              return super.visitClassNew(declaration)
+            }
+          }
+        }
+
         // TODO check generator
         // TODO check modifiers/class types
         val primaryConstructor = declaration.primaryConstructor
