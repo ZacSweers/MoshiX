@@ -15,9 +15,15 @@
  */
 package dev.zacsweers.moshix.ir.compiler
 
+import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
+import dev.zacsweers.moshix.ir.compiler.util.irConstructorBody
+import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
+import dev.zacsweers.moshix.ir.compiler.util.isSubclassOfFqName
+import dev.zacsweers.moshix.ir.compiler.util.overridesFunctionIn
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.backend.common.lower.irIfThen
 import org.jetbrains.kotlin.backend.common.lower.irThrow
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -27,7 +33,6 @@ import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
-import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.addField
@@ -39,6 +44,7 @@ import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBranch
 import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irConcat
 import org.jetbrains.kotlin.ir.builders.irElseBranch
 import org.jetbrains.kotlin.ir.builders.irEquals
 import org.jetbrains.kotlin.ir.builders.irExprBody
@@ -47,6 +53,7 @@ import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irIfNull
 import org.jetbrains.kotlin.ir.builders.irImplicitCast
 import org.jetbrains.kotlin.ir.builders.irInt
+import org.jetbrains.kotlin.ir.builders.irNotEquals
 import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irReturnUnit
@@ -64,7 +71,6 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin.INSTANCE_RECEIVE
 import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFile
-import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
@@ -73,7 +79,6 @@ import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
@@ -130,12 +135,22 @@ internal class MoshiIrVisitor(
 
   override fun visitClassNew(declaration: IrClass): IrStatement {
     declaration.getAnnotation(JSON_CLASS_ANNOTATION)?.let { call ->
-      call.getValueArgument(0)?.let { argument ->
+      call.getValueArgument(0)?.let { generateAdapter ->
         // This is generateAdapter
         @Suppress("UNCHECKED_CAST")
-        if (!(argument as IrConst<Boolean>).value) {
+        if (!(generateAdapter as IrConst<Boolean>).value) {
           return super.visitClassNew(declaration)
         }
+
+        if (call.valueArgumentsCount == 2) {
+          call.getValueArgument(1)?.let { generator ->
+            @Suppress("UNCHECKED_CAST")
+            if ((generator as IrConst<String>).value.isNotBlank()) {
+              return super.visitClassNew(declaration)
+            }
+          }
+        }
+
         // TODO check generator
         // TODO check modifiers/class types
         val primaryConstructor = declaration.primaryConstructor
@@ -232,6 +247,40 @@ internal class MoshiIrVisitor(
               context = pluginContext,
               classSymbol = adapterCls.symbol,
           )
+
+      // Size check for types array. Must be equal to the number of type parameters
+      if (isGeneric) {
+        val expectedSize = declaration.typeParameters.size
+        statements +=
+            DeclarationIrBuilder(pluginContext, ctor.symbol).irBlock {
+              val receivedSize =
+                  irTemporary(
+                      irCall(moshiSymbols.arraySizeGetter).apply {
+                        dispatchReceiver = irGet(ctor.valueParameters[1])
+                      },
+                      nameHint = "receivedSize")
+              +irIfThen(
+                  condition = irNotEquals(irGet(receivedSize), irInt(expectedSize)),
+                  thenPart =
+                      irThrow(
+                          irCall(pluginContext.irBuiltIns.illegalArgumentExceptionSymbol).apply {
+                            putValueArgument(
+                                0,
+                                irConcat().apply {
+                                  addArgument(irString("TypeVariable mismatch: Expecting "))
+                                  addArgument(irInt(expectedSize))
+                                  addArgument(irString(" type for generic type variables ["))
+                                  addArgument(
+                                      irString(
+                                          declaration.typeParameters.joinToString(separator = ",") {
+                                            it.name.asString()
+                                          }))
+                                  addArgument(irString("], but received "))
+                                  addArgument(irGet(receivedSize))
+                                })
+                          }))
+            }
+      }
     }
 
     val optionsField =
@@ -306,7 +355,6 @@ internal class MoshiIrVisitor(
                                 // type
                                 if (genericIndex == -1) {
                                   // Use typeOf() intrinsic
-                                  // TODO maaaaaay have to use Types.newParameterizedType instead
                                   putValueArgument(
                                       0,
                                       irCall(
@@ -327,13 +375,9 @@ internal class MoshiIrVisitor(
                                           })
                                 } else {
                                   // It's generic, get from types array
-                                  val arrayGet =
-                                      pluginContext.irBuiltIns.arrayClass.owner.declarations
-                                          .filterIsInstance<IrSimpleFunction>()
-                                          .single { it.name.asString() == "get" }
                                   putValueArgument(
                                       0,
-                                      irCall(arrayGet.symbol).apply {
+                                      irCall(moshiSymbols.arrayGet.symbol).apply {
                                         dispatchReceiver = irGet(ctor.valueParameters[1])
                                         putValueArgument(0, irInt(genericIndex))
                                       })
@@ -484,6 +528,7 @@ internal class MoshiIrVisitor(
           body =
               DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
                 // TODO can we use IMPLICIT_NOTNULL here and just skip the null check?
+                // TODO just use irIfThen
                 +irIfNull(
                     value.type,
                     irGet(value),
@@ -537,7 +582,24 @@ internal class MoshiIrVisitor(
               }
         }
 
-    // TODO toString()
+    // toString that returns "GeneratedJsonAdapter(<target>)"
+    adapterCls.addOverride(
+            FqName("kotlin.Any"),
+            Name.identifier("toString").identifier,
+            pluginContext.irBuiltIns.stringType,
+            modality = Modality.OPEN,
+        )
+        .apply {
+          body =
+              DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
+                +irReturn(
+                    irConcat().apply {
+                      addArgument(irString("JsonAdapter("))
+                      addArgument(irString(declaration.name.identifier))
+                      addArgument(irString(")"))
+                    })
+              }
+        }
 
     return adapterCls
   }
@@ -549,23 +611,6 @@ internal class MoshiIrVisitor(
   ): IrType =
       pluginContext.referenceClass(FqName(qualifiedName))!!.createType(
           hasQuestionMark = nullable, arguments = arguments)
-
-  private fun IrFunction.reflectivelySetFakeOverride(isFakeOverride: Boolean) {
-    with(javaClass.getDeclaredField("isFakeOverride")) {
-      isAccessible = true
-      setBoolean(this@reflectivelySetFakeOverride, isFakeOverride)
-    }
-  }
-
-  /**
-   * Only works properly after [IrFunction.mutateWithNewDispatchReceiverParameterForParentClass] has
-   * been called on [irFunction].
-   */
-  private fun IrBlockBodyBuilder.receiver(irFunction: IrFunction) =
-      IrGetValueImpl(irFunction.dispatchReceiverParameter!!)
-
-  private fun IrBlockBodyBuilder.IrGetValueImpl(irParameter: IrValueParameter) =
-      IrGetValueImpl(startOffset, endOffset, irParameter.type, irParameter.symbol)
 
   private fun log(message: String) {
     messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")
