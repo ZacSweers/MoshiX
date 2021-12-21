@@ -362,7 +362,6 @@ internal class MoshiIrVisitor(
                                 // type
                                 if (genericIndex == -1) {
                                   // Use typeOf() intrinsic
-                                  // TODO maaaaaay have to use Types.newParameterizedType instead
                                   putValueArgument(
                                       0,
                                       irCall(
