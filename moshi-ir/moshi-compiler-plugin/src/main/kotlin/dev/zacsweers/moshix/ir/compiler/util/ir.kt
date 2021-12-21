@@ -69,6 +69,7 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrPropertySymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
+import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.getPrimitiveType
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
@@ -332,5 +333,19 @@ internal val IrProperty.type: IrType
 internal fun Visibility.checkIsVisibile() {
   require(this == Visibilities.Public || this == Visibilities.Internal) {
     "Visibility must be one of public or internal. Is $name"
+  }
+}
+
+/** Returns the raw [IrClass] of this [IrType] or throws. */
+internal fun IrType.rawType(): IrClass {
+  return rawTypeOrNull() ?: error("Unrecognized type! $this")
+}
+
+/** Returns the raw [IrClass] of this [IrType] or null. */
+internal fun IrType.rawTypeOrNull(): IrClass? {
+  return when (val classifier = classifierOrNull) {
+    is IrClassSymbol -> classifier.owner
+    //    is WildcardTypeName -> (inTypes + outTypes).toVariableNames()
+    else -> null
   }
 }

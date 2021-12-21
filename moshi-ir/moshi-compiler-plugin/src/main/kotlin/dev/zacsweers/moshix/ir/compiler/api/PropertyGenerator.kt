@@ -15,6 +15,7 @@
  */
 package dev.zacsweers.moshix.ir.compiler.api
 
+import dev.zacsweers.moshix.ir.compiler.util.NameAllocator
 import dev.zacsweers.moshix.ir.compiler.util.defaultPrimitiveValue
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.ir.builders.IrStatementsBuilder
@@ -57,9 +58,9 @@ internal class PropertyGenerator(
       !isTransient && hasDefault && !hasConstructorParameter && delegateKey.nullable
   public val hasConstructorDefault: Boolean = hasDefault && hasConstructorParameter
 
-  internal fun allocateNames() {
-    localName = name
-    localIsPresentName = "${name}Set"
+  internal fun allocateNames(nameAllocator: NameAllocator) {
+    localName = nameAllocator.newName(name)
+    localIsPresentName = nameAllocator.newName("${name}Set")
   }
 
   internal fun generateLocalProperty(
