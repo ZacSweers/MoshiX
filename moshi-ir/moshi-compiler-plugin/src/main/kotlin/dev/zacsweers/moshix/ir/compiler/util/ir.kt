@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.backend.common.ir.allOverridden
 import org.jetbrains.kotlin.backend.common.ir.createDispatchReceiverParameter
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.jvm.ir.erasedUpperBound
+import org.jetbrains.kotlin.builtins.PrimitiveType
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
@@ -33,8 +34,13 @@ import org.jetbrains.kotlin.ir.builders.IrBlockBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.IrGeneratorContext
 import org.jetbrains.kotlin.ir.builders.Scope
+import org.jetbrains.kotlin.ir.builders.irBoolean
+import org.jetbrains.kotlin.ir.builders.irChar
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
+import org.jetbrains.kotlin.ir.builders.irInt
+import org.jetbrains.kotlin.ir.builders.irLong
+import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
@@ -47,6 +53,7 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.expressions.IrInstanceInitializerCall
 import org.jetbrains.kotlin.ir.expressions.IrReturn
+import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrReturnImpl
@@ -61,6 +68,8 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.createType
+import org.jetbrains.kotlin.ir.types.getPrimitiveType
+import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
@@ -286,3 +295,28 @@ internal fun IrPluginContext.irType(
 ): IrType =
     referenceClass(FqName(qualifiedName))!!.createType(
         hasQuestionMark = nullable, arguments = arguments)
+
+// returns null: Any? for boxed types and 0: <number type> for primitives
+internal fun IrBuilderWithScope.defaultPrimitiveValue(
+    type: IrType,
+    pluginContext: IrPluginContext
+): IrExpression {
+  // TODO check unit/void/nothing
+  val defaultPrimitive: IrExpression? =
+      if (type.isMarkedNullable()) {
+        null
+      } else {
+        when (type.getPrimitiveType()) {
+          PrimitiveType.BOOLEAN -> irBoolean(false)
+          PrimitiveType.CHAR -> irChar(0.toChar())
+          PrimitiveType.BYTE -> IrConstImpl.byte(startOffset, endOffset, type, 0)
+          PrimitiveType.SHORT -> IrConstImpl.short(startOffset, endOffset, type, 0)
+          PrimitiveType.INT -> irInt(0)
+          PrimitiveType.FLOAT -> IrConstImpl.float(startOffset, endOffset, type, 0.0f)
+          PrimitiveType.LONG -> irLong(0L)
+          PrimitiveType.DOUBLE -> IrConstImpl.double(startOffset, endOffset, type, 0.0)
+          else -> null
+        }
+      }
+  return defaultPrimitive ?: irNull(pluginContext.irBuiltIns.anyNType)
+}

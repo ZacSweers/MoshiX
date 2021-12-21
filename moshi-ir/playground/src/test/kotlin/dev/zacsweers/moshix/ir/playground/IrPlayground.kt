@@ -85,4 +85,4 @@ class UppercaseJsonAdapter {
   }
 }
 
-@JsonClass(generateAdapter = true) data class SimpleClass<T>(val a: Int?, val b: T)
+@JsonClass(generateAdapter = true) data class SimpleClass<T>(val a: Int, val b: T)

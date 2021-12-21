@@ -17,6 +17,7 @@ package dev.zacsweers.moshix.ir.compiler
 
 import dev.zacsweers.moshix.ir.compiler.api.DelegateKey
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
+import dev.zacsweers.moshix.ir.compiler.util.defaultPrimitiveValue
 import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
 import dev.zacsweers.moshix.ir.compiler.util.irConstructorBody
 import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
@@ -361,7 +362,11 @@ internal class MoshiIrVisitor(
                   // TODO primitives need diff defaults
                   val name = property.name.asString()
                   val localVar =
-                      irTemporary(irNull(property.type), isMutable = true, nameHint = name)
+                      irTemporary(
+                        defaultPrimitiveValue(property.type, pluginContext),
+                        isMutable = true,
+                        nameHint = name
+                      )
                   localVars[name] = localVar
                 }
                 +irCall(moshiSymbols.jsonReader.getSimpleFunction("beginObject")!!).apply {
