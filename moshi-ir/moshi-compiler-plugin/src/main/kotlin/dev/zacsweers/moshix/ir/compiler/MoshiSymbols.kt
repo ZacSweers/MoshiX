@@ -38,6 +38,7 @@ import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.makeNullable
+import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -50,6 +51,10 @@ internal class MoshiSymbols(
   private val irFactory: IrFactory = pluginContext.irFactory
 
   private val moshiPackage: IrPackageFragment = createPackage("com.squareup.moshi")
+  private val javaReflectPackage: IrPackageFragment = createPackage("java.lang.reflect")
+
+  val type: IrClassSymbol =
+      createClass(javaReflectPackage, "Type", ClassKind.INTERFACE, Modality.ABSTRACT)
 
   val jsonReader: IrClassSymbol =
       irFactory
@@ -130,6 +135,51 @@ internal class MoshiSymbols(
                 }
           }
           .symbol
+
+  // Must go after jsonAdapter.
+  // TODO could we get around this with by lazy?
+  val moshi: IrClassSymbol =
+      irFactory
+          .buildClass {
+            name = Name.identifier("Moshi")
+            kind = ClassKind.CLASS
+            modality = Modality.FINAL
+          }
+          .apply {
+            createImplicitParameterDeclarationWithWrappedDescriptor()
+            parent = moshiPackage
+
+            addFunction(
+                Name.identifier("adapter").identifier,
+                jsonAdapter.typeWith(irBuiltIns.anyNType),
+                Modality.FINAL)
+                .apply {
+                  addTypeParameter("T", irBuiltIns.anyNType)
+                  addValueParameter("type", type.defaultType)
+                  addValueParameter(
+                      "annotations", irBuiltIns.setClass.typeWith(irBuiltIns.annotationType))
+                  addValueParameter("fieldName", irBuiltIns.stringType)
+                }
+          }
+          .symbol
+
+  val emptySet = pluginContext.referenceFunctions(FqName("kotlin.collections.emptySet")).first()
+
+  /*
+   * There are two setOf() functions with one arg - one is the vararg and the other is a shorthand for
+   * Collections.singleton(element). It's important we pick the right one, otherwise we can accidentally send a
+   * vararg array into the singleton() function.
+   */
+
+  val setOfVararg =
+      pluginContext.referenceFunctions(FqName("kotlin.collections.setOf")).first {
+        it.owner.valueParameters.size == 1 || it.owner.valueParameters[0].varargElementType != null
+      }
+
+  val setOfSingleton =
+      pluginContext.referenceFunctions(FqName("kotlin.collections.setOf")).first {
+        it.owner.valueParameters.size == 1 || it.owner.valueParameters[0].varargElementType == null
+      }
 
   val arrayGet =
       pluginContext.irBuiltIns.arrayClass.owner.declarations.filterIsInstance<IrSimpleFunction>()

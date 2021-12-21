@@ -280,9 +280,9 @@ internal fun IrPluginContext.createIrBuilder(symbol: IrSymbol): DeclarationIrBui
 }
 
 internal fun IrPluginContext.irType(
-  qualifiedName: String,
-  nullable: Boolean = false,
-  arguments: List<IrTypeArgument> = emptyList()
+    qualifiedName: String,
+    nullable: Boolean = false,
+    arguments: List<IrTypeArgument> = emptyList()
 ): IrType =
-  referenceClass(FqName(qualifiedName))!!.createType(
-    hasQuestionMark = nullable, arguments = arguments)
+    referenceClass(FqName(qualifiedName))!!.createType(
+        hasQuestionMark = nullable, arguments = arguments)

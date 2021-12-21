@@ -18,10 +18,14 @@
 package dev.zacsweers.moshix.ir.playground
 
 import com.google.common.truth.Truth.assertThat
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonClass
+import com.squareup.moshi.JsonQualifier
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.ToJson
 import com.squareup.moshi.adapter
 import java.lang.reflect.InvocationTargetException
+import java.util.Locale
 import kotlin.reflect.javaType
 import kotlin.reflect.typeOf
 import org.junit.Test
@@ -48,6 +52,36 @@ class IrPlayground {
           .contains(
               "TypeVariable mismatch: Expecting 1 type for generic type variables [T], but received 2")
     }
+  }
+
+  @Test
+  fun constructorParameterWithQualifier() {
+    val moshi = Moshi.Builder().add(UppercaseJsonAdapter()).build()
+    val jsonAdapter = moshi.adapter<ConstructorParameterWithQualifier>()
+
+    val encoded = ConstructorParameterWithQualifier("Android", "Banana")
+    assertThat(jsonAdapter.toJson(encoded)).isEqualTo("""{"a":"ANDROID","b":"Banana"}""")
+
+    val decoded = jsonAdapter.fromJson("""{"a":"Android","b":"Banana"}""")!!
+    assertThat(decoded.a).isEqualTo("android")
+    assertThat(decoded.b).isEqualTo("Banana")
+  }
+}
+
+@JsonClass(generateAdapter = true)
+class ConstructorParameterWithQualifier(@Uppercase(inFrench = true) val a: String, val b: String)
+
+@JsonQualifier annotation class Uppercase(val inFrench: Boolean, val onSundays: Boolean = false)
+
+class UppercaseJsonAdapter {
+  @ToJson
+  fun toJson(@Uppercase(inFrench = true) s: String): String {
+    return s.uppercase(Locale.US)
+  }
+  @FromJson
+  @Uppercase(inFrench = true)
+  fun fromJson(s: String): String {
+    return s.lowercase(Locale.US)
   }
 }
 

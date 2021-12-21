@@ -50,10 +50,10 @@ import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irConcat
 import org.jetbrains.kotlin.ir.builders.irElseBranch
 import org.jetbrains.kotlin.ir.builders.irEquals
+import org.jetbrains.kotlin.ir.builders.irEqualsNull
 import org.jetbrains.kotlin.ir.builders.irExprBody
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
-import org.jetbrains.kotlin.ir.builders.irIfNull
 import org.jetbrains.kotlin.ir.builders.irImplicitCast
 import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irNotEquals
@@ -80,19 +80,15 @@ import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.expressions.IrConst
+import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
-import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
-import org.jetbrains.kotlin.ir.symbols.IrSymbol
-import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
-import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
-import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
@@ -102,6 +98,7 @@ import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.getPropertyGetter
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
+import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
@@ -111,6 +108,7 @@ import org.jetbrains.kotlin.resolve.source.getPsi
 
 internal const val LOG_PREFIX = "*** MOSHI (IR):"
 private val JSON_ANNOTATION = FqName("com.squareup.moshi.Json")
+private val JSON_QUALIFIER_ANNOTATION = FqName("com.squareup.moshi.JsonQualifier")
 private val JSON_CLASS_ANNOTATION = FqName("com.squareup.moshi.JsonClass")
 
 internal data class GeneratedAdapter(val adapterClass: IrDeclaration, val irFile: IrFile)
@@ -125,6 +123,8 @@ internal class MoshiIrVisitor(
 
   private val moshiSymbols = MoshiSymbols(pluginContext.irBuiltIns, moduleFragment, pluginContext)
 
+  private data class AdapterKey(val type: IrType, val jsonQualifiers: List<IrConstructorCall>)
+
   private class Property(
       val property: IrProperty,
       val isIgnored: Boolean,
@@ -134,12 +134,22 @@ internal class MoshiIrVisitor(
     val name = parameter?.name ?: property.name
     val jsonName: String = parameter?.jsonName() ?: property.jsonName() ?: name.asString()
     val hasDefault = parameter == null || parameter.defaultValue != null
+    val jsonQualifiers by lazy { (property.jsonQualifiers() + parameter.jsonQualifiers()).toList() }
+
+    val adapterKey by lazy { AdapterKey(type, jsonQualifiers) }
+
+    private fun IrAnnotationContainer?.jsonQualifiers(): Set<IrConstructorCall> {
+      if (this == null) return emptySet()
+      return annotations.filterTo(LinkedHashSet()) {
+        it.type.classOrNull?.owner?.hasAnnotation(JSON_QUALIFIER_ANNOTATION) == true
+      }
+    }
   }
 
   private fun irType(
-    qualifiedName: String,
-    nullable: Boolean = false,
-    arguments: List<IrTypeArgument> = emptyList()
+      qualifiedName: String,
+      nullable: Boolean = false,
+      arguments: List<IrTypeArgument> = emptyList()
   ) = pluginContext.irType(qualifiedName, nullable, arguments)
 
   override fun visitClassNew(declaration: IrClass): IrStatement {
@@ -317,19 +327,19 @@ internal class MoshiIrVisitor(
             }
 
     // Each adapter based on property
-    // TODO json qualifiers. Put them in the property and group by the type + properties
-    val propertiesByType = properties.groupBy { it.property.type }
-    val adapterProperties = mutableMapOf<IrType, IrField>()
-    for ((propertyType, props) in propertiesByType) {
-      val delegateKey = DelegateKey(propertyType, emptyList())
-      adapterProperties[propertyType] = delegateKey.generateProperty(
-        pluginContext,
-        moshiSymbols,
-        adapterCls,
-        ctor.valueParameters[0],
-        ctor.valueParameters.getOrNull(1),
-        props[0].jsonName
-      )
+    val propertiesByType = properties.groupBy { it.adapterKey }
+    val adapterProperties = mutableMapOf<AdapterKey, IrField>()
+    for ((propertyKey, props) in propertiesByType) {
+      val (propertyType, qualifiers) = propertyKey
+      val delegateKey = DelegateKey(propertyType, qualifiers)
+      adapterProperties[propertyKey] =
+          delegateKey.generateProperty(
+              pluginContext,
+              moshiSymbols,
+              adapterCls,
+              ctor.valueParameters[0],
+              ctor.valueParameters.getOrNull(1),
+              props[0].jsonName)
     }
 
     adapterCls
@@ -397,7 +407,8 @@ internal class MoshiIrVisitor(
                                                     dispatchReceiver =
                                                         irGetField(
                                                             irGet(dispatchReceiverParameter!!),
-                                                            adapterProperties.getValue(prop.type))
+                                                            adapterProperties.getValue(
+                                                                prop.adapterKey))
                                                     putValueArgument(0, irGet(readerParam))
                                                   })
                                         }))
@@ -460,10 +471,8 @@ internal class MoshiIrVisitor(
           body =
               DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
                 // TODO can we use IMPLICIT_NOTNULL here and just skip the null check?
-                // TODO just use irIfThen
-                +irIfNull(
-                    value.type,
-                    irGet(value),
+                +irIfThen(
+                    irEqualsNull(irGet(value)),
                     irThrow(
                         irCall(
                             // TODO why can't I use kotlin.NullPointerException here?
@@ -475,8 +484,7 @@ internal class MoshiIrVisitor(
                                   0,
                                   irString(
                                       "value was null! Wrap in .nullSafe() to write nullable values."))
-                            }),
-                    irBlock {})
+                            }))
                 // Cast it up to the actual type
                 val castValue =
                     irTemporary(
@@ -496,7 +504,7 @@ internal class MoshiIrVisitor(
                     dispatchReceiver =
                         irGetField(
                             irGet(dispatchReceiverParameter!!),
-                            adapterProperties.getValue(property.type))
+                            adapterProperties.getValue(property.adapterKey))
                     // writer
                     putValueArgument(0, irGet(writer))
                     // value.prop
