@@ -123,8 +123,6 @@ internal class MoshiIrVisitor(
 
   private val moshiSymbols = MoshiSymbols(pluginContext.irBuiltIns, moduleFragment, pluginContext)
 
-  private data class AdapterKey(val type: IrType, val jsonQualifiers: List<IrConstructorCall>)
-
   private class Property(
       val property: IrProperty,
       val isIgnored: Boolean,
@@ -136,7 +134,7 @@ internal class MoshiIrVisitor(
     val hasDefault = parameter == null || parameter.defaultValue != null
     val jsonQualifiers by lazy { (property.jsonQualifiers() + parameter.jsonQualifiers()).toList() }
 
-    val adapterKey by lazy { AdapterKey(type, jsonQualifiers) }
+    val delegateKey by lazy { DelegateKey(type, jsonQualifiers) }
 
     private fun IrAnnotationContainer?.jsonQualifiers(): Set<IrConstructorCall> {
       if (this == null) return emptySet()
@@ -327,12 +325,10 @@ internal class MoshiIrVisitor(
             }
 
     // Each adapter based on property
-    val propertiesByType = properties.groupBy { it.adapterKey }
-    val adapterProperties = mutableMapOf<AdapterKey, IrField>()
-    for ((propertyKey, props) in propertiesByType) {
-      val (propertyType, qualifiers) = propertyKey
-      val delegateKey = DelegateKey(propertyType, qualifiers)
-      adapterProperties[propertyKey] =
+    val propertiesByType = properties.groupBy { it.delegateKey }
+    val adapterProperties = mutableMapOf<DelegateKey, IrField>()
+    for ((delegateKey, props) in propertiesByType) {
+      adapterProperties[delegateKey] =
           delegateKey.generateProperty(
               pluginContext,
               moshiSymbols,
@@ -408,7 +404,7 @@ internal class MoshiIrVisitor(
                                                         irGetField(
                                                             irGet(dispatchReceiverParameter!!),
                                                             adapterProperties.getValue(
-                                                                prop.adapterKey))
+                                                                prop.delegateKey))
                                                     putValueArgument(0, irGet(readerParam))
                                                   })
                                         }))
@@ -504,7 +500,7 @@ internal class MoshiIrVisitor(
                     dispatchReceiver =
                         irGetField(
                             irGet(dispatchReceiverParameter!!),
-                            adapterProperties.getValue(property.adapterKey))
+                            adapterProperties.getValue(property.delegateKey))
                     // writer
                     putValueArgument(0, irGet(writer))
                     // value.prop
