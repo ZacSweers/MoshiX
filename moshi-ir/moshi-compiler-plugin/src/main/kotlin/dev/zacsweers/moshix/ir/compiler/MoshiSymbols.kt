@@ -132,15 +132,18 @@ internal class MoshiSymbols(
           .symbol
 
   val arrayGet =
-    pluginContext.irBuiltIns.arrayClass.owner.declarations
-      .filterIsInstance<IrSimpleFunction>()
-      .single { it.name.asString() == "get" }
+      pluginContext.irBuiltIns.arrayClass.owner.declarations.filterIsInstance<IrSimpleFunction>()
+          .single { it.name.asString() == "get" }
 
   val arraySizeGetter =
-    pluginContext.irBuiltIns.arrayClass.owner.declarations
-      .filterIsInstance<IrProperty>()
-      .single { it.name.asString() == "size" }
-      .getter!!
+      pluginContext
+          .irBuiltIns
+          .arrayClass
+          .owner
+          .declarations
+          .filterIsInstance<IrProperty>()
+          .single { it.name.asString() == "size" }
+          .getter!!
 
   private fun createPackage(packageName: String): IrPackageFragment =
       IrExternalPackageFragmentImpl.createEmptyExternalPackageFragment(

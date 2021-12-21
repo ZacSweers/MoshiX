@@ -21,10 +21,10 @@ import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
-import org.junit.Test
 import java.lang.reflect.InvocationTargetException
 import kotlin.reflect.javaType
 import kotlin.reflect.typeOf
+import org.junit.Test
 
 class IrPlayground {
 
@@ -40,14 +40,15 @@ class IrPlayground {
 
     // Ensure types check works
     try {
-      Class.forName("dev.zacsweers.moshix.ir.playground.SimpleClassJsonAdapter")
-        .constructors[0]
-        .newInstance(moshi, arrayOf(typeOf<String>().javaType, typeOf<Int>().javaType))
+      Class.forName("dev.zacsweers.moshix.ir.playground.SimpleClassJsonAdapter").constructors[0]
+          .newInstance(moshi, arrayOf(typeOf<String>().javaType, typeOf<Int>().javaType))
     } catch (e: InvocationTargetException) {
-      assertThat(e.cause).hasMessageThat().contains("TypeVariable mismatch: Expecting 1 type for generic type variables [T], but received 2")
+      assertThat(e.cause)
+          .hasMessageThat()
+          .contains(
+              "TypeVariable mismatch: Expecting 1 type for generic type variables [T], but received 2")
     }
   }
 }
 
-@JsonClass(generateAdapter = true)
-data class SimpleClass<T>(val a: Int?, val b: T)
+@JsonClass(generateAdapter = true) data class SimpleClass<T>(val a: Int?, val b: T)
