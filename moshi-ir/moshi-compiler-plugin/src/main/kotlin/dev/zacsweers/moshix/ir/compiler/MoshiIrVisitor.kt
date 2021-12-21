@@ -15,9 +15,12 @@
  */
 package dev.zacsweers.moshix.ir.compiler
 
+import dev.zacsweers.moshix.ir.compiler.api.DelegateKey
+import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
 import dev.zacsweers.moshix.ir.compiler.util.irConstructorBody
 import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
+import dev.zacsweers.moshix.ir.compiler.util.irType
 import dev.zacsweers.moshix.ir.compiler.util.isSubclassOfFqName
 import dev.zacsweers.moshix.ir.compiler.util.overridesFunctionIn
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
@@ -132,6 +135,12 @@ internal class MoshiIrVisitor(
     val jsonName: String = parameter?.jsonName() ?: property.jsonName() ?: name.asString()
     val hasDefault = parameter == null || parameter.defaultValue != null
   }
+
+  private fun irType(
+    qualifiedName: String,
+    nullable: Boolean = false,
+    arguments: List<IrTypeArgument> = emptyList()
+  ) = pluginContext.irType(qualifiedName, nullable, arguments)
 
   override fun visitClassNew(declaration: IrClass): IrStatement {
     declaration.getAnnotation(JSON_CLASS_ANNOTATION)?.let { call ->
@@ -308,96 +317,19 @@ internal class MoshiIrVisitor(
             }
 
     // Each adapter based on property
-    // TODO reuse adapters for same type
-    // TODO qualifiers
-    // TODO handle generics
+    // TODO json qualifiers. Put them in the property and group by the type + properties
     val propertiesByType = properties.groupBy { it.property.type }
     val adapterProperties = mutableMapOf<IrType, IrField>()
     for ((propertyType, props) in propertiesByType) {
-      var genericIndex = -1
-      val simpleName =
-          when (val classifier = propertyType.classifierOrFail) {
-            is IrTypeParameterSymbol -> {
-              classifier.descriptor.name.asString().also { typeParamName ->
-                genericIndex =
-                    adapterCls.typeParameters.indexOfFirst { it.name.asString() == typeParamName }
-              }
-            }
-            is IrClassSymbol -> {
-              propertyType.classFqName!!.asString().replace(".", "_")
-            }
-            else -> {
-              error("Unexpected type: $propertyType")
-            }
-          }
-      val nullablePrefix = if (propertyType.isMarkedNullable()) "Nullable" else ""
-      val field =
-          adapterCls
-              .addField {
-                name = Name.identifier("${simpleName}${nullablePrefix}Adapter")
-                type = moshiSymbols.jsonAdapter.typeWith(propertyType)
-                visibility = DescriptorVisibilities.PRIVATE
-                isFinal = true
-              }
-              .apply {
-                initializer =
-                    pluginContext.createIrBuilder(symbol).run {
-                      irExprBody(
-                          irCall(
-                              pluginContext.referenceClass(FqName("com.squareup.moshi.Moshi"))!!
-                                  .functions.single {
-                                it.descriptor.name.asString() == "adapter" &&
-                                    it.descriptor.valueParameters.size == 3
-                              })
-                              .apply {
-                                dispatchReceiver = irGet(ctor.valueParameters[0])
-
-                                // type
-                                if (genericIndex == -1) {
-                                  // Use typeOf() intrinsic
-                                  putValueArgument(
-                                      0,
-                                      irCall(
-                                          pluginContext
-                                              .referenceProperties(
-                                                  FqName("kotlin.reflect.javaType"))
-                                              .first()
-                                              .owner
-                                              .getter!!)
-                                          .apply {
-                                            extensionReceiver =
-                                                irCall(
-                                                    pluginContext
-                                                        .referenceFunctions(
-                                                            FqName("kotlin.reflect.typeOf"))
-                                                        .first())
-                                                    .apply { putTypeArgument(0, propertyType) }
-                                          })
-                                } else {
-                                  // It's generic, get from types array
-                                  putValueArgument(
-                                      0,
-                                      irCall(moshiSymbols.arrayGet.symbol).apply {
-                                        dispatchReceiver = irGet(ctor.valueParameters[1])
-                                        putValueArgument(0, irInt(genericIndex))
-                                      })
-                                }
-                                // annotations
-                                // TODO construct these
-                                putValueArgument(
-                                    1,
-                                    irCall(
-                                        pluginContext
-                                            .referenceFunctions(
-                                                FqName("kotlin.collections.emptySet"))
-                                            .first())
-                                        .apply { putTypeArgument(0, irType("kotlin.Annotation")) })
-                                // field hint
-                                putValueArgument(2, irString(props.first().jsonName))
-                              })
-                    }
-              }
-      adapterProperties[propertyType] = field
+      val delegateKey = DelegateKey(propertyType, emptyList())
+      adapterProperties[propertyType] = delegateKey.generateProperty(
+        pluginContext,
+        moshiSymbols,
+        adapterCls,
+        ctor.valueParameters[0],
+        ctor.valueParameters.getOrNull(1),
+        props[0].jsonName
+      )
     }
 
     adapterCls
@@ -604,20 +536,8 @@ internal class MoshiIrVisitor(
     return adapterCls
   }
 
-  private fun irType(
-      qualifiedName: String,
-      nullable: Boolean = false,
-      arguments: List<IrTypeArgument> = emptyList()
-  ): IrType =
-      pluginContext.referenceClass(FqName(qualifiedName))!!.createType(
-          hasQuestionMark = nullable, arguments = arguments)
-
   private fun log(message: String) {
     messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")
-  }
-
-  private fun IrPluginContext.createIrBuilder(symbol: IrSymbol): DeclarationIrBuilder {
-    return DeclarationIrBuilder(this, symbol, symbol.owner.startOffset, symbol.owner.endOffset)
   }
 
   private fun IrClass.reportError(message: String) {

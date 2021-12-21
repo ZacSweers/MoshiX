@@ -59,6 +59,8 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrFieldSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrPropertySymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.IrTypeArgument
+import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
@@ -272,3 +274,15 @@ internal fun IrClass.isSubclassOfFqName(fqName: String): Boolean =
 internal fun IrSimpleFunction.overridesFunctionIn(fqName: FqName): Boolean =
     parentClassOrNull?.fqNameWhenAvailable == fqName ||
         allOverridden().any { it.parentClassOrNull?.fqNameWhenAvailable == fqName }
+
+internal fun IrPluginContext.createIrBuilder(symbol: IrSymbol): DeclarationIrBuilder {
+  return DeclarationIrBuilder(this, symbol, symbol.owner.startOffset, symbol.owner.endOffset)
+}
+
+internal fun IrPluginContext.irType(
+  qualifiedName: String,
+  nullable: Boolean = false,
+  arguments: List<IrTypeArgument> = emptyList()
+): IrType =
+  referenceClass(FqName(qualifiedName))!!.createType(
+    hasQuestionMark = nullable, arguments = arguments)
