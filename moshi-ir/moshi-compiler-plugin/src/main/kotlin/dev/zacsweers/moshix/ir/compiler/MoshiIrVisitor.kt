@@ -24,6 +24,7 @@ import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
 import dev.zacsweers.moshix.ir.compiler.util.irType
 import dev.zacsweers.moshix.ir.compiler.util.isSubclassOfFqName
 import dev.zacsweers.moshix.ir.compiler.util.overridesFunctionIn
+import dev.zacsweers.moshix.ir.compiler.util.type
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -596,9 +597,3 @@ private fun IrAnnotationContainer.jsonName(): String? {
   @Suppress("UNCHECKED_CAST")
   return (getAnnotation(JSON_ANNOTATION)?.getValueArgument(0) as? IrConst<String>?)?.value
 }
-
-private val IrProperty.type: IrType
-  get() =
-      getter?.returnType
-          ?: setter?.valueParameters?.first()?.type ?: backingField?.type
-              ?: error("No type for property $name")

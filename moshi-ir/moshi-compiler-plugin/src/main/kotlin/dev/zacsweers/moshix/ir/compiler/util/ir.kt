@@ -26,6 +26,8 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.descriptors.Visibilities
+import org.jetbrains.kotlin.descriptors.Visibility
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
@@ -319,4 +321,16 @@ internal fun IrBuilderWithScope.defaultPrimitiveValue(
         }
       }
   return defaultPrimitive ?: irNull(pluginContext.irBuiltIns.anyNType)
+}
+
+internal val IrProperty.type: IrType
+  get() =
+    getter?.returnType
+      ?: setter?.valueParameters?.first()?.type ?: backingField?.type
+      ?: error("No type for property $name")
+
+internal fun Visibility.checkIsVisibile() {
+  require(this == Visibilities.Public || this == Visibilities.Internal) {
+    "Visibility must be one of public or internal. Is $name"
+  }
 }
