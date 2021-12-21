@@ -51,11 +51,11 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 /** A JsonAdapter that can be used to encode and decode a particular field. */
-public data class DelegateKey(
+internal data class DelegateKey(
     private val delegateType: IrType,
     private val jsonQualifiers: List<IrConstructorCall>,
 ) {
-  public val nullable: Boolean
+  val nullable: Boolean
     get() = delegateType.isNullable()
 
   /** Returns an adapter to use when encoding and decoding this property. */
