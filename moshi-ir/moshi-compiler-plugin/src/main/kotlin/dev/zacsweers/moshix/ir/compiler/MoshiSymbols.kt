@@ -56,132 +56,140 @@ internal class MoshiSymbols(
 ) {
   private val irFactory: IrFactory = pluginContext.irFactory
 
-  private val moshiPackage: IrPackageFragment = createPackage("com.squareup.moshi")
-  private val javaReflectPackage: IrPackageFragment = createPackage("java.lang.reflect")
+  private val moshiPackage: IrPackageFragment by lazy { createPackage("com.squareup.moshi") }
+  private val javaReflectPackage: IrPackageFragment by lazy { createPackage("java.lang.reflect") }
 
-  val type: IrClassSymbol =
-      createClass(javaReflectPackage, "Type", ClassKind.INTERFACE, Modality.ABSTRACT)
+  val type: IrClassSymbol by lazy {
+    createClass(javaReflectPackage, "Type", ClassKind.INTERFACE, Modality.ABSTRACT)
+  }
 
-  val jsonReader: IrClassSymbol =
-      irFactory
-          .buildClass {
-            name = Name.identifier("JsonReader")
-            kind = ClassKind.CLASS
-            modality = Modality.ABSTRACT
+  val jsonReader: IrClassSymbol by lazy {
+    irFactory
+        .buildClass {
+          name = Name.identifier("JsonReader")
+          kind = ClassKind.CLASS
+          modality = Modality.ABSTRACT
+        }
+        .apply {
+          createImplicitParameterDeclarationWithWrappedDescriptor()
+          parent = moshiPackage
+
+          addFunction(
+              Name.identifier("beginObject").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
+          addFunction(
+              Name.identifier("endObject").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
+          addFunction(
+              Name.identifier("skipName").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
+          addFunction(
+              Name.identifier("skipValue").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
+
+          addFunction(
+              Name.identifier("hasNext").identifier, irBuiltIns.booleanType, Modality.ABSTRACT)
+
+          val optionsClass = createClass(this, "Options", ClassKind.CLASS, Modality.FINAL)
+
+          addFunction(
+              Name.identifier("selectName").identifier, irBuiltIns.intType, Modality.ABSTRACT)
+              .apply { addValueParameter("options", optionsClass.defaultType) }
+        }
+        .symbol
+  }
+
+  val jsonWriter: IrClassSymbol by lazy {
+    irFactory
+        .buildClass {
+          name = Name.identifier("JsonWriter")
+          kind = ClassKind.CLASS
+          modality = Modality.ABSTRACT
+        }
+        .apply {
+          createImplicitParameterDeclarationWithWrappedDescriptor()
+          parent = moshiPackage
+
+          addFunction(Name.identifier("beginObject").identifier, defaultType, Modality.ABSTRACT)
+          addFunction(Name.identifier("endObject").identifier, defaultType, Modality.ABSTRACT)
+
+          addFunction(Name.identifier("name").identifier, defaultType, Modality.ABSTRACT).apply {
+            addValueParameter("name", irBuiltIns.stringType)
           }
-          .apply {
-            createImplicitParameterDeclarationWithWrappedDescriptor()
-            parent = moshiPackage
+        }
+        .symbol
+  }
 
-            addFunction(
-                Name.identifier("beginObject").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
-            addFunction(
-                Name.identifier("endObject").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
-            addFunction(
-                Name.identifier("skipName").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
-            addFunction(
-                Name.identifier("skipValue").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
+  val moshi: IrClassSymbol by lazy {
+    irFactory
+        .buildClass {
+          name = Name.identifier("Moshi")
+          kind = ClassKind.CLASS
+          modality = Modality.FINAL
+        }
+        .apply {
+          createImplicitParameterDeclarationWithWrappedDescriptor()
+          parent = moshiPackage
 
-            addFunction(
-                Name.identifier("hasNext").identifier, irBuiltIns.booleanType, Modality.ABSTRACT)
+          addFunction(
+              Name.identifier("adapter").identifier,
+              jsonAdapter.typeWith(irBuiltIns.anyNType),
+              Modality.FINAL)
+              .apply {
+                addTypeParameter("T", irBuiltIns.anyNType)
+                addValueParameter("type", type.defaultType)
+                addValueParameter(
+                    "annotations", irBuiltIns.setClass.typeWith(irBuiltIns.annotationType))
+                addValueParameter("fieldName", irBuiltIns.stringType)
+              }
+        }
+        .symbol
+  }
 
-            val optionsClass = createClass(this, "Options", ClassKind.CLASS, Modality.FINAL)
+  internal val jsonAdapter: IrClassSymbol by lazy {
+    irFactory
+        .buildClass {
+          name = Name.identifier("JsonAdapter")
+          kind = ClassKind.CLASS
+          modality = Modality.ABSTRACT
+        }
+        .apply {
+          createImplicitParameterDeclarationWithWrappedDescriptor()
+          val t = addTypeParameter("T", irBuiltIns.anyNType)
+          parent = moshiPackage
 
-            addFunction(
-                Name.identifier("selectName").identifier, irBuiltIns.intType, Modality.ABSTRACT)
-                .apply { addValueParameter("options", optionsClass.defaultType) }
-          }
-          .symbol
+          addConstructor {}
 
-  val jsonWriter: IrClassSymbol =
-      irFactory
-          .buildClass {
-            name = Name.identifier("JsonWriter")
-            kind = ClassKind.CLASS
-            modality = Modality.ABSTRACT
-          }
-          .apply {
-            createImplicitParameterDeclarationWithWrappedDescriptor()
-            parent = moshiPackage
+          addFunction(
+              Name.identifier("fromJson").identifier,
+              t.defaultType.makeNullable(),
+              Modality.ABSTRACT)
+              .apply { addValueParameter("reader", jsonReader.defaultType) }
 
-            addFunction(Name.identifier("beginObject").identifier, defaultType, Modality.ABSTRACT)
-            addFunction(Name.identifier("endObject").identifier, defaultType, Modality.ABSTRACT)
+          addFunction(Name.identifier("toJson").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
+              .apply {
+                addValueParameter("writer", jsonWriter.defaultType)
+                addValueParameter("value", t.defaultType.makeNullable())
+              }
+        }
+        .symbol
+  }
 
-            addFunction(Name.identifier("name").identifier, defaultType, Modality.ABSTRACT).apply {
-              addValueParameter("name", irBuiltIns.stringType)
-            }
-          }
-          .symbol
+  val jsonDataException: IrClassSymbol by lazy {
+    pluginContext.referenceClass(FqName("com.squareup.moshi.JsonDataException"))!!
+  }
 
-  internal val jsonAdapter: IrClassSymbol =
-      irFactory
-          .buildClass {
-            name = Name.identifier("JsonAdapter")
-            kind = ClassKind.CLASS
-            modality = Modality.ABSTRACT
-          }
-          .apply {
-            createImplicitParameterDeclarationWithWrappedDescriptor()
-            val t = addTypeParameter("T", irBuiltIns.anyNType)
-            parent = moshiPackage
-
-            addConstructor {}
-
-            addFunction(
-                Name.identifier("fromJson").identifier,
-                t.defaultType.makeNullable(),
-                Modality.ABSTRACT)
-                .apply { addValueParameter("reader", jsonReader.defaultType) }
-
-            addFunction(
-                Name.identifier("toJson").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
-                .apply {
-                  addValueParameter("writer", jsonWriter.defaultType)
-                  addValueParameter("value", t.defaultType.makeNullable())
-                }
-          }
-          .symbol
-
-  // Must go after jsonAdapter.
-  // TODO could we get around this with by lazy?
-  val moshi: IrClassSymbol =
-      irFactory
-          .buildClass {
-            name = Name.identifier("Moshi")
-            kind = ClassKind.CLASS
-            modality = Modality.FINAL
-          }
-          .apply {
-            createImplicitParameterDeclarationWithWrappedDescriptor()
-            parent = moshiPackage
-
-            addFunction(
-                Name.identifier("adapter").identifier,
-                jsonAdapter.typeWith(irBuiltIns.anyNType),
-                Modality.FINAL)
-                .apply {
-                  addTypeParameter("T", irBuiltIns.anyNType)
-                  addValueParameter("type", type.defaultType)
-                  addValueParameter(
-                      "annotations", irBuiltIns.setClass.typeWith(irBuiltIns.annotationType))
-                  addValueParameter("fieldName", irBuiltIns.stringType)
-                }
-          }
-          .symbol
-
-  val jsonDataException: IrClassSymbol =
-      pluginContext.referenceClass(FqName("com.squareup.moshi.JsonDataException"))!!
-  val jsonDataExceptionStringConstructor: IrFunctionSymbol =
-      jsonDataException.constructors.first {
-        it.owner.valueParameters.size == 1 &&
-            it.owner.valueParameters[0].type.makeNotNull() == pluginContext.irBuiltIns.stringType
-      }
+  val jsonDataExceptionStringConstructor: IrFunctionSymbol by lazy {
+    jsonDataException.constructors.first {
+      it.owner.valueParameters.size == 1 &&
+          it.owner.valueParameters[0].type.makeNotNull() == pluginContext.irBuiltIns.stringType
+    }
+  }
 
   // TODO why doesn't creating an anonymous irclass work here? Breaks bytecode somewhere
-  val moshiUtil: IrClassSymbol =
-      pluginContext.referenceClass(FqName("com.squareup.moshi.internal.Util"))!!
+  val moshiUtil: IrClassSymbol by lazy {
+    pluginContext.referenceClass(FqName("com.squareup.moshi.internal.Util"))!!
+  }
 
-  val emptySet = pluginContext.referenceFunctions(FqName("kotlin.collections.emptySet")).first()
+  val emptySet by lazy {
+    pluginContext.referenceFunctions(FqName("kotlin.collections.emptySet")).first()
+  }
 
   /*
    * There are two setOf() functions with one arg - one is the vararg and the other is a shorthand for
@@ -189,43 +197,49 @@ internal class MoshiSymbols(
    * vararg array into the singleton() function.
    */
 
-  val setOfVararg =
-      pluginContext.referenceFunctions(FqName("kotlin.collections.setOf")).first {
-        it.owner.valueParameters.size == 1 || it.owner.valueParameters[0].varargElementType != null
-      }
+  val setOfVararg by lazy {
+    pluginContext.referenceFunctions(FqName("kotlin.collections.setOf")).first {
+      it.owner.valueParameters.size == 1 || it.owner.valueParameters[0].varargElementType != null
+    }
+  }
 
-  val setOfSingleton =
-      pluginContext.referenceFunctions(FqName("kotlin.collections.setOf")).first {
-        it.owner.valueParameters.size == 1 || it.owner.valueParameters[0].varargElementType == null
-      }
+  val setOfSingleton by lazy {
+    pluginContext.referenceFunctions(FqName("kotlin.collections.setOf")).first {
+      it.owner.valueParameters.size == 1 || it.owner.valueParameters[0].varargElementType == null
+    }
+  }
 
-  val setPlus =
-      pluginContext.referenceFunctions(FqName("kotlin.collections.plus")).single {
-        val owner = it.owner
-        owner.extensionReceiverParameter?.type?.classFqName == FqName("kotlin.collections.Set") &&
-            owner.valueParameters.size == 1 &&
-            owner.valueParameters[0].type.classifierOrNull is IrTypeParameterSymbol
-      }
+  val setPlus by lazy {
+    pluginContext.referenceFunctions(FqName("kotlin.collections.plus")).single {
+      val owner = it.owner
+      owner.extensionReceiverParameter?.type?.classFqName == FqName("kotlin.collections.Set") &&
+          owner.valueParameters.size == 1 &&
+          owner.valueParameters[0].type.classifierOrNull is IrTypeParameterSymbol
+    }
+  }
 
-  val arrayGet =
-      pluginContext.irBuiltIns.arrayClass.owner.declarations.filterIsInstance<IrSimpleFunction>()
-          .single { it.name.asString() == "get" }
+  val arrayGet by lazy {
+    pluginContext.irBuiltIns.arrayClass.owner.declarations.filterIsInstance<IrSimpleFunction>()
+        .single { it.name.asString() == "get" }
+  }
 
-  val arraySizeGetter =
-      pluginContext
-          .irBuiltIns
-          .arrayClass
-          .owner
-          .declarations
-          .filterIsInstance<IrProperty>()
-          .single { it.name.asString() == "size" }
-          .getter!!
+  val arraySizeGetter by lazy {
+    pluginContext
+        .irBuiltIns
+        .arrayClass
+        .owner
+        .declarations
+        .filterIsInstance<IrProperty>()
+        .single { it.name.asString() == "size" }
+        .getter!!
+  }
 
-  val iterableJoinToString =
-      pluginContext.referenceFunctions(FqName("kotlin.collections.joinToString")).single {
-        it.owner.extensionReceiverParameter?.type?.classFqName ==
-            FqName("kotlin.collections.Iterable")
-      }
+  val iterableJoinToString by lazy {
+    pluginContext.referenceFunctions(FqName("kotlin.collections.joinToString")).single {
+      it.owner.extensionReceiverParameter?.type?.classFqName ==
+          FqName("kotlin.collections.Iterable")
+    }
+  }
 
   private fun createPackage(packageName: String): IrPackageFragment =
       IrExternalPackageFragmentImpl.createEmptyExternalPackageFragment(
@@ -258,10 +272,4 @@ internal class MoshiSymbols(
   ): IrType =
       pluginContext.referenceClass(FqName(qualifiedName))!!.createType(
           hasQuestionMark = nullable, arguments = arguments)
-
-  //  fun createBuilder(
-  //    symbol: IrSymbol,
-  //    startOffset: Int = UNDEFINED_OFFSET,
-  //    endOffset: Int = UNDEFINED_OFFSET
-  //  ) = AndroidIrBuilder(this, symbol, startOffset, endOffset)
 }
