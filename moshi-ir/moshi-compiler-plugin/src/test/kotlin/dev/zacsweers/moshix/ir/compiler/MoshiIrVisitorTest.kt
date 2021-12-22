@@ -519,11 +519,12 @@ class MoshiIrVisitorTest {
       val processor = MoshiCommandLineProcessor()
       commandLineProcessors = listOf(processor)
       pluginOptions =
-          listOf(
-              processor.option(KEY_ENABLED, "true"),
-              processor.option(
-                  KEY_GENERATED_ANNOTATION, generatedAnnotation ?: "javax.annotation.Generated"),
-          )
+          buildList {
+            add(processor.option(KEY_ENABLED, "true"))
+            if (generatedAnnotation != null) {
+              processor.option(KEY_GENERATED_ANNOTATION, generatedAnnotation)
+            }
+          }
       inheritClassPath = true
       sources = sourceFiles.asList()
       verbose = false
