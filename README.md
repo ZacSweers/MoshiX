@@ -2,6 +2,7 @@
 
 Extensions for [Moshi](https://github.com/square/moshi)
 
+* [moshi-ir](https://github.com/ZacSweers/MoshiX/tree/main/moshi-ir) - A Kotlin IR implementation of Moshi code gen.
 * [moshi-adapters](https://github.com/ZacSweers/MoshiX/tree/main/moshi-adapters) - A collection of custom adapters for Moshi.
 * [moshi-metadata-reflect](https://github.com/ZacSweers/MoshiX/tree/main/moshi-metadata-reflect) - A [kotlinx-metadata](https://github.com/JetBrains/kotlin/tree/master/libraries/kotlinx-metadata/jvm) based implementation of `KotlinJsonAdapterFactory`. This allows for reflective Moshi serialization on Kotlin classes without the cost of including kotlin-reflect.
 * [moshi-sealed](https://github.com/ZacSweers/MoshiX/tree/main/moshi-sealed) - Reflective and code gen implementations for serializing Kotlin sealed classes via Moshi polymorphic adapters.

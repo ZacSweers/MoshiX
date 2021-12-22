@@ -44,7 +44,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 internal class MoshiSymbols(
-    val irBuiltIns: IrBuiltIns,
+    private val irBuiltIns: IrBuiltIns,
     private val moduleFragment: IrModuleFragment,
     private val pluginContext: IrPluginContext
 ) {
@@ -162,6 +162,10 @@ internal class MoshiSymbols(
                 }
           }
           .symbol
+
+  // TODO why doesn't creating an anonymous irclass work here? Breaks bytecode somewhere
+  val moshiUtil: IrClassSymbol =
+      pluginContext.referenceClass(FqName("com.squareup.moshi.internal.Util"))!!
 
   val emptySet = pluginContext.referenceFunctions(FqName("kotlin.collections.emptySet")).first()
 

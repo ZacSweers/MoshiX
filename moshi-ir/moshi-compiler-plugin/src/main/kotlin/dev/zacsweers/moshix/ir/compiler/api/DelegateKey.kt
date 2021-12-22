@@ -18,6 +18,7 @@ package dev.zacsweers.moshix.ir.compiler.api
 import dev.zacsweers.moshix.ir.compiler.MoshiSymbols
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.irType
+import dev.zacsweers.moshix.ir.compiler.util.rawType
 import java.util.Locale
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
@@ -234,14 +235,5 @@ private fun IrType.toVariableName(): String {
     "Nullable$base"
   } else {
     base
-  }
-}
-
-/** Returns a suggested variable name derived from a type name, like nullableListOfString. */
-private fun IrType.rawType(): IrClass {
-  return when (val classifier = classifierOrNull) {
-    is IrClassSymbol -> classifier.owner
-    //    is WildcardTypeName -> (inTypes + outTypes).toVariableNames()
-    else -> throw IllegalArgumentException("Unrecognized type! $this")
   }
 }

@@ -20,10 +20,13 @@ import org.jetbrains.kotlin.backend.common.ir.allOverridden
 import org.jetbrains.kotlin.backend.common.ir.createDispatchReceiverParameter
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.jvm.ir.erasedUpperBound
+import org.jetbrains.kotlin.builtins.PrimitiveType
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
+import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
+import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
@@ -33,8 +36,15 @@ import org.jetbrains.kotlin.ir.builders.IrBlockBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.IrGeneratorContext
 import org.jetbrains.kotlin.ir.builders.Scope
+import org.jetbrains.kotlin.ir.builders.declarations.addFunction
+import org.jetbrains.kotlin.ir.builders.irBoolean
+import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irChar
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
+import org.jetbrains.kotlin.ir.builders.irInt
+import org.jetbrains.kotlin.ir.builders.irLong
+import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
@@ -46,23 +56,33 @@ import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.expressions.IrInstanceInitializerCall
+import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
 import org.jetbrains.kotlin.ir.expressions.IrReturn
+import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrReturnImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
+import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
 import org.jetbrains.kotlin.ir.symbols.IrReturnTargetSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrFieldSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrPropertySymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
+import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
+import org.jetbrains.kotlin.ir.types.classOrNull
+import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.createType
+import org.jetbrains.kotlin.ir.types.getPrimitiveType
+import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
+import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -76,7 +96,7 @@ internal fun FqName.child(name: String) = child(Name.identifier(name))
 /** Thrown on invalid or unexpected input code. */
 internal class MoshiCompilationException(
     override val message: String,
-    val element: IrElement? = null,
+    val location: CompilerMessageSourceLocation? = null,
     val severity: CompilerMessageSeverity = CompilerMessageSeverity.ERROR,
 ) : Exception(message)
 
@@ -93,6 +113,31 @@ internal fun IrFile.locationOf(irElement: IrElement?): CompilerMessageSourceLoca
       lineEnd = sourceRangeInfo.endLineNumber + 1,
       columnEnd = sourceRangeInfo.endColumnNumber + 1,
       lineContent = null)!!
+}
+
+internal inline fun MessageCollector.check(condition: Boolean, message: () -> String) {
+  check(condition, null, message)
+}
+
+internal inline fun MessageCollector.check(
+    condition: Boolean,
+    noinline location: (() -> CompilerMessageSourceLocation)?,
+    message: () -> String
+) {
+  if (!condition) {
+    throw MoshiCompilationException(message(), location?.invoke())
+  }
+}
+
+internal inline fun MessageCollector.error(message: () -> String) {
+  error(null, message)
+}
+
+internal inline fun MessageCollector.error(
+    noinline location: (() -> CompilerMessageSourceLocation)?,
+    message: () -> String
+) {
+  report(CompilerMessageSeverity.ERROR, message(), location?.invoke())
 }
 
 /** `return ...` */
@@ -286,3 +331,120 @@ internal fun IrPluginContext.irType(
 ): IrType =
     referenceClass(FqName(qualifiedName))!!.createType(
         hasQuestionMark = nullable, arguments = arguments)
+
+// returns null: Any? for boxed types and 0: <number type> for primitives
+internal fun IrBuilderWithScope.defaultPrimitiveValue(
+    type: IrType,
+    pluginContext: IrPluginContext
+): IrExpression {
+  // TODO check unit/void/nothing
+  val defaultPrimitive: IrExpression? =
+      if (type.isMarkedNullable()) {
+        null
+      } else {
+        when (type.getPrimitiveType()) {
+          PrimitiveType.BOOLEAN -> irBoolean(false)
+          PrimitiveType.CHAR -> irChar(0.toChar())
+          PrimitiveType.BYTE -> IrConstImpl.byte(startOffset, endOffset, type, 0)
+          PrimitiveType.SHORT -> IrConstImpl.short(startOffset, endOffset, type, 0)
+          PrimitiveType.INT -> irInt(0)
+          PrimitiveType.FLOAT -> IrConstImpl.float(startOffset, endOffset, type, 0.0f)
+          PrimitiveType.LONG -> irLong(0L)
+          PrimitiveType.DOUBLE -> IrConstImpl.double(startOffset, endOffset, type, 0.0)
+          else -> null
+        }
+      }
+  return defaultPrimitive ?: irNull(pluginContext.irBuiltIns.anyNType)
+}
+
+internal val IrProperty.type: IrType
+  get() =
+      getter?.returnType
+          ?: setter?.valueParameters?.first()?.type ?: backingField?.type
+              ?: error("No type for property $name")
+
+internal fun DescriptorVisibility.checkIsVisibile() {
+  require(this == DescriptorVisibilities.PUBLIC || this == DescriptorVisibilities.INTERNAL) {
+    "Visibility must be one of public or internal. Is $name"
+  }
+}
+
+/** Returns the raw [IrClass] of this [IrType] or throws. */
+internal fun IrType.rawType(): IrClass {
+  return rawTypeOrNull() ?: error("Unrecognized type! $this")
+}
+
+/** Returns the raw [IrClass] of this [IrType] or null. */
+internal fun IrType.rawTypeOrNull(): IrClass? {
+  return when (val classifier = classifierOrNull) {
+    is IrClassSymbol -> classifier.owner
+    //    is WildcardTypeName -> (inTypes + outTypes).toVariableNames()
+    else -> null
+  }
+}
+
+internal fun IrClass.addOverride(
+    baseFqName: FqName,
+    name: String,
+    returnType: IrType,
+    modality: Modality = Modality.FINAL,
+    overloadFilter: (function: IrSimpleFunction) -> Boolean = { true }
+): IrSimpleFunction =
+    addFunction(name, returnType, modality).apply {
+      overriddenSymbols =
+          superTypes
+              .mapNotNull { superType ->
+                superType.classOrNull?.owner?.takeIf { superClass ->
+                  superClass.isSubclassOfFqName(baseFqName.asString())
+                }
+              }
+              .flatMap { superClass ->
+                superClass
+                    .functions
+                    .filter { function ->
+                      function.name.asString() == name &&
+                          function.overridesFunctionIn(baseFqName) &&
+                          overloadFilter(function)
+                    }
+                    .map { it.symbol }
+                    .toList()
+              }
+    }
+
+internal fun IrBuilderWithScope.irBinOp(
+    pluginContext: IrPluginContext,
+    name: Name,
+    lhs: IrExpression,
+    rhs: IrExpression
+): IrExpression {
+  val classFqName = (lhs.type as IrSimpleType).classOrNull!!.owner.fqNameWhenAvailable!!
+  val symbol = pluginContext.referenceFunctions(classFqName.child(name)).single()
+  return irInvoke(lhs, symbol, rhs)
+}
+
+internal fun IrBuilderWithScope.irInvoke(
+    dispatchReceiver: IrExpression? = null,
+    callee: IrFunctionSymbol,
+    vararg args: IrExpression,
+    typeHint: IrType? = null
+): IrMemberAccessExpression<*> {
+  assert(callee.isBound) { "Symbol $callee expected to be bound" }
+  val returnType = typeHint ?: callee.owner.returnType
+  val call = irCall(callee, type = returnType)
+  call.dispatchReceiver = dispatchReceiver
+  args.forEachIndexed(call::putValueArgument)
+  return call
+}
+
+internal fun IrBuilderWithScope.irInvoke(
+    dispatchReceiver: IrExpression? = null,
+    callee: IrFunctionSymbol,
+    typeArguments: List<IrType?>,
+    valueArguments: List<IrExpression>,
+    returnTypeHint: IrType? = null
+): IrMemberAccessExpression<*> =
+    irInvoke(dispatchReceiver, callee, *valueArguments.toTypedArray(), typeHint = returnTypeHint)
+        .also { call -> typeArguments.forEachIndexed(call::putTypeArgument) }
+
+internal val IrProperty.isTransient: Boolean
+  get() = backingField?.hasAnnotation(FqName("kotlin.jvm.Transient")) == true

@@ -15,6 +15,7 @@
  */
 package dev.zacsweers.moshix.ir.compiler
 
+import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -27,13 +28,19 @@ internal class MoshiIrGenerationExtension(
 ) : IrGenerationExtension {
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
-    val generatedAnnotation = generatedAnnotationName?.let(pluginContext::referenceClass)
-    if (generatedAnnotation == null) {
-      // TODO eventually error
-      println("Unknown generated annotation $generatedAnnotationName")
-    }
+    val generatedAnnotation =
+        generatedAnnotationName?.let { fqName ->
+          pluginContext.referenceClass(fqName).also {
+            if (it == null) {
+              messageCollector.error { "Unknown generated annotation $generatedAnnotationName" }
+              return
+            }
+          }
+        }
     val deferred = mutableListOf<GeneratedAdapter>()
-    val moshiTransformer = MoshiIrVisitor(moduleFragment, pluginContext, messageCollector, deferred)
+    val moshiTransformer =
+        MoshiIrVisitor(
+            moduleFragment, pluginContext, messageCollector, generatedAnnotation, deferred)
     moduleFragment.transform(moshiTransformer, null)
     for ((file, adapters) in deferred.groupBy { it.irFile }) {
       for (adapter in adapters) {

@@ -43,7 +43,8 @@ apiValidation {
   ignoredProjects +=
       listOf(
           /* :moshi-ir: */
-          "playground",
+          "moshi-kotlin-tests",
+          "extra-moshi-test-module",
           /* :moshi-sealed: */
           "sample",
       )
@@ -62,32 +63,23 @@ spotless {
     googleJavaFormat(libs.versions.gjf.get())
     target("**/*.java")
     targetExclude("**/spotless.java", "**/build/**")
-    licenseHeaderFile("spotless/spotless.java")
   }
   kotlin {
     ktfmt("0.30")
     target("**/*.kt")
     trimTrailingWhitespace()
     endWithNewline()
-    licenseHeaderFile("spotless/spotless.kt").updateYearWithLatest(false)
     targetExclude(
         "**/Dependencies.kt",
         "**/spotless.kt",
         "**/build/**",
     )
   }
-  //  format("externalKotlin", KotlinExtension::class.java) {
-  //    // These don't use our spotless config for header files since we don't want to overwrite the
-  //    // existing copyright headers.
-  //    configureCommonKotlinFormat()
-  //  }
   kotlinGradle {
     ktfmt("0.30")
     target("**/*.gradle.kts")
     trimTrailingWhitespace()
     endWithNewline()
-    licenseHeaderFile(
-        "spotless/spotless.kts", "(import|plugins|buildscript|dependencies|pluginManagement)")
   }
 }
 

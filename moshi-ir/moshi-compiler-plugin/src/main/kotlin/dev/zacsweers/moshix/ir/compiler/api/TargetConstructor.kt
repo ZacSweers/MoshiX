@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Zac Sweers
+ * Copyright (C) 2018 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package dev.zacsweers.moshix.ir.compiler.api
 
-plugins {
-  kotlin("jvm")
-  id("dev.zacsweers.moshix")
-}
+import org.jetbrains.kotlin.descriptors.DescriptorVisibility
+import org.jetbrains.kotlin.ir.declarations.IrConstructor
 
-dependencies {
-  testImplementation("junit:junit:4.13.2")
-  testImplementation("com.google.truth:truth:1.1.3")
-  testImplementation("com.squareup.moshi:moshi:1.13.0")
-  testImplementation(kotlin("reflect"))
-}
-
-configurations.configureEach {
-  resolutionStrategy.dependencySubstitution {
-    substitute(module("dev.zacsweers.moshix:moshi-compiler-plugin"))
-        .using(project(":moshi-ir:moshi-compiler-plugin"))
-  }
-}
+/** A constructor in user code that should be called by generated code. */
+internal data class TargetConstructor(
+    val irConstructor: IrConstructor,
+    val parameters: LinkedHashMap<String, TargetParameter>,
+    val visibility: DescriptorVisibility,
+)
