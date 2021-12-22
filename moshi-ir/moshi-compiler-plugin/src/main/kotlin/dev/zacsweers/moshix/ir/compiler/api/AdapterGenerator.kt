@@ -523,8 +523,6 @@ internal class AdapterGenerator(
                             if (input is ParameterOnly ||
                                 (input is ParameterProperty && input.property.isTransient)) {
                               updateMaskIndexes()
-                              //                        constructorPropertyTypes +=
-                              // input.type.asTypeBlock()
                               continue
                             } else if (input is PropertyOnly && input.property.isTransient) {
                               continue
