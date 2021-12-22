@@ -41,7 +41,8 @@ jobs:
       - name: Build project
         run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} -Pksp.incremental=${{ matrix.ksp_incremental_enabled }} --stacktrace
       - name: Upload snapshot (main only)
-        run: |
-          ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9 || true
-          ./gradlew publish -PmavenCentralUsername=${{ secrets.SONATYPE_USERNAME }} -PmavenCentralPassword=${{ secrets.SONATYPE_PASSWORD }}
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SonatypeUsername }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SonatypePassword }}
+        run: ./publish.sh --snapshot
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java_version == '17' && !matrix.ksp_enabled
