@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Square, Inc.
+ * Copyright (C) 2018 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,15 +77,21 @@ internal class PropertyGenerator(
             // the reflective invocation.
             defaultPrimitiveValue(target.type.makeNullable(), pluginContext)
           }
-      return irTemporary(expression, isMutable = true, nameHint = localName)
+      return irTemporary(
+          expression, isMutable = true, nameHint = localName, irType = expression.type)
     }
   }
 
-    internal fun generateLocalIsPresentProperty(
+  internal fun generateLocalIsPresentProperty(
       builder: IrStatementsBuilder<*>,
-    ): IrVariable {
-      builder.apply {
-        return irTemporary(irBoolean(false), isMutable = true, nameHint = localIsPresentName)
-      }
+      pluginContext: IrPluginContext
+  ): IrVariable {
+    builder.apply {
+      return irTemporary(
+          irBoolean(false),
+          isMutable = true,
+          nameHint = localIsPresentName,
+          irType = pluginContext.irBuiltIns.booleanType)
     }
+  }
 }

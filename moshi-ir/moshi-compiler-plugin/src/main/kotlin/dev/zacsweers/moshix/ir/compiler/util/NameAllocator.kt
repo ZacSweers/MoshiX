@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2015 Square, Inc.
+ * Copyright (C) 2015 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,8 @@ import java.util.UUID
 
 /**
  * Assigns Kotlin identifier names to avoid collisions, keywords, and invalid characters. To use,
- * first create an instance and allocate all of the names that you need. Typically this is a
- * mix of user-supplied names and constants:
+ * first create an instance and allocate all of the names that you need. Typically this is a mix of
+ * user-supplied names and constants:
  *
  * ```kotlin
  * val nameAllocator = NameAllocator()
@@ -73,21 +73,20 @@ import java.util.UUID
  * NameAllocator used for the outer scope to further refine name allocation for a specific inner
  * scope.
  */
-public class NameAllocator private constructor(
-  private val allocatedNames: MutableSet<String>,
-  private val tagToName: MutableMap<Any, String>
+public class NameAllocator
+private constructor(
+    private val allocatedNames: MutableSet<String>,
+    private val tagToName: MutableMap<Any, String>
 ) {
   public constructor() : this(mutableSetOf(), mutableMapOf())
 
   /**
    * Return a new name using `suggestion` that will not be a Java identifier or clash with other
-   * names. The returned value can be queried multiple times by passing `tag` to
-   * [NameAllocator.get].
+   * names. The returned value can be queried multiple times by passing `tag` to [NameAllocator.get]
+   * .
    */
-  @JvmOverloads public fun newName(
-    suggestion: String,
-    tag: Any = UUID.randomUUID().toString()
-  ): String {
+  @JvmOverloads
+  public fun newName(suggestion: String, tag: Any = UUID.randomUUID().toString()): String {
     var result = toJavaIdentifier(suggestion)
     while (result.isKeyword || !allocatedNames.add(result)) {
       result += "_"
@@ -106,8 +105,8 @@ public class NameAllocator private constructor(
   public operator fun get(tag: Any): String = requireNotNull(tagToName[tag]) { "unknown tag: $tag" }
 
   /**
-   * Create a deep copy of this NameAllocator. Useful to create multiple independent refinements
-   * of a NameAllocator to be used in the respective definition of multiples, independently-scoped,
+   * Create a deep copy of this NameAllocator. Useful to create multiple independent refinements of
+   * a NameAllocator to be used in the respective definition of multiples, independently-scoped,
    * inner code blocks.
    *
    * @return A deep copy of this NameAllocator.
@@ -122,107 +121,109 @@ private fun toJavaIdentifier(suggestion: String) = buildString {
   while (i < suggestion.length) {
     val codePoint = suggestion.codePointAt(i)
     if (i == 0 &&
-      !Character.isJavaIdentifierStart(codePoint) &&
-      Character.isJavaIdentifierPart(codePoint)
-    ) {
+        !Character.isJavaIdentifierStart(codePoint) &&
+        Character.isJavaIdentifierPart(codePoint)) {
       append("_")
     }
 
-    val validCodePoint: Int = if (Character.isJavaIdentifierPart(codePoint)) {
-      codePoint
-    } else {
-      '_'.code
-    }
+    val validCodePoint: Int =
+        if (Character.isJavaIdentifierPart(codePoint)) {
+          codePoint
+        } else {
+          '_'.code
+        }
     appendCodePoint(validCodePoint)
     i += Character.charCount(codePoint)
   }
 }
 
-internal val String.isKeyword get() = this in KEYWORDS
+internal val String.isKeyword
+  get() = this in KEYWORDS
 
 // https://kotlinlang.org/docs/reference/keyword-reference.html
-private val KEYWORDS = setOf(
-  // Hard keywords
-  "as",
-  "break",
-  "class",
-  "continue",
-  "do",
-  "else",
-  "false",
-  "for",
-  "fun",
-  "if",
-  "in",
-  "interface",
-  "is",
-  "null",
-  "object",
-  "package",
-  "return",
-  "super",
-  "this",
-  "throw",
-  "true",
-  "try",
-  "typealias",
-  "typeof",
-  "val",
-  "var",
-  "when",
-  "while",
+private val KEYWORDS =
+    setOf(
+        // Hard keywords
+        "as",
+        "break",
+        "class",
+        "continue",
+        "do",
+        "else",
+        "false",
+        "for",
+        "fun",
+        "if",
+        "in",
+        "interface",
+        "is",
+        "null",
+        "object",
+        "package",
+        "return",
+        "super",
+        "this",
+        "throw",
+        "true",
+        "try",
+        "typealias",
+        "typeof",
+        "val",
+        "var",
+        "when",
+        "while",
 
-  // Soft keywords
-  "by",
-  "catch",
-  "constructor",
-  "delegate",
-  "dynamic",
-  "field",
-  "file",
-  "finally",
-  "get",
-  "import",
-  "init",
-  "param",
-  "property",
-  "receiver",
-  "set",
-  "setparam",
-  "where",
+        // Soft keywords
+        "by",
+        "catch",
+        "constructor",
+        "delegate",
+        "dynamic",
+        "field",
+        "file",
+        "finally",
+        "get",
+        "import",
+        "init",
+        "param",
+        "property",
+        "receiver",
+        "set",
+        "setparam",
+        "where",
 
-  // Modifier keywords
-  "actual",
-  "abstract",
-  "annotation",
-  "companion",
-  "const",
-  "crossinline",
-  "data",
-  "enum",
-  "expect",
-  "external",
-  "final",
-  "infix",
-  "inline",
-  "inner",
-  "internal",
-  "lateinit",
-  "noinline",
-  "open",
-  "operator",
-  "out",
-  "override",
-  "private",
-  "protected",
-  "public",
-  "reified",
-  "sealed",
-  "suspend",
-  "tailrec",
-  "value",
-  "vararg",
+        // Modifier keywords
+        "actual",
+        "abstract",
+        "annotation",
+        "companion",
+        "const",
+        "crossinline",
+        "data",
+        "enum",
+        "expect",
+        "external",
+        "final",
+        "infix",
+        "inline",
+        "inner",
+        "internal",
+        "lateinit",
+        "noinline",
+        "open",
+        "operator",
+        "out",
+        "override",
+        "private",
+        "protected",
+        "public",
+        "reified",
+        "sealed",
+        "suspend",
+        "tailrec",
+        "value",
+        "vararg",
 
-  // Other reserved keywords
-  "yield",
-)
+        // Other reserved keywords
+        "yield",
+    )

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Square, Inc.
+ * Copyright (C) 2018 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,12 @@
  */
 package dev.zacsweers.moshix.ir.compiler.api
 
-import dev.zacsweers.moshix.ir.compiler.util.checkIsVisibile
-import org.jetbrains.kotlin.descriptors.Visibility
+import org.jetbrains.kotlin.descriptors.DescriptorVisibility
+import org.jetbrains.kotlin.ir.declarations.IrConstructor
 
 /** A constructor in user code that should be called by generated code. */
 internal data class TargetConstructor(
-  val parameters: LinkedHashMap<String, TargetParameter>,
-  val visibility: Visibility,
-  val signature: String?
-) {
-  init {
-    visibility.checkIsVisibile()
-  }
-}
+    val irConstructor: IrConstructor,
+    val parameters: LinkedHashMap<String, TargetParameter>,
+    val visibility: DescriptorVisibility,
+)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Square, Inc.
+ * Copyright (C) 2018 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,20 @@
 package dev.zacsweers.moshix.ir.compiler.api
 
 import dev.zacsweers.moshix.ir.compiler.util.checkIsVisibile
-import org.jetbrains.kotlin.descriptors.Visibility
+import org.jetbrains.kotlin.descriptors.DescriptorVisibility
+import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrTypeParameter
 import org.jetbrains.kotlin.ir.types.IrType
 
 /** A user type that should be decoded and encoded by generated code. */
 internal data class TargetType(
-  val typeName: IrType,
-  val constructor: TargetConstructor,
-  val properties: Map<String, TargetProperty>,
-  val typeVariables: List<IrTypeParameter>,
-  val isDataClass: Boolean,
-  val visibility: Visibility,
+    val irClass: IrClass,
+    val typeName: IrType,
+    val constructor: TargetConstructor,
+    val properties: Map<String, TargetProperty>,
+    val typeVariables: List<IrTypeParameter>,
+    val isDataClass: Boolean,
+    val visibility: DescriptorVisibility,
 ) {
 
   init {

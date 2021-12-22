@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Square, Inc.
+ * Copyright (C) 2018 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import org.jetbrains.kotlin.ir.types.IrType
 
 /** A parameter in user code that should be populated by generated code. */
 internal data class TargetParameter(
-  val name: String,
-  val index: Int,
-  val type: IrType,
-  val hasDefault: Boolean,
-  val jsonName: String? = null,
-  val jsonIgnore: Boolean = false,
-  val qualifiers: Set<IrConstructorCall>? = null
+    val name: String,
+    val index: Int,
+    val type: IrType,
+    val hasDefault: Boolean,
+    val jsonName: String? = null,
+    val jsonIgnore: Boolean = false,
+    val qualifiers: Set<IrConstructorCall>? = null
 )
