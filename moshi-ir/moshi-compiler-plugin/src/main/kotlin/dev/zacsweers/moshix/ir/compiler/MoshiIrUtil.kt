@@ -21,13 +21,13 @@ import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.api.TargetProperty
 import dev.zacsweers.moshix.ir.compiler.util.error
 import dev.zacsweers.moshix.ir.compiler.util.locationOf
-import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.ir.declarations.IrAnnotationContainer
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
+import org.jetbrains.kotlin.ir.expressions.IrGetEnumValue
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.getAnnotation
@@ -70,7 +70,6 @@ private val TargetProperty.isVisible: Boolean
  */
 internal fun TargetProperty.generator(
     logger: MessageCollector,
-    pluginContext: IrPluginContext,
     originalType: IrClass,
 ): PropertyGenerator? {
   val location = { originalType.file.locationOf(originalType) }
@@ -93,19 +92,22 @@ internal fun TargetProperty.generator(
 
   // Merge parameter and property annotations
   val qualifiers = parameter?.qualifiers.orEmpty() + property.jsonQualifiers()
-  // TODO how to check for runtime retention?
   for (jsonQualifier in qualifiers) {
     val qualifierRawType = jsonQualifier.type.classOrNull!!.owner
-    //    // Check Java types since that covers both Java and Kotlin annotations.
-    //    resolver.getClassDeclarationByName(qualifierRawType.canonicalName)?.let {
-    // annotationElement ->
-    //      annotationElement.findAnnotationWithType<Retention>()?.let {
-    //        if (it.value != AnnotationRetention.RUNTIME) {
-    //          logger.error("JsonQualifier @${qualifierRawType.simpleName} must have RUNTIME
-    // retention")
-    //        }
-    //      }
-    //    }
+    val retentionValue =
+        qualifierRawType
+            .getAnnotation(FqName("kotlin.annotation.Retention"))
+            ?.getValueArgument(0) as
+            IrGetEnumValue?
+            ?: continue
+    // TODO what about java qualifiers types?
+    val retention = retentionValue.symbol.owner.name.identifier
+    // Check Java types since that covers both Java and Kotlin annotations.
+    if (retention != "RUNTIME") {
+      logger.error({ originalType.file.locationOf(jsonQualifier) }) {
+        "JsonQualifier @${qualifierRawType.name} must have RUNTIME retention"
+      }
+    }
   }
 
   return PropertyGenerator(this, DelegateKey(type, qualifiers.toList()))

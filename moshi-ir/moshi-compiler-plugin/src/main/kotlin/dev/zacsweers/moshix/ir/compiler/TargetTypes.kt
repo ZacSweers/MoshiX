@@ -21,24 +21,26 @@ import dev.zacsweers.moshix.ir.compiler.api.TargetProperty
 import dev.zacsweers.moshix.ir.compiler.api.TargetType
 import dev.zacsweers.moshix.ir.compiler.util.check
 import dev.zacsweers.moshix.ir.compiler.util.error
+import dev.zacsweers.moshix.ir.compiler.util.isTransient
 import dev.zacsweers.moshix.ir.compiler.util.locationOf
+import dev.zacsweers.moshix.ir.compiler.util.rawType
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.file
-import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.hasDefaultValue
-import org.jetbrains.kotlin.ir.util.isClass
 import org.jetbrains.kotlin.ir.util.isEnumClass
+import org.jetbrains.kotlin.ir.util.isFromJava
 import org.jetbrains.kotlin.ir.util.isLocal
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
-import org.jetbrains.kotlin.name.FqName
 
 /** Returns a target type for [type] or null if it cannot be used with code gen. */
 internal fun targetType(
@@ -49,27 +51,29 @@ internal fun targetType(
   val file = type.file
   val location = { file.locationOf(type) }
   logger.check(!type.isEnumClass, location) {
-    "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.name}: code gen for enums is not supported or necessary"
+    "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.fqNameWhenAvailable}: code gen for enums is not supported or necessary"
   }
-  logger.check(type.isClass, location) {
-    "@JsonClass can't be applied to ${type.name}: must be a Kotlin class"
+  logger.check(type.kind == ClassKind.CLASS, location) {
+    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be a Kotlin class"
   }
   logger.check(!type.isInner, location) {
-    "@JsonClass can't be applied to ${type.name}: must not be an inner class"
+    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be an inner class"
   }
   logger.check(type.modality != Modality.SEALED, location) {
-    "@JsonClass can't be applied to ${type.name}: must not be sealed"
+    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be sealed"
   }
   logger.check(type.modality != Modality.ABSTRACT, location) {
-    "@JsonClass can't be applied to ${type.name}: must not be abstract"
+    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be abstract"
   }
   logger.check(!type.isLocal, location) {
-    "@JsonClass can't be applied to ${type.name}: must not be local"
+    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be local"
   }
-  logger.check(
+  val isPublicOrInternal =
       type.visibility == DescriptorVisibilities.PUBLIC ||
-          type.visibility == DescriptorVisibilities.INTERNAL,
-      location) { "@JsonClass can't be applied to ${type.name}: must be internal or public" }
+          type.visibility == DescriptorVisibilities.INTERNAL
+  logger.check(isPublicOrInternal, location) {
+    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be internal or public"
+  }
 
   //  val classTypeParamsResolver = type.typeParameters.toTypeParameterResolver(
   //    sourceTypeHint = type.qualifiedName!!.asString()
@@ -94,18 +98,16 @@ internal fun targetType(
   val properties = mutableMapOf<String, TargetProperty>()
   for (superclass in appliedType.superclasses(pluginContext)) {
     val classDecl = superclass.type
-    //      if (!classDecl.isKotlinClass()) {
-    //        logger.error(
-    //          """
-    //          @JsonClass can't be applied to $type: supertype $superclass is not a Kotlin type.
-    //          Origin=${classDecl.origin}
-    //          Annotations=${classDecl.annotations.joinToString(prefix = "[", postfix = "]") {
-    //   it.shortName.getShortName() }}
-    //          """.trimIndent(),
-    //          type
-    //        )
-    //        return null
-    //      }
+    if (classDecl.isFromJava()) {
+      logger.error({ type.file.locationOf(type) }) {
+        """
+          @JsonClass can't be applied to $type: supertype $superclass is not a Kotlin type.
+          Origin=${classDecl.origin}
+          Annotations=${classDecl.annotations.joinToString(prefix = "[", postfix = "]") { it.type.rawType().name.identifier }}
+          """.trimIndent()
+      }
+      return null
+    }
     val supertypeProperties = declaredProperties(constructor = constructor, classDecl = classDecl)
     for ((name, property) in supertypeProperties) {
       properties.putIfAbsent(name, property)
@@ -162,6 +164,7 @@ internal fun primaryConstructor(
             type = parameter.type,
             hasDefault = parameter.hasDefaultValue(),
             qualifiers = parameter.jsonQualifiers(),
+            jsonIgnore = parameter.jsonIgnore(),
             jsonName = parameter.jsonName() ?: name)
   }
 
@@ -181,7 +184,7 @@ private fun declaredProperties(
     val name = property.name.identifier
     val parameter = constructor.parameters[name]
     // TODO what about java/modifier transient?
-    val isTransient = property.hasAnnotation(FqName("kotlin.jvm.Transient"))
+    val isTransient = property.isTransient
     result[name] =
         TargetProperty(
             property = property,

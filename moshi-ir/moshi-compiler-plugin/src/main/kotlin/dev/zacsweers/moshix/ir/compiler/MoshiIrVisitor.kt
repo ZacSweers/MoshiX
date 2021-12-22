@@ -19,7 +19,6 @@ import dev.zacsweers.moshix.ir.compiler.api.AdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
 import dev.zacsweers.moshix.ir.compiler.util.error
-import dev.zacsweers.moshix.ir.compiler.util.irType
 import dev.zacsweers.moshix.ir.compiler.util.locationOf
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -33,7 +32,6 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.expressions.IrConst
-import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.name.FqName
@@ -46,41 +44,13 @@ internal data class GeneratedAdapter(val adapterClass: IrDeclaration, val irFile
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 internal class MoshiIrVisitor(
-    private val moduleFragment: IrModuleFragment,
+    moduleFragment: IrModuleFragment,
     private val pluginContext: IrPluginContext,
     private val messageCollector: MessageCollector,
     private val deferredAddedClasses: MutableList<GeneratedAdapter>
 ) : IrElementTransformerVoidWithContext() {
 
   private val moshiSymbols = MoshiSymbols(pluginContext.irBuiltIns, moduleFragment, pluginContext)
-
-  //  private class Property(
-  //      val property: IrProperty,
-  //      val isIgnored: Boolean,
-  //      val parameter: IrValueParameter?,
-  //      val type: IrType,
-  //  ) {
-  //    val name = parameter?.name ?: property.name
-  //    val jsonName: String = parameter?.jsonName() ?: property.jsonName() ?: name.asString()
-  //    val hasDefault = parameter == null || parameter.defaultValue != null
-  //    val jsonQualifiers by lazy { (property.jsonQualifiers() +
-  // parameter.jsonQualifiers()).toList() }
-  //
-  //    val delegateKey by lazy { DelegateKey(type, jsonQualifiers) }
-  //
-  //    private fun IrAnnotationContainer?.jsonQualifiers(): Set<IrConstructorCall> {
-  //      if (this == null) return emptySet()
-  //      return annotations.filterTo(LinkedHashSet()) {
-  //        it.type.classOrNull?.owner?.hasAnnotation(JSON_QUALIFIER_ANNOTATION) == true
-  //      }
-  //    }
-  //  }
-
-  private fun irType(
-      qualifiedName: String,
-      nullable: Boolean = false,
-      arguments: List<IrTypeArgument> = emptyList()
-  ) = pluginContext.irType(qualifiedName, nullable, arguments)
 
   private fun adapterGenerator(
       originalType: IrClass,
@@ -89,7 +59,7 @@ internal class MoshiIrVisitor(
 
     val properties = mutableMapOf<String, PropertyGenerator>()
     for (property in type.properties.values) {
-      val generator = property.generator(messageCollector, pluginContext, originalType)
+      val generator = property.generator(messageCollector, originalType)
       if (generator != null) {
         properties[property.name] = generator
       }

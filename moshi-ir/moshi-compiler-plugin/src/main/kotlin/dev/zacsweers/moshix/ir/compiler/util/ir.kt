@@ -82,6 +82,7 @@ import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -444,3 +445,6 @@ internal fun IrBuilderWithScope.irInvoke(
 ): IrMemberAccessExpression<*> =
     irInvoke(dispatchReceiver, callee, *valueArguments.toTypedArray(), typeHint = returnTypeHint)
         .also { call -> typeArguments.forEachIndexed(call::putTypeArgument) }
+
+internal val IrProperty.isTransient: Boolean
+  get() = backingField?.hasAnnotation(FqName("kotlin.jvm.Transient")) == true

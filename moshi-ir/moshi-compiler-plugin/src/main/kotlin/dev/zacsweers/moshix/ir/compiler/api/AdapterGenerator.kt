@@ -37,7 +37,6 @@ import org.jetbrains.kotlin.backend.common.lower.irThrow
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.addField
@@ -653,14 +652,10 @@ internal class AdapterGenerator(
                               if (input is ParameterOnly ||
                                   (input is ParameterProperty && input.property.isTransient)) {
                                 // We have to use the default primitive for the available type in
-                                // order
-                                // for
-                                // invokeDefaultConstructor to properly invoke it. Just using "null"
-                                // isn't safe because
-                                // the transient type may be a primitive type.
-                                // Inline a little comment for readability indicating which
-                                // parameter is
-                                // it's referring to
+                                // order  for invokeDefaultConstructor to properly invoke it. Just
+                                // using "null" isn't safe because the transient type may be a
+                                // primitive type. Inline a little comment for readability
+                                // indicating which parameter is it's referring to
                                 putValueArgument(
                                     input.parameter.index,
                                     defaultPrimitiveValue(input.type, pluginContext))
@@ -697,18 +692,18 @@ internal class AdapterGenerator(
                   if (property.hasConstructorParameter) {
                     continue // Property already handled.
                   }
-                  val condition = if (property.hasLocalIsPresentName) {
-                    irGet(localVars.getValue(property.localIsPresentName))
-                  } else {
-                    irNot(irEqualsNull(irGet(localVars.getValue(property.localName))))
-                  }
+                  val condition =
+                      if (property.hasLocalIsPresentName) {
+                        irGet(localVars.getValue(property.localIsPresentName))
+                      } else {
+                        irNot(irEqualsNull(irGet(localVars.getValue(property.localName))))
+                      }
                   +irIfThen(
-                    condition,
-                    irCall(property.target.property.setter!!).apply {
-                      dispatchReceiver = irGet(result)
-                      putValueArgument(0, irGet(localVars.getValue(property.localName)))
-                    }
-                  )
+                      condition,
+                      irCall(property.target.property.setter!!).apply {
+                        dispatchReceiver = irGet(result)
+                        putValueArgument(0, irGet(localVars.getValue(property.localName)))
+                      })
                 }
 
                 +irReturn(irGet(result))
@@ -719,11 +714,14 @@ internal class AdapterGenerator(
   private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
       IrDelegatingConstructorCall {
     return IrDelegatingConstructorCallImpl.fromSymbolOwner(
-        startOffset, endOffset, pluginContext.irBuiltIns.unitType, moshiSymbols.jsonAdapter.constructors.single())
+        startOffset,
+        endOffset,
+        pluginContext.irBuiltIns.unitType,
+        moshiSymbols.jsonAdapter.constructors.single())
   }
 }
 
-/** Represents a prepared adapter with its [spec]. */
+/** Represents a prepared adapter with its [adapterClass]. */
 internal data class PreparedAdapter(val adapterClass: IrClass)
 
 private interface PropertyComponent {
