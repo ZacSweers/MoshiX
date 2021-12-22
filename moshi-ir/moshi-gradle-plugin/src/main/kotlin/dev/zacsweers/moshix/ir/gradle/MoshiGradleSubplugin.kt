@@ -44,7 +44,8 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     val extension = project.extensions.getByType(MoshiPluginExtension::class.java)
     val generatedAnnotation = extension.generatedAnnotation.orNull
 
-    project.dependencies.add("api", "com.squareup.moshi:moshi:$VERSION")
+    // Minimum Moshi version
+    project.dependencies.add("api", "com.squareup.moshi:moshi:1.13.0")
 
     return project.provider {
       buildList {
