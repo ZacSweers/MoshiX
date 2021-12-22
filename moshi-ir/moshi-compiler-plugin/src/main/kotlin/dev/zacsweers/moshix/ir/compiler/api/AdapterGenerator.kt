@@ -460,7 +460,7 @@ internal class AdapterGenerator(
                     (0 until maskCount).map {
                       irTemporary(irInt(-1), "bitMask$it", isMutable = true)
                     }
-                val maskAllSetValues = Array(maskCount) { -1 }
+                val maskAllSetValues = IntArray(maskCount) { -1 }
                 val useDefaultsConstructor =
                     components.filterIsInstance<ParameterComponent>().any {
                       it.parameter.hasDefault
@@ -469,164 +469,16 @@ internal class AdapterGenerator(
                 +irCall(moshiSymbols.jsonReader.getSimpleFunction("beginObject")!!).apply {
                   dispatchReceiver = irGet(readerParam)
                 }
-                +irWhile().apply {
-                  condition =
-                      irCall(moshiSymbols.jsonReader.getSimpleFunction("hasNext")!!).apply {
-                        dispatchReceiver = irGet(readerParam)
-                      }
-                  body =
-                      irBlock {
-                        val nextName =
-                            irTemporary(
-                                irCall(moshiSymbols.jsonReader.getSimpleFunction("selectName")!!)
-                                    .apply {
-                                      dispatchReceiver = irGet(readerParam)
-                                      putValueArgument(
-                                          0,
-                                          irGetField(
-                                              irGet(dispatchReceiverParameter!!), optionsField))
-                                    },
-                                nameHint = "nextName")
-
-                        // We track property index and mask index separately, because mask index is
-                        // based on _all_
-                        // constructor arguments, while property index is only based on the index
-                        // passed into
-                        // JsonReader.Options.
-                        var propertyIndex = 0
-
-                        //
-                        // Track important indices for masks. Masks generally increment with each
-                        // parameter (including
-                        // transient).
-                        //
-                        // Mask name index is an index into the maskNames array we initialized
-                        // above.
-                        //
-                        // Once the maskIndex reaches 32, we've filled up that mask and have to move
-                        // to the next mask
-                        // name. Reset the maskIndex relative to here and continue incrementing.
-                        //
-                        var maskIndex = 0
-                        var maskNameIndex = 0
-                        val updateMaskIndexes = {
-                          maskIndex++
-                          if (maskIndex == 32) {
-                            // Move to the next mask
-                            maskIndex = 0
-                            maskNameIndex++
-                          }
-                        }
-
-                        val branches = buildList {
-                          for (input in components) {
-                            if (input is ParameterOnly ||
-                                (input is ParameterProperty && input.property.isTransient)) {
-                              updateMaskIndexes()
-                              continue
-                            } else if (input is PropertyOnly && input.property.isTransient) {
-                              continue
-                            }
-
-                            // We've removed all parameter-only types by this point
-                            val property = (input as PropertyComponent).property
-
-                            // Proceed as usual
-                            add(
-                                irBranch(
-                                    irEquals(irGet(nextName), irInt(propertyIndex)),
-                                    result =
-                                        irBlock {
-                                          val result =
-                                              irTemporary(
-                                                  irCall(
-                                                      moshiSymbols.jsonAdapter.getSimpleFunction(
-                                                          "fromJson")!!)
-                                                      .apply {
-                                                        dispatchReceiver =
-                                                            irGetField(
-                                                                irGet(dispatchReceiverParameter!!),
-                                                                adapterProperties.getValue(
-                                                                    property.delegateKey))
-                                                        putValueArgument(0, irGet(readerParam))
-                                                      })
-                                          val setVarExpression =
-                                              irSet(
-                                                  localVars.getValue(property.localName),
-                                                  irGet(result))
-                                          if (!property.delegateKey.nullable) {
-                                            // Check for unexpected nulls
-                                            +irIfThenElse(
-                                                type = pluginContext.irBuiltIns.unitType,
-                                                condition = irEqualsNull(irGet(result)),
-                                                thenPart =
-                                                    irBlock {
-                                                      // Mark this property as having an error
-                                                      // so we don't double report later
-                                                      // TODO maybe we should move this into
-                                                      //  addError for future?
-                                                      +irSet(
-                                                          localVars.getValue(
-                                                              property.localHasErrorName),
-                                                          irBoolean(true))
-                                                      +addError(
-                                                          errors,
-                                                          property,
-                                                          readerParam,
-                                                          "unexpectedNull")
-                                                    },
-                                                elsePart = setVarExpression)
-                                          } else {
-                                            +setVarExpression
-                                          }
-
-                                          if (property.hasLocalIsPresentName) {
-                                            // Presence tracker for a mutable property
-                                            +irSet(
-                                                localVars.getValue(property.localIsPresentName),
-                                                irBoolean(true))
-                                          }
-                                          if (property.hasConstructorDefault) {
-                                            // Track our mask index
-                                            val inverted = (1 shl maskIndex).inv()
-                                            if (input is ParameterComponent &&
-                                                input.parameter.hasDefault) {
-                                              maskAllSetValues[maskNameIndex] =
-                                                  maskAllSetValues[maskNameIndex] and inverted
-                                            }
-                                            // bitMask[i] = bitMask[i] and inverted
-                                            val and =
-                                                irBinOp(
-                                                    pluginContext,
-                                                    OperatorNameConventions.AND,
-                                                    irGet(bitMasks[maskNameIndex]),
-                                                    irInt(inverted))
-                                            +irSet(bitMasks[maskNameIndex].symbol, and)
-                                          }
-                                        }))
-                            propertyIndex++
-                            updateMaskIndexes()
-                          }
-                          // final else/-1
-                          add(
-                              irBranch(
-                                  irEquals(irGet(nextName), irInt(-1)),
-                                  result =
-                                      irBlock {
-                                        +irCall(
-                                            moshiSymbols.jsonReader.getSimpleFunction("skipName")!!)
-                                            .apply { dispatchReceiver = irGet(readerParam) }
-                                        +irCall(
-                                            moshiSymbols.jsonReader.getSimpleFunction(
-                                                "skipValue")!!)
-                                            .apply { dispatchReceiver = irGet(readerParam) }
-                                      }))
-                          // TODO merge this and the -1? Throw an error?
-                          add(irElseBranch(irBlock {}))
-                        }
-                        +irWhen(pluginContext.irBuiltIns.intType, branches)
-                      }
-                }
+                +buildWhileHasNextLoop(
+                    fieldsHolder = dispatchReceiverParameter!!,
+                    optionsField = optionsField,
+                    readerParam = readerParam,
+                    adapterProperties = adapterProperties,
+                    localVars = localVars,
+                    errors = errors,
+                    maskAllSetValues = maskAllSetValues,
+                    bitMasks = bitMasks,
+                    components = components)
                 +irCall(moshiSymbols.jsonReader.getSimpleFunction("endObject")!!).apply {
                   dispatchReceiver = irGet(readerParam)
                 }
@@ -758,6 +610,162 @@ internal class AdapterGenerator(
               }
         }
   }
+
+  private fun IrBuilderWithScope.buildWhileHasNextLoop(
+      fieldsHolder: IrValueParameter,
+      optionsField: IrField,
+      readerParam: IrValueParameter,
+      adapterProperties: Map<DelegateKey, IrField>,
+      localVars: Map<String, IrVariable>,
+      errors: IrVariable,
+      maskAllSetValues: IntArray,
+      bitMasks: List<IrVariable>,
+      components: List<FromJsonComponent>
+  ) =
+      irWhile().apply {
+        condition =
+            irCall(moshiSymbols.jsonReader.getSimpleFunction("hasNext")!!).apply {
+              dispatchReceiver = irGet(readerParam)
+            }
+        body =
+            irBlock {
+              val nextName =
+                  irTemporary(
+                      irCall(moshiSymbols.jsonReader.getSimpleFunction("selectName")!!).apply {
+                        dispatchReceiver = irGet(readerParam)
+                        putValueArgument(0, irGetField(irGet(fieldsHolder), optionsField))
+                      },
+                      nameHint = "nextName")
+
+              // We track property index and mask index separately, because mask index is
+              // based on _all_
+              // constructor arguments, while property index is only based on the index
+              // passed into
+              // JsonReader.Options.
+              var propertyIndex = 0
+
+              //
+              // Track important indices for masks. Masks generally increment with each
+              // parameter (including
+              // transient).
+              //
+              // Mask name index is an index into the maskNames array we initialized
+              // above.
+              //
+              // Once the maskIndex reaches 32, we've filled up that mask and have to move
+              // to the next mask
+              // name. Reset the maskIndex relative to here and continue incrementing.
+              //
+              var maskIndex = 0
+              var maskNameIndex = 0
+              val updateMaskIndexes = {
+                maskIndex++
+                if (maskIndex == 32) {
+                  // Move to the next mask
+                  maskIndex = 0
+                  maskNameIndex++
+                }
+              }
+
+              val branches = buildList {
+                for (input in components) {
+                  if (input is ParameterOnly ||
+                      (input is ParameterProperty && input.property.isTransient)) {
+                    updateMaskIndexes()
+                    continue
+                  } else if (input is PropertyOnly && input.property.isTransient) {
+                    continue
+                  }
+
+                  // We've removed all parameter-only types by this point
+                  val property = (input as PropertyComponent).property
+
+                  // Proceed as usual
+                  add(
+                      irBranch(
+                          irEquals(irGet(nextName), irInt(propertyIndex)),
+                          result =
+                              irBlock {
+                                val result =
+                                    irTemporary(
+                                        irCall(
+                                            moshiSymbols.jsonAdapter.getSimpleFunction(
+                                                "fromJson")!!)
+                                            .apply {
+                                              dispatchReceiver =
+                                                  irGetField(
+                                                      irGet(fieldsHolder),
+                                                      adapterProperties.getValue(
+                                                          property.delegateKey))
+                                              putValueArgument(0, irGet(readerParam))
+                                            })
+                                val setVarExpression =
+                                    irSet(localVars.getValue(property.localName), irGet(result))
+                                if (!property.delegateKey.nullable) {
+                                  // Check for unexpected nulls
+                                  +irIfThenElse(
+                                      type = pluginContext.irBuiltIns.unitType,
+                                      condition = irEqualsNull(irGet(result)),
+                                      thenPart =
+                                          irBlock {
+                                            // Mark this property as having an error
+                                            // so we don't double report later
+                                            // TODO maybe we should move this into
+                                            //  addError for future?
+                                            +irSet(
+                                                localVars.getValue(property.localHasErrorName),
+                                                irBoolean(true))
+                                            +addError(
+                                                errors, property, readerParam, "unexpectedNull")
+                                          },
+                                      elsePart = setVarExpression)
+                                } else {
+                                  +setVarExpression
+                                }
+
+                                if (property.hasLocalIsPresentName) {
+                                  // Presence tracker for a mutable property
+                                  +irSet(
+                                      localVars.getValue(property.localIsPresentName),
+                                      irBoolean(true))
+                                }
+                                if (property.hasConstructorDefault) {
+                                  // Track our mask index
+                                  val inverted = (1 shl maskIndex).inv()
+                                  if (input is ParameterComponent && input.parameter.hasDefault) {
+                                    maskAllSetValues[maskNameIndex] =
+                                        maskAllSetValues[maskNameIndex] and inverted
+                                  }
+                                  // bitMask[i] = bitMask[i] and inverted
+                                  val and =
+                                      irBinOp(
+                                          pluginContext,
+                                          OperatorNameConventions.AND,
+                                          irGet(bitMasks[maskNameIndex]),
+                                          irInt(inverted))
+                                  +irSet(bitMasks[maskNameIndex].symbol, and)
+                                }
+                              }))
+                  propertyIndex++
+                  updateMaskIndexes()
+                }
+                // final else/-1
+                add(
+                    irBranch(
+                        irEquals(irGet(nextName), irInt(-1)),
+                        result =
+                            irBlock {
+                              +irCall(moshiSymbols.jsonReader.getSimpleFunction("skipName")!!)
+                                  .apply { dispatchReceiver = irGet(readerParam) }
+                              +irCall(moshiSymbols.jsonReader.getSimpleFunction("skipValue")!!)
+                                  .apply { dispatchReceiver = irGet(readerParam) }
+                            }))
+                // TODO merge this and the -1? Throw an error?
+                add(irElseBranch(irBlock {}))
+              }
+              +irWhen(pluginContext.irBuiltIns.intType, branches)
+            }
+      }
 
   // TODO currently this creates an exception and just steals its message,
   //  would be nice if we had a separate utility? Not a big deal regardless
