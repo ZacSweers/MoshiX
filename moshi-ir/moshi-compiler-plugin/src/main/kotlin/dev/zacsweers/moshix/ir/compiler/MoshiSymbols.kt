@@ -44,7 +44,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 internal class MoshiSymbols(
-    val irBuiltIns: IrBuiltIns,
+    private val irBuiltIns: IrBuiltIns,
     private val moduleFragment: IrModuleFragment,
     private val pluginContext: IrPluginContext
 ) {

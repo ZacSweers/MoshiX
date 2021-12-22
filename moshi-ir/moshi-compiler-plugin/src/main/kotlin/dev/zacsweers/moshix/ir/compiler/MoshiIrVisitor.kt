@@ -17,14 +17,11 @@ package dev.zacsweers.moshix.ir.compiler
 
 import dev.zacsweers.moshix.ir.compiler.api.AdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
-import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
 import dev.zacsweers.moshix.ir.compiler.util.error
 import dev.zacsweers.moshix.ir.compiler.util.locationOf
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrClass
@@ -32,10 +29,10 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.expressions.IrConst
+import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.resolve.source.getPsi
 
 internal const val LOG_PREFIX = "*** MOSHI (IR):"
 private val JSON_CLASS_ANNOTATION = FqName("com.squareup.moshi.JsonClass")
@@ -47,6 +44,7 @@ internal class MoshiIrVisitor(
     moduleFragment: IrModuleFragment,
     private val pluginContext: IrPluginContext,
     private val messageCollector: MessageCollector,
+    private val generatedAnnotation: IrClassSymbol?,
     private val deferredAddedClasses: MutableList<GeneratedAdapter>
 ) : IrElementTransformerVoidWithContext() {
 
@@ -111,17 +109,16 @@ internal class MoshiIrVisitor(
             adapterGenerator(declaration) ?: return super.visitClassNew(declaration)
         pluginContext.irFactory.run {
           val adapterClass = adapterGenerator.prepare()
-          println("Dumping current IR src")
-          println(adapterClass.adapterClass.dumpSrc())
+          if (generatedAnnotation != null) {
+            // TODO add generated annotation
+          }
+          // Uncomment for debugging generated code
+          //          println("Dumping current IR src")
+          //          println(adapterClass.adapterClass.dumpSrc())
           deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)
         }
       }
     }
     return super.visitClassNew(declaration)
-  }
-
-  private fun IrClass.reportError(message: String) {
-    val location = MessageUtil.psiElementToMessageLocation(descriptor.source.getPsi())
-    messageCollector.report(CompilerMessageSeverity.ERROR, "$LOG_PREFIX $message", location)
   }
 }

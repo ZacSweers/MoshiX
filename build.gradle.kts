@@ -44,6 +44,7 @@ apiValidation {
       listOf(
           /* :moshi-ir: */
           "moshi-kotlin-tests",
+          "extra-moshi-test-module",
           /* :moshi-sealed: */
           "sample",
       )
