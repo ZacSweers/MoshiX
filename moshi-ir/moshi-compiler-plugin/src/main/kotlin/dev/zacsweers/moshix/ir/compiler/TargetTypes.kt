@@ -21,7 +21,6 @@ import dev.zacsweers.moshix.ir.compiler.api.TargetProperty
 import dev.zacsweers.moshix.ir.compiler.api.TargetType
 import dev.zacsweers.moshix.ir.compiler.util.error
 import dev.zacsweers.moshix.ir.compiler.util.isTransient
-import dev.zacsweers.moshix.ir.compiler.util.locationOf
 import dev.zacsweers.moshix.ir.compiler.util.rawType
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -31,7 +30,6 @@ import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.util.defaultType
-import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.hasDefaultValue
 import org.jetbrains.kotlin.ir.util.isEnumClass
@@ -47,40 +45,38 @@ internal fun targetType(
     pluginContext: IrPluginContext,
     logger: MessageCollector,
 ): TargetType? {
-  val file = type.file
-  val location = { file.locationOf(type) }
   if (type.isEnumClass) {
-    logger.error(location) {
+    logger.error(type) {
       "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.fqNameWhenAvailable}: code gen for enums is not supported or necessary"
     }
     return null
   }
   if (type.kind != ClassKind.CLASS) {
-    logger.error(location) {
+    logger.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be a Kotlin class"
     }
     return null
   }
   if (type.isInner) {
-    logger.error(location) {
+    logger.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be an inner class"
     }
     return null
   }
   if (type.modality == Modality.SEALED) {
-    logger.error(location) {
+    logger.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be sealed"
     }
     return null
   }
   if (type.modality == Modality.ABSTRACT) {
-    logger.error(location) {
+    logger.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be abstract"
     }
     return null
   }
   if (type.isLocal) {
-    logger.error(location) {
+    logger.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be local"
     }
     return null
@@ -89,7 +85,7 @@ internal fun targetType(
       type.visibility != DescriptorVisibilities.PUBLIC &&
           type.visibility != DescriptorVisibilities.INTERNAL
   if (isNotPublicOrInternal) {
-    logger.error(location) {
+    logger.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be internal or public"
     }
     return null
@@ -104,12 +100,20 @@ internal fun targetType(
   val constructor =
       primaryConstructor(type)
           ?: run {
-            logger.error({ type.file.locationOf(type) }) { "No primary constructor found on $type" }
+            logger.error(type) { "No primary constructor found on ${type.fqNameWhenAvailable}" }
             return null
           }
+
+  if (type.isInline && constructor.parameters.values.first().hasDefault) {
+    logger.error(constructor.irConstructor) {
+      "value classes with default values are not currently supported in Moshi code gen"
+    }
+    return null
+  }
+
   if (constructor.visibility != DescriptorVisibilities.INTERNAL &&
       constructor.visibility != DescriptorVisibilities.PUBLIC) {
-    logger.error({ type.file.locationOf(constructor.irConstructor) }) {
+    logger.error(constructor.irConstructor) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: primary constructor is not internal or public"
     }
     return null
@@ -119,7 +123,7 @@ internal fun targetType(
   for (superclass in appliedType.superclasses(pluginContext)) {
     val classDecl = superclass.type
     if (classDecl.isFromJava()) {
-      logger.error({ type.file.locationOf(type) }) {
+      logger.error(type) {
         """
           @JsonClass can't be applied to ${type.fqNameWhenAvailable}: supertype $superclass is not a Kotlin type.
           Origin=${classDecl.origin}

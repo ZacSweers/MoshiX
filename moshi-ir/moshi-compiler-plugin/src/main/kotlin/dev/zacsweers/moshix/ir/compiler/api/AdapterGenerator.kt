@@ -613,12 +613,6 @@ internal class AdapterGenerator(
                     if (useDefaultsConstructor) {
                       // We can't get the synthetic constructor from here but we _can_ make a fake
                       // one to compile against
-                      if (target.irClass.isInline &&
-                          target.constructor.parameters.values.first().hasDefault) {
-                        // TODO report this properly
-                        error(
-                            "value classes with default values are not currently supported in Moshi code gen")
-                      }
                       target
                           .constructor
                           .irConstructor

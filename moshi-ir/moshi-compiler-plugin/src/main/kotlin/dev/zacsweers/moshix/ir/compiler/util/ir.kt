@@ -17,7 +17,6 @@ package dev.zacsweers.moshix.ir.compiler.util
 
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.ir.allOverridden
-import org.jetbrains.kotlin.backend.common.ir.createDispatchReceiverParameter
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.jvm.ir.erasedUpperBound
 import org.jetbrains.kotlin.builtins.PrimitiveType
@@ -31,45 +30,29 @@ import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
-import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
-import org.jetbrains.kotlin.ir.builders.IrBlockBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.IrGeneratorContext
-import org.jetbrains.kotlin.ir.builders.Scope
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.irBoolean
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irChar
-import org.jetbrains.kotlin.ir.builders.irGet
-import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irLong
 import org.jetbrains.kotlin.ir.builders.irNull
-import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
+import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
-import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.expressions.IrInstanceInitializerCall
 import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
-import org.jetbrains.kotlin.ir.expressions.IrReturn
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrReturnImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
-import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
-import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
-import org.jetbrains.kotlin.ir.symbols.IrReturnTargetSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
-import org.jetbrains.kotlin.ir.symbols.impl.IrFieldSymbolImpl
-import org.jetbrains.kotlin.ir.symbols.impl.IrPropertySymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
@@ -80,6 +63,7 @@ import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.getPrimitiveType
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.hasAnnotation
@@ -91,12 +75,17 @@ import org.jetbrains.kotlin.name.Name
  * Adapted from Zipline: https://github.com/cashapp/zipline/blob/06f9f5d735/zipline-kotlin-plugin-hosted/src/main/kotlin/app/cash/zipline/kotlin/ir.kt
  */
 
-/** Finds the line and column of [irElement] within this file. */
-internal fun IrFile.locationOf(irElement: IrElement?): CompilerMessageSourceLocation {
+/** Finds the line and column of [this] within its file. */
+internal fun IrDeclaration.location(): CompilerMessageSourceLocation {
+  return locationIn(file)
+}
+
+/** Finds the line and column of [this] within this [file]. */
+internal fun IrElement?.locationIn(file: IrFile): CompilerMessageSourceLocation {
   val sourceRangeInfo =
-      fileEntry.getSourceRangeInfo(
-          beginOffset = irElement?.startOffset ?: SYNTHETIC_OFFSET,
-          endOffset = irElement?.endOffset ?: SYNTHETIC_OFFSET)
+      file.fileEntry.getSourceRangeInfo(
+          beginOffset = this?.startOffset ?: SYNTHETIC_OFFSET,
+          endOffset = this?.endOffset ?: SYNTHETIC_OFFSET)
   return CompilerMessageLocationWithRange.create(
       path = sourceRangeInfo.filePath,
       lineStart = sourceRangeInfo.startLineNumber + 1,
@@ -106,9 +95,10 @@ internal fun IrFile.locationOf(irElement: IrElement?): CompilerMessageSourceLoca
       lineContent = null)!!
 }
 
-internal inline fun MessageCollector.error(message: () -> String) {
-  error(null, message)
-}
+internal inline fun MessageCollector.error(message: () -> String) = error(null, message)
+
+internal inline fun MessageCollector.error(declaration: IrDeclaration, message: () -> String) =
+    error(declaration::location, message)
 
 internal inline fun MessageCollector.error(
     noinline location: (() -> CompilerMessageSourceLocation)?,
@@ -135,7 +125,6 @@ internal fun IrConstructor.irConstructorBody(
           endOffset = endOffset,
       ) { constructorIrBuilder.blockBody(statements) }
 }
-
 
 internal fun DeclarationIrBuilder.irInstanceInitializerCall(
     context: IrGeneratorContext,
