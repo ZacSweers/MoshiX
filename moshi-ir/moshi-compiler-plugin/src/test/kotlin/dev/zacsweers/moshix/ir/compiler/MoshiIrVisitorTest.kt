@@ -17,6 +17,7 @@ package dev.zacsweers.moshix.ir.compiler
 
 import com.google.common.truth.Truth.assertThat
 import com.tschuchort.compiletesting.KotlinCompilation
+import com.tschuchort.compiletesting.KotlinCompilation.ExitCode.COMPILATION_ERROR
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode.OK
 import com.tschuchort.compiletesting.PluginOption
 import com.tschuchort.compiletesting.SourceFile
@@ -49,7 +50,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           value class ValueClass(val i: Int = 0)
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
         .contains("value classes with default values are not currently supported in Moshi code gen")
   }
@@ -73,7 +74,7 @@ class MoshiIrVisitorTest {
             }
           }
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages).contains("constructor is not internal or public")
   }
 
@@ -90,7 +91,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           class PrivateConstructorParameter(private var a: Int)
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages).contains("property a is not visible")
   }
 
@@ -110,7 +111,7 @@ class MoshiIrVisitorTest {
             private var b: Int = -1
           }
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages).contains("property a is not visible")
   }
 
@@ -127,7 +128,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           interface Interface
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
         .contains("@JsonClass can't be applied to test.Interface: must be a Kotlin class")
   }
@@ -161,7 +162,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           abstract class AbstractClass(val a: Int)
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
         .contains("@JsonClass can't be applied to test.AbstractClass: must not be abstract")
   }
@@ -179,7 +180,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           sealed class SealedClass(val a: Int)
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
         .contains("@JsonClass can't be applied to test.SealedClass: must not be sealed")
   }
@@ -199,7 +200,7 @@ class MoshiIrVisitorTest {
             inner class InnerClass(val a: Int)
           }
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
         .contains(
             "@JsonClass can't be applied to test.Outer.InnerClass: must not be an inner class")
@@ -220,7 +221,7 @@ class MoshiIrVisitorTest {
             A, B
           }
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
         .contains(
             "@JsonClass with 'generateAdapter = \"true\"' can't be applied to test.KotlinEnum: code gen for enums is not supported or necessary")
@@ -243,7 +244,7 @@ class MoshiIrVisitorTest {
             class LocalClass(val a: Int)
           }
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
         .contains("@JsonClass can't be applied to LocalClass: must not be local")
   }
@@ -261,7 +262,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           private class PrivateClass(val a: Int)
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
         .contains("@JsonClass can't be applied to test.PrivateClass: must be internal or public")
   }
@@ -281,7 +282,7 @@ class MoshiIrVisitorTest {
             var a = 5
           }
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
         .contains("@JsonClass can't be applied to test.ObjectDeclaration: must be a Kotlin class")
   }
@@ -299,7 +300,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           class RequiredTransientConstructorParameter(@Transient var a: Int)
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages).contains("No default value for transient/ignored property a")
   }
 
@@ -317,7 +318,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           class RequiredTransientConstructorParameter(@Json(ignore = true) var a: Int)
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages).contains("No default value for transient/ignored property a")
   }
 
@@ -334,7 +335,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           class NonPropertyConstructorParameter(a: Int, val b: Int)
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages).contains("No property for required constructor parameter a")
   }
 
@@ -373,7 +374,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           class Class2(private var c: Int)
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages).contains("property a is not visible")
     assertThat(result.messages).contains("property c is not visible")
   }
@@ -417,7 +418,7 @@ class MoshiIrVisitorTest {
           public int a = 1;
         }
         """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
         .contains("supertype com.squareup.moshi.kotlin.codegen.JavaSuperclass is not a Kotlin type")
   }
@@ -473,7 +474,7 @@ class MoshiIrVisitorTest {
           @JsonClass(generateAdapter = true)
           class ClassWithQualifier(@UpperCase val a: Int)
           """))
-    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages).contains("JsonQualifier @UpperCase must have RUNTIME retention")
   }
 

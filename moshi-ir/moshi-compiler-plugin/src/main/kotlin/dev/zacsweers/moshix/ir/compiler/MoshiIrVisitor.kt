@@ -18,7 +18,6 @@ package dev.zacsweers.moshix.ir.compiler
 import dev.zacsweers.moshix.ir.compiler.api.AdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.util.error
-import dev.zacsweers.moshix.ir.compiler.util.locationOf
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -34,7 +33,6 @@ import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.name.FqName
 
-internal const val LOG_PREFIX = "*** MOSHI (IR):"
 private val JSON_CLASS_ANNOTATION = FqName("com.squareup.moshi.JsonClass")
 
 internal data class GeneratedAdapter(val adapterClass: IrDeclaration, val irFile: IrFile)
@@ -57,7 +55,14 @@ internal class MoshiIrVisitor(
 
     val properties = mutableMapOf<String, PropertyGenerator>()
     for (property in type.properties.values) {
-      val generator = property.generator(messageCollector, originalType)
+      val errors = mutableListOf<(MessageCollector) -> Unit>()
+      val generator = property.generator(originalType, errors)
+      if (errors.isNotEmpty()) {
+        for (error in errors) {
+          error(messageCollector)
+        }
+        return null
+      }
       if (generator != null) {
         properties[property.name] = generator
       }
@@ -66,7 +71,7 @@ internal class MoshiIrVisitor(
     for ((name, parameter) in type.constructor.parameters) {
       if (type.properties[parameter.name] == null && !parameter.hasDefault) {
         // TODO would be nice if we could pass the parameter node directly?
-        messageCollector.error({ originalType.file.locationOf(originalType) }) {
+        messageCollector.error(originalType) {
           "No property for required constructor parameter $name"
         }
         return null

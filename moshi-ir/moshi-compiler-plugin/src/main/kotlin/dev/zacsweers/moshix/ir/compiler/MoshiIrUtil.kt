@@ -20,7 +20,7 @@ import dev.zacsweers.moshix.ir.compiler.api.DelegateKey
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.api.TargetProperty
 import dev.zacsweers.moshix.ir.compiler.util.error
-import dev.zacsweers.moshix.ir.compiler.util.locationOf
+import dev.zacsweers.moshix.ir.compiler.util.locationIn
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.ir.declarations.IrAnnotationContainer
@@ -81,20 +81,22 @@ private val TargetProperty.isVisible: Boolean
  * cannot be used with code gen, or if no codegen is necessary for this property.
  */
 internal fun TargetProperty.generator(
-    logger: MessageCollector,
     originalType: IrClass,
+    errors: MutableList<(logger: MessageCollector) -> Unit>
 ): PropertyGenerator? {
-  val location = { originalType.file.locationOf(originalType) }
   if (jsonIgnore) {
     if (!hasDefault) {
-      logger.error(location) { "No default value for transient/ignored property $name" }
+      errors +=
+          {
+            it.error(originalType) { "No default value for transient/ignored property $name" }
+          }
       return null
     }
     return PropertyGenerator(this, DelegateKey(type, emptyList()), true)
   }
 
   if (!isVisible) {
-    logger.error(location) { "property $name is not visible" }
+    errors += { it.error(originalType) { "property $name is not visible" } }
     return null
   }
 
@@ -116,9 +118,12 @@ internal fun TargetProperty.generator(
     val retention = retentionValue.symbol.owner.name.identifier
     // Check Java types since that covers both Java and Kotlin annotations.
     if (retention != "RUNTIME") {
-      logger.error({ originalType.file.locationOf(jsonQualifier) }) {
-        "JsonQualifier @${qualifierRawType.name} must have RUNTIME retention"
-      }
+      errors +=
+          {
+            it.error({ jsonQualifier.locationIn(originalType.file) }) {
+              "JsonQualifier @${qualifierRawType.name} must have RUNTIME retention"
+            }
+          }
     }
   }
 
