@@ -47,7 +47,26 @@ class DualKotlinTest {
     }
   }
 
-  @JsonClass(generateAdapter = true) class RequiredValueAbsent(var a: Int = 3, var b: Int)
+  @JsonClass(generateAdapter = true) class RequiredValueAbsent(val a: Int = 3, val b: Int)
+
+  // moshi-IR exclusive!
+  @Test
+  fun multipleRequiredValuesAbsent() {
+    val jsonAdapter = moshi.adapter<RequiredValuesAbsent>()
+
+    try {
+      // language=JSON
+      jsonAdapter.fromJson("""{"a":4}""")
+      fail()
+    } catch (expected: JsonDataException) {
+      assertThat(expected)
+          .hasMessageThat()
+          .isEqualTo("Required value 'b' missing at $\nRequired value 'c' missing at $")
+    }
+  }
+
+  @JsonClass(generateAdapter = true)
+  class RequiredValuesAbsent(val a: Int = 3, val b: Int, val c: Int)
 
   @Test
   fun requiredValueWithDifferentJsonNameAbsent() {
