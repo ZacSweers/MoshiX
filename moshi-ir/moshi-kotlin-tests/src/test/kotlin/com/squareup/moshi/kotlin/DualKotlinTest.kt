@@ -47,7 +47,30 @@ class DualKotlinTest {
     }
   }
 
-  @JsonClass(generateAdapter = true) class RequiredValueAbsent(var a: Int = 3, var b: Int)
+  @JsonClass(generateAdapter = true) class RequiredValueAbsent(val a: Int = 3, val b: Int)
+
+  // moshi-IR exclusive!
+  @Test
+  fun multipleRequiredValuesAbsent() {
+    val jsonAdapter = moshi.adapter<RequiredValuesAbsent>()
+
+    try {
+      // language=JSON
+      jsonAdapter.fromJson("""{"a":4}""")
+      fail()
+    } catch (expected: JsonDataException) {
+      assertThat(expected)
+          .hasMessageThat()
+          .isEqualTo(
+              """
+              Required value 'b' missing at $
+              Required value 'c' missing at $
+              """.trimIndent())
+    }
+  }
+
+  @JsonClass(generateAdapter = true)
+  class RequiredValuesAbsent(val a: Int = 3, val b: Int, val c: Int)
 
   @Test
   fun requiredValueWithDifferentJsonNameAbsent() {
@@ -79,6 +102,28 @@ class DualKotlinTest {
       assertThat(expected).hasMessageThat().isEqualTo("Non-null value 'a' was null at \$.a")
     }
   }
+
+  // moshi-IR exclusive!
+  @Test
+  fun multipleUnexpectedNullProperties() {
+    val jsonAdapter = moshi.adapter<MultipleUnexpectedNulls>()
+
+    try {
+      // language=JSON
+      jsonAdapter.fromJson("{\"a\":null,\"b\":null}")
+      fail()
+    } catch (expected: JsonDataException) {
+      assertThat(expected)
+          .hasMessageThat()
+          .isEqualTo(
+              """
+              Non-null value 'a' was null at $.a
+              Non-null value 'b' was null at $.b
+              """.trimIndent())
+    }
+  }
+
+  @JsonClass(generateAdapter = true) class MultipleUnexpectedNulls(val a: String, val b: String)
 
   @Test
   fun nonNullPropertySetToNullFromAdapterFailsWithJsonDataException() {
