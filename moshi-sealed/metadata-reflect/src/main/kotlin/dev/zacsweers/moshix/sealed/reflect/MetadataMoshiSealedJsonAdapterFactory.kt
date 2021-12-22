@@ -39,7 +39,7 @@ private val UNSET = Any()
 public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
   override fun create(
       type: Type,
-      annotations: MutableSet<out Annotation>,
+      annotations: Set<Annotation>,
       moshi: Moshi
   ): JsonAdapter<*>? {
     if (annotations.isNotEmpty()) {
