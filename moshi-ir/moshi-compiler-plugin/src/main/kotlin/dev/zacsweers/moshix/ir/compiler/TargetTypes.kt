@@ -19,7 +19,6 @@ import dev.zacsweers.moshix.ir.compiler.api.TargetConstructor
 import dev.zacsweers.moshix.ir.compiler.api.TargetParameter
 import dev.zacsweers.moshix.ir.compiler.api.TargetProperty
 import dev.zacsweers.moshix.ir.compiler.api.TargetType
-import dev.zacsweers.moshix.ir.compiler.util.check
 import dev.zacsweers.moshix.ir.compiler.util.error
 import dev.zacsweers.moshix.ir.compiler.util.isTransient
 import dev.zacsweers.moshix.ir.compiler.util.locationOf
@@ -50,29 +49,50 @@ internal fun targetType(
 ): TargetType? {
   val file = type.file
   val location = { file.locationOf(type) }
-  logger.check(!type.isEnumClass, location) {
-    "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.fqNameWhenAvailable}: code gen for enums is not supported or necessary"
+  if (type.isEnumClass) {
+    logger.error(location) {
+      "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.fqNameWhenAvailable}: code gen for enums is not supported or necessary"
+    }
+    return null
   }
-  logger.check(type.kind == ClassKind.CLASS, location) {
-    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be a Kotlin class"
+  if (type.kind != ClassKind.CLASS) {
+    logger.error(location) {
+      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be a Kotlin class"
+    }
+    return null
   }
-  logger.check(!type.isInner, location) {
-    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be an inner class"
+  if (type.isInner) {
+    logger.error(location) {
+      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be an inner class"
+    }
+    return null
   }
-  logger.check(type.modality != Modality.SEALED, location) {
-    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be sealed"
+  if (type.modality == Modality.SEALED) {
+    logger.error(location) {
+      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be sealed"
+    }
+    return null
   }
-  logger.check(type.modality != Modality.ABSTRACT, location) {
-    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be abstract"
+  if (type.modality == Modality.ABSTRACT) {
+    logger.error(location) {
+      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be abstract"
+    }
+    return null
   }
-  logger.check(!type.isLocal, location) {
-    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be local"
+  if (type.isLocal) {
+    logger.error(location) {
+      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be local"
+    }
+    return null
   }
-  val isPublicOrInternal =
-      type.visibility == DescriptorVisibilities.PUBLIC ||
-          type.visibility == DescriptorVisibilities.INTERNAL
-  logger.check(isPublicOrInternal, location) {
-    "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be internal or public"
+  val isNotPublicOrInternal =
+      type.visibility != DescriptorVisibilities.PUBLIC &&
+          type.visibility != DescriptorVisibilities.INTERNAL
+  if (isNotPublicOrInternal) {
+    logger.error(location) {
+      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be internal or public"
+    }
+    return null
   }
 
   //  val classTypeParamsResolver = type.typeParameters.toTypeParameterResolver(
@@ -90,7 +110,7 @@ internal fun targetType(
   if (constructor.visibility != DescriptorVisibilities.INTERNAL &&
       constructor.visibility != DescriptorVisibilities.PUBLIC) {
     logger.error({ type.file.locationOf(constructor.irConstructor) }) {
-      "@JsonClass can't be applied to $type: primary constructor is not internal or public"
+      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: primary constructor is not internal or public"
     }
     return null
   }

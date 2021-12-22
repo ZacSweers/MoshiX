@@ -34,7 +34,6 @@ import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.name.FqName
 
-internal const val LOG_PREFIX = "*** MOSHI (IR):"
 private val JSON_CLASS_ANNOTATION = FqName("com.squareup.moshi.JsonClass")
 
 internal data class GeneratedAdapter(val adapterClass: IrDeclaration, val irFile: IrFile)

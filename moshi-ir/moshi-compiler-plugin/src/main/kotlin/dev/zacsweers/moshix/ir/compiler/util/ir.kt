@@ -91,15 +91,6 @@ import org.jetbrains.kotlin.name.Name
  * Adapted from Zipline: https://github.com/cashapp/zipline/blob/06f9f5d735/zipline-kotlin-plugin-hosted/src/main/kotlin/app/cash/zipline/kotlin/ir.kt
  */
 
-internal fun FqName.child(name: String) = child(Name.identifier(name))
-
-/** Thrown on invalid or unexpected input code. */
-internal class MoshiCompilationException(
-    override val message: String,
-    val location: CompilerMessageSourceLocation? = null,
-    val severity: CompilerMessageSeverity = CompilerMessageSeverity.ERROR,
-) : Exception(message)
-
 /** Finds the line and column of [irElement] within this file. */
 internal fun IrFile.locationOf(irElement: IrElement?): CompilerMessageSourceLocation {
   val sourceRangeInfo =
@@ -115,20 +106,6 @@ internal fun IrFile.locationOf(irElement: IrElement?): CompilerMessageSourceLoca
       lineContent = null)!!
 }
 
-internal inline fun MessageCollector.check(condition: Boolean, message: () -> String) {
-  check(condition, null, message)
-}
-
-internal inline fun MessageCollector.check(
-    condition: Boolean,
-    noinline location: (() -> CompilerMessageSourceLocation)?,
-    message: () -> String
-) {
-  if (!condition) {
-    throw MoshiCompilationException(message(), location?.invoke())
-  }
-}
-
 internal inline fun MessageCollector.error(message: () -> String) {
   error(null, message)
 }
@@ -138,21 +115,6 @@ internal inline fun MessageCollector.error(
     message: () -> String
 ) {
   report(CompilerMessageSeverity.ERROR, message(), location?.invoke())
-}
-
-/** `return ...` */
-internal fun IrBuilderWithScope.irReturn(
-    value: IrExpression,
-    returnTargetSymbol: IrReturnTargetSymbol,
-    type: IrType = value.type,
-): IrReturn {
-  return IrReturnImpl(
-      startOffset = startOffset,
-      endOffset = endOffset,
-      type = type,
-      returnTargetSymbol = returnTargetSymbol,
-      value = value,
-  )
 }
 
 internal fun IrConstructor.irConstructorBody(
@@ -174,24 +136,6 @@ internal fun IrConstructor.irConstructorBody(
       ) { constructorIrBuilder.blockBody(statements) }
 }
 
-internal fun DeclarationIrBuilder.irDelegatingConstructorCall(
-    context: IrGeneratorContext,
-    symbol: IrConstructorSymbol,
-    typeArgumentsCount: Int = 0,
-    valueArgumentsCount: Int = 0,
-    block: IrDelegatingConstructorCall.() -> Unit = {},
-): IrDelegatingConstructorCall {
-  val result =
-      IrDelegatingConstructorCallImpl(
-          startOffset = startOffset,
-          endOffset = endOffset,
-          type = context.irBuiltIns.unitType,
-          symbol = symbol,
-          typeArgumentsCount = typeArgumentsCount,
-          valueArgumentsCount = valueArgumentsCount)
-  result.block()
-  return result
-}
 
 internal fun DeclarationIrBuilder.irInstanceInitializerCall(
     context: IrGeneratorContext,
@@ -203,113 +147,6 @@ internal fun DeclarationIrBuilder.irInstanceInitializerCall(
       classSymbol = classSymbol,
       type = context.irBuiltIns.unitType,
   )
-}
-
-internal fun IrSimpleFunction.irFunctionBody(
-    context: IrGeneratorContext,
-    scopeOwnerSymbol: IrSymbol,
-    blockBody: IrBlockBodyBuilder.() -> Unit
-) {
-  val bodyBuilder =
-      IrBlockBodyBuilder(
-          startOffset = SYNTHETIC_OFFSET,
-          endOffset = SYNTHETIC_OFFSET,
-          context = context,
-          scope = Scope(scopeOwnerSymbol),
-      )
-  body = bodyBuilder.blockBody { blockBody() }
-}
-
-/** Create a private val with a backing field and an accessor function. */
-internal fun irVal(
-    pluginContext: IrPluginContext,
-    propertyType: IrType,
-    declaringClass: IrClass,
-    propertyName: Name,
-    overriddenProperty: IrPropertySymbol? = null,
-    initializer: IrBlockBuilder.() -> IrExpressionBody,
-): IrProperty {
-  val irFactory = pluginContext.irFactory
-  val result =
-      irFactory.createProperty(
-              startOffset = declaringClass.startOffset,
-              endOffset = declaringClass.endOffset,
-              origin = IrDeclarationOrigin.DEFINED,
-              symbol = IrPropertySymbolImpl(),
-              name = propertyName,
-              visibility = overriddenProperty?.owner?.visibility ?: DescriptorVisibilities.PRIVATE,
-              modality = Modality.FINAL,
-              isVar = false,
-              isConst = false,
-              isLateinit = false,
-              isDelegated = false,
-              isExternal = false,
-              isExpect = false,
-              isFakeOverride = false,
-              containerSource = null,
-          )
-          .apply {
-            overriddenSymbols = listOfNotNull(overriddenProperty)
-            parent = declaringClass
-          }
-
-  result.backingField =
-      irFactory.createField(
-              startOffset = declaringClass.startOffset,
-              endOffset = declaringClass.endOffset,
-              origin = IrDeclarationOrigin.PROPERTY_BACKING_FIELD,
-              symbol = IrFieldSymbolImpl(),
-              name = result.name,
-              type = propertyType,
-              visibility = DescriptorVisibilities.PRIVATE,
-              isFinal = true,
-              isExternal = false,
-              isStatic = false)
-          .apply {
-            parent = declaringClass
-            correspondingPropertySymbol = result.symbol
-            val initializerBuilder =
-                IrBlockBuilder(
-                    startOffset = SYNTHETIC_OFFSET,
-                    endOffset = SYNTHETIC_OFFSET,
-                    context = pluginContext,
-                    scope = Scope(symbol),
-                )
-            this.initializer = initializerBuilder.initializer()
-          }
-
-  result.getter =
-      irFactory.createFunction(
-              startOffset = declaringClass.startOffset,
-              endOffset = declaringClass.endOffset,
-              origin = IrDeclarationOrigin.DEFAULT_PROPERTY_ACCESSOR,
-              name = Name.special("<get-${propertyName.identifier}>"),
-              visibility = overriddenProperty?.owner?.getter?.visibility
-                      ?: DescriptorVisibilities.PRIVATE,
-              isExternal = false,
-              symbol = IrSimpleFunctionSymbolImpl(),
-              modality = Modality.FINAL,
-              returnType = propertyType,
-              isInline = false,
-              isTailrec = false,
-              isSuspend = false,
-              isOperator = false,
-              isInfix = false,
-              isExpect = false,
-              isFakeOverride = false,
-              containerSource = null)
-          .apply {
-            parent = declaringClass
-            correspondingPropertySymbol = result.symbol
-            overriddenSymbols = listOfNotNull(overriddenProperty?.owner?.getter?.symbol)
-            createDispatchReceiverParameter()
-            irFunctionBody(context = pluginContext, scopeOwnerSymbol = symbol) {
-              +irReturn(
-                  value = irGetField(irGet(dispatchReceiverParameter!!), result.backingField!!))
-            }
-          }
-
-  return result
 }
 
 internal fun IrClass.isSubclassOfFqName(fqName: String): Boolean =
@@ -435,16 +272,6 @@ internal fun IrBuilderWithScope.irInvoke(
   args.forEachIndexed(call::putValueArgument)
   return call
 }
-
-internal fun IrBuilderWithScope.irInvoke(
-    dispatchReceiver: IrExpression? = null,
-    callee: IrFunctionSymbol,
-    typeArguments: List<IrType?>,
-    valueArguments: List<IrExpression>,
-    returnTypeHint: IrType? = null
-): IrMemberAccessExpression<*> =
-    irInvoke(dispatchReceiver, callee, *valueArguments.toTypedArray(), typeHint = returnTypeHint)
-        .also { call -> typeArguments.forEachIndexed(call::putTypeArgument) }
 
 internal val IrProperty.isTransient: Boolean
   get() = backingField?.hasAnnotation(FqName("kotlin.jvm.Transient")) == true

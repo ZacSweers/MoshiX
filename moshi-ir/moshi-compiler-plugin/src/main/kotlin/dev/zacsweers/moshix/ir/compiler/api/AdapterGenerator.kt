@@ -149,6 +149,7 @@ internal class AdapterGenerator(
       visibility = this@AdapterGenerator.visibility // always public or internal
     }
 
+    adapterCls.origin = MoshiOrigin
     val isGeneric = typeVariables.isNotEmpty()
     adapterCls.typeParameters = typeVariables
 

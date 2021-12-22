@@ -26,10 +26,7 @@ import org.jetbrains.kotlin.ir.util.getAllSuperclasses
  * A concrete type like `List<String>` with enough information to know how to resolve its type
  * variables.
  */
-internal class AppliedType
-private constructor(
-    val type: IrClass,
-) {
+internal class AppliedType private constructor(val type: IrClass) {
 
   /**
    * Returns all super classes of this, recursively. Only [IrClass] is used as we can't really use
