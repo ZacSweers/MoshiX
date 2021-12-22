@@ -89,7 +89,6 @@ import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
-import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getPropertyGetter
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
 import org.jetbrains.kotlin.ir.util.packageFqName
@@ -274,12 +273,8 @@ internal class AdapterGenerator(
         .apply {
           initializer =
               pluginContext.createIrBuilder(symbol).run {
-                // TODO put this in MoshiSymbols
-                val functionRef =
-                    pluginContext.referenceClass(FqName("com.squareup.moshi.JsonReader.Options"))!!
-                        .functions.single { it.owner.name.asString() == "of" }
                 irExprBody(
-                    irCall(functionRef).apply {
+                    irCall(moshiSymbols.jsonReaderOptionsOf).apply {
                       val args = nonTransientProperties.map { irString(it.jsonName) }
                       this.putValueArgument(0, irVararg(pluginContext.irBuiltIns.stringType, args))
                     })

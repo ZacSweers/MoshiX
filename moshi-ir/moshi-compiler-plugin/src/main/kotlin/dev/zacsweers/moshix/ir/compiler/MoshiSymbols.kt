@@ -46,6 +46,7 @@ import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.defaultType
+import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
@@ -93,6 +94,11 @@ internal class MoshiSymbols(
               .apply { addValueParameter("options", optionsClass.defaultType) }
         }
         .symbol
+  }
+
+  val jsonReaderOptionsOf by lazy {
+    pluginContext.referenceClass(FqName("com.squareup.moshi.JsonReader.Options"))!!.functions
+        .single { it.owner.name.asString() == "of" }
   }
 
   val jsonWriter: IrClassSymbol by lazy {
