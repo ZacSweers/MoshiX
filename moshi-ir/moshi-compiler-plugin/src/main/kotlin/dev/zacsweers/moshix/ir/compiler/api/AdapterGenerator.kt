@@ -32,6 +32,7 @@ import dev.zacsweers.moshix.ir.compiler.util.rawTypeOrNull
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irIfThen
+import org.jetbrains.kotlin.backend.common.lower.irNot
 import org.jetbrains.kotlin.backend.common.lower.irThrow
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
@@ -689,7 +690,26 @@ internal class AdapterGenerator(
                         },
                         nameHint = "result",
                         irType = target.typeName)
-                //                // TODO set settable properties
+
+                // Assign properties not present in the constructor.
+                for (property in nonTransientProperties) {
+                  if (property.hasConstructorParameter) {
+                    continue // Property already handled.
+                  }
+                  val condition = if (property.hasLocalIsPresentName) {
+                    irGet(localVars.getValue(property.localIsPresentName))
+                  } else {
+                    irNot(irEqualsNull(irGet(localVars.getValue(property.localName))))
+                  }
+                  +irIfThen(
+                    condition,
+                    irCall(property.target.property.setter!!).apply {
+                      dispatchReceiver = irGet(result)
+                      putValueArgument(0, irGet(localVars.getValue(property.localName)))
+                    }
+                  )
+                }
+
                 +irReturn(irGet(result))
               }
         }
