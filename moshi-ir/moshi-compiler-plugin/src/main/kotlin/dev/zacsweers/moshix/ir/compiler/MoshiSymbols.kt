@@ -33,12 +33,18 @@ import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
+import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
+import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.defaultType
+import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
+import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -163,6 +169,13 @@ internal class MoshiSymbols(
           }
           .symbol
 
+  val jsonDataException: IrClassSymbol = pluginContext.referenceClass(FqName("com.squareup.moshi.JsonDataException"))!!
+  val jsonDataExceptionStringConstructor: IrFunctionSymbol = jsonDataException.constructors.first {
+    it.owner.valueParameters.size == 1 &&
+      it.owner.valueParameters[0].type.makeNotNull() ==
+      pluginContext.irBuiltIns.stringType
+  }
+
   // TODO why doesn't creating an anonymous irclass work here? Breaks bytecode somewhere
   val moshiUtil: IrClassSymbol =
       pluginContext.referenceClass(FqName("com.squareup.moshi.internal.Util"))!!
@@ -185,6 +198,15 @@ internal class MoshiSymbols(
         it.owner.valueParameters.size == 1 || it.owner.valueParameters[0].varargElementType == null
       }
 
+  val setPlus =
+    pluginContext.referenceFunctions(FqName("kotlin.collections.plus"))
+      .single {
+        val owner = it.owner
+        owner.extensionReceiverParameter?.type?.classFqName == FqName("kotlin.collections.Set") &&
+          owner.valueParameters.size == 1 &&
+          owner.valueParameters[0].type.classifierOrNull is IrTypeParameterSymbol
+      }
+
   val arrayGet =
       pluginContext.irBuiltIns.arrayClass.owner.declarations.filterIsInstance<IrSimpleFunction>()
           .single { it.name.asString() == "get" }
@@ -198,6 +220,13 @@ internal class MoshiSymbols(
           .filterIsInstance<IrProperty>()
           .single { it.name.asString() == "size" }
           .getter!!
+
+  val iterableJoinToString = pluginContext
+    .referenceFunctions(
+      FqName("kotlin.collections.joinToString"))
+    .single {
+      it.owner.extensionReceiverParameter?.type?.classFqName == FqName("kotlin.collections.Iterable")
+    }
 
   private fun createPackage(packageName: String): IrPackageFragment =
       IrExternalPackageFragmentImpl.createEmptyExternalPackageFragment(

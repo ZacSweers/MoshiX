@@ -407,6 +407,15 @@ internal class AdapterGenerator(
                   }
                 }
 
+                val missingProperties =
+                    irTemporary(
+                        irCall(moshiSymbols.emptySet),
+                        "missingProperties",
+                        irType =
+                            pluginContext.irBuiltIns.setClass.typeWith(
+                                pluginContext.irBuiltIns.stringType),
+                        isMutable = true)
+
                 val propertiesByIndex =
                     propertyList.asSequence().filter { it.hasConstructorParameter }.associateBy {
                       it.target.parameterIndex
@@ -630,23 +639,59 @@ internal class AdapterGenerator(
                       target.constructor.irConstructor.symbol
                     }
 
-                // TODO we could accumulate the missing properties instead
                 for (input in components.filterIsInstance<PropertyComponent>()) {
                   val property = input.property
                   if (!property.isTransient && property.isRequired) {
                     +irIfThen(
                         condition = irEqualsNull(irGet(localVars.getValue(property.localName))),
+                        // TODO currently this creates an exception and just steals its message,
+                        //  would be nice if we had a separate utility? Not a big deal regardless
+                        //  since we're gonna error at the end anyway
                         thenPart =
-                            irThrow(
-                                irCall(
-                                    moshiSymbols.moshiUtil.getSimpleFunction("missingProperty")!!)
-                                    .apply {
-                                      putValueArgument(0, irString(property.localName))
-                                      putValueArgument(1, irString(property.jsonName))
-                                      putValueArgument(2, irGet(readerParam))
-                                    }))
+                            irSet(
+                                missingProperties,
+                                irCall(moshiSymbols.setPlus).apply {
+                                  extensionReceiver = irGet(missingProperties)
+                                  putValueArgument(
+                                      0,
+                                      irCall(
+                                          pluginContext.irBuiltIns.throwableClass.getPropertyGetter(
+                                              "message")!!)
+                                          .apply {
+                                            dispatchReceiver =
+                                                irCall(
+                                                    moshiSymbols.moshiUtil.getSimpleFunction(
+                                                        "missingProperty")!!)
+                                                    .apply {
+                                                      putValueArgument(
+                                                          0, irString(property.localName))
+                                                      putValueArgument(
+                                                          1, irString(property.jsonName))
+                                                      putValueArgument(2, irGet(readerParam))
+                                                    }
+                                          })
+                                }))
                   }
                 }
+
+                // If any errors were logged, join them into a new message and throw
+                +irIfThen(
+                    condition =
+                        irNotEquals(
+                            irCall(
+                                pluginContext.irBuiltIns.setClass.owner.getPropertyGetter("size")!!)
+                                .apply { dispatchReceiver = irGet(missingProperties) },
+                            irInt(0)),
+                    thenPart =
+                        irThrow(
+                            irCall(moshiSymbols.jsonDataExceptionStringConstructor).apply {
+                              putValueArgument(
+                                  0,
+                                  irCall(moshiSymbols.iterableJoinToString).apply {
+                                    extensionReceiver = irGet(missingProperties)
+                                    putValueArgument(0, irString("\n"))
+                                  })
+                            }))
                 val result =
                     irTemporary(
                         irCall(constructor).apply {
@@ -657,7 +702,7 @@ internal class AdapterGenerator(
                               if (input is ParameterOnly ||
                                   (input is ParameterProperty && input.property.isTransient)) {
                                 // We have to use the default primitive for the available type in
-                                // order  for invokeDefaultConstructor to properly invoke it. Just
+                                // order for invokeDefaultConstructor to properly invoke it. Just
                                 // using "null" isn't safe because the transient type may be a
                                 // primitive type. Inline a little comment for readability
                                 // indicating which parameter is it's referring to
