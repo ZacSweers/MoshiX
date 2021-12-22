@@ -626,6 +626,7 @@ internal class AdapterGenerator(
                       target.constructor.irConstructor.symbol
                     }
 
+                // TODO we could accumulate the missing properties instead
                 for (input in components.filterIsInstance<PropertyComponent>()) {
                   val property = input.property
                   if (!property.isTransient && property.isRequired) {
