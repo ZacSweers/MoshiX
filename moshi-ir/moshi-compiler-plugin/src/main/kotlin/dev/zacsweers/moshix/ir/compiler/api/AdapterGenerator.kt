@@ -141,7 +141,6 @@ internal class AdapterGenerator(
 
   private fun IrFactory.generateType(): IrClass {
     val adapterCls = buildClass {
-      // TODO make name lookups work for nested?
       name = Name.identifier(adapterName)
       modality = Modality.FINAL
       kind = ClassKind.CLASS
@@ -226,7 +225,6 @@ internal class AdapterGenerator(
         val expectedSize = typeVariables.size
         statements +=
             DeclarationIrBuilder(pluginContext, ctor.symbol).irBlock {
-              // TODO inline this to the condition arg below
               val receivedSize =
                   irTemporary(
                       irCall(moshiSymbols.arraySizeGetter).apply {
@@ -324,7 +322,6 @@ internal class AdapterGenerator(
           }
           body =
               DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
-                // TODO can we use IMPLICIT_NOTNULL here and just skip the null check?
                 +irIfThen(
                     irEqualsNull(irGet(value)),
                     irThrow(
@@ -525,7 +522,6 @@ internal class AdapterGenerator(
                                     irEquals(irGet(nextName), irInt(propertyIndex)),
                                     result =
                                         irBlock {
-                                          // TODO check for unexpected null
                                           val result =
                                               irTemporary(
                                                   irCall(
@@ -628,7 +624,7 @@ internal class AdapterGenerator(
                     } else {
                       target.constructor.irConstructor.symbol
                     }
-                // TODO use defaults
+
                 for (input in components.filterIsInstance<PropertyComponent>()) {
                   val property = input.property
                   if (!property.isTransient && property.isRequired) {
@@ -699,17 +695,10 @@ internal class AdapterGenerator(
         }
   }
 
-  @OptIn(ObsoleteDescriptorBasedAPI::class)
   private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
       IrDelegatingConstructorCall {
-    // TODO put this in MoshiSymbols
-    val anyConstructor =
-        pluginContext.referenceClass(FqName("com.squareup.moshi.JsonAdapter"))!!.owner.declarations
-            .single { it is IrConstructor } as
-            IrConstructor
-    // TODO use non-descriptor API
-    return IrDelegatingConstructorCallImpl.fromSymbolDescriptor(
-        startOffset, endOffset, pluginContext.irBuiltIns.unitType, anyConstructor.symbol)
+    return IrDelegatingConstructorCallImpl.fromSymbolOwner(
+        startOffset, endOffset, pluginContext.irBuiltIns.unitType, moshiSymbols.jsonAdapter.constructors.single())
   }
 }
 
