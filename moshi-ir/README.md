@@ -16,15 +16,15 @@ plugin.
   R8/Proguard.
   - One option is to use IR in debug builds and Kapt/KSP in release builds, the latter of which do still generate
     proguard rules.
-```proguard
-# Keep names for JsonClass-annotated classes
--keepnames class @com.squareup.moshi.JsonClass **
+  ```proguard
+  # Keep names for JsonClass-annotated classes
+  -keepnames class @com.squareup.moshi.JsonClass **
 
-# Keep generated adapter classes' constructors
--keepclassmembers class *JsonAdapter {
-    public <init>(...);
-}
-```
+  # Keep generated adapter classes' constructors
+  -keepclassmembers class *JsonAdapter {
+      public <init>(...);
+  }
+  ```
 - Kotlin IR is not a stable API and may change in future Kotlin versions. While I'll try to publish quickly to adjust to
 these, you should be aware. If you have any issues, you can always fall back to Kapt/KSP.
 
