@@ -16,8 +16,8 @@
 package dev.zacsweers.moshix.ir.compiler
 
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
+import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.ir.declarations.IrClass
-import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
@@ -27,7 +27,9 @@ import org.jetbrains.kotlin.ir.util.getAllSuperclasses
  * variables.
  */
 internal class AppliedType
-private constructor(val type: IrClass, val typeName: IrType = type.defaultType) {
+private constructor(
+    val type: IrClass,
+) {
 
   /**
    * Returns all super classes of this, recursively. Only [IrClass] is used as we can't really use
@@ -39,13 +41,14 @@ private constructor(val type: IrClass, val typeName: IrType = type.defaultType) 
     val result: LinkedHashSet<AppliedType> = LinkedHashSet()
     result.add(this)
     for (supertype in type.getAllSuperclasses()) {
+      if (supertype.kind != ClassKind.CLASS) continue
       // TODO do we need to check if it's j.l.Object?
       val irType = supertype.defaultType
       if (irType == pluginContext.irBuiltIns.anyType) {
         // Don't load properties for kotlin.Any/java.lang.Object.
         continue
       }
-      result.add(AppliedType(supertype, irType))
+      result.add(AppliedType(supertype))
     }
     return result
   }

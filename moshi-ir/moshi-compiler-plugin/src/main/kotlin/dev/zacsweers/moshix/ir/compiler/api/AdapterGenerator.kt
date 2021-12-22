@@ -111,11 +111,12 @@ internal class AdapterGenerator(
   private val nameAllocator = NameAllocator()
   private val packageName = className.packageFqName!!.asString()
   private val simpleNames =
-      className.fqNameWhenAvailable!!.asString().removePrefix(packageName).split(".")
-  private val adapterName =
-      "${simpleNames.joinToString(separator = "_")}JsonAdapter".removePrefix("_")
-  private val originalTypeName = target.typeName
-  private val originalRawTypeName = originalTypeName.rawType()
+      className.fqNameWhenAvailable!!
+          .asString()
+          .removePrefix(packageName)
+          .removePrefix(".")
+          .split(".")
+  private val adapterName = "${simpleNames.joinToString(separator = "_")}JsonAdapter"
 
   private fun irType(
       qualifiedName: String,
@@ -242,10 +243,11 @@ internal class AdapterGenerator(
                                 irConcat().apply {
                                   addArgument(irString("TypeVariable mismatch: Expecting "))
                                   addArgument(irInt(expectedSize))
-                                  addArgument(irString(" type for generic type variables ["))
+                                  val typeWord = if (expectedSize == 1) "type" else "types"
+                                  addArgument(irString(" $typeWord for generic type variables ["))
                                   addArgument(
                                       irString(
-                                          typeVariables.joinToString(separator = ",") {
+                                          typeVariables.joinToString(separator = ", ") {
                                             it.name.asString()
                                           }))
                                   addArgument(irString("], but received "))
@@ -294,8 +296,8 @@ internal class AdapterGenerator(
               DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
                 +irReturn(
                     irConcat().apply {
-                      addArgument(irString("JsonAdapter("))
-                      addArgument(irString(target.irClass.name.identifier))
+                      addArgument(irString("GeneratedJsonAdapter("))
+                      addArgument(irString(simpleNames.joinToString(".")))
                       addArgument(irString(")"))
                     })
               }
@@ -609,8 +611,13 @@ internal class AdapterGenerator(
                 val constructor =
                     if (useDefaultsConstructor) {
                       // We can't get the synthetic constructor from here but we _can_ make a fake
-                      // one to compile
-                      // against
+                      // one to compile against
+                      if (target.irClass.isInline &&
+                          target.constructor.parameters.values.first().hasDefault) {
+                        // TODO report this properly
+                        error(
+                            "value classes with default values are not currently supported in Moshi code gen")
+                      }
                       target
                           .constructor
                           .irConstructor

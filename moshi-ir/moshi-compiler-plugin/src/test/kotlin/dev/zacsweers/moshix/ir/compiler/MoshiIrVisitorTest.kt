@@ -33,23 +33,25 @@ class MoshiIrVisitorTest {
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
   @Test
-  fun simple() {
+  fun valueClassesCannotHaveDefaultValues() {
     val result =
         compile(
             kotlin(
-                "SimpleClass.kt",
+                "source.kt",
                 """
           package dev.zacsweers.moshix.ir.compiler.test
 
+          import com.squareup.moshi.Json
           import com.squareup.moshi.JsonClass
           import com.squareup.moshi.JsonQualifier
 
+          @JvmInline
           @JsonClass(generateAdapter = true)
-          data class SimpleClass<T>(val a: Int = 0)
+          value class ValueClass(val i: Int = 0)
           """))
-    // Kotlin reports an error message from IR as an internal error for some reason, so we just
-    // check "not ok"
-    assertThat(result.exitCode).isEqualTo(OK)
+    assertThat(result.exitCode).isNotEqualTo(OK)
+    assertThat(result.messages)
+        .contains("value classes with default values are not currently supported in Moshi code gen")
   }
 
   @Test

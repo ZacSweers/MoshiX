@@ -101,7 +101,7 @@ internal fun targetType(
     if (classDecl.isFromJava()) {
       logger.error({ type.file.locationOf(type) }) {
         """
-          @JsonClass can't be applied to $type: supertype $superclass is not a Kotlin type.
+          @JsonClass can't be applied to ${type.fqNameWhenAvailable}: supertype $superclass is not a Kotlin type.
           Origin=${classDecl.origin}
           Annotations=${classDecl.annotations.joinToString(prefix = "[", postfix = "]") { it.type.rawType().name.identifier }}
           """.trimIndent()
@@ -165,7 +165,7 @@ internal fun primaryConstructor(
             hasDefault = parameter.hasDefaultValue(),
             qualifiers = parameter.jsonQualifiers(),
             jsonIgnore = parameter.jsonIgnore(),
-            jsonName = parameter.jsonName() ?: name)
+            jsonName = parameter.jsonName())
   }
 
   return TargetConstructor(
@@ -190,8 +190,9 @@ private fun declaredProperties(
             property = property,
             parameter = parameter,
             visibility = property.visibility,
-            jsonName = parameter?.jsonName ?: property.jsonName() ?: name,
-            jsonIgnore = isTransient || parameter?.jsonIgnore == true || property.jsonIgnore())
+            jsonName = property.jsonNameFromAnywhere() ?: parameter?.jsonName ?: name,
+            jsonIgnore =
+                isTransient || parameter?.jsonIgnore == true || property.jsonIgnoreFromAnywhere())
   }
 
   return result

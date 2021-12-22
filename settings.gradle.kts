@@ -37,7 +37,8 @@ rootProject.name = "moshix-root"
 include(
     ":moshi-adapters",
     ":moshi-ir:moshi-compiler-plugin",
-    ":moshi-ir:playground",
+    ":moshi-ir:moshi-kotlin-tests",
+    ":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module",
     ":moshi-metadata-reflect",
     ":moshi-sealed:codegen",
     ":moshi-sealed:java-sealed-reflect",

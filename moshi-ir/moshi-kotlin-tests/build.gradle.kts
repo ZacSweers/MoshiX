@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
   kotlin("jvm")
   id("dev.zacsweers.moshix")
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+  kotlinOptions {
+    @Suppress("SuspiciousCollectionReassignment")
+    freeCompilerArgs +=
+        listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xopt-in=kotlin.ExperimentalStdlibApi")
+  }
 }
 
 dependencies {
@@ -24,6 +34,8 @@ dependencies {
   testImplementation("com.google.truth:truth:1.1.3")
   testImplementation("com.squareup.moshi:moshi:1.13.0")
   testImplementation(kotlin("reflect"))
+  testImplementation(project(":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module"))
+  testImplementation(libs.moshi.kotlin)
 }
 
 configurations.configureEach {

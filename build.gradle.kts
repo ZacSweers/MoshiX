@@ -43,7 +43,7 @@ apiValidation {
   ignoredProjects +=
       listOf(
           /* :moshi-ir: */
-          "playground",
+          "moshi-kotlin-tests",
           /* :moshi-sealed: */
           "sample",
       )
