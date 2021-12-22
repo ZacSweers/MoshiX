@@ -191,11 +191,7 @@ internal class KotlinJsonAdapter<T>(
 }
 
 public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
-  override fun create(
-      type: Type,
-      annotations: Set<Annotation>,
-      moshi: Moshi
-  ): JsonAdapter<*>? {
+  override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
     if (annotations.isNotEmpty()) return null
 
     val rawType = Types.getRawType(type)

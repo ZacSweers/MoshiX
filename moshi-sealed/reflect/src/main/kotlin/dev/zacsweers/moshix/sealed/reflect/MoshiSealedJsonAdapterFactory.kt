@@ -30,11 +30,7 @@ import kotlin.reflect.full.findAnnotation
 private val UNSET = Any()
 
 public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
-  override fun create(
-      type: Type,
-      annotations: Set<Annotation>,
-      moshi: Moshi
-  ): JsonAdapter<*>? {
+  override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
     if (annotations.isNotEmpty()) {
       return null
     }

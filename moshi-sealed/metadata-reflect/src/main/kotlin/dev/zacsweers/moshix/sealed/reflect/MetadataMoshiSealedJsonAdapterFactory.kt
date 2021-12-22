@@ -37,11 +37,7 @@ private val KOTLIN_METADATA = Metadata::class.java
 private val UNSET = Any()
 
 public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
-  override fun create(
-      type: Type,
-      annotations: Set<Annotation>,
-      moshi: Moshi
-  ): JsonAdapter<*>? {
+  override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
     if (annotations.isNotEmpty()) {
       return null
     }

@@ -154,7 +154,7 @@ internal fun targetType(
       }
   return TargetType(
       irClass = type,
-      typeName = type.defaultType,
+      irType = type.defaultType,
       constructor = constructor,
       properties = properties,
       typeVariables = typeVariables,
@@ -163,15 +163,6 @@ internal fun targetType(
   )
 }
 
-// private fun ClassName.withTypeArguments(arguments: List<TypeName>): TypeName {
-//  return if (arguments.isEmpty()) {
-//    this
-//  } else {
-//    this.parameterizedBy(arguments)
-//  }
-// }
-
-// @OptIn(KspExperimental::class)
 internal fun primaryConstructor(
     targetType: IrClass,
 ): TargetConstructor? {

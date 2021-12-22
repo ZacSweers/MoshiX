@@ -204,7 +204,6 @@ internal fun IrType.rawType(): IrClass {
 internal fun IrType.rawTypeOrNull(): IrClass? {
   return when (val classifier = classifierOrNull) {
     is IrClassSymbol -> classifier.owner
-    //    is WildcardTypeName -> (inTypes + outTypes).toVariableNames()
     else -> null
   }
 }

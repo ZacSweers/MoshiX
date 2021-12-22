@@ -102,7 +102,7 @@ internal class AdapterGenerator(
     private val propertyList: List<PropertyGenerator>,
 ) {
   private val nonTransientProperties = propertyList.filterNot { it.isTransient }
-  private val className = target.typeName.rawType()
+  private val className = target.irType.rawType()
   private val visibility = target.visibility
   private val typeVariables = target.typeVariables
   private val targetConstructorParams =
@@ -166,7 +166,7 @@ internal class AdapterGenerator(
         }
     adapterCls.thisReceiver = adapterReceiver
     adapterCls.superTypes =
-        listOf(irType("com.squareup.moshi.JsonAdapter").classifierOrFail.typeWith(target.typeName))
+        listOf(irType("com.squareup.moshi.JsonAdapter").classifierOrFail.typeWith(target.irType))
 
     val ctor = adapterCls.generateConstructor(isGeneric)
     val optionsField = adapterCls.generateOptionsField()
@@ -343,7 +343,7 @@ internal class AdapterGenerator(
                 // Cast it up to the actual type
                 val castValue =
                     irTemporary(
-                        irImplicitCast(irGet(value), target.typeName.makeNotNull()), "castValue")
+                        irImplicitCast(irGet(value), target.irType.makeNotNull()), "castValue")
                 +irCall(moshiSymbols.jsonWriter.getSimpleFunction("beginObject")!!).apply {
                   dispatchReceiver = irGet(writer)
                 }
@@ -690,7 +690,7 @@ internal class AdapterGenerator(
                           }
                         },
                         nameHint = "result",
-                        irType = target.typeName)
+                        irType = target.irType)
 
                 // Assign properties not present in the constructor.
                 for (property in nonTransientProperties) {

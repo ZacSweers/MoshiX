@@ -83,13 +83,13 @@ internal data class DelegateKey(
         } else {
           -1
         }
-    val adapterTypeName = moshiSymbols.jsonAdapter.typeWith(delegateType)
+    val typedAdapter = moshiSymbols.jsonAdapter.typeWith(delegateType)
 
     val field =
         adapterCls
             .addField {
               name = Name.identifier(adapterName)
-              type = adapterTypeName
+              type = typedAdapter
               visibility = DescriptorVisibilities.PRIVATE
               isFinal = true
             }
@@ -224,9 +224,8 @@ private fun IrType.toVariableName(): String {
             rawName + "Of" + owner.typeParameters.map { it.defaultType }.toVariableNames()
           }
         }
-        //    is WildcardTypeName -> (inTypes + outTypes).toVariableNames()
         is IrTypeParameterSymbol -> {
-          classifier.owner.name.identifier // + classifier. .toVariableNames()
+          classifier.owner.name.identifier
         }
         else -> throw IllegalArgumentException("Unrecognized type! $this")
       }
