@@ -56,6 +56,7 @@ import org.jetbrains.kotlin.ir.builders.irEqualsNull
 import org.jetbrains.kotlin.ir.builders.irExprBody
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
+import org.jetbrains.kotlin.ir.builders.irIfThenElse
 import org.jetbrains.kotlin.ir.builders.irImplicitCast
 import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irNotEquals
@@ -74,6 +75,7 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
@@ -401,16 +403,18 @@ internal class AdapterGenerator(
                 for (property in nonTransientProperties) {
                   localVars[property.localName] =
                       property.generateLocalProperty(this, pluginContext)
+                  localVars[property.localHasErrorName] =
+                      property.generateLocalHasErrorProperty(this, pluginContext)
                   if (property.hasLocalIsPresentName) {
                     localVars[property.localIsPresentName] =
                         property.generateLocalIsPresentProperty(this, pluginContext)
                   }
                 }
 
-                val missingProperties =
+                val errors =
                     irTemporary(
                         irCall(moshiSymbols.emptySet),
-                        "missingProperties",
+                        "errors",
                         irType =
                             pluginContext.irBuiltIns.setClass.typeWith(
                                 pluginContext.irBuiltIns.stringType),
@@ -548,24 +552,35 @@ internal class AdapterGenerator(
                                                                     property.delegateKey))
                                                         putValueArgument(0, irGet(readerParam))
                                                       })
+                                          val setVarExpression =
+                                              irSet(
+                                                  localVars.getValue(property.localName),
+                                                  irGet(result))
                                           if (!property.delegateKey.nullable) {
                                             // Check for unexpected nulls
-                                            +irIfThen(
-                                                irEqualsNull(irGet(result)),
-                                                irThrow(
-                                                    irCall(
-                                                        moshiSymbols.moshiUtil.getSimpleFunction(
-                                                            "unexpectedNull")!!)
-                                                        .apply {
-                                                          putValueArgument(
-                                                              0, irString(property.localName))
-                                                          putValueArgument(
-                                                              1, irString(property.jsonName))
-                                                          putValueArgument(2, irGet(readerParam))
-                                                        }))
+                                            +irIfThenElse(
+                                                type = pluginContext.irBuiltIns.unitType,
+                                                condition = irEqualsNull(irGet(result)),
+                                                thenPart =
+                                                    irBlock {
+                                                      // Mark this property as having an error
+                                                      // so we don't double report later
+                                                      // TODO maybe we should move this into
+                                                      //  addError for future?
+                                                      +irSet(
+                                                          localVars.getValue(
+                                                              property.localHasErrorName),
+                                                          irBoolean(true))
+                                                      +addError(
+                                                          errors,
+                                                          property,
+                                                          readerParam,
+                                                          "unexpectedNull")
+                                                    },
+                                                elsePart = setVarExpression)
+                                          } else {
+                                            +setVarExpression
                                           }
-                                          +irSet(
-                                              localVars.getValue(property.localName), irGet(result))
 
                                           if (property.hasLocalIsPresentName) {
                                             // Presence tracker for a mutable property
@@ -642,35 +657,20 @@ internal class AdapterGenerator(
                 for (input in components.filterIsInstance<PropertyComponent>()) {
                   val property = input.property
                   if (!property.isTransient && property.isRequired) {
+                    // Note we check if we've reported an error about a local var to avoid domino
+                    // error reporting
+                    // Otherwise an unexpected null prop could then get reported as missing too
+                    // TODO is there an irAnd() we can use for chaining conditions?
                     +irIfThen(
-                        condition = irEqualsNull(irGet(localVars.getValue(property.localName))),
-                        // TODO currently this creates an exception and just steals its message,
-                        //  would be nice if we had a separate utility? Not a big deal regardless
-                        //  since we're gonna error at the end anyway
+                        condition = irNot(irGet(localVars.getValue(property.localHasErrorName))),
                         thenPart =
-                            irSet(
-                                missingProperties,
-                                irCall(moshiSymbols.setPlus).apply {
-                                  extensionReceiver = irGet(missingProperties)
-                                  putValueArgument(
-                                      0,
-                                      irCall(
-                                          pluginContext.irBuiltIns.throwableClass.getPropertyGetter(
-                                              "message")!!)
-                                          .apply {
-                                            dispatchReceiver =
-                                                irCall(
-                                                    moshiSymbols.moshiUtil.getSimpleFunction(
-                                                        "missingProperty")!!)
-                                                    .apply {
-                                                      putValueArgument(
-                                                          0, irString(property.localName))
-                                                      putValueArgument(
-                                                          1, irString(property.jsonName))
-                                                      putValueArgument(2, irGet(readerParam))
-                                                    }
-                                          })
-                                }))
+                            irBlock {
+                              +irIfThen(
+                                  condition =
+                                      irEqualsNull(irGet(localVars.getValue(property.localName))),
+                                  thenPart =
+                                      addError(errors, property, readerParam, "missingProperty"))
+                            })
                   }
                 }
 
@@ -680,7 +680,7 @@ internal class AdapterGenerator(
                         irNotEquals(
                             irCall(
                                 pluginContext.irBuiltIns.setClass.owner.getPropertyGetter("size")!!)
-                                .apply { dispatchReceiver = irGet(missingProperties) },
+                                .apply { dispatchReceiver = irGet(errors) },
                             irInt(0)),
                     thenPart =
                         irThrow(
@@ -688,7 +688,7 @@ internal class AdapterGenerator(
                               putValueArgument(
                                   0,
                                   irCall(moshiSymbols.iterableJoinToString).apply {
-                                    extensionReceiver = irGet(missingProperties)
+                                    extensionReceiver = irGet(errors)
                                     putValueArgument(0, irString("\n"))
                                   })
                             }))
@@ -760,6 +760,33 @@ internal class AdapterGenerator(
               }
         }
   }
+
+  // TODO currently this creates an exception and just steals its message,
+  //  would be nice if we had a separate utility? Not a big deal regardless
+  //  since we're gonna error at the end anyway
+  private fun IrBuilderWithScope.addError(
+      errors: IrVariable,
+      property: PropertyGenerator,
+      readerParam: IrValueParameter,
+      moshiUtilFunction: String
+  ) =
+      irSet(
+          errors,
+          irCall(moshiSymbols.setPlus).apply {
+            extensionReceiver = irGet(errors)
+            putValueArgument(
+                0,
+                irCall(pluginContext.irBuiltIns.throwableClass.getPropertyGetter("message")!!)
+                    .apply {
+                      dispatchReceiver =
+                          irCall(moshiSymbols.moshiUtil.getSimpleFunction(moshiUtilFunction)!!)
+                              .apply {
+                                putValueArgument(0, irString(property.localName))
+                                putValueArgument(1, irString(property.jsonName))
+                                putValueArgument(2, irGet(readerParam))
+                              }
+                    })
+          })
 
   private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
       IrDelegatingConstructorCall {

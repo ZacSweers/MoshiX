@@ -37,6 +37,7 @@ internal class PropertyGenerator(
 
   lateinit var localName: String
   lateinit var localIsPresentName: String
+  lateinit var localHasErrorName: String
 
   val isRequired: Boolean
     get() = !delegateKey.nullable && !hasDefault
@@ -61,6 +62,7 @@ internal class PropertyGenerator(
   internal fun allocateNames(nameAllocator: NameAllocator) {
     localName = nameAllocator.newName(name)
     localIsPresentName = nameAllocator.newName("${name}Set")
+    localHasErrorName = nameAllocator.newName("${name}HasError")
   }
 
   internal fun generateLocalProperty(
@@ -91,6 +93,19 @@ internal class PropertyGenerator(
           irBoolean(false),
           isMutable = true,
           nameHint = localIsPresentName,
+          irType = pluginContext.irBuiltIns.booleanType)
+    }
+  }
+
+  internal fun generateLocalHasErrorProperty(
+      builder: IrStatementsBuilder<*>,
+      pluginContext: IrPluginContext
+  ): IrVariable {
+    builder.apply {
+      return irTemporary(
+          irBoolean(false),
+          isMutable = true,
+          nameHint = localHasErrorName,
           irType = pluginContext.irBuiltIns.booleanType)
     }
   }

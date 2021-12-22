@@ -7,9 +7,14 @@ The goal of this is to have functional parity with Moshi's native Kapt/KSP code 
 plugin.
 
 **Benefits**
-- Significantly faster build times
-- No reflection required at runtime to support default parameter values
-- Feature parity with Moshi's native code gen
+- Significantly faster build times.
+  - No Kapt or KSP tasks, no extra source files to compile. This runs directly in kotlinc and generates IR that is 
+    lowered directly into bytecode.
+- No reflection required at runtime to support default parameter values.
+- Feature parity with Moshi's native code gen.
+- More detailed error messages for unexpected null values and missing properties. Now all errors are accumulated and 
+  reported at the end, rather than failing eagerly with just the first one encountered.
+  - See https://github.com/square/moshi/issues/836 for more details!
 
 **Cons**
 - No support for Proguard file generation for now. You will need to add this manually to your rules if you use 

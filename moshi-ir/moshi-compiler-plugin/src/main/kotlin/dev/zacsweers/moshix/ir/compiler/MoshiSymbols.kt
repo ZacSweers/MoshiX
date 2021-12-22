@@ -169,12 +169,13 @@ internal class MoshiSymbols(
           }
           .symbol
 
-  val jsonDataException: IrClassSymbol = pluginContext.referenceClass(FqName("com.squareup.moshi.JsonDataException"))!!
-  val jsonDataExceptionStringConstructor: IrFunctionSymbol = jsonDataException.constructors.first {
-    it.owner.valueParameters.size == 1 &&
-      it.owner.valueParameters[0].type.makeNotNull() ==
-      pluginContext.irBuiltIns.stringType
-  }
+  val jsonDataException: IrClassSymbol =
+      pluginContext.referenceClass(FqName("com.squareup.moshi.JsonDataException"))!!
+  val jsonDataExceptionStringConstructor: IrFunctionSymbol =
+      jsonDataException.constructors.first {
+        it.owner.valueParameters.size == 1 &&
+            it.owner.valueParameters[0].type.makeNotNull() == pluginContext.irBuiltIns.stringType
+      }
 
   // TODO why doesn't creating an anonymous irclass work here? Breaks bytecode somewhere
   val moshiUtil: IrClassSymbol =
@@ -199,12 +200,11 @@ internal class MoshiSymbols(
       }
 
   val setPlus =
-    pluginContext.referenceFunctions(FqName("kotlin.collections.plus"))
-      .single {
+      pluginContext.referenceFunctions(FqName("kotlin.collections.plus")).single {
         val owner = it.owner
         owner.extensionReceiverParameter?.type?.classFqName == FqName("kotlin.collections.Set") &&
-          owner.valueParameters.size == 1 &&
-          owner.valueParameters[0].type.classifierOrNull is IrTypeParameterSymbol
+            owner.valueParameters.size == 1 &&
+            owner.valueParameters[0].type.classifierOrNull is IrTypeParameterSymbol
       }
 
   val arrayGet =
@@ -221,12 +221,11 @@ internal class MoshiSymbols(
           .single { it.name.asString() == "size" }
           .getter!!
 
-  val iterableJoinToString = pluginContext
-    .referenceFunctions(
-      FqName("kotlin.collections.joinToString"))
-    .single {
-      it.owner.extensionReceiverParameter?.type?.classFqName == FqName("kotlin.collections.Iterable")
-    }
+  val iterableJoinToString =
+      pluginContext.referenceFunctions(FqName("kotlin.collections.joinToString")).single {
+        it.owner.extensionReceiverParameter?.type?.classFqName ==
+            FqName("kotlin.collections.Iterable")
+      }
 
   private fun createPackage(packageName: String): IrPackageFragment =
       IrExternalPackageFragmentImpl.createEmptyExternalPackageFragment(
