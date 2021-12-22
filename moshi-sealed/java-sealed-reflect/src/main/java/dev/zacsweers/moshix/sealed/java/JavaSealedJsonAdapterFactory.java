@@ -27,11 +27,7 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-/**
- * A {@link JsonAdapter.Factory} that supports JDK 16+ Java {@code sealed} classes via reflection.
- *
- * <p><em>NOTE:</em> Java sealed classes are currently in preview.
- */
+/** A {@link JsonAdapter.Factory} that supports Java 17+ {@code sealed} classes via reflection. */
 public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
 
   private static final String SEALED_PREFIX = "sealed:";
