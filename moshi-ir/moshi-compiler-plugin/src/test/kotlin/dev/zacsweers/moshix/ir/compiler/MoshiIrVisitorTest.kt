@@ -40,7 +40,7 @@ class MoshiIrVisitorTest {
             kotlin(
                 "source.kt",
                 """
-          package dev.zacsweers.moshix.ir.compiler.test
+          package test
 
           import com.squareup.moshi.Json
           import com.squareup.moshi.JsonClass
