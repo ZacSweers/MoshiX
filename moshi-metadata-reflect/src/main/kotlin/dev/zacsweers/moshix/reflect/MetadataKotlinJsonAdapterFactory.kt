@@ -340,7 +340,7 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
       if (this.size != other.size) return false
 
       // check this and other contains same elements at position
-      for (i in 0 until size) {
+      for (i in indices) {
         if (!(get(i) valueEquals other[i])) {
           return false
         }
