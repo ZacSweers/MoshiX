@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         java_version: [ 17 ]
-        kotlin_version: [ 1.6.0 ]
+        kotlin_version: [ 1.6.10 ]
         ksp_enabled: [ true, false ]
         ksp_incremental_enabled: [ true, false ]
         exclude:
