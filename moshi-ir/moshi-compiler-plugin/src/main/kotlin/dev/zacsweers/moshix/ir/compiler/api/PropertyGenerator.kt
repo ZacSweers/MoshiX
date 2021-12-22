@@ -70,12 +70,12 @@ internal class PropertyGenerator(
     builder.apply {
       val expression =
           if (hasConstructorDefault) {
-            irNull(target.type.makeNullable())
-          } else {
             // We default to the primitive default type, as reflectively invoking the constructor
             // without this (even though it's a throwaway) will fail argument type resolution in
             // the reflective invocation.
-            defaultPrimitiveValue(target.type.makeNullable(), pluginContext)
+            defaultPrimitiveValue(target.type, pluginContext)
+          } else {
+            irNull(target.type.makeNullable())
           }
       return irTemporary(
           expression, isMutable = true, nameHint = localName, irType = expression.type)

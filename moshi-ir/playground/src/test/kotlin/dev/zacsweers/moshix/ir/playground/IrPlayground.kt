@@ -52,6 +52,9 @@ class IrPlayground {
           .contains(
               "TypeVariable mismatch: Expecting 1 type for generic type variables [T], but received 2")
     }
+
+    val instanceWithDefault = adapter.fromJson("""{"b":"there"}""")!!
+    assertThat(instanceWithDefault.a).isEqualTo(1)
   }
 
   @Test
@@ -66,10 +69,10 @@ class IrPlayground {
     assertThat(decoded.a).isEqualTo("android")
     assertThat(decoded.b).isEqualTo("Banana")
   }
-}
 
-@JsonClass(generateAdapter = true)
-class ConstructorParameterWithQualifier(@Uppercase(inFrench = true) val a: String, val b: String)
+  @JsonClass(generateAdapter = true)
+  class ConstructorParameterWithQualifier(@Uppercase(inFrench = true) val a: String, val b: String)
+}
 
 @JsonQualifier annotation class Uppercase(val inFrench: Boolean, val onSundays: Boolean = false)
 
@@ -85,4 +88,4 @@ class UppercaseJsonAdapter {
   }
 }
 
-@JsonClass(generateAdapter = true) data class SimpleClass<T>(val a: Int, val b: T)
+@JsonClass(generateAdapter = true) data class SimpleClass<T>(val a: Int = 1, val b: T)

@@ -29,6 +29,7 @@ import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
 import dev.zacsweers.moshix.ir.compiler.util.irType
 import dev.zacsweers.moshix.ir.compiler.util.rawType
 import dev.zacsweers.moshix.ir.compiler.util.rawTypeOrNull
+import org.jetbrains.kotlin.backend.common.deepCopyWithVariables
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irIfThen
@@ -578,10 +579,6 @@ internal class AdapterGenerator(
                                             +irSet(bitMasks[maskNameIndex].symbol, and)
                                           }
                                         }))
-                            //                      if (property.hasConstructorParameter) {
-                            //                        constructorPropertyTypes +=
-                            // property.target.type.asTypeBlock()
-                            //                      }
                             propertyIndex++
                             updateMaskIndexes()
                           }
@@ -609,16 +606,22 @@ internal class AdapterGenerator(
                   dispatchReceiver = irGet(readerParam)
                 }
 
-                //            val result = irTemporary(target.typeName, nameHint = "result")
-                val hasNonConstructorProperties =
-                    nonTransientProperties.any { !it.hasConstructorParameter }
                 val constructor =
                     if (useDefaultsConstructor) {
-                      // TO
-                      target.irClass.constructors
-                          .single {
-                            it.valueParameters.last().type ==
-                                irType("kotlin.jvm.internal.DefaultConstructorMarker")
+                      // We can't get the synthetic constructor from here but we _can_ make a fake
+                      // one to compile
+                      // against
+                      target
+                          .constructor
+                          .irConstructor
+                          .deepCopyWithVariables()
+                          .apply {
+                            parent = target.irClass
+                            repeat(maskCount) {
+                              addValueParameter("mask$it", pluginContext.irBuiltIns.intType)
+                            }
+                            addValueParameter(
+                                "marker", irType("kotlin.jvm.internal.DefaultConstructorMarker"))
                           }
                           .symbol
                     } else {
@@ -677,11 +680,11 @@ internal class AdapterGenerator(
                           if (useDefaultsConstructor) {
                             // Add the masks and a null instance for the trailing default marker
                             // instance
-                            // DefaultConstructorMarker
-                            putValueArgument(++lastIndex, irNull())
                             for (mask in bitMasks) {
                               putValueArgument(++lastIndex, irGet(mask))
                             }
+                            // DefaultConstructorMarker
+                            putValueArgument(++lastIndex, irNull())
                           }
                         },
                         nameHint = "result",

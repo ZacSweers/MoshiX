@@ -44,11 +44,8 @@ class MoshiIrVisitorTest {
           import com.squareup.moshi.JsonClass
           import com.squareup.moshi.JsonQualifier
 
-          @JsonQualifier
-          annotation class UpperCase(val locale: String)
-
           @JsonClass(generateAdapter = true)
-          data class SimpleClass<T>(val a: Int, val b: T, val c: String, @UpperCase("france") val upperString: String)
+          data class SimpleClass<T>(val a: Int = 0)
           """))
     // Kotlin reports an error message from IR as an internal error for some reason, so we just
     // check "not ok"
