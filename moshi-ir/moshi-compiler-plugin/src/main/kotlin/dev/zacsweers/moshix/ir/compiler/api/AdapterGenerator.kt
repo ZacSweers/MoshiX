@@ -541,7 +541,7 @@ internal class AdapterGenerator(
 
                 val result =
                     irTemporary(
-                        invokeConstructor(
+                        constructorCall(
                           constructor,
                           localVars,
                           components,
@@ -758,7 +758,7 @@ internal class AdapterGenerator(
                     })
           })
 
-  private fun IrBuilderWithScope.invokeConstructor(
+  private fun IrBuilderWithScope.constructorCall(
     constructor: IrConstructorSymbol,
     localVars: Map<String, IrVariable>,
     components: List<FromJsonComponent>,
