@@ -24,7 +24,8 @@ import org.jetbrains.kotlin.name.FqName
 
 internal class MoshiIrGenerationExtension(
     private val messageCollector: MessageCollector,
-    private val generatedAnnotationName: FqName?
+    private val generatedAnnotationName: FqName?,
+    private val enableSealed: Boolean
 ) : IrGenerationExtension {
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
@@ -40,7 +41,12 @@ internal class MoshiIrGenerationExtension(
     val deferred = mutableListOf<GeneratedAdapter>()
     val moshiTransformer =
         MoshiIrVisitor(
-            moduleFragment, pluginContext, messageCollector, generatedAnnotation, deferred)
+            moduleFragment,
+            pluginContext,
+            messageCollector,
+            generatedAnnotation,
+            enableSealed,
+            deferred)
     moduleFragment.transform(moshiTransformer, null)
     for ((file, adapters) in deferred.groupBy { it.irFile }) {
       for (adapter in adapters) {

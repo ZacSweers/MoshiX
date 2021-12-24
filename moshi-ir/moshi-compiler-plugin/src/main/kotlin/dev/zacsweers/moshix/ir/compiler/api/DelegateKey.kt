@@ -47,7 +47,6 @@ import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.isNullable
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
-import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
@@ -122,17 +121,13 @@ private fun IrBuilderWithScope.moshiAdapterCall(
     jsonQualifiers: List<IrConstructorCall>
 ): IrExpressionBody {
   return irExprBody(
-      irCall(
-          // single() because we only define the three-arg adapter() call here anyway
-          moshiSymbols.moshi.functions.single())
-          .apply {
-            dispatchReceiver = irGet(moshiParameter)
+      irCall(moshiSymbols.moshiThreeArgAdapter).apply {
+        dispatchReceiver = irGet(moshiParameter)
 
-            addTypeParam(
-                this, pluginContext, moshiSymbols, delegateType, genericIndex, typesParameter)
-            addAnnotationsParam(this, pluginContext, moshiSymbols, jsonQualifiers)
-            putValueArgument(2, irString(propertyName))
-          })
+        addTypeParam(this, pluginContext, moshiSymbols, delegateType, genericIndex, typesParameter)
+        addAnnotationsParam(this, pluginContext, moshiSymbols, jsonQualifiers)
+        putValueArgument(2, irString(propertyName))
+      })
 }
 
 private fun IrBuilderWithScope.addTypeParam(

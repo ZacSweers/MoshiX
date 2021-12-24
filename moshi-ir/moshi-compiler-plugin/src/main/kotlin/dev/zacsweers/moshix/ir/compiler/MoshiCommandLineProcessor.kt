@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
 internal val KEY_ENABLED = CompilerConfigurationKey<Boolean>("enabled")
 internal val KEY_GENERATED_ANNOTATION = CompilerConfigurationKey<String>("generatedAnnotation")
+internal val KEY_ENABLE_SEALED = CompilerConfigurationKey<Boolean>("enableSealed")
 
 @AutoService(CommandLineProcessor::class)
 public class MoshiCommandLineProcessor : CommandLineProcessor {
@@ -33,6 +34,7 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
   override val pluginOptions: Collection<AbstractCliOption> =
       listOf(
           CliOption("enabled", "<true | false>", "", required = true),
+          CliOption("enableSealed", "<true | false>", "", required = false),
           CliOption("generatedAnnotation", "String", "", required = false),
       )
 
@@ -43,6 +45,7 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
   ): Unit =
       when (option.optionName) {
         "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
+        "enableSealed" -> configuration.put(KEY_ENABLE_SEALED, value.toBoolean())
         "generatedAnnotation" -> configuration.put(KEY_GENERATED_ANNOTATION, value)
         else -> error("Unknown plugin option: ${option.optionName}")
       }

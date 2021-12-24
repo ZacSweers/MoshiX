@@ -21,10 +21,13 @@ import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrBuiltIns
 import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
+import org.jetbrains.kotlin.ir.builders.declarations.addExtensionReceiver
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
+import org.jetbrains.kotlin.ir.builders.declarations.addGetter
 import org.jetbrains.kotlin.ir.builders.declarations.addTypeParameter
 import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
+import org.jetbrains.kotlin.ir.builders.declarations.buildProperty
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
 import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
@@ -34,6 +37,7 @@ import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
+import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
 import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
@@ -43,10 +47,12 @@ import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.makeNullable
+import org.jetbrains.kotlin.ir.types.starProjectedType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.getSimpleFunction
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
@@ -57,6 +63,8 @@ internal class MoshiSymbols(
 ) {
   private val irFactory: IrFactory = pluginContext.irFactory
 
+  private val javaLang: IrPackageFragment by lazy { createPackage("java.lang") }
+  private val kotlinJvm: IrPackageFragment by lazy { createPackage("kotlin.jvm") }
   private val moshiPackage: IrPackageFragment by lazy { createPackage("com.squareup.moshi") }
   private val javaReflectPackage: IrPackageFragment by lazy { createPackage("java.lang.reflect") }
 
@@ -122,6 +130,12 @@ internal class MoshiSymbols(
         .symbol
   }
 
+  val moshiBuilder by lazy {
+    pluginContext.referenceClass(FqName("com.squareup.moshi.Moshi.Builder"))!!
+  }
+
+  val moshiBuilderBuild by lazy { moshiBuilder.getSimpleFunction("build")!! }
+
   val moshi: IrClassSymbol by lazy {
     irFactory
         .buildClass {
@@ -144,8 +158,20 @@ internal class MoshiSymbols(
                     "annotations", irBuiltIns.setClass.typeWith(irBuiltIns.annotationType))
                 addValueParameter("fieldName", irBuiltIns.stringType)
               }
+
+          addFunction(
+              Name.identifier("newBuilder").identifier, moshiBuilder.defaultType, Modality.FINAL)
         }
         .symbol
+  }
+
+  val moshiThreeArgAdapter by lazy { moshi.getSimpleFunction("adapter")!! }
+
+  val moshiNewBuilder by lazy { moshi.getSimpleFunction("newBuilder")!! }
+
+  val jsonAdapterFactoryCreate by lazy {
+    pluginContext.referenceClass(FqName("com.squareup.moshi.JsonAdapter.Factory"))!!
+        .getSimpleFunction("create")!!
   }
 
   internal val jsonAdapter: IrClassSymbol by lazy {
@@ -175,6 +201,10 @@ internal class MoshiSymbols(
               }
         }
         .symbol
+  }
+
+  val addAdapter by lazy {
+    pluginContext.referenceFunctions(FqName("com.squareup.moshi.addAdapter")).first()
   }
 
   val jsonDataException: IrClassSymbol by lazy {
@@ -246,6 +276,22 @@ internal class MoshiSymbols(
           FqName("kotlin.collections.Iterable")
     }
   }
+
+  val javaLangClass: IrClassSymbol by lazy {
+    createClass(javaLang, "Class", ClassKind.CLASS, Modality.FINAL)
+  }
+
+  val kotlinKClassJava: IrPropertySymbol =
+      irFactory
+          .buildProperty() { name = Name.identifier("java") }
+          .apply {
+            parent = kotlinJvm
+            addGetter().apply {
+              addExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
+              returnType = javaLangClass.defaultType
+            }
+          }
+          .symbol
 
   private fun createPackage(packageName: String): IrPackageFragment =
       IrExternalPackageFragmentImpl.createEmptyExternalPackageFragment(

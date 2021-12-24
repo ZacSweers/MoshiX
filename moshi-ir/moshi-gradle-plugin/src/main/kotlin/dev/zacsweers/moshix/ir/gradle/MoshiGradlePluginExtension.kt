@@ -21,5 +21,8 @@ import org.gradle.api.provider.Property
 
 abstract class MoshiPluginExtension @Inject constructor(objects: ObjectFactory) {
   val enabled: Property<Boolean> = objects.property(Boolean::class.javaObjectType).convention(true)
+  /** Note: this is not currently implemented yet */
   val generatedAnnotation: Property<String> = objects.property(String::class.java)
+  /** Enables moshi-sealed code gen. Disabled by default. */
+  val enableSealed: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 }

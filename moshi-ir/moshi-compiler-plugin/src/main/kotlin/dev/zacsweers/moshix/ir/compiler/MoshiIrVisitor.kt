@@ -15,8 +15,10 @@
  */
 package dev.zacsweers.moshix.ir.compiler
 
-import dev.zacsweers.moshix.ir.compiler.api.AdapterGenerator
+import dev.zacsweers.moshix.ir.compiler.api.MoshiAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
+import dev.zacsweers.moshix.ir.compiler.sealed.MoshiSealedSymbols
+import dev.zacsweers.moshix.ir.compiler.sealed.SealedAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -44,14 +46,19 @@ internal class MoshiIrVisitor(
     private val pluginContext: IrPluginContext,
     private val messageCollector: MessageCollector,
     private val generatedAnnotation: IrClassSymbol?,
+    private val enableSealed: Boolean,
     private val deferredAddedClasses: MutableList<GeneratedAdapter>
 ) : IrElementTransformerVoidWithContext() {
 
-  private val moshiSymbols = MoshiSymbols(pluginContext.irBuiltIns, moduleFragment, pluginContext)
+  private val moshiSymbols by lazy {
+    MoshiSymbols(pluginContext.irBuiltIns, moduleFragment, pluginContext)
+  }
+
+  private val moshiSealedSymbols by lazy { MoshiSealedSymbols(pluginContext) }
 
   private fun adapterGenerator(
       originalType: IrClass,
-  ): AdapterGenerator? {
+  ): MoshiAdapterGenerator? {
     val type = targetType(originalType, pluginContext, messageCollector) ?: return null
 
     val properties = mutableMapOf<String, PropertyGenerator>()
@@ -89,7 +96,7 @@ internal class MoshiIrVisitor(
           }
         }
 
-    return AdapterGenerator(pluginContext, moshiSymbols, type, sortedProperties)
+    return MoshiAdapterGenerator(pluginContext, moshiSymbols, type, sortedProperties)
   }
 
   override fun visitClassNew(declaration: IrClass): IrStatement {
@@ -101,34 +108,45 @@ internal class MoshiIrVisitor(
           return super.visitClassNew(declaration)
         }
 
-        if (call.valueArgumentsCount >= 2) {
-          // This is generator
-          call.getValueArgument(1)?.let { generator ->
-            @Suppress("UNCHECKED_CAST")
-            if ((generator as IrConst<String>).value.isNotBlank()) {
-              return super.visitClassNew(declaration)
+        // This is generator
+        @Suppress("UNCHECKED_CAST")
+        val generatorValue = (call.getValueArgument(1) as? IrConst<String>?)?.value.orEmpty()
+        val generator =
+            if (generatorValue.isNotBlank()) {
+              if (enableSealed && generatorValue.startsWith("sealed:")) {
+                val typeLabel = generatorValue.removePrefix("sealed:")
+                SealedAdapterGenerator(
+                    pluginContext,
+                    messageCollector,
+                    moshiSymbols,
+                    moshiSealedSymbols,
+                    declaration,
+                    typeLabel)
+              } else {
+                return super.visitClassNew(declaration)
+              }
+            } else {
+              // Unspecified/null - means it's empty/default.
+              adapterGenerator(declaration)
             }
-          }
-        }
 
-        val adapterGenerator =
-            adapterGenerator(declaration) ?: return super.visitClassNew(declaration)
-        pluginContext.irFactory.run {
-          try {
-            val adapterClass = adapterGenerator.prepare()
-            if (generatedAnnotation != null) {
-              // TODO add generated annotation
-            }
-            // Uncomment for debugging generated code
-            //            println("Dumping current IR src")
-            //            println(adapterClass.adapterClass.dumpSrc())
-            deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)
-          } catch (e: Exception) {
-            messageCollector.error(declaration) {
-              "Error preparing adapter for ${declaration.fqNameWhenAvailable}"
-            }
-            throw e
+        val adapterGenerator = generator ?: return super.visitClassNew(declaration)
+        try {
+          val adapterClass = adapterGenerator.prepare() ?: return super.visitClassNew(declaration)
+          if (generatedAnnotation != null) {
+            // TODO add generated annotation
           }
+          // Uncomment for debugging generated code
+          //            println("Dumping current IR src")
+          //          messageCollector.report(
+          //              CompilerMessageSeverity.STRONG_WARNING,
+          // adapterClass.adapterClass.dumpSrc())
+          deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)
+        } catch (e: Exception) {
+          messageCollector.error(declaration) {
+            "Error preparing adapter for ${declaration.fqNameWhenAvailable}"
+          }
+          throw e
         }
       }
     }

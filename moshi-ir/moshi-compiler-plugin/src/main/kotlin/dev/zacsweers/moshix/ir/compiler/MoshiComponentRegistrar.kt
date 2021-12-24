@@ -33,12 +33,13 @@ public class MoshiComponentRegistrar : ComponentRegistrar {
   ) {
 
     if (configuration[KEY_ENABLED] == false) return
+    val enableSealed = configuration[KEY_ENABLE_SEALED] ?: false
 
     val messageCollector =
         configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
     val fqGeneratedAnnotation = configuration[KEY_GENERATED_ANNOTATION]?.let(::FqName)
 
     IrGenerationExtension.registerExtension(
-        project, MoshiIrGenerationExtension(messageCollector, fqGeneratedAnnotation))
+        project, MoshiIrGenerationExtension(messageCollector, fqGeneratedAnnotation, enableSealed))
   }
 }

@@ -1,10 +1,10 @@
 Moshi-IR
 ========
 
-A Kotlin IR implementation of Moshi code gen.
+A Kotlin IR implementation of Moshi code gen and moshi-sealed code gen.
 
-The goal of this is to have functional parity with Moshi's native Kapt/KSP code gen but run as a fully embedded IR 
-plugin.
+The goal of this is to have functional parity with their native Kapt/KSP code gen analogues but run as a fully 
+embedded IR plugin.
 
 **Benefits**
 - Significantly faster build times.
@@ -35,7 +35,8 @@ these, you should be aware. If you have any issues, you can always fall back to 
 
 ### Installation
 
-Simply apply the Gradle plugin in your project to use it.
+Simply apply the Gradle plugin in your project to use it. You can enable moshi-sealed code gen via the `moshi` 
+extension.
 
 The Gradle plugin is published to Maven Central, so ensure you have `mavenCentral()` visible to your buildscript 
 classpath.
@@ -45,6 +46,11 @@ classpath.
 plugins {
   kotlin("jvm")
   id("dev.zacsweers.moshix") version "x.y.z"
+}
+
+moshi {
+  // Opt-in to enable moshi-sealed, disabled by default.
+  enableSealed.set(true)
 }
 ```
 
