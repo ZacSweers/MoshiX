@@ -17,6 +17,7 @@ package dev.zacsweers.moshix.ir.compiler
 
 import dev.zacsweers.moshix.ir.compiler.api.MoshiAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
+import dev.zacsweers.moshix.ir.compiler.sealed.MoshiSealedSymbols
 import dev.zacsweers.moshix.ir.compiler.sealed.SealedAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
@@ -49,7 +50,11 @@ internal class MoshiIrVisitor(
     private val deferredAddedClasses: MutableList<GeneratedAdapter>
 ) : IrElementTransformerVoidWithContext() {
 
-  private val moshiSymbols = MoshiSymbols(pluginContext.irBuiltIns, moduleFragment, pluginContext)
+  private val moshiSymbols by lazy {
+    MoshiSymbols(pluginContext.irBuiltIns, moduleFragment, pluginContext)
+  }
+
+  private val moshiSealedSymbols by lazy { MoshiSealedSymbols(pluginContext) }
 
   private fun adapterGenerator(
       originalType: IrClass,
@@ -111,7 +116,12 @@ internal class MoshiIrVisitor(
               if (enableSealed && generatorValue.startsWith("sealed:")) {
                 val typeLabel = generatorValue.removePrefix("sealed:")
                 SealedAdapterGenerator(
-                    pluginContext, messageCollector, moshiSymbols, declaration, typeLabel)
+                    pluginContext,
+                    messageCollector,
+                    moshiSymbols,
+                    moshiSealedSymbols,
+                    declaration,
+                    typeLabel)
               } else {
                 return super.visitClassNew(declaration)
               }
