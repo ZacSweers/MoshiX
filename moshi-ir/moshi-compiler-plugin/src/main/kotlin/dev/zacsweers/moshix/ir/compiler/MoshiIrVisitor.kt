@@ -45,6 +45,7 @@ internal class MoshiIrVisitor(
     private val pluginContext: IrPluginContext,
     private val messageCollector: MessageCollector,
     private val generatedAnnotation: IrClassSymbol?,
+    private val enableSealed: Boolean,
     private val deferredAddedClasses: MutableList<GeneratedAdapter>
 ) : IrElementTransformerVoidWithContext() {
 
@@ -107,7 +108,7 @@ internal class MoshiIrVisitor(
         val generatorValue = (call.getValueArgument(1) as? IrConst<String>?)?.value.orEmpty()
         val generator =
             if (generatorValue.isNotBlank()) {
-              if (generatorValue.startsWith("sealed:")) {
+              if (enableSealed && generatorValue.startsWith("sealed:")) {
                 val typeLabel = generatorValue.removePrefix("sealed:")
                 SealedAdapterGenerator(
                     pluginContext, messageCollector, moshiSymbols, declaration, typeLabel)
