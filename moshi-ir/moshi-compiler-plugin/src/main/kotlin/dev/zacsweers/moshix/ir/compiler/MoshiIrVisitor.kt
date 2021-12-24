@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.util.file
+import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.name.FqName
 
@@ -113,14 +114,21 @@ internal class MoshiIrVisitor(
         val adapterGenerator =
             adapterGenerator(declaration) ?: return super.visitClassNew(declaration)
         pluginContext.irFactory.run {
-          val adapterClass = adapterGenerator.prepare()
-          if (generatedAnnotation != null) {
-            // TODO add generated annotation
+          try {
+            val adapterClass = adapterGenerator.prepare()
+            if (generatedAnnotation != null) {
+              // TODO add generated annotation
+            }
+            // Uncomment for debugging generated code
+            //            println("Dumping current IR src")
+            //            println(adapterClass.adapterClass.dumpSrc())
+            deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)
+          } catch (e: Exception) {
+            messageCollector.error(declaration) {
+              "Error preparing adapter for ${declaration.fqNameWhenAvailable}"
+            }
+            throw e
           }
-          // Uncomment for debugging generated code
-          //          println("Dumping current IR src")
-          //          println(adapterClass.adapterClass.dumpSrc())
-          deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)
         }
       }
     }

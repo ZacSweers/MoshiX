@@ -70,6 +70,7 @@ import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.util.OperatorNameConventions
 
 /*
  * Adapted from Zipline: https://github.com/cashapp/zipline/blob/06f9f5d735/zipline-kotlin-plugin-hosted/src/main/kotlin/app/cash/zipline/kotlin/ir.kt
@@ -263,3 +264,25 @@ internal fun IrBuilderWithScope.irInvoke(
 
 internal val IrProperty.isTransient: Boolean
   get() = backingField?.hasAnnotation(FqName("kotlin.jvm.Transient")) == true
+
+internal fun IrBuilderWithScope.irAnd(
+    pluginContext: IrPluginContext,
+    lhs: IrExpression,
+    rhs: IrExpression
+): IrExpression = irBinOp(pluginContext, OperatorNameConventions.AND, lhs, rhs)
+
+internal fun Sequence<IrExpression>.joinToIrAnd(
+    scope: IrBuilderWithScope,
+    pluginContext: IrPluginContext,
+): IrExpression {
+  var compositeExpression: IrExpression? = null
+  for (singleCheckExpr in this) {
+    compositeExpression =
+        if (compositeExpression == null) {
+          singleCheckExpr
+        } else {
+          scope.irAnd(pluginContext, compositeExpression, singleCheckExpr)
+        }
+  }
+  return compositeExpression ?: error("No expressions to join")
+}

@@ -23,10 +23,12 @@ import dev.zacsweers.moshix.ir.compiler.util.NameAllocator
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.defaultPrimitiveValue
+import dev.zacsweers.moshix.ir.compiler.util.irAnd
 import dev.zacsweers.moshix.ir.compiler.util.irBinOp
 import dev.zacsweers.moshix.ir.compiler.util.irConstructorBody
 import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
 import dev.zacsweers.moshix.ir.compiler.util.irType
+import dev.zacsweers.moshix.ir.compiler.util.joinToIrAnd
 import dev.zacsweers.moshix.ir.compiler.util.rawType
 import dev.zacsweers.moshix.ir.compiler.util.rawTypeOrNull
 import org.jetbrains.kotlin.backend.common.deepCopyWithVariables
@@ -79,6 +81,7 @@ import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
+import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.classifierOrFail
@@ -102,7 +105,7 @@ internal class AdapterGenerator(
     private val target: TargetType,
     private val propertyList: List<PropertyGenerator>,
 ) {
-  private val nonTransientProperties = propertyList.filterNot { it.isTransient }
+  private val nonTransientProperties = propertyList.filterNot { it.isTransientOrIgnored }
   private val className = target.irType.rawType()
   private val visibility = target.visibility
   private val typeVariables = target.typeVariables
@@ -436,7 +439,7 @@ internal class AdapterGenerator(
                   if (property.target.parameterIndex in targetConstructorParams) {
                     continue // Already handled
                   }
-                  if (property.isTransient) {
+                  if (property.isTransientOrIgnored) {
                     continue // We don't care about these outside of constructor parameters
                   }
                   components += PropertyOnly(property)
@@ -478,44 +481,20 @@ internal class AdapterGenerator(
                   dispatchReceiver = irGet(readerParam)
                 }
 
-                val constructor =
-                    if (useDefaultsConstructor) {
-                      // We can't get the synthetic constructor from here but we _can_ make a fake
-                      // one to compile against
-                      target
-                          .constructor
-                          .irConstructor
-                          .deepCopyWithVariables()
-                          .apply {
-                            parent = target.irClass
-                            repeat(maskCount) {
-                              addValueParameter("mask$it", pluginContext.irBuiltIns.intType)
-                            }
-                            addValueParameter(
-                                "marker", irType("kotlin.jvm.internal.DefaultConstructorMarker"))
-                          }
-                          .symbol
-                    } else {
-                      target.constructor.irConstructor.symbol
-                    }
-
                 for (input in components.filterIsInstance<PropertyComponent>()) {
                   val property = input.property
-                  if (!property.isTransient && property.isRequired) {
+                  if (!property.isTransientOrIgnored && property.isRequired) {
                     // Note we check if we've reported an error about a local var to avoid domino
                     // error reporting
                     // Otherwise an unexpected null prop could then get reported as missing too
-                    // TODO is there an irAnd() we can use for chaining conditions?
+                    val compositeCondition =
+                        irAnd(
+                            pluginContext,
+                            irNot(irGet(localVars.getValue(property.localHasErrorName))),
+                            irEqualsNull(irGet(localVars.getValue(property.localName))))
                     +irIfThen(
-                        condition = irNot(irGet(localVars.getValue(property.localHasErrorName))),
-                        thenPart =
-                            irBlock {
-                              +irIfThen(
-                                  condition =
-                                      irEqualsNull(irGet(localVars.getValue(property.localName))),
-                                  thenPart =
-                                      addError(errors, property, readerParam, "missingProperty"))
-                            })
+                        condition = compositeCondition,
+                        thenPart = addError(errors, property, readerParam, "missingProperty"))
                   }
                 }
 
@@ -537,48 +516,90 @@ internal class AdapterGenerator(
                                     putValueArgument(0, irString("\n"))
                                   })
                             }))
+
+                val standardConstructor = target.constructor.irConstructor.symbol
+                val constructorInvocationExpression =
+                    if (useDefaultsConstructor) {
+                      // We can't get the synthetic constructor from here but we _can_ make a fake
+                      // one to compile against
+                      val defaultsConstructor =
+                          target
+                              .constructor
+                              .irConstructor
+                              .deepCopyWithVariables()
+                              .apply {
+                                parent = target.irClass
+                                repeat(maskCount) {
+                                  addValueParameter("mask$it", pluginContext.irBuiltIns.intType)
+                                }
+                                addValueParameter(
+                                    "marker",
+                                    irType("kotlin.jvm.internal.DefaultConstructorMarker"))
+                              }
+                              .symbol
+
+                      // If there are any transient/ignored properties they _must_ use the defaults
+                      // constructor
+                      val hasIgnoredProperties =
+                          components
+                              .filterIsInstance<ParameterComponent>()
+                              .filterIsInstance<PropertyComponent>()
+                              .any { it.property.isTransientOrIgnored }
+
+                      if (hasIgnoredProperties) {
+                        constructorCall(
+                            defaultsConstructor,
+                            localVars,
+                            components,
+                            bitMasks,
+                            useDefaultsConstructor = true)
+                      } else {
+                        // Happy path - all parameters with defaults are set
+                        val compositeExpression =
+                            bitMasks
+                                .withIndex()
+                                .asSequence()
+                                .map { (index, maskName) ->
+                                  irEquals(
+                                      irGet(maskName),
+                                      irInt(maskAllSetValues[index]),
+                                  )
+                                }
+                                .joinToIrAnd(this, pluginContext)
+
+                        irIfThenElse(
+                            type = target.irType,
+                            condition = compositeExpression,
+                            // Golden masks - invoke the standard constructor
+                            thenPart =
+                                constructorCall(
+                                    standardConstructor,
+                                    localVars,
+                                    components,
+                                    bitMasks,
+                                    useDefaultsConstructor = false),
+                            // Not all set, invoke the defaults constructor
+                            elsePart =
+                                constructorCall(
+                                    defaultsConstructor,
+                                    localVars,
+                                    components,
+                                    bitMasks,
+                                    useDefaultsConstructor = true))
+                      }
+                    } else {
+                      // Invoke the standard constructor
+                      constructorCall(
+                          standardConstructor,
+                          localVars,
+                          components,
+                          bitMasks,
+                          useDefaultsConstructor = false)
+                    }
+
                 val result =
                     irTemporary(
-                        irCall(constructor).apply {
-                          var lastIndex = 0
-                          for (input in components.filterIsInstance<ParameterComponent>()) {
-                            lastIndex = input.parameter.index
-                            if (useDefaultsConstructor) {
-                              if (input is ParameterOnly ||
-                                  (input is ParameterProperty && input.property.isTransient)) {
-                                // We have to use the default primitive for the available type in
-                                // order for invokeDefaultConstructor to properly invoke it. Just
-                                // using "null" isn't safe because the transient type may be a
-                                // primitive type. Inline a little comment for readability
-                                // indicating which parameter is it's referring to
-                                putValueArgument(
-                                    input.parameter.index,
-                                    defaultPrimitiveValue(input.type, pluginContext))
-                              } else {
-                                putValueArgument(
-                                    input.parameter.index,
-                                    irGet(
-                                        localVars.getValue(
-                                            (input as ParameterProperty).property.localName)))
-                              }
-                            } else if (input !is ParameterOnly) {
-                              val property = (input as ParameterProperty).property
-                              putValueArgument(
-                                  input.parameter.index,
-                                  irGet(localVars.getValue(property.localName)))
-                            }
-                          }
-
-                          if (useDefaultsConstructor) {
-                            // Add the masks and a null instance for the trailing default marker
-                            // instance
-                            for (mask in bitMasks) {
-                              putValueArgument(++lastIndex, irGet(mask))
-                            }
-                            // DefaultConstructorMarker
-                            putValueArgument(++lastIndex, irNull())
-                          }
-                        },
+                        constructorInvocationExpression,
                         nameHint = "result",
                         irType = target.irType)
 
@@ -665,10 +686,10 @@ internal class AdapterGenerator(
               val branches = buildList {
                 for (input in components) {
                   if (input is ParameterOnly ||
-                      (input is ParameterProperty && input.property.isTransient)) {
+                      (input is ParameterProperty && input.property.isTransientOrIgnored)) {
                     updateMaskIndexes()
                     continue
-                  } else if (input is PropertyOnly && input.property.isTransient) {
+                  } else if (input is PropertyOnly && input.property.isTransientOrIgnored) {
                     continue
                   }
 
@@ -788,6 +809,48 @@ internal class AdapterGenerator(
                               }
                     })
           })
+
+  private fun IrBuilderWithScope.constructorCall(
+      constructor: IrConstructorSymbol,
+      localVars: Map<String, IrVariable>,
+      components: List<FromJsonComponent>,
+      bitMasks: List<IrVariable>,
+      useDefaultsConstructor: Boolean
+  ) =
+      irCall(constructor).apply {
+        var lastIndex = 0
+        for (input in components.filterIsInstance<ParameterComponent>()) {
+          lastIndex = input.parameter.index
+          if (useDefaultsConstructor) {
+            if (input is ParameterOnly ||
+                (input is ParameterProperty && input.property.isTransientOrIgnored)) {
+              // We have to use the default primitive for the available type in
+              // order for invokeDefaultConstructor to properly invoke it. Just
+              // using "null" isn't safe because the transient type may be a
+              // primitive type.
+              putValueArgument(
+                  input.parameter.index, defaultPrimitiveValue(input.type, pluginContext))
+            } else {
+              putValueArgument(
+                  input.parameter.index,
+                  irGet(localVars.getValue((input as ParameterProperty).property.localName)))
+            }
+          } else if (input !is ParameterOnly) {
+            val property = (input as ParameterProperty).property
+            putValueArgument(input.parameter.index, irGet(localVars.getValue(property.localName)))
+          }
+        }
+
+        if (useDefaultsConstructor) {
+          // Add the masks and a null instance for the trailing default marker
+          // instance
+          for (mask in bitMasks) {
+            putValueArgument(++lastIndex, irGet(mask))
+          }
+          // DefaultConstructorMarker
+          putValueArgument(++lastIndex, irNull())
+        }
+      }
 
   private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
       IrDelegatingConstructorCall {
