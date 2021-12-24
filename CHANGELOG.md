@@ -1,6 +1,69 @@
 Changelog
 =========
 
+Version 0.16.0
+--------------
+
+#### **New:** [moshi-ir](https://github.com/ZacSweers/MoshiX/tree/main/moshi-ir)
+
+An experimental Kotlin IR implementation of Moshi code gen and moshi-sealed code gen.
+
+The goal of this is to have functional parity with their native Kapt/KSP code gen analogues but run as a fully
+embedded IR plugin.
+
+**Benefits**
+- Significantly faster build times.
+  - No extra Kapt or KSP tasks, no extra source files to compile. This runs directly in kotlinc and generates IR that is
+    lowered directly into bytecode.
+- No reflection required at runtime to support default parameter values.
+- Feature parity with Moshi's native code gen.
+- More detailed error messages for unexpected null values and missing properties. Now all errors are accumulated and
+  reported at the end, rather than failing eagerly with just the first one encountered.
+  - See https://github.com/square/moshi/issues/836 for more details!
+
+**Cons**
+- No support for Proguard file generation for now [#193](https://github.com/ZacSweers/MoshiX/issues/193). You will
+  need to add this manually to your rules if you use R8/Proguard.
+  - One option is to use IR in debug builds and Kapt/KSP in release builds, the latter of which do still generate
+    proguard rules.
+  ```proguard
+  # Keep names for JsonClass-annotated classes
+  -keepnames class @com.squareup.moshi.JsonClass **
+
+  # Keep generated adapter classes' constructors
+  -keepclassmembers class *JsonAdapter {
+      public <init>(...);
+  }
+  ```
+- Kotlin IR is not a stable API and may change in future Kotlin versions. While I'll try to publish quickly to adjust to
+  these, you should be aware. If you have any issues, you can always fall back to Kapt/KSP.
+
+### Installation
+
+Simply apply the Gradle plugin in your project to use it. You can enable moshi-sealed code gen via the `moshi`
+extension.
+
+The Gradle plugin is published to Maven Central, so ensure you have `mavenCentral()` visible to your buildscript
+classpath.
+
+[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-gradle-plugin.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-gradle-plugin)
+```gradle
+plugins {
+  kotlin("jvm")
+  id("dev.zacsweers.moshix") version "x.y.z"
+}
+
+moshi {
+  // Opt-in to enable moshi-sealed, disabled by default.
+  enableSealed.set(true)
+}
+```
+
+#### Other
+
+- Update to Kotlin `1.6.10`
+- Update to KSP `1.6.10-1.0.2`
+
 Version 0.15.0
 --------------
 

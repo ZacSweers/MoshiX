@@ -8,8 +8,8 @@ embedded IR plugin.
 
 **Benefits**
 - Significantly faster build times.
-  - No Kapt or KSP tasks, no extra source files to compile. This runs directly in kotlinc and generates IR that is 
-    lowered directly into bytecode.
+  - No extra Kapt or KSP tasks, no extra source files to compile. This runs directly in kotlinc and generates IR 
+    that is lowered directly into bytecode.
 - No reflection required at runtime to support default parameter values.
 - Feature parity with Moshi's native code gen.
 - More detailed error messages for unexpected null values and missing properties. Now all errors are accumulated and 
@@ -17,8 +17,8 @@ embedded IR plugin.
   - See https://github.com/square/moshi/issues/836 for more details!
 
 **Cons**
-- No support for Proguard file generation for now. You will need to add this manually to your rules if you use 
-  R8/Proguard.
+- No support for Proguard file generation for now [#193](https://github.com/ZacSweers/MoshiX/issues/193). You will
+  need to add this manually to your rules if you use R8/Proguard.
   - One option is to use IR in debug builds and Kapt/KSP in release builds, the latter of which do still generate
     proguard rules.
   ```proguard
