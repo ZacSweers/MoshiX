@@ -23,10 +23,12 @@ import dev.zacsweers.moshix.ir.compiler.util.NameAllocator
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.defaultPrimitiveValue
+import dev.zacsweers.moshix.ir.compiler.util.irAnd
 import dev.zacsweers.moshix.ir.compiler.util.irBinOp
 import dev.zacsweers.moshix.ir.compiler.util.irConstructorBody
 import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
 import dev.zacsweers.moshix.ir.compiler.util.irType
+import dev.zacsweers.moshix.ir.compiler.util.joinToIrAnd
 import dev.zacsweers.moshix.ir.compiler.util.rawType
 import dev.zacsweers.moshix.ir.compiler.util.rawTypeOrNull
 import org.jetbrains.kotlin.backend.common.deepCopyWithVariables
@@ -78,7 +80,6 @@ import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
-import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.types.IrType
@@ -486,17 +487,14 @@ internal class AdapterGenerator(
                     // Note we check if we've reported an error about a local var to avoid domino
                     // error reporting
                     // Otherwise an unexpected null prop could then get reported as missing too
-                    // TODO is there an irAnd() we can use for chaining conditions?
+                    val compositeCondition =
+                        irAnd(
+                            pluginContext,
+                            irNot(irGet(localVars.getValue(property.localHasErrorName))),
+                            irEqualsNull(irGet(localVars.getValue(property.localName))))
                     +irIfThen(
-                        condition = irNot(irGet(localVars.getValue(property.localHasErrorName))),
-                        thenPart =
-                            irBlock {
-                              +irIfThen(
-                                  condition =
-                                      irEqualsNull(irGet(localVars.getValue(property.localName))),
-                                  thenPart =
-                                      addError(errors, property, readerParam, "missingProperty"))
-                            })
+                        condition = compositeCondition,
+                        thenPart = addError(errors, property, readerParam, "missingProperty"))
                   }
                 }
 
@@ -557,29 +555,21 @@ internal class AdapterGenerator(
                             useDefaultsConstructor = true)
                       } else {
                         // Happy path - all parameters with defaults are set
-                        var compositeExpression: IrExpression? = null
-                        for ((index, maskName) in bitMasks.withIndex()) {
-                          val singleCheckExpr =
-                              irEquals(
-                                  irGet(maskName),
-                                  irInt(maskAllSetValues[index]),
-                              )
-
-                          compositeExpression =
-                              if (compositeExpression == null) {
-                                singleCheckExpr
-                              } else {
-                                irBinOp(
-                                    pluginContext,
-                                    OperatorNameConventions.AND,
-                                    compositeExpression,
-                                    singleCheckExpr)
-                              }
-                        }
+                        val compositeExpression =
+                            bitMasks
+                                .withIndex()
+                                .asSequence()
+                                .map { (index, maskName) ->
+                                  irEquals(
+                                      irGet(maskName),
+                                      irInt(maskAllSetValues[index]),
+                                  )
+                                }
+                                .joinToIrAnd(this, pluginContext)
 
                         irIfThenElse(
                             type = target.irType,
-                            condition = compositeExpression!!,
+                            condition = compositeExpression,
                             // Golden masks - invoke the standard constructor
                             thenPart =
                                 constructorCall(
