@@ -120,8 +120,8 @@ internal class MoshiIrVisitor(
               // TODO add generated annotation
             }
             // Uncomment for debugging generated code
-            //          println("Dumping current IR src")
-            //          println(adapterClass.adapterClass.dumpSrc())
+            //            println("Dumping current IR src")
+            //            println(adapterClass.adapterClass.dumpSrc())
             deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)
           } catch (e: Exception) {
             messageCollector.error(declaration) {

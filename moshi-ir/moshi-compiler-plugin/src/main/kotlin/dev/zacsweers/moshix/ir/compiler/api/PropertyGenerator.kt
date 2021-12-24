@@ -29,7 +29,7 @@ import org.jetbrains.kotlin.ir.types.makeNullable
 internal class PropertyGenerator(
     val target: TargetProperty,
     val delegateKey: DelegateKey,
-    val isTransient: Boolean = false
+    val isTransientOrIgnored: Boolean = false
 ) {
   val name: String = target.name
   val jsonName: String = target.jsonName ?: target.name
@@ -56,7 +56,7 @@ internal class PropertyGenerator(
    * to an absent value
    */
   val hasLocalIsPresentName: Boolean =
-      !isTransient && hasDefault && !hasConstructorParameter && delegateKey.nullable
+      !isTransientOrIgnored && hasDefault && !hasConstructorParameter && delegateKey.nullable
   val hasConstructorDefault: Boolean = hasDefault && hasConstructorParameter
 
   internal fun allocateNames(nameAllocator: NameAllocator) {
