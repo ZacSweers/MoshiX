@@ -21,6 +21,8 @@ plugins {
   id("dev.zacsweers.moshix")
 }
 
+moshi { enableSealed.set(true) }
+
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
@@ -42,5 +44,7 @@ configurations.configureEach {
   resolutionStrategy.dependencySubstitution {
     substitute(module("dev.zacsweers.moshix:moshi-compiler-plugin"))
         .using(project(":moshi-ir:moshi-compiler-plugin"))
+    substitute(module("dev.zacsweers.moshix:moshi-sealed-runtime"))
+        .using(project(":moshi-sealed:runtime"))
   }
 }
