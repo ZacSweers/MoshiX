@@ -15,15 +15,12 @@
  */
 package dev.zacsweers.moshix.ir.compiler
 
-import dev.zacsweers.moshix.ir.compiler.api.AdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.MoshiAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.sealed.SealedAdapterGenerator
-import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
 import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
@@ -105,33 +102,22 @@ internal class MoshiIrVisitor(
           return super.visitClassNew(declaration)
         }
 
-        var generator: AdapterGenerator? = null
-        if (call.valueArgumentsCount >= 2) {
-          // This is generator
-          call.getValueArgument(1)?.let { generatorArg ->
-            @Suppress("UNCHECKED_CAST") val generatorValue = (generatorArg as IrConst<String>).value
+        // This is generator
+        @Suppress("UNCHECKED_CAST")
+        val generatorValue = (call.getValueArgument(1) as? IrConst<String>?)?.value.orEmpty()
+        val generator =
             if (generatorValue.isNotBlank()) {
               if (generatorValue.startsWith("sealed:")) {
                 val typeLabel = generatorValue.removePrefix("sealed:")
-                generator =
-                    SealedAdapterGenerator(
-                        pluginContext, messageCollector, moshiSymbols, declaration, typeLabel)
+                SealedAdapterGenerator(
+                    pluginContext, messageCollector, moshiSymbols, declaration, typeLabel)
               } else {
                 return super.visitClassNew(declaration)
               }
             } else {
-              generator = adapterGenerator(declaration)
+              // Unspecified/null - means it's empty/default.
+              adapterGenerator(declaration)
             }
-          }
-        }
-
-        // private val runtimeAdapter: JsonAdapter<Message> =
-        // of(Message::class.java, "type")
-        // .withDefaultValue(Unknown)
-        // .withSubtype(Success::class.java, "success")
-        // .withSubtype(Error::class.java, "error")
-        // .create(Message::class.java, emptySet(), moshi)
-        //
 
         val adapterGenerator = generator ?: return super.visitClassNew(declaration)
         try {
@@ -141,8 +127,9 @@ internal class MoshiIrVisitor(
           }
           // Uncomment for debugging generated code
           //            println("Dumping current IR src")
-          messageCollector.report(
-              CompilerMessageSeverity.ERROR, adapterClass.adapterClass.dumpSrc())
+          //          messageCollector.report(
+          //              CompilerMessageSeverity.STRONG_WARNING,
+          // adapterClass.adapterClass.dumpSrc())
           deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)
         } catch (e: Exception) {
           messageCollector.error(declaration) {
