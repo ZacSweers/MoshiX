@@ -24,7 +24,6 @@ import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
@@ -40,7 +39,6 @@ private val JSON_CLASS_ANNOTATION = FqName("com.squareup.moshi.JsonClass")
 
 internal data class GeneratedAdapter(val adapterClass: IrDeclaration, val irFile: IrFile)
 
-@OptIn(ObsoleteDescriptorBasedAPI::class)
 internal class MoshiIrVisitor(
     moduleFragment: IrModuleFragment,
     private val pluginContext: IrPluginContext,
