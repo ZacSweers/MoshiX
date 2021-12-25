@@ -4,6 +4,8 @@ Changelog
 Version 0.16.0
 --------------
 
+_2021-12-24_
+
 #### **New:** [moshi-ir](https://github.com/ZacSweers/MoshiX/tree/main/moshi-ir)
 
 An experimental Kotlin IR implementation of Moshi code gen and moshi-sealed code gen.
@@ -66,6 +68,8 @@ moshi {
 
 Version 0.15.0
 --------------
+
+_2021-12-10_
 
 * Update to Moshi `1.13.0`
 * **Removed:** The `moshi-ksp` artifact has been upstreamed to Moshi itself as is no longer published.
