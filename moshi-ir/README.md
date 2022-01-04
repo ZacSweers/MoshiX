@@ -23,7 +23,7 @@ embedded IR plugin.
     proguard rules.
   ```proguard
   # Keep names for JsonClass-annotated classes
-  -keepnames class @com.squareup.moshi.JsonClass **
+  -keepnames @com.squareup.moshi.JsonClass class **
 
   # Keep generated adapter classes' constructors
   -keepclassmembers class *JsonAdapter {
