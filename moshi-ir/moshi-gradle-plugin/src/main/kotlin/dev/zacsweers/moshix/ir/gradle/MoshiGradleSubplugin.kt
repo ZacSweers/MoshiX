@@ -101,19 +101,12 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
         if (generateProguardRules) {
           val resourceOutputDir = getMoshiXResourceOutputDir(project, sourceSetName).path
           add(SubpluginOption("resourcesOutputDir", resourceOutputDir))
+          add(SubpluginOption("generateProguardRules", "true"))
         }
       }
     }
   }
 }
-
-// fun registerGeneratedJavaSources(
-//  project: Project,
-//  kotlinCompilation: KotlinJvmAndroidCompilation,
-//  resourcesOutputDir: FileCollection,
-// ) {
-//  kotlinCompilation.androidVariant.registerPostJavacGeneratedBytecode(resourcesOutputDir)
-// }
 
 // Copied from kotlin-gradle-plugin, because they are internal.
 internal inline fun <reified T : Task> Project.locateTask(name: String): TaskProvider<T>? =
