@@ -19,9 +19,11 @@ import dev.zacsweers.moshix.ir.compiler.api.MoshiAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.sealed.MoshiSealedSymbols
 import dev.zacsweers.moshix.ir.compiler.sealed.SealedAdapterGenerator
+import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
 import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.IrClass
@@ -45,7 +47,8 @@ internal class MoshiIrVisitor(
     private val messageCollector: MessageCollector,
     private val generatedAnnotation: IrClassSymbol?,
     private val enableSealed: Boolean,
-    private val deferredAddedClasses: MutableList<GeneratedAdapter>
+    private val deferredAddedClasses: MutableList<GeneratedAdapter>,
+    private val debug: Boolean,
 ) : IrElementTransformerVoidWithContext() {
 
   private val moshiSymbols by lazy {
@@ -134,11 +137,12 @@ internal class MoshiIrVisitor(
           if (generatedAnnotation != null) {
             // TODO add generated annotation
           }
-          // Uncomment for debugging generated code
-          //            println("Dumping current IR src")
-          //          messageCollector.report(
-          //              CompilerMessageSeverity.STRONG_WARNING,
-          // adapterClass.adapterClass.dumpSrc())
+          if (debug) {
+            val irSrc = adapterClass.adapterClass.dumpSrc()
+            messageCollector.report(
+                CompilerMessageSeverity.STRONG_WARNING,
+                "MOSHI: Dumping current IR src for ${adapterClass.adapterClass.name}\n$irSrc")
+          }
           deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)
         } catch (e: Exception) {
           messageCollector.error(declaration) {

@@ -17,19 +17,6 @@ embedded IR plugin.
   - See https://github.com/square/moshi/issues/836 for more details!
 
 **Cons**
-- No support for Proguard file generation for now [#193](https://github.com/ZacSweers/MoshiX/issues/193). You will
-  need to add this manually to your rules if you use R8/Proguard.
-  - One option is to use IR in debug builds and Kapt/KSP in release builds, the latter of which do still generate
-    proguard rules.
-  ```proguard
-  # Keep names for JsonClass-annotated classes
-  -keepnames @com.squareup.moshi.JsonClass class **
-
-  # Keep generated adapter classes' constructors
-  -keepclassmembers class *JsonAdapter {
-      public <init>(...);
-  }
-  ```
 - Kotlin IR is not a stable API and may change in future Kotlin versions. While I'll try to publish quickly to adjust to
 these, you should be aware. If you have any issues, you can always fall back to Kapt/KSP.
 
