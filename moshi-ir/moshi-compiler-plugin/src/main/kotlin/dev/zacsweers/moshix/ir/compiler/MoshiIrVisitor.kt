@@ -42,13 +42,13 @@ private val JSON_CLASS_ANNOTATION = FqName("com.squareup.moshi.JsonClass")
 internal data class GeneratedAdapter(val adapterClass: IrDeclaration, val irFile: IrFile)
 
 internal class MoshiIrVisitor(
-  moduleFragment: IrModuleFragment,
-  private val pluginContext: IrPluginContext,
-  private val messageCollector: MessageCollector,
-  private val generatedAnnotation: IrClassSymbol?,
-  private val enableSealed: Boolean,
-  private val deferredAddedClasses: MutableList<GeneratedAdapter>,
-  private val debug: Boolean,
+    moduleFragment: IrModuleFragment,
+    private val pluginContext: IrPluginContext,
+    private val messageCollector: MessageCollector,
+    private val generatedAnnotation: IrClassSymbol?,
+    private val enableSealed: Boolean,
+    private val deferredAddedClasses: MutableList<GeneratedAdapter>,
+    private val debug: Boolean,
 ) : IrElementTransformerVoidWithContext() {
 
   private val moshiSymbols by lazy {
@@ -58,7 +58,7 @@ internal class MoshiIrVisitor(
   private val moshiSealedSymbols by lazy { MoshiSealedSymbols(pluginContext) }
 
   private fun adapterGenerator(
-    originalType: IrClass,
+      originalType: IrClass,
   ): MoshiAdapterGenerator? {
     val type = targetType(originalType, pluginContext, messageCollector) ?: return null
 
@@ -89,13 +89,13 @@ internal class MoshiIrVisitor(
 
     // Sort properties so that those with constructor parameters come first.
     val sortedProperties =
-      properties.values.sortedBy {
-        if (it.hasConstructorParameter) {
-          it.target.parameterIndex
-        } else {
-          Integer.MAX_VALUE
+        properties.values.sortedBy {
+          if (it.hasConstructorParameter) {
+            it.target.parameterIndex
+          } else {
+            Integer.MAX_VALUE
+          }
         }
-      }
 
     return MoshiAdapterGenerator(pluginContext, moshiSymbols, type, sortedProperties)
   }
@@ -113,24 +113,23 @@ internal class MoshiIrVisitor(
         @Suppress("UNCHECKED_CAST")
         val generatorValue = (call.getValueArgument(1) as? IrConst<String>?)?.value.orEmpty()
         val generator =
-          if (generatorValue.isNotBlank()) {
-            if (enableSealed && generatorValue.startsWith("sealed:")) {
-              val typeLabel = generatorValue.removePrefix("sealed:")
-              SealedAdapterGenerator(
-                pluginContext,
-                messageCollector,
-                moshiSymbols,
-                moshiSealedSymbols,
-                declaration,
-                typeLabel
-              )
+            if (generatorValue.isNotBlank()) {
+              if (enableSealed && generatorValue.startsWith("sealed:")) {
+                val typeLabel = generatorValue.removePrefix("sealed:")
+                SealedAdapterGenerator(
+                    pluginContext,
+                    messageCollector,
+                    moshiSymbols,
+                    moshiSealedSymbols,
+                    declaration,
+                    typeLabel)
+              } else {
+                return super.visitClassNew(declaration)
+              }
             } else {
-              return super.visitClassNew(declaration)
+              // Unspecified/null - means it's empty/default.
+              adapterGenerator(declaration)
             }
-          } else {
-            // Unspecified/null - means it's empty/default.
-            adapterGenerator(declaration)
-          }
 
         val adapterGenerator = generator ?: return super.visitClassNew(declaration)
         try {
@@ -141,9 +140,8 @@ internal class MoshiIrVisitor(
           if (debug) {
             val irSrc = adapterClass.adapterClass.dumpSrc()
             messageCollector.report(
-              CompilerMessageSeverity.STRONG_WARNING,
-              "MOSHI: Dumping current IR src for ${adapterClass.adapterClass.fqNameWhenAvailable}\n$irSrc"
-            )
+                CompilerMessageSeverity.STRONG_WARNING,
+                "MOSHI: Dumping current IR src for ${adapterClass.adapterClass.name}\n$irSrc")
           }
           deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)
         } catch (e: Exception) {
