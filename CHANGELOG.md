@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Version 0.16.2
+--------------
+
+_2022-01-06_
+
+* **Fix:** Pass `generateProguardRules` Gradle plugin option correctly.
+* **Fix:** Best-effort avoid synchronization race with IntelliJ openapi when registering proguard rule gen extension
+
 Version 0.16.1
 --------------
 
