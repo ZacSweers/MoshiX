@@ -1,6 +1,29 @@
 Changelog
 =========
 
+Version 0.16.1
+--------------
+
+_2022-01-06_
+
+* `moshi-ir` now supports dynamic generation of proguard rules, bringing it to feature parity with Moshi's existing
+  code gen.
+  * Note that if you have any issues, this can be disabled via the Gradle extension's `generateProguardRules`
+    property and using the manual rules mentioned in version 0.16.0's notes.
+  ```gradle
+  moshi {
+    generateProguardRules.set(false)
+  }
+  ```
+* **New:** To help with debugging `moshi-ir`, a new `debug` property is available in the Gradle extension. It is off
+  by default and can be enabled like below. Please try this out and include its output when reporting issues. Thanks!
+
+```gradle
+moshi {
+  debug.set(true)
+}
+```
+
 Version 0.16.0
 --------------
 
@@ -30,7 +53,7 @@ embedded IR plugin.
     proguard rules.
   ```proguard
   # Keep names for JsonClass-annotated classes
-  -keepnames class @com.squareup.moshi.JsonClass **
+  -keepnames @com.squareup.moshi.JsonClass class **
 
   # Keep generated adapter classes' constructors
   -keepclassmembers class *JsonAdapter {
