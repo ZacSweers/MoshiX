@@ -98,10 +98,10 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
         if (generatedAnnotation != null) {
           add(SubpluginOption(key = "generatedAnnotation", value = generatedAnnotation))
         }
+        add(SubpluginOption("generateProguardRules", generateProguardRules.toString()))
         if (generateProguardRules) {
           val resourceOutputDir = getMoshiXResourceOutputDir(project, sourceSetName).path
           add(SubpluginOption("resourcesOutputDir", resourceOutputDir))
-          add(SubpluginOption("generateProguardRules", "true"))
         }
       }
     }
