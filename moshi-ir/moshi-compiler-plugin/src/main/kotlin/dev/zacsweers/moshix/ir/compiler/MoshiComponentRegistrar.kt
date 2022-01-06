@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
+import org.jetbrains.kotlin.com.intellij.openapi.extensions.Extensions
 import org.jetbrains.kotlin.com.intellij.openapi.extensions.LoadingOrder
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
@@ -76,8 +77,13 @@ private fun AnalysisHandlerExtension.Companion.registerExtensionFirst(
     project: MockProject,
     extension: AnalysisHandlerExtension
 ) {
-  project
-      .extensionArea
-      .getExtensionPoint(AnalysisHandlerExtension.extensionPointName)
-      .registerExtension(extension, LoadingOrder.FIRST, project)
+  // See
+  // https://github.com/detekt/detekt/commit/a0d36e2ca4f6ca38cac0f9cb418df989ccf4f063#diff-1abfa33e705e9d1a139e397920c0a3b91cff3fe0d738291dd9bce517943290d0R24-R28
+  @Suppress("DEPRECATION")
+  synchronized(Extensions.getRootArea()) {
+    project
+        .extensionArea
+        .getExtensionPoint(AnalysisHandlerExtension.extensionPointName)
+        .registerExtension(extension, LoadingOrder.FIRST, project)
+  }
 }

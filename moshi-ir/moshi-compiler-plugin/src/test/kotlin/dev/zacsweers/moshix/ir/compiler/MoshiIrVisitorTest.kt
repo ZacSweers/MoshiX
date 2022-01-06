@@ -356,6 +356,7 @@ class MoshiIrVisitorTest {
     val result =
         prepareCompilation(
                 "javax.annotation.GeneratedBlerg",
+                true,
                 kotlin(
                     "source.kt",
                     """
@@ -745,12 +746,35 @@ class MoshiIrVisitorTest {
     }
   }
 
+  @Test
+  fun `Disabled proguard rules gen should generate no rules`() {
+    val compilation =
+        prepareCompilation(
+            null,
+            generateProguardRules = false,
+            kotlin(
+                "source.kt",
+                """
+          package testPackage
+          import com.squareup.moshi.JsonClass
+
+          @JsonClass(generateAdapter = true)
+          data class Example(val firstName: String)
+          """))
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(OK)
+
+    assertThat(resourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()).isEmpty()
+  }
+
   private fun prepareCompilation(vararg sourceFiles: SourceFile): KotlinCompilation {
-    return prepareCompilation(null, *sourceFiles)
+    return prepareCompilation(
+        generatedAnnotation = null, generateProguardRules = true, *sourceFiles)
   }
 
   private fun prepareCompilation(
       generatedAnnotation: String? = null,
+      generateProguardRules: Boolean = true,
       vararg sourceFiles: SourceFile
   ): KotlinCompilation {
     return KotlinCompilation().apply {
@@ -762,7 +786,7 @@ class MoshiIrVisitorTest {
           buildList {
             add(processor.option(KEY_ENABLED, "true"))
             add(processor.option(KEY_DEBUG, "false")) // Enable when needed for extra debugging
-            add(processor.option(KEY_GENERATE_PROGUARD_RULES, "true"))
+            add(processor.option(KEY_GENERATE_PROGUARD_RULES, generateProguardRules.toString()))
             add(processor.option(KEY_RESOURCES_OUTPUT_DIR, resourcesDir))
             if (generatedAnnotation != null) {
               processor.option(KEY_GENERATED_ANNOTATION, generatedAnnotation)
@@ -780,13 +804,6 @@ class MoshiIrVisitorTest {
   }
 
   private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {
-    return compile(null, *sourceFiles)
-  }
-
-  private fun compile(
-      generatedAnnotation: String? = null,
-      vararg sourceFiles: SourceFile
-  ): KotlinCompilation.Result {
-    return prepareCompilation(generatedAnnotation, *sourceFiles).compile()
+    return prepareCompilation(null, true, *sourceFiles).compile()
   }
 }
