@@ -18,13 +18,13 @@ import org.jetbrains.kotlin.util.getExceptionMessage
  * `AnvilCompilationException` is thrown when Anvil specific code can't be processed or an error
  * occurs while generating code.
  */
-public class MoshiCompilationException(
+internal class MoshiCompilationException(
     message: String,
     cause: Throwable? = null,
     element: PsiElement? = null
 ) : CompilationException(message, cause, element) {
-  public companion object {
-    public operator fun invoke(
+  companion object {
+    operator fun invoke(
         annotationDescriptor: AnnotationDescriptor,
         message: String,
         cause: Throwable? = null
@@ -33,7 +33,7 @@ public class MoshiCompilationException(
           message = message, cause = cause, element = annotationDescriptor.identifier)
     }
 
-    public operator fun invoke(
+    operator fun invoke(
         classDescriptor: ClassDescriptor,
         message: String,
         cause: Throwable? = null
@@ -42,7 +42,7 @@ public class MoshiCompilationException(
           message = message, cause = cause, element = classDescriptor.identifier)
     }
 
-    public operator fun invoke(
+    operator fun invoke(
         element: IrElement? = null,
         message: String,
         cause: Throwable? = null
@@ -63,7 +63,7 @@ public class MoshiCompilationException(
           }
     }
 
-    public operator fun invoke(
+    operator fun invoke(
         element: IrSymbol? = null,
         message: String,
         cause: Throwable? = null,

@@ -63,7 +63,7 @@ internal fun ClassDescriptor.annotation(
  * this class. This is different from [getAllSuperClassifiers] in that the latter returns the entire
  * hierarchy.
  */
-public fun ClassDescriptor.directSuperClassAndInterfaces(): List<ClassDescriptor> {
+internal fun ClassDescriptor.directSuperClassAndInterfaces(): List<ClassDescriptor> {
   return listOfNotNull(getSuperClassNotAny()).plus(getSuperInterfaces())
 }
 

@@ -33,7 +33,7 @@ import org.jetbrains.kotlin.psi.psiUtil.parentsWithSelf
 private val kotlinAnnotations = listOf(jvmSuppressWildcardsFqName, publishedApiFqName)
 
 /** Returns the computed [FqName] representation of this [KClass]. */
-public val KClass<*>.fqName: FqName
+internal val KClass<*>.fqName: FqName
   get() = FqName(java.canonicalName)
 
 internal fun KtNamedDeclaration.requireFqName(): FqName =
