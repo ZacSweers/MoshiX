@@ -23,30 +23,33 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.name.FqName
 
 internal class MoshiIrGenerationExtension(
-    private val messageCollector: MessageCollector,
-    private val generatedAnnotationName: FqName?,
-    private val enableSealed: Boolean
+  private val messageCollector: MessageCollector,
+  private val generatedAnnotationName: FqName?,
+  private val enableSealed: Boolean,
+  private val debug: Boolean
 ) : IrGenerationExtension {
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
     val generatedAnnotation =
-        generatedAnnotationName?.let { fqName ->
-          pluginContext.referenceClass(fqName).also {
-            if (it == null) {
-              messageCollector.error { "Unknown generated annotation $generatedAnnotationName" }
-              return
-            }
+      generatedAnnotationName?.let { fqName ->
+        pluginContext.referenceClass(fqName).also {
+          if (it == null) {
+            messageCollector.error { "Unknown generated annotation $generatedAnnotationName" }
+            return
           }
         }
+      }
     val deferred = mutableListOf<GeneratedAdapter>()
     val moshiTransformer =
-        MoshiIrVisitor(
-            moduleFragment,
-            pluginContext,
-            messageCollector,
-            generatedAnnotation,
-            enableSealed,
-            deferred)
+      MoshiIrVisitor(
+        moduleFragment,
+        pluginContext,
+        messageCollector,
+        generatedAnnotation,
+        enableSealed,
+        deferred,
+        debug
+      )
     moduleFragment.transform(moshiTransformer, null)
     for ((file, adapters) in deferred.groupBy { it.irFile }) {
       for (adapter in adapters) {
