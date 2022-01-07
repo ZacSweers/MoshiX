@@ -111,6 +111,12 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.isAnnotationConstructor
 import org.jetbrains.kotlin.types.Variance
 import org.jetbrains.kotlin.utils.Printer
 
+/*
+ * Adapted from AndroidX
+ *
+ * https://github.com/androidx/androidx/blob/b1b990eb8792a08fd5c26b4e94c70a4fc6716d21/compose/compiler/compiler-hosted/src/main/java/androidx/compose/compiler/plugins/kotlin/lower/IrSourcePrinter.kt
+ */
+
 internal fun IrElement.dumpSrc(): String {
   val sb = StringBuilder()
   accept(IrSourcePrinterVisitor(sb, "%tab%"), null)
