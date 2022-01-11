@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Version 0.16.3
+--------------
+
+_2022-01-11_
+
+* **Fix:** Build new type parameters when generating classes in `moshi-ir` rather than incorrectly reuse the
+  original class's parameters. Resolves [this issue](https://issuetracker.google.com/issues/213578515) (that was
+  originally believed to be a Compose issue).
+
 Version 0.16.2
 --------------
 
