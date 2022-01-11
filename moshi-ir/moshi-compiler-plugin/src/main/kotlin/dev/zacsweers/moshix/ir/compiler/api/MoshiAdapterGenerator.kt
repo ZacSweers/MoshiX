@@ -43,6 +43,7 @@ import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.addField
+import org.jetbrains.kotlin.ir.builders.declarations.addTypeParameter
 import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.declarations.buildValueParameter
@@ -155,7 +156,14 @@ internal class MoshiAdapterGenerator(
 
     adapterCls.origin = MoshiOrigin
     val isGeneric = typeVariables.isNotEmpty()
-    adapterCls.typeParameters = typeVariables
+    for ((i, typeVariable) in typeVariables.withIndex()) {
+      adapterCls.addTypeParameter {
+        name = typeVariable.name
+        variance = typeVariable.variance
+        superTypes += typeVariable.superTypes
+        index = i
+      }
+    }
 
     val adapterReceiver =
         buildValueParameter(adapterCls) {

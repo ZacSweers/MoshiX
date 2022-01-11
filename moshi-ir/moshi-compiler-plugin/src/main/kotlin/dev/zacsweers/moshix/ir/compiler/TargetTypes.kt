@@ -91,9 +91,6 @@ internal fun targetType(
     return null
   }
 
-  //  val classTypeParamsResolver = type.typeParameters.toTypeParameterResolver(
-  //    sourceTypeHint = type.qualifiedName!!.asString()
-  //  )
   val typeVariables = type.typeParameters
   val appliedType = AppliedType(type)
 
