@@ -68,7 +68,8 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
     val enableSealed = extension.enableSealed.get()
     if (enableSealed) {
-      project.dependencies.add("implementation", "dev.zacsweers.moshix:moshi-sealed-runtime:$VERSION")
+      project.dependencies.add(
+          "implementation", "dev.zacsweers.moshix:moshi-sealed-runtime:$VERSION")
     }
 
     if (generateProguardRules) {

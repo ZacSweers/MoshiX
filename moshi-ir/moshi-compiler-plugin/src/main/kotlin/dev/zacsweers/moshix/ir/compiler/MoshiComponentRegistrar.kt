@@ -22,8 +22,6 @@ import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
-import org.jetbrains.kotlin.com.intellij.openapi.extensions.Extensions
-import org.jetbrains.kotlin.com.intellij.openapi.extensions.LoadingOrder
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.name.FqName
@@ -50,15 +48,7 @@ public class MoshiComponentRegistrar : ComponentRegistrar {
       val resourceOutputDir =
           configuration.get(KEY_RESOURCES_OUTPUT_DIR)?.let(::File)
               ?: error("No resources dir provided for proguard rule generation")
-      // It's important to register our extension at the first position. The compiler calls each
-      // extension one by one. If an extension returns a result, then the compiler won't call any
-      // other extension. That usually happens with Kapt in the stub generating task.
-      //
-      // It's not dangerous for our extension to run first, because we generate code, restart the
-      // analysis phase and then don't return a result anymore. That means the next extension can
-      // take over. If we wouldn't do this and any other extension won't let ours run, then we
-      // couldn't generate any code.
-      AnalysisHandlerExtension.registerExtensionFirst(
+      AnalysisHandlerExtension.registerExtension(
           project,
           ProguardRuleGenerationExtension(
               messageCollector = messageCollector,
@@ -70,20 +60,5 @@ public class MoshiComponentRegistrar : ComponentRegistrar {
     IrGenerationExtension.registerExtension(
         project,
         MoshiIrGenerationExtension(messageCollector, fqGeneratedAnnotation, enableSealed, debug))
-  }
-}
-
-private fun AnalysisHandlerExtension.Companion.registerExtensionFirst(
-    project: MockProject,
-    extension: AnalysisHandlerExtension
-) {
-  // See
-  // https://github.com/detekt/detekt/commit/a0d36e2ca4f6ca38cac0f9cb418df989ccf4f063#diff-1abfa33e705e9d1a139e397920c0a3b91cff3fe0d738291dd9bce517943290d0R24-R28
-  @Suppress("DEPRECATION")
-  synchronized(Extensions.getRootArea()) {
-    project
-        .extensionArea
-        .getExtensionPoint(AnalysisHandlerExtension.extensionPointName)
-        .registerExtension(extension, LoadingOrder.FIRST, project)
   }
 }
