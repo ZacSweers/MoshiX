@@ -1,6 +1,18 @@
 Changelog
 =========
 
+Version 0.16.4
+--------------
+
+_2022-01-13_
+
+* **Fix:** Add moshi/moshi-sealed-runtime dependencies as `implementation` rather than `api` when applying the
+  `moshi-ir` plugin. [#200](https://github.com/ZacSweers/MoshiX/pull/200)
+* **Fix:** A second attempt at fixing extension point issues with AnalysisHandlerExtension in `moshi-ir`'s proguard
+  rule generation. [#201](https://github.com/ZacSweers/MoshiX/pull/201)
+
+Thanks to [@gpeal](https://github.com/gpeal) for contributing to this release!
+
 Version 0.16.3
 --------------
 
