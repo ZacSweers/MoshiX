@@ -64,11 +64,11 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     val sourceSetName = kotlinCompilation.compilationName
 
     // Minimum Moshi version
-    project.dependencies.add("api", "com.squareup.moshi:moshi:1.13.0")
+    project.dependencies.add("implementation", "com.squareup.moshi:moshi:1.13.0")
 
     val enableSealed = extension.enableSealed.get()
     if (enableSealed) {
-      project.dependencies.add("api", "dev.zacsweers.moshix:moshi-sealed-runtime:$VERSION")
+      project.dependencies.add("implementation", "dev.zacsweers.moshix:moshi-sealed-runtime:$VERSION")
     }
 
     if (generateProguardRules) {
