@@ -44,15 +44,12 @@ import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrVararg
-import org.jetbrains.kotlin.ir.expressions.impl.IrClassReferenceImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.interpreter.hasAnnotation
-import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
-import org.jetbrains.kotlin.ir.types.starProjectedType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.defaultType
@@ -241,7 +238,8 @@ private constructor(
                     val ofCreatorExpression =
                         irCall(moshiSealedSymbols.pjafOf).apply {
                           putTypeArgument(0, targetType.defaultType)
-                          putValueArgument(0, javaClassReference(targetType.defaultType))
+                          putValueArgument(
+                              0, moshiSymbols.javaClassReference(this@run, targetType.defaultType))
                           putValueArgument(1, irString(typeLabel))
                         }
 
@@ -252,7 +250,10 @@ private constructor(
                           subtype.labels.fold(receiver) { nestedReceiver, label ->
                             irCall(moshiSealedSymbols.pjafWithSubtype).apply {
                               dispatchReceiver = nestedReceiver
-                              putValueArgument(0, javaClassReference(subtype.className.defaultType))
+                              putValueArgument(
+                                  0,
+                                  moshiSymbols.javaClassReference(
+                                      this@run, subtype.className.defaultType))
                               putValueArgument(1, irString(label))
                             }
                           }
@@ -306,7 +307,9 @@ private constructor(
                         irAs(
                             irCall(moshiSymbols.jsonAdapterFactoryCreate).apply {
                               dispatchReceiver = possiblyWithDefaultExpression
-                              putValueArgument(0, javaClassReference(targetType.defaultType))
+                              putValueArgument(
+                                  0,
+                                  moshiSymbols.javaClassReference(this@run, targetType.defaultType))
                               putValueArgument(1, irCall(moshiSymbols.emptySet))
                               putValueArgument(2, moshiAccess)
                             },
@@ -405,25 +408,6 @@ private constructor(
 
     return ctor
   }
-
-  private fun IrBuilderWithScope.kClassReference(classType: IrType) =
-      IrClassReferenceImpl(
-          startOffset,
-          endOffset,
-          context.irBuiltIns.kClassClass.starProjectedType,
-          context.irBuiltIns.kClassClass,
-          classType)
-
-  private fun IrBuilderWithScope.kClassToJavaClass(kClassReference: IrExpression) =
-      irGet(
-          moshiSymbols.javaLangClass.starProjectedType,
-          null,
-          moshiSymbols.kotlinKClassJava.owner.getter!!.symbol)
-          .apply { extensionReceiver = kClassReference }
-
-  // Produce a static reference to the java class of the given type.
-  fun IrBuilderWithScope.javaClassReference(classType: IrType) =
-      kClassToJavaClass(kClassReference(classType))
 
   private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
       IrDelegatingConstructorCall {
