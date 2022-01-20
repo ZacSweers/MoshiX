@@ -27,6 +27,7 @@ import org.jetbrains.kotlin.ir.builders.declarations.addField
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irExprBody
 import org.jetbrains.kotlin.ir.builders.irGet
+import org.jetbrains.kotlin.ir.builders.irImplicitCast
 import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.builders.irVararg
@@ -40,15 +41,20 @@ import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
+import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.IrTypeProjection
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.isNullable
+import org.jetbrains.kotlin.ir.types.typeOrNull
 import org.jetbrains.kotlin.ir.types.typeWith
+import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
-import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.types.Variance
 
 /** A JsonAdapter that can be used to encode and decode a particular field. */
 internal data class DelegateKey(
@@ -124,7 +130,7 @@ private fun IrBuilderWithScope.moshiAdapterCall(
       irCall(moshiSymbols.moshiThreeArgAdapter).apply {
         dispatchReceiver = irGet(moshiParameter)
 
-        addTypeParam(this, pluginContext, moshiSymbols, delegateType, genericIndex, typesParameter)
+        addTypeParam(this, moshiSymbols, delegateType, genericIndex, typesParameter)
         addAnnotationsParam(this, pluginContext, moshiSymbols, jsonQualifiers)
         putValueArgument(2, irString(propertyName))
       })
@@ -132,7 +138,6 @@ private fun IrBuilderWithScope.moshiAdapterCall(
 
 private fun IrBuilderWithScope.addTypeParam(
     irCall: IrCall,
-    pluginContext: IrPluginContext,
     moshiSymbols: MoshiSymbols,
     delegateType: IrType,
     genericIndex: Int,
@@ -142,20 +147,7 @@ private fun IrBuilderWithScope.addTypeParam(
       // type
       if (genericIndex == -1) {
         // Use typeOf() intrinsic
-        putValueArgument(
-            0,
-            irCall(
-                pluginContext
-                    .referenceProperties(FqName("kotlin.reflect.javaType"))
-                    .first()
-                    .owner
-                    .getter!!)
-                .apply {
-                  extensionReceiver =
-                      irCall(
-                          pluginContext.referenceFunctions(FqName("kotlin.reflect.typeOf")).first())
-                          .apply { putTypeArgument(0, delegateType) }
-                })
+        putValueArgument(0, renderType(moshiSymbols, delegateType))
       } else {
         // It's generic, get from types array
         putValueArgument(
@@ -229,5 +221,91 @@ private fun IrType.toVariableName(): String {
     "Nullable$base"
   } else {
     base
+  }
+}
+
+/**
+ * Returns an [IrExpression] that is passed to the adapter(Type) parameter. We don't use the
+ * typeOf() intrinsics from the stdlib because it does unnecessary reflection at runtime since we
+ * are too late to properly use it hear, and also avoids some possible conflicts with
+ * kotlin-reflect.
+ */
+private fun IrBuilderWithScope.renderType(
+    moshiSymbols: MoshiSymbols,
+    delegateType: IrType,
+    forceBoxing: Boolean = false
+): IrExpression {
+  check(delegateType is IrSimpleType) { "Expected a SimpleType, got $delegateType" }
+  val classifier = delegateType.classifier
+  check(classifier is IrClassSymbol) { "Expected Class, got $classifier" }
+  val irClass = classifier.owner
+
+  // If it's an Array type, we shortcut this to return Types.arrayOf()
+  // Special-case primitive arrays
+  val builtIns = moshiSymbols.pluginContext.irBuiltIns
+  builtIns.primitiveArraysToPrimitiveTypes[irClass.symbol]?.let { primitiveArrayType ->
+    return irCall(moshiSymbols.moshiTypesArrayOf).apply {
+      putValueArgument(
+          0, renderType(moshiSymbols, builtIns.primitiveTypeToIrType.getValue(primitiveArrayType)))
+    }
+  }
+  if (irClass.symbol == builtIns.arrayClass) {
+    return irCall(moshiSymbols.moshiTypesArrayOf).apply {
+      putValueArgument(
+          0, renderType(moshiSymbols, delegateType.arguments[0].typeOrNull!!, forceBoxing = true))
+    }
+  }
+
+  // Standard generic type
+  return if (delegateType.arguments.isEmpty()) {
+    irImplicitCast(
+        moshiSymbols.javaClassReference(this, delegateType, forceObjectType = forceBoxing),
+        moshiSymbols.type.defaultType)
+  } else {
+    // Build the generic
+    val arguments = mutableListOf<IrExpression>()
+    val parentClass = irClass.parentClassOrNull
+    val symbol =
+        if (parentClass != null) {
+          arguments += renderType(moshiSymbols, parentClass.defaultType, forceBoxing = true)
+          moshiSymbols.moshiTypesNewParameterizedTypeWithOwner
+        } else {
+          moshiSymbols.moshiTypesNewParameterizedType
+        }
+
+    arguments += moshiSymbols.javaClassReference(this, delegateType, forceObjectType = true)
+
+    irCall(symbol).apply {
+      for ((i, arg) in arguments.withIndex()) {
+        putValueArgument(i, arg)
+      }
+      putValueArgument(
+          arguments.size,
+          irVararg(
+              moshiSymbols.type.defaultType,
+              delegateType.arguments.map { typeArg ->
+                if (typeArg is IrTypeProjection && typeArg.variance != Variance.INVARIANT) {
+                  // Wildcard type
+                  val renderedType = renderType(moshiSymbols, typeArg.type, forceBoxing = true)
+                  val targetMethod =
+                      when (typeArg.variance) {
+                        Variance.IN_VARIANCE -> moshiSymbols.moshiTypesSuperTypeOf
+                        Variance.OUT_VARIANCE -> moshiSymbols.moshiTypesSubtypeOf
+                        Variance.INVARIANT -> error("Not possible")
+                      }
+                  return@map irCall(targetMethod).apply { putValueArgument(0, renderedType) }
+                }
+                val type = typeArg.typeOrNull
+                if (type != null) {
+                  renderType(moshiSymbols, type, forceBoxing = true)
+                } else {
+                  // Star projection
+                  irCall(moshiSymbols.moshiTypesSubtypeOf).apply {
+                    putValueArgument(
+                        0, renderType(moshiSymbols, builtIns.anyType, forceBoxing = true))
+                  }
+                }
+              }))
+    }
   }
 }

@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.backend.common.ir.createImplicitParameterDeclaration
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrBuiltIns
+import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.addExtensionReceiver
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
@@ -28,6 +29,7 @@ import org.jetbrains.kotlin.ir.builders.declarations.addTypeParameter
 import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.declarations.buildProperty
+import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
 import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
@@ -35,6 +37,8 @@ import org.jetbrains.kotlin.ir.declarations.IrPackageFragment
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
+import org.jetbrains.kotlin.ir.expressions.IrExpression
+import org.jetbrains.kotlin.ir.expressions.impl.IrClassReferenceImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
@@ -59,7 +63,7 @@ import org.jetbrains.kotlin.name.Name
 internal class MoshiSymbols(
     private val irBuiltIns: IrBuiltIns,
     private val moduleFragment: IrModuleFragment,
-    private val pluginContext: IrPluginContext
+    val pluginContext: IrPluginContext
 ) {
   private val irFactory: IrFactory = pluginContext.irFactory
 
@@ -223,6 +227,22 @@ internal class MoshiSymbols(
     pluginContext.referenceClass(FqName("com.squareup.moshi.internal.Util"))!!
   }
 
+  val moshiTypes by lazy { pluginContext.referenceClass(FqName("com.squareup.moshi.Types"))!! }
+
+  val moshiTypesArrayOf by lazy { moshiTypes.getSimpleFunction("arrayOf")!! }
+
+  val moshiTypesNewParameterizedTypeWithOwner by lazy {
+    moshiTypes.getSimpleFunction("newParameterizedTypeWithOwner")!!
+  }
+
+  val moshiTypesNewParameterizedType by lazy {
+    moshiTypes.getSimpleFunction("newParameterizedType")!!
+  }
+
+  val moshiTypesSubtypeOf by lazy { moshiTypes.getSimpleFunction("subtypeOf")!! }
+
+  val moshiTypesSuperTypeOf by lazy { moshiTypes.getSimpleFunction("supertypeOf")!! }
+
   val emptySet by lazy {
     pluginContext.referenceFunctions(FqName("kotlin.collections.emptySet")).first()
   }
@@ -283,7 +303,19 @@ internal class MoshiSymbols(
 
   val kotlinKClassJava: IrPropertySymbol =
       irFactory
-          .buildProperty() { name = Name.identifier("java") }
+          .buildProperty { name = Name.identifier("java") }
+          .apply {
+            parent = kotlinJvm
+            addGetter().apply {
+              addExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
+              returnType = javaLangClass.defaultType
+            }
+          }
+          .symbol
+
+  val kotlinKClassJavaObjectType: IrPropertySymbol =
+      irFactory
+          .buildProperty { name = Name.identifier("javaObjectType") }
           .apply {
             parent = kotlinJvm
             addGetter().apply {
@@ -317,11 +349,43 @@ internal class MoshiSymbols(
           }
           .symbol
 
-  internal fun irType(
+  fun irType(
       qualifiedName: String,
       nullable: Boolean = false,
       arguments: List<IrTypeArgument> = emptyList()
   ): IrType =
       pluginContext.referenceClass(FqName(qualifiedName))!!.createType(
           hasQuestionMark = nullable, arguments = arguments)
+
+  private fun IrBuilderWithScope.kClassReference(classType: IrType) =
+      IrClassReferenceImpl(
+          startOffset,
+          endOffset,
+          context.irBuiltIns.kClassClass.starProjectedType,
+          context.irBuiltIns.kClassClass,
+          classType)
+
+  private fun IrBuilderWithScope.kClassToJavaClass(kClassReference: IrExpression) =
+      irGet(javaLangClass.starProjectedType, null, kotlinKClassJava.owner.getter!!.symbol).apply {
+        extensionReceiver = kClassReference
+      }
+
+  private fun IrBuilderWithScope.kClassToJavaObjectClass(kClassReference: IrExpression) =
+      irGet(javaLangClass.starProjectedType, null, kotlinKClassJavaObjectType.owner.getter!!.symbol)
+          .apply { extensionReceiver = kClassReference }
+
+  // Produce a static reference to the java class of the given type.
+  fun javaClassReference(
+      irBuilder: IrBuilderWithScope,
+      classType: IrType,
+      forceObjectType: Boolean = false
+  ) =
+      with(irBuilder) {
+        val kClassReference = kClassReference(classType)
+        if (forceObjectType) {
+          kClassToJavaObjectClass(kClassReference)
+        } else {
+          kClassToJavaClass(kClassReference)
+        }
+      }
 }
