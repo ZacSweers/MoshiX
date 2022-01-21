@@ -1,6 +1,16 @@
 Changelog
 =========
 
+Version 0.16.5
+--------------
+
+_2022-01-20_
+
+* **Enhancement:** Generate manual `Type` construction in `moshi-ir` adapter lookups. Prior to this, we generated IR
+  code that leveraged `typeOf()`, but this appears to be too late to leverage compiler intrinsics support for it and
+  appears to cause some issues if `kotlin-reflect` is on the classpath. This should improve runtime performance as a
+  result.
+
 Version 0.16.4
 --------------
 
