@@ -1,6 +1,18 @@
 Changelog
 =========
 
+Version 0.16.6
+--------------
+
+_2022-01-27_
+
+* **Fix:** Nested type argument use in properties would fail in 0.16.5's new type rendering. This is now fixed.
+  Example failing case would've been something like this:
+  ```kotlin
+  @JsonClass(generateAdapter = true)
+  class Foo<T>(val value: List<T>)
+  ```
+
 Version 0.16.5
 --------------
 
