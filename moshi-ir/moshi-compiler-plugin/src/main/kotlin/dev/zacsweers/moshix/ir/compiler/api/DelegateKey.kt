@@ -147,7 +147,7 @@ private fun IrBuilderWithScope.addTypeParam(
       // type
       if (genericIndex == -1) {
         // Use typeOf() intrinsic
-        putValueArgument(0, renderType(moshiSymbols, delegateType))
+        putValueArgument(0, renderType(moshiSymbols, delegateType, typesParameter))
       } else {
         // It's generic, get from types array
         putValueArgument(
@@ -233,10 +233,21 @@ private fun IrType.toVariableName(): String {
 private fun IrBuilderWithScope.renderType(
     moshiSymbols: MoshiSymbols,
     delegateType: IrType,
+    typesParameter: IrValueParameter?,
     forceBoxing: Boolean = false
 ): IrExpression {
   check(delegateType is IrSimpleType) { "Expected a SimpleType, got $delegateType" }
   val classifier = delegateType.classifier
+
+  if (classifier is IrTypeParameterSymbol) {
+    // Get the type from the types array param
+    val index = classifier.owner.index
+    return irCall(moshiSymbols.arrayGet.symbol).apply {
+      dispatchReceiver = irGet(typesParameter!!)
+      putValueArgument(0, irInt(index))
+    }
+  }
+
   check(classifier is IrClassSymbol) { "Expected Class, got $classifier" }
   val irClass = classifier.owner
 
@@ -246,13 +257,22 @@ private fun IrBuilderWithScope.renderType(
   builtIns.primitiveArraysToPrimitiveTypes[irClass.symbol]?.let { primitiveArrayType ->
     return irCall(moshiSymbols.moshiTypesArrayOf).apply {
       putValueArgument(
-          0, renderType(moshiSymbols, builtIns.primitiveTypeToIrType.getValue(primitiveArrayType)))
+          0,
+          renderType(
+              moshiSymbols,
+              builtIns.primitiveTypeToIrType.getValue(primitiveArrayType),
+              typesParameter))
     }
   }
   if (irClass.symbol == builtIns.arrayClass) {
     return irCall(moshiSymbols.moshiTypesArrayOf).apply {
       putValueArgument(
-          0, renderType(moshiSymbols, delegateType.arguments[0].typeOrNull!!, forceBoxing = true))
+          0,
+          renderType(
+              moshiSymbols,
+              delegateType.arguments[0].typeOrNull!!,
+              typesParameter,
+              forceBoxing = true))
     }
   }
 
@@ -267,7 +287,8 @@ private fun IrBuilderWithScope.renderType(
     val parentClass = irClass.parentClassOrNull
     val symbol =
         if (parentClass != null) {
-          arguments += renderType(moshiSymbols, parentClass.defaultType, forceBoxing = true)
+          arguments +=
+              renderType(moshiSymbols, parentClass.defaultType, typesParameter, forceBoxing = true)
           moshiSymbols.moshiTypesNewParameterizedTypeWithOwner
         } else {
           moshiSymbols.moshiTypesNewParameterizedType
@@ -286,7 +307,8 @@ private fun IrBuilderWithScope.renderType(
               delegateType.arguments.map { typeArg ->
                 if (typeArg is IrTypeProjection && typeArg.variance != Variance.INVARIANT) {
                   // Wildcard type
-                  val renderedType = renderType(moshiSymbols, typeArg.type, forceBoxing = true)
+                  val renderedType =
+                      renderType(moshiSymbols, typeArg.type, typesParameter, forceBoxing = true)
                   val targetMethod =
                       when (typeArg.variance) {
                         Variance.IN_VARIANCE -> moshiSymbols.moshiTypesSuperTypeOf
@@ -297,12 +319,14 @@ private fun IrBuilderWithScope.renderType(
                 }
                 val type = typeArg.typeOrNull
                 if (type != null) {
-                  renderType(moshiSymbols, type, forceBoxing = true)
+                  renderType(moshiSymbols, type, typesParameter, forceBoxing = true)
                 } else {
                   // Star projection
                   irCall(moshiSymbols.moshiTypesSubtypeOf).apply {
                     putValueArgument(
-                        0, renderType(moshiSymbols, builtIns.anyType, forceBoxing = true))
+                        0,
+                        renderType(
+                            moshiSymbols, builtIns.anyType, typesParameter, forceBoxing = true))
                   }
                 }
               }))

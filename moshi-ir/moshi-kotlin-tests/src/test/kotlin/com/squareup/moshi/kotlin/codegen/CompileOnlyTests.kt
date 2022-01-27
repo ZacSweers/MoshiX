@@ -125,3 +125,7 @@ data class ClassWithQualifier(@UpperCase(foo = [Foo.BAR]) val a: Int)
 // Regression for https://github.com/ZacSweers/MoshiX/issues/120
 @JsonClass(generateAdapter = true)
 data class DataClassInModuleB(val id: String) : AbstractClassInModuleA()
+
+// Ensure that generic lookups are properly plumbed through when nested
+@JsonClass(generateAdapter = true)
+class NestedGeneric<T>(val noLayer: T, val oneLayer: List<T>, val nestedLayer: List<List<T>>)
