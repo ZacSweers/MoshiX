@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Version 0.16.7
+--------------
+
+_2022-02-01_
+
+**moshi-ir**
+
+* **Fix:** Use `FilesSubpluginOption` to fix build cache relocatability when generating proguard rules
+
 Version 0.16.6
 --------------
 
