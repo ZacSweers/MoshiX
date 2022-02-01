@@ -73,7 +73,7 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     }
 
     if (generateProguardRules) {
-      val resourceOutputDir = getMoshiXResourceOutputDir(project, sourceSetName).path
+      val resourceOutputDir = getMoshiXResourceOutputDir(project, sourceSetName)
       val compilationTask = kotlinCompilation.compileKotlinTask
       compilationTask.outputs.dirs(resourceOutputDir)
       val processResourcesTaskName =
