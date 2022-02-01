@@ -23,6 +23,7 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.jvm.tasks.ProcessResources
+import org.jetbrains.kotlin.gradle.plugin.FilesSubpluginOption
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilationWithResources
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
@@ -101,8 +102,8 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
         }
         add(SubpluginOption("generateProguardRules", generateProguardRules.toString()))
         if (generateProguardRules) {
-          val resourceOutputDir = getMoshiXResourceOutputDir(project, sourceSetName).path
-          add(SubpluginOption("resourcesOutputDir", resourceOutputDir))
+          val resourceOutputDir = getMoshiXResourceOutputDir(project, sourceSetName)
+          add(FilesSubpluginOption("resourcesOutputDir", listOf(resourceOutputDir)))
         }
       }
     }
