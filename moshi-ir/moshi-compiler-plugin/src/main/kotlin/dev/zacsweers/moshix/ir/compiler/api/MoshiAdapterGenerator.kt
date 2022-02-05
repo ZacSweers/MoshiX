@@ -23,6 +23,7 @@ import dev.zacsweers.moshix.ir.compiler.util.NameAllocator
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.defaultPrimitiveValue
+import dev.zacsweers.moshix.ir.compiler.util.generateToStringFun
 import dev.zacsweers.moshix.ir.compiler.util.irAnd
 import dev.zacsweers.moshix.ir.compiler.util.irBinOp
 import dev.zacsweers.moshix.ir.compiler.util.irConstructorBody
@@ -195,7 +196,7 @@ internal class MoshiAdapterGenerator(
               uniqueAdapter.name)
     }
 
-    adapterCls.generateToStringFun()
+    adapterCls.generateToStringFun(pluginContext, simpleNames.joinToString("."))
     adapterCls.generateToJsonFun(adapterProperties)
     adapterCls.generateFromJsonFun(adapterProperties, optionsField)
 
@@ -288,26 +289,6 @@ internal class MoshiAdapterGenerator(
                     irCall(moshiSymbols.jsonReaderOptionsOf).apply {
                       val args = nonTransientProperties.map { irString(it.jsonName) }
                       this.putValueArgument(0, irVararg(pluginContext.irBuiltIns.stringType, args))
-                    })
-              }
-        }
-  }
-
-  private fun IrClass.generateToStringFun(): IrFunction {
-    return addOverride(
-        FqName("kotlin.Any"),
-        Name.identifier("toString").identifier,
-        pluginContext.irBuiltIns.stringType,
-        modality = Modality.OPEN,
-    )
-        .apply {
-          body =
-              DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
-                +irReturn(
-                    irConcat().apply {
-                      addArgument(irString("GeneratedJsonAdapter("))
-                      addArgument(irString(simpleNames.joinToString(".")))
-                      addArgument(irString(")"))
                     })
               }
         }

@@ -6,6 +6,7 @@ import dev.zacsweers.moshix.ir.compiler.api.PreparedAdapter
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.error
+import dev.zacsweers.moshix.ir.compiler.util.generateToStringFun
 import dev.zacsweers.moshix.ir.compiler.util.irConstructorBody
 import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
 import dev.zacsweers.moshix.ir.compiler.util.irType
@@ -319,8 +320,8 @@ private constructor(
 
     adapterCls.generateFromJsonFun(runtimeAdapter)
     adapterCls.generateToJsonFun(runtimeAdapter)
-
-    // TODO toString?
+    adapterCls.generateToStringFun(
+        pluginContext, simpleNames.joinToString("."), generatedName = "GeneratedSealedJsonAdapter")
 
     return PreparedAdapter(adapterCls)
   }
