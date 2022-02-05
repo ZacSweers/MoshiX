@@ -33,16 +33,21 @@ import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.IrGeneratorContext
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
+import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBoolean
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irChar
+import org.jetbrains.kotlin.ir.builders.irConcat
 import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irLong
 import org.jetbrains.kotlin.ir.builders.irNull
+import org.jetbrains.kotlin.ir.builders.irReturn
+import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
+import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrExpression
@@ -285,4 +290,28 @@ internal fun Sequence<IrExpression>.joinToIrAnd(
         }
   }
   return compositeExpression ?: error("No expressions to join")
+}
+
+internal fun IrClass.generateToStringFun(
+    pluginContext: IrPluginContext,
+    targetName: String,
+    generatedName: String = "GeneratedJsonAdapter",
+): IrFunction {
+  return addOverride(
+      FqName("kotlin.Any"),
+      Name.identifier("toString").identifier,
+      pluginContext.irBuiltIns.stringType,
+      modality = Modality.OPEN,
+  )
+      .apply {
+        body =
+            DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
+              +irReturn(
+                  irConcat().apply {
+                    addArgument(irString("$generatedName("))
+                    addArgument(irString(targetName))
+                    addArgument(irString(")"))
+                  })
+            }
+      }
 }
