@@ -18,8 +18,8 @@ package dev.zacsweers.moshix.sealed.reflect
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
+import com.squareup.moshi.rawType
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
@@ -35,7 +35,7 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
     if (annotations.isNotEmpty()) {
       return null
     }
-    val rawType = Types.getRawType(type)
+    val rawType = type.rawType
     val rawTypeKotlin = rawType.kotlin
     rawType.getAnnotation(JsonClass::class.java)?.let { jsonClass ->
       val generator = jsonClass.generator
