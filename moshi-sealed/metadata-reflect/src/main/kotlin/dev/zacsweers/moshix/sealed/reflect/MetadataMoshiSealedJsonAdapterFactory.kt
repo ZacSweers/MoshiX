@@ -52,7 +52,7 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
 
       val kmClass = checkNotNull(rawType.header()?.toKmClass())
 
-      val typeLabel = generator.removePrefix("sealed:")
+      val labelKey = generator.removePrefix("sealed:")
       if (!Flag.IS_SEALED(kmClass.flags)) {
         return null
       }
@@ -89,23 +89,9 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
             }
           }
         } else {
-          val labelAnnotation =
-              checkNotNull(sealedSubclass.getAnnotation(TypeLabel::class.java)) {
-                "Sealed subtypes must be annotated with @TypeLabel to define their label $sealedSubclass"
-              }
-
+          walkTypeLabels(sealedSubclass, labelKey, labels)
           check(sealedSubclass.typeParameters.isEmpty()) {
             "Moshi-sealed subtypes cannot be generic: $sealedSubclass"
-          }
-
-          val label = labelAnnotation.label
-          labels.put(label, sealedSubclass)?.let { prev ->
-            error("Duplicate label '$label' defined for $sealedSubclass and $prev.")
-          }
-          for (alternate in labelAnnotation.alternateLabels) {
-            labels.put(alternate, sealedSubclass)?.let { prev ->
-              error("Duplicate alternate label '$alternate' defined for $sealedSubclass and $prev.")
-            }
           }
           if (isObject) {
             objectSubtypes[sealedSubclass] = sealedSubclass.objectInstance()
@@ -128,7 +114,7 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
           }
 
       @Suppress("UNCHECKED_CAST")
-      val seed = PolymorphicJsonAdapterFactory.of(rawType as Class<Any>?, typeLabel)
+      val seed = PolymorphicJsonAdapterFactory.of(rawType as Class<Any>?, labelKey)
       val polymorphicFactory =
           labels.entries
               .fold(seed) { factory, (label, subtype) -> factory.withSubtype(subtype, label) }
@@ -174,4 +160,64 @@ private fun ClassName.toJavaClass(): Class<*> {
 
 private fun Class<*>.objectInstance(): Any {
   return getDeclaredField("INSTANCE").get(null)
+}
+
+private fun walkTypeLabels(
+    subtype: Class<*>,
+    labelKey: String,
+    labels: MutableMap<String, Class<*>>
+) {
+  // If it's sealed, check if it's inheriting from our existing type or a separate/new branching off
+  // point
+  val subtypeKmClass = subtype.header()?.toKmClass()
+  if (subtypeKmClass != null && Flag.IS_SEALED(subtypeKmClass.flags)) {
+    val jsonClass = subtype.getAnnotation(JsonClass::class.java)
+    if (jsonClass != null && jsonClass.generator.startsWith("sealed:")) {
+      val sealedTypeDiscriminator = jsonClass.generator.removePrefix("sealed:")
+      // Redundant case
+      if (labelKey == sealedTypeDiscriminator) {
+        error(
+            "Sealed subtype $subtype is redundantly annotated with @JsonClass(generator = " +
+                "\"sealed:$sealedTypeDiscriminator\").")
+      } else {
+        // It's a different type, allow it to be used as a label
+        addLabelKeyForType(subtype, labels, skipJsonClassCheck = true)
+      }
+    } else {
+      // Recurse, inheriting the top type
+      for (nested in subtypeKmClass.sealedSubclasses.map { it.toJavaClass() }) {
+        walkTypeLabels(nested, labelKey, labels)
+      }
+    }
+  } else {
+    addLabelKeyForType(subtype, labels)
+  }
+}
+
+private fun addLabelKeyForType(
+    sealedSubclass: Class<*>,
+    labels: MutableMap<String, Class<*>>,
+    skipJsonClassCheck: Boolean = false
+) {
+  // Regular subtype, read its label
+  val labelAnnotation =
+      checkNotNull(sealedSubclass.getAnnotation(TypeLabel::class.java)) {
+        "Sealed subtypes must be annotated with @TypeLabel to define their label $sealedSubclass"
+      }
+
+  val label = labelAnnotation.label
+  labels.put(label, sealedSubclass)?.let { prev ->
+    error("Duplicate label '$label' defined for $sealedSubclass and $prev.")
+  }
+  for (alternate in labelAnnotation.alternateLabels) {
+    labels.put(alternate, sealedSubclass)?.let { prev ->
+      error("Duplicate alternate label '$alternate' defined for $sealedSubclass and $prev.")
+    }
+  }
+  check(
+      skipJsonClassCheck ||
+          sealedSubclass.getAnnotation(JsonClass::class.java)?.generator?.startsWith("sealed:") ==
+              false) {
+    "Sealed subtype $sealedSubclass is annotated with @JsonClass(generator = \"sealed:...\") and @TypeLabel."
+  }
 }
