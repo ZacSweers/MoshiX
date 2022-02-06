@@ -27,6 +27,7 @@ import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import java.lang.reflect.Type
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.jvm.javaType
 
 private val UNSET = Any()
 
@@ -37,14 +38,29 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
     }
     val rawType = type.rawType
     val rawTypeKotlin = rawType.kotlin
-    rawType.getAnnotation(JsonClass::class.java)?.let { jsonClass ->
-      val generator = jsonClass.generator
-      if (!generator.startsWith("sealed:")) {
-        return null
-      }
-      val labelKey = generator.removePrefix("sealed:")
+
+    // If this is an unannotated nested sealed type of a moshi-sealed parent, defer to the parent
+    val sealedParent =
+        rawTypeKotlin.supertypes.firstNotNullOfOrNull { supertype ->
+          // Weird that we need to check the classifier ourselves
+          val jsonClass =
+              (supertype.classifier as? KClass<*>)?.findAnnotation<JsonClass>()
+                  ?: supertype.findAnnotation()
+          jsonClass?.labelKey()?.let { supertype.javaType to it }
+        }
+
+    val jsonClass = rawType.getAnnotation(JsonClass::class.java)
+    if (jsonClass != null) {
+      val labelKey = jsonClass.labelKey() ?: return null
       if (!rawTypeKotlin.isSealed) {
         return null
+      }
+
+      sealedParent?.let { (_, parentLabelKey) ->
+        check(parentLabelKey != labelKey) {
+          "Sealed subtype $rawType is redundantly annotated with @JsonClass(generator = " +
+              "\"sealed:$labelKey\")."
+        }
       }
 
       // Pull out the default instance as necessary
@@ -105,6 +121,7 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
                 }
                 .build()
           }
+
       @Suppress("UNCHECKED_CAST")
       val seed = PolymorphicJsonAdapterFactory.of(rawType as Class<Any>?, labelKey)
       val polymorphicFactory =
@@ -120,9 +137,20 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
 
       return polymorphicFactory.create(rawType, annotations, delegateMoshi)
     }
+
+    sealedParent?.let { (parent, _) ->
+      return moshi.adapter<Any>(parent) as JsonAdapter<*>
+    }
     return null
   }
 }
+
+private fun JsonClass.labelKey(): String? =
+    if (generator.startsWith("sealed:")) {
+      generator.removePrefix("sealed:")
+    } else {
+      null
+    }
 
 private fun walkTypeLabels(
     subtype: KClass<*>,

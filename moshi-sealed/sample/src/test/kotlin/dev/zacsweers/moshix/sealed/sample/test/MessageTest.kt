@@ -146,14 +146,22 @@ class MessageTest(type: Type) {
   @Test
   fun nestedMessageTypes() {
     val adapter = moshi.adapter<NestedMessageTypes>()
+    // Basic nested sealed support
     assertThat(adapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
         .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
     assertThat(adapter.fromJson("{\"type\":\"success_string\",\"value\":\"Okay!\"}"))
         .isEqualTo(NestedMessageTypes.Success.SuccessString("Okay!"))
+
+    // Different label keys
     assertThat(
             adapter.fromJson(
                 "{\"type\":\"something_else\",\"second_type\":\"success\",\"value\":\"Okay!\"}"))
         .isEqualTo(NestedMessageTypes.DifferentLabelKey.Success("Okay!"))
+
+    // Adapter for the intermediate type works too
+    val intermediateAdapter = moshi.adapter<NestedMessageTypes.Success>()
+    assertThat(intermediateAdapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
+        .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
   }
 
   @DefaultNull

@@ -18,8 +18,8 @@ package dev.zacsweers.moshix.sealed.reflect
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
+import com.squareup.moshi.rawType
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
@@ -41,20 +41,28 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
     if (annotations.isNotEmpty()) {
       return null
     }
-    val rawType = Types.getRawType(type)
+    val rawType = type.rawType
     if (!rawType.isAnnotationPresent(KOTLIN_METADATA)) return null
+    // If this is an unannotated nested sealed type of a moshi-sealed parent, defer to the parent
+    val supertypes: List<Class<*>> = listOfNotNull(rawType.superclass, *rawType.interfaces)
+    val sealedParent =
+        supertypes.firstNotNullOfOrNull { supertype ->
+          supertype.getAnnotation(JsonClass::class.java)?.labelKey()?.let { supertype to it }
+        }
 
     rawType.getAnnotation(JsonClass::class.java)?.let { jsonClass ->
-      val generator = jsonClass.generator
-      if (!generator.startsWith("sealed:")) {
+      val labelKey = jsonClass.labelKey() ?: return null
+      val kmClass = checkNotNull(rawType.header()?.toKmClass())
+
+      if (!Flag.IS_SEALED(kmClass.flags)) {
         return null
       }
 
-      val kmClass = checkNotNull(rawType.header()?.toKmClass())
-
-      val labelKey = generator.removePrefix("sealed:")
-      if (!Flag.IS_SEALED(kmClass.flags)) {
-        return null
+      sealedParent?.let { (_, parentLabelKey) ->
+        check(parentLabelKey != labelKey) {
+          "Sealed subtype $rawType is redundantly annotated with @JsonClass(generator = " +
+              "\"sealed:$labelKey\")."
+        }
       }
 
       // Pull out the default instance as necessary
@@ -128,6 +136,11 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
 
       return polymorphicFactory.create(rawType, annotations, delegateMoshi)
     }
+
+    sealedParent?.let { (parent, _) ->
+      return moshi.adapter(parent)
+    }
+
     return null
   }
 }
@@ -153,6 +166,13 @@ private fun KotlinClassHeader.toKmClass(): KmClass? {
   }
   return classMetadata.toKmClass()
 }
+
+private fun JsonClass.labelKey(): String? =
+    if (generator.startsWith("sealed:")) {
+      generator.removePrefix("sealed:")
+    } else {
+      null
+    }
 
 private fun ClassName.toJavaClass(): Class<*> {
   return Class.forName(replace(".", "$").replace("/", "."))
