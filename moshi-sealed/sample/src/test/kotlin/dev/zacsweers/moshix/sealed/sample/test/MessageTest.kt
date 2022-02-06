@@ -142,4 +142,48 @@ class MessageTest(type: Type) {
     internal data class Error(val error_logs: Map<String, Any>) :
         MessageWithInternalVisibilityModifier()
   }
+
+  @Test
+  fun nestedMessageTypes() {
+    val adapter = moshi.adapter<NestedMessageTypes>()
+    assertThat(adapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
+        .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
+    assertThat(adapter.fromJson("{\"type\":\"success_string\",\"value\":\"Okay!\"}"))
+        .isEqualTo(NestedMessageTypes.Success.SuccessString("Okay!"))
+    assertThat(
+            adapter.fromJson(
+                "{\"type\":\"something_else\",\"second_type\":\"success\",\"value\":\"Okay!\"}"))
+        .isEqualTo(NestedMessageTypes.DifferentLabelKey.Success("Okay!"))
+  }
+
+  @DefaultNull
+  @JsonClass(generateAdapter = true, generator = "sealed:type")
+  sealed interface NestedMessageTypes {
+
+    sealed class Success : NestedMessageTypes {
+      @TypeLabel("success_int")
+      @JsonClass(generateAdapter = true)
+      data class SuccessInt(val value: Int) : Success()
+
+      @TypeLabel("success_string")
+      @JsonClass(generateAdapter = true)
+      data class SuccessString(val value: String) : Success()
+    }
+
+    @TypeLabel("something_else")
+    @JsonClass(generateAdapter = true, generator = "sealed:second_type")
+    sealed interface DifferentLabelKey : NestedMessageTypes {
+      @TypeLabel("success")
+      @JsonClass(generateAdapter = true)
+      data class Success(val value: String) : DifferentLabelKey
+
+      @TypeLabel("error")
+      @JsonClass(generateAdapter = true)
+      data class Error(val error_logs: Map<String, Any>) : DifferentLabelKey
+    }
+
+    @TypeLabel("error")
+    @JsonClass(generateAdapter = true)
+    data class Error(val error_logs: Map<String, Any>) : NestedMessageTypes
+  }
 }
