@@ -22,6 +22,7 @@ import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.rawType
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
+import dev.zacsweers.moshix.sealed.annotations.NestedSealed
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import java.lang.reflect.Type
@@ -39,15 +40,18 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
     val rawType = type.rawType
     val rawTypeKotlin = rawType.kotlin
 
-    // If this is an unannotated nested sealed type of a moshi-sealed parent, defer to the parent
-    val sealedParent =
-        rawTypeKotlin.supertypes.firstNotNullOfOrNull { supertype ->
-          // Weird that we need to check the classifier ourselves
-          val jsonClass =
-              (supertype.classifier as? KClass<*>)?.findAnnotation<JsonClass>()
-                  ?: supertype.findAnnotation()
-          jsonClass?.labelKey()?.let { supertype.javaType to it }
-        }
+    // If this is a nested sealed type of a moshi-sealed parent, defer to the parent
+    val sealedParent = if (rawType.getAnnotation(NestedSealed::class.java) != null) {
+      rawTypeKotlin.supertypes.firstNotNullOfOrNull { supertype ->
+        // Weird that we need to check the classifier ourselves
+        val jsonClass =
+          (supertype.classifier as? KClass<*>)?.findAnnotation<JsonClass>()
+            ?: supertype.findAnnotation()
+        jsonClass?.labelKey()?.let { supertype.javaType to it }
+      } ?: error("No JsonClass-annotated sealed supertype found for $rawTypeKotlin")
+    } else {
+      null
+    }
 
     val jsonClass = rawType.getAnnotation(JsonClass::class.java)
     if (jsonClass != null) {
@@ -58,8 +62,7 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
 
       sealedParent?.let { (_, parentLabelKey) ->
         check(parentLabelKey != labelKey) {
-          "Sealed subtype $rawType is redundantly annotated with @JsonClass(generator = " +
-              "\"sealed:$labelKey\")."
+          "@NestedSealed-annotated subtype $rawType is inappropriately annotated with @JsonClass(generator = \"sealed:$labelKey\")."
         }
       }
 

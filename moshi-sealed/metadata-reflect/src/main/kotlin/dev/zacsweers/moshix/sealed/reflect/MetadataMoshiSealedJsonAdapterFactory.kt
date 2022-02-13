@@ -22,6 +22,7 @@ import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.rawType
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
+import dev.zacsweers.moshix.sealed.annotations.NestedSealed
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import java.lang.reflect.Type
@@ -43,12 +44,16 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
     }
     val rawType = type.rawType
     if (!rawType.isAnnotationPresent(KOTLIN_METADATA)) return null
-    // If this is an unannotated nested sealed type of a moshi-sealed parent, defer to the parent
-    val supertypes: List<Class<*>> = listOfNotNull(rawType.superclass, *rawType.interfaces)
-    val sealedParent =
-        supertypes.firstNotNullOfOrNull { supertype ->
-          supertype.getAnnotation(JsonClass::class.java)?.labelKey()?.let { supertype to it }
-        }
+
+    // If this is a nested sealed type of a moshi-sealed parent, defer to the parent
+    val sealedParent = if (rawType.getAnnotation(NestedSealed::class.java) != null) {
+      val supertypes: List<Class<*>> = listOfNotNull(rawType.superclass, *rawType.interfaces)
+      supertypes.firstNotNullOfOrNull { supertype ->
+        supertype.getAnnotation(JsonClass::class.java)?.labelKey()?.let { supertype to it }
+      } ?: error("No JsonClass-annotated sealed supertype found for $rawType")
+    } else {
+      null
+    }
 
     rawType.getAnnotation(JsonClass::class.java)?.let { jsonClass ->
       val labelKey = jsonClass.labelKey() ?: return null
@@ -60,8 +65,7 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
 
       sealedParent?.let { (_, parentLabelKey) ->
         check(parentLabelKey != labelKey) {
-          "Sealed subtype $rawType is redundantly annotated with @JsonClass(generator = " +
-              "\"sealed:$labelKey\")."
+          "@NestedSealed-annotated subtype $rawType is inappropriately annotated with @JsonClass(generator = \"sealed:$labelKey\")."
         }
       }
 

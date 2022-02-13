@@ -22,6 +22,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
+import dev.zacsweers.moshix.sealed.annotations.NestedSealed
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.reflect.MetadataMoshiSealedJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.reflect.MoshiSealedJsonAdapterFactory
@@ -168,6 +169,7 @@ class MessageTest(type: Type) {
   @JsonClass(generateAdapter = true, generator = "sealed:type")
   sealed interface NestedMessageTypes {
 
+    @NestedSealed
     sealed class Success : NestedMessageTypes {
       @TypeLabel("success_int")
       @JsonClass(generateAdapter = true)
@@ -178,6 +180,7 @@ class MessageTest(type: Type) {
       data class SuccessString(val value: String) : Success()
     }
 
+    // Nested types with a different label key are fine and treated separately
     @TypeLabel("something_else")
     @JsonClass(generateAdapter = true, generator = "sealed:second_type")
     sealed interface DifferentLabelKey : NestedMessageTypes {
