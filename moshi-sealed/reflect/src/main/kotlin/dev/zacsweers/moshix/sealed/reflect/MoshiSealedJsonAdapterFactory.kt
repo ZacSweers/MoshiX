@@ -164,14 +164,13 @@ private fun walkTypeLabels(
   // If it's sealed, check if it's inheriting from our existing type or a separate/new branching off
   // point
   if (subtype.isSealed) {
-    val jsonClass = subtype.findAnnotation<JsonClass>()
-    if (jsonClass != null && jsonClass.generator.startsWith("sealed:")) {
-      val sealedTypeDiscriminator = jsonClass.generator.removePrefix("sealed:")
+    val nestedLabelKey = subtype.findAnnotation<JsonClass>()?.labelKey()
+    if (nestedLabelKey != null) {
       // Redundant case
-      if (labelKey == sealedTypeDiscriminator) {
+      if (labelKey == nestedLabelKey) {
         error(
             "Sealed subtype $subtype is redundantly annotated with @JsonClass(generator = " +
-                "\"sealed:$sealedTypeDiscriminator\").")
+                "\"sealed:$nestedLabelKey\").")
       } else {
         // It's a different type, allow it to be used as a label
         addLabelKeyForType(subtype, labels, skipJsonClassCheck = true)
