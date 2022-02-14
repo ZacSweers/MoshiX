@@ -19,10 +19,10 @@ import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
 
 /**
- * Use this annotation to specify that a given sealed type is a subtype of another sealed type and uses the same
- * key as the supertype.
+ * Use this annotation to specify that a given sealed type is a subtype of another sealed type and
+ * uses the same key as the supertype.
  *
- * The supertype must be a _direct_ supertype. It is an error to annotate this type with [JsonClass] as this
- * supersedes that annotation.
+ * The supertype must be a _direct_ supertype. It is an error to annotate this type with [JsonClass]
+ * as this supersedes that annotation.
  */
 @Target(CLASS) @Retention(RUNTIME) public annotation class NestedSealed

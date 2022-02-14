@@ -47,15 +47,15 @@ internal sealed class Subtype(val className: TypeName) {
 }
 
 internal fun createType(
-  targetType: ClassName,
-  isInternal: Boolean,
-  labelKey: String,
-  useDefaultNull: Boolean,
-  generatedAnnotation: AnnotationSpec?,
-  subtypes: Set<Subtype>,
-  objectAdapters: List<CodeBlock>,
-  generateProguardConfig: Boolean,
-  typeSpecHook: TypeSpec.Builder.() -> Unit
+    targetType: ClassName,
+    isInternal: Boolean,
+    labelKey: String,
+    useDefaultNull: Boolean,
+    generatedAnnotation: AnnotationSpec?,
+    subtypes: Set<Subtype>,
+    objectAdapters: List<CodeBlock>,
+    generateProguardConfig: Boolean,
+    typeSpecHook: TypeSpec.Builder.() -> Unit
 ): PreparedAdapter {
   val defaultCodeBlockBuilder = CodeBlock.builder()
   val adapterName =

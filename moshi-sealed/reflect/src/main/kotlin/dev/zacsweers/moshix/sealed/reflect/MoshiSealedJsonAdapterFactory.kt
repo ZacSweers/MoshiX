@@ -41,17 +41,19 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
     val rawTypeKotlin = rawType.kotlin
 
     // If this is a nested sealed type of a moshi-sealed parent, defer to the parent
-    val sealedParent = if (rawType.getAnnotation(NestedSealed::class.java) != null) {
-      rawTypeKotlin.supertypes.firstNotNullOfOrNull { supertype ->
-        // Weird that we need to check the classifier ourselves
-        val jsonClass =
-          (supertype.classifier as? KClass<*>)?.findAnnotation<JsonClass>()
-            ?: supertype.findAnnotation()
-        jsonClass?.labelKey()?.let { supertype.javaType to it }
-      } ?: error("No JsonClass-annotated sealed supertype found for $rawTypeKotlin")
-    } else {
-      null
-    }
+    val sealedParent =
+        if (rawType.getAnnotation(NestedSealed::class.java) != null) {
+          rawTypeKotlin.supertypes.firstNotNullOfOrNull { supertype ->
+            // Weird that we need to check the classifier ourselves
+            val jsonClass =
+                (supertype.classifier as? KClass<*>)?.findAnnotation<JsonClass>()
+                    ?: supertype.findAnnotation()
+            jsonClass?.labelKey()?.let { supertype.javaType to it }
+          }
+              ?: error("No JsonClass-annotated sealed supertype found for $rawTypeKotlin")
+        } else {
+          null
+        }
 
     val jsonClass = rawType.getAnnotation(JsonClass::class.java)
     if (jsonClass != null) {
