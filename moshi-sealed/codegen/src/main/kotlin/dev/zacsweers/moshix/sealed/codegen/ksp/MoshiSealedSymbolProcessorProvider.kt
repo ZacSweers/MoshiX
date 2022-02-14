@@ -217,6 +217,8 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     val useDefaultNull = type.hasAnnotation(defaultNullAnnotation)
     val objectAdapters = mutableListOf<CodeBlock>()
     val seenLabels = mutableMapOf<String, ClassName>()
+    val originatingKSFiles = mutableSetOf<KSFile>()
+    type.containingFile?.let(originatingKSFiles::add)
     val sealedSubtypes =
         type.getSealedSubclasses().flatMapTo(LinkedHashSet()) { subtype ->
           val className = subtype.toClassName()
@@ -243,7 +245,16 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
                   className,
                   ObjectJsonAdapter::class.asClassName()))
             }
-            walkTypeLabels(type, subtype, typeLabelAnnotation, jsonClassAnnotation, labelKey, seenLabels, className)
+            walkTypeLabels(
+              rootType = type,
+              subtype = subtype,
+              typeLabelAnnotation = typeLabelAnnotation,
+              jsonClassAnnotation = jsonClassAnnotation,
+              labelKey = labelKey,
+              seenLabels = seenLabels,
+              originatingKSFiles = originatingKSFiles,
+              className = className
+            )
           }
         }
 
@@ -258,7 +269,9 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
             objectAdapters = objectAdapters,
             generateProguardConfig = generateProguardConfig) {
           addAnnotation(COMMON_SUPPRESS)
-          addOriginatingKSFile(type.containingFile!!)
+          for (file in originatingKSFiles) {
+            addOriginatingKSFile(file)
+          }
         }
 
     val ksFile = preparedAdapter.spec.originatingKSFiles().single()
@@ -273,8 +286,10 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     jsonClassAnnotation: KSType,
     labelKey: String,
     seenLabels: MutableMap<String, ClassName>,
+    originatingKSFiles: MutableSet<KSFile>,
     className: ClassName = subtype.toClassName(),
   ): Sequence<Subtype> {
+    subtype.containingFile?.let(originatingKSFiles::add)
     // If it's sealed, check if it's inheriting from our existing type or a separate/new branching off
     // point
     if (Modifier.SEALED in subtype.modifiers) {
@@ -294,12 +309,26 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
       } else {
         // Recurse, inheriting the top type
         return subtype.getSealedSubclasses().flatMap {
-          walkTypeLabels(rootType, it, typeLabelAnnotation, jsonClassAnnotation, labelKey, seenLabels)
+          walkTypeLabels(
+            rootType = rootType,
+            subtype = it,
+            typeLabelAnnotation = typeLabelAnnotation,
+            jsonClassAnnotation = jsonClassAnnotation,
+            labelKey = labelKey,
+            seenLabels = seenLabels,
+            originatingKSFiles = originatingKSFiles
+          )
         }
       }
     } else {
-      val classType = addLabelKeyForType(rootType, subtype, typeLabelAnnotation, jsonClassAnnotation, seenLabels,
-        className)
+      val classType = addLabelKeyForType(
+        rootType = rootType,
+        subtype = subtype,
+        typeLabelAnnotation = typeLabelAnnotation,
+        jsonClassAnnotation = jsonClassAnnotation,
+        seenLabels = seenLabels,
+        className = className
+      )
       return classType?.let { sequenceOf(it) } ?: emptySequence()
     }
   }
