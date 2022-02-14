@@ -34,19 +34,21 @@ import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)
 @ExperimentalStdlibApi
-class MessageTest(private val type: Type) {
+class MessageTest(type: Type) {
 
-  enum class Type(val moshi: Moshi = Moshi.Builder().build()) {
+  enum class Type(val moshi: Moshi = Moshi.Builder().add(NestedSealed.Factory()).build()) {
     REFLECT(
         moshi =
             Moshi.Builder()
                 .add(MoshiSealedJsonAdapterFactory())
+                .add(NestedSealed.Factory())
                 .addLast(KotlinJsonAdapterFactory())
                 .build()),
     METADATA_REFLECT(
         moshi =
             Moshi.Builder()
                 .add(MetadataMoshiSealedJsonAdapterFactory())
+                .add(NestedSealed.Factory())
                 .addLast(KotlinJsonAdapterFactory())
                 .build()),
     CODEGEN
@@ -159,13 +161,10 @@ class MessageTest(private val type: Type) {
                 "{\"type\":\"something_else\",\"second_type\":\"success\",\"value\":\"Okay!\"}"))
         .isEqualTo(NestedMessageTypes.DifferentLabelKey.Success("Okay!"))
 
-    // TODO Intermediate lookups are not implemented in code gen currently
-    if (type != Type.CODEGEN) {
-      // Adapter for the intermediate type works too
-      val intermediateAdapter = moshi.adapter<NestedMessageTypes.Success>()
-      assertThat(intermediateAdapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
-          .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
-    }
+    // Adapter for the intermediate type works too
+    val intermediateAdapter = moshi.adapter<NestedMessageTypes.Success>()
+    assertThat(intermediateAdapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
+        .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
   }
 
   @DefaultNull

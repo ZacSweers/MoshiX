@@ -45,18 +45,6 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
     val rawType = type.rawType
     if (!rawType.isAnnotationPresent(KOTLIN_METADATA)) return null
 
-    // If this is a nested sealed type of a moshi-sealed parent, defer to the parent
-    val sealedParent =
-        if (rawType.getAnnotation(NestedSealed::class.java) != null) {
-          val supertypes: List<Class<*>> = listOfNotNull(rawType.superclass, *rawType.interfaces)
-          supertypes.firstNotNullOfOrNull { supertype ->
-            supertype.getAnnotation(JsonClass::class.java)?.labelKey()?.let { supertype to it }
-          }
-              ?: error("No JsonClass-annotated sealed supertype found for $rawType")
-        } else {
-          null
-        }
-
     rawType.getAnnotation(JsonClass::class.java)?.let { jsonClass ->
       val labelKey = jsonClass.labelKey() ?: return null
       val kmClass = checkNotNull(rawType.header()?.toKmClass())
@@ -65,7 +53,14 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         return null
       }
 
-      sealedParent?.let { (_, parentLabelKey) ->
+      // If this is a nested sealed type of a moshi-sealed parent, defer to the parent
+      if (rawType.getAnnotation(NestedSealed::class.java) != null) {
+        val supertypes: List<Class<*>> = listOfNotNull(rawType.superclass, *rawType.interfaces)
+        val parentLabelKey =
+            supertypes.firstNotNullOfOrNull { supertype ->
+              supertype.getAnnotation(JsonClass::class.java)?.labelKey()
+            }
+                ?: error("No JsonClass-annotated sealed supertype found for $rawType")
         check(parentLabelKey != labelKey) {
           "@NestedSealed-annotated subtype $rawType is inappropriately annotated with @JsonClass(generator = \"sealed:$labelKey\")."
         }
@@ -141,10 +136,6 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
               }
 
       return polymorphicFactory.create(rawType, annotations, delegateMoshi)
-    }
-
-    sealedParent?.let { (parent, _) ->
-      return moshi.adapter(parent)
     }
 
     return null

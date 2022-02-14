@@ -27,7 +27,7 @@ import org.junit.Test
 
 @ExperimentalStdlibApi
 class MessageTest {
-  private val moshi: Moshi = Moshi.Builder().build()
+  private val moshi: Moshi = Moshi.Builder().add(NestedSealed.Factory()).build()
 
   @Test
   fun assertDefaultBehavior() {
@@ -126,11 +126,9 @@ class MessageTest {
                 "{\"type\":\"something_else\",\"second_type\":\"success\",\"value\":\"Okay!\"}"))
         .isEqualTo(NestedMessageTypes.DifferentLabelKey.Success("Okay!"))
 
-    // TODO Intermediate lookups are not implemented in code gen currently
-    //    // Adapter for the intermediate type works too
-    //    val intermediateAdapter = moshi.adapter<NestedMessageTypes.Success>()
-    //    assertThat(intermediateAdapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
-    //      .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
+    val intermediateAdapter = moshi.adapter<NestedMessageTypes.Success>()
+    assertThat(intermediateAdapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
+        .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
   }
 
   @DefaultNull
