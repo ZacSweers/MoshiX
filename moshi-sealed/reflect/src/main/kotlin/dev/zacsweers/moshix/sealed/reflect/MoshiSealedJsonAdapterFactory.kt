@@ -184,7 +184,7 @@ private fun walkTypeLabels(
       }
     }
   } else {
-    addLabelKeyForType(subtype, labels)
+    addLabelKeyForType(subtype, labels, skipJsonClassCheck = subtype.objectInstance != null)
   }
 }
 
@@ -208,9 +208,7 @@ private fun addLabelKeyForType(
       error("Duplicate alternate label '$alternate' defined for $subtypeClazz and $prev.")
     }
   }
-  check(
-      skipJsonClassCheck ||
-          subtype.findAnnotation<JsonClass>()?.generator?.startsWith("sealed:") == false) {
+  check(skipJsonClassCheck || subtype.findAnnotation<JsonClass>()?.labelKey() == null) {
     "Sealed subtype $subtype is annotated with @JsonClass(generator = \"sealed:...\") and @TypeLabel."
   }
 }
