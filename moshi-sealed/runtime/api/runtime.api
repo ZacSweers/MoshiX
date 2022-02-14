@@ -4,6 +4,9 @@ public abstract interface annotation class dev/zacsweers/moshix/sealed/annotatio
 public abstract interface annotation class dev/zacsweers/moshix/sealed/annotations/DefaultObject : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class dev/zacsweers/moshix/sealed/annotations/NestedSealed : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class dev/zacsweers/moshix/sealed/annotations/TypeLabel : java/lang/annotation/Annotation {
 	public abstract fun alternateLabels ()[Ljava/lang/String;
 	public abstract fun label ()Ljava/lang/String;
