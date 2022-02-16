@@ -43,6 +43,7 @@ public annotation class NestedSealed {
       val rawType = type.rawType
       return if (rawType.getAnnotation(NestedSealed::class.java) != null) {
         (sequenceOf(rawType.superclass) + rawType.interfaces)
+            .filterNotNull()
             .firstOrNull {
               it.getAnnotation(JsonClass::class.java)?.generator?.startsWith("sealed:") == true
             }

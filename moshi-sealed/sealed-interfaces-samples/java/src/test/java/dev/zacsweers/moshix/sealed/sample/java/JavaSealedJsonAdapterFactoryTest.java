@@ -20,15 +20,24 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonClass;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
+import dev.zacsweers.moshix.sealed.annotations.DefaultNull;
+import dev.zacsweers.moshix.sealed.annotations.NestedSealed;
+import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
 import dev.zacsweers.moshix.sealed.java.JavaSealedJsonAdapterFactory;
 import java.io.IOException;
+import java.util.Map;
 import org.junit.Test;
 
 public final class JavaSealedJsonAdapterFactoryTest {
 
-  private final Moshi moshi = new Moshi.Builder().add(new JavaSealedJsonAdapterFactory()).build();
+  private final Moshi moshi =
+      new Moshi.Builder()
+          .add(new JavaSealedJsonAdapterFactory())
+          .add(new NestedSealed.Factory())
+          .build();
 
   @Test
   public void assertDefaultBehavior_interface() throws IOException {
@@ -116,5 +125,59 @@ public final class JavaSealedJsonAdapterFactoryTest {
         assertThat(e).hasMessageThat().contains("Register a subtype for this label");
       }
     }
+  }
+
+  @Test
+  public void nestedMessageTypes() throws IOException {
+    var adapter = moshi.adapter(NestedMessageTypes.class);
+    // Basic nested sealed support
+    assertThat(adapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
+        .isEqualTo(new NestedMessageTypes.Success.SuccessInt(3));
+    assertThat(adapter.fromJson("{\"type\":\"success_string\",\"value\":\"Okay!\"}"))
+        .isEqualTo(new NestedMessageTypes.Success.SuccessString("Okay!"));
+
+    // Different label keys
+    assertThat(
+            adapter.fromJson(
+                "{\"type\":\"something_else\",\"second_type\":\"success\",\"value\":\"Okay!\"}"))
+        .isEqualTo(new NestedMessageTypes.DifferentLabelKey.Success("Okay!"));
+
+    // Adapter for the intermediate type works too
+    var intermediateAdapter = moshi.adapter(NestedMessageTypes.Success.class);
+    assertThat(intermediateAdapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
+        .isEqualTo(new NestedMessageTypes.Success.SuccessInt(3));
+  }
+
+  @DefaultNull
+  @JsonClass(generateAdapter = false, generator = "sealed:type")
+  sealed interface NestedMessageTypes
+      permits NestedMessageTypes.DifferentLabelKey,
+          NestedMessageTypes.ErrorResponse,
+          NestedMessageTypes.Success {
+
+    @NestedSealed
+    sealed interface Success extends NestedMessageTypes
+        permits Success.SuccessInt, Success.SuccessString {
+      @TypeLabel(label = "success_int")
+      record SuccessInt(int value) implements Success {}
+
+      @TypeLabel(label = "success_string")
+      record SuccessString(String value) implements Success {}
+    }
+
+    // Nested types with a different label key are fine and treated separately
+    @TypeLabel(label = "something_else")
+    @JsonClass(generateAdapter = false, generator = "sealed:second_type")
+    sealed interface DifferentLabelKey extends NestedMessageTypes
+        permits DifferentLabelKey.Success, DifferentLabelKey.ErrorResponse {
+      @TypeLabel(label = "success")
+      record Success(String value) implements DifferentLabelKey {}
+
+      @TypeLabel(label = "error")
+      record ErrorResponse(Map<String, Object> error_logs) implements DifferentLabelKey {}
+    }
+
+    @TypeLabel(label = "error")
+    record ErrorResponse(Map<String, Object> error_logs) implements NestedMessageTypes {}
   }
 }
