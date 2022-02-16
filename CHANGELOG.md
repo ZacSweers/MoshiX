@@ -61,7 +61,7 @@ Caveats:
 recently IR. These are a lot to maintain! To cut down on maintenance, Kapt is no longer supported and has been removed
 in this release. Please consider migrating to KSP or Moshi-IR.
 
-####  **Fix:** Properly report all originating files in KSP
+#### **Fix:** Properly report all originating files in KSP
 
 With Kotlin 1.5.0, sealed types could now exist across multiple files. `moshi-sealed`'s KSP support previously assumed
 single files when reporting originating elements, and now properly reports all files if sealed types are spread
