@@ -180,6 +180,10 @@ class MessageTest(type: Type) {
       @TypeLabel("success_string")
       @JsonClass(generateAdapter = true)
       data class SuccessString(val value: String) : Success()
+
+      @TypeLabel("empty_success")
+      @JsonClass(generateAdapter = true)
+      object EmptySuccess : Success()
     }
 
     // Nested types with a different label key are fine and treated separately
@@ -193,6 +197,10 @@ class MessageTest(type: Type) {
       @TypeLabel("error")
       @JsonClass(generateAdapter = true)
       data class Error(val error_logs: Map<String, Any>) : DifferentLabelKey
+
+      @TypeLabel("empty_success")
+      @JsonClass(generateAdapter = true)
+      object EmptySuccess : DifferentLabelKey
     }
 
     @TypeLabel("error")
