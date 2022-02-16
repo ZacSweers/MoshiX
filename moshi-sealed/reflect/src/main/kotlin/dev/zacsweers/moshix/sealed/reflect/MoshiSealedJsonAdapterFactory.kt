@@ -95,14 +95,10 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         } else {
           // For nested sealed classes, extract their labels and route to their adapter
           val clazz = sealedSubclass.java
-          walkTypeLabels(sealedSubclass, labelKey, labels, clazz)
+          walkTypeLabels(sealedSubclass, labelKey, labels, objectSubtypes, clazz)
 
           check(clazz.typeParameters.isEmpty()) {
             "Moshi-sealed subtypes cannot be generic: $clazz"
-          }
-
-          if (objectInstance != null) {
-            objectSubtypes[sealedSubclass.java] = objectInstance
           }
         }
       }
@@ -152,6 +148,7 @@ private fun walkTypeLabels(
     subtype: KClass<*>,
     labelKey: String,
     labels: MutableMap<String, Class<*>>,
+    objectSubtypes: MutableMap<Class<*>, Any>,
     clazz: Class<*> = subtype.java,
 ) {
   // If it's sealed, check if it's inheriting from our existing type or a separate/new branching off
@@ -166,22 +163,24 @@ private fun walkTypeLabels(
                 "\"sealed:$nestedLabelKey\").")
       } else {
         // It's a different type, allow it to be used as a label
-        addLabelKeyForType(subtype, labels, skipJsonClassCheck = true)
+        addLabelKeyForType(subtype, labels, objectSubtypes, skipJsonClassCheck = true)
       }
     } else {
       // Recurse, inheriting the top type
       for (nested in subtype.sealedSubclasses) {
-        walkTypeLabels(nested, labelKey, labels, clazz)
+        walkTypeLabels(nested, labelKey, labels, objectSubtypes, clazz)
       }
     }
   } else {
-    addLabelKeyForType(subtype, labels, skipJsonClassCheck = subtype.objectInstance != null)
+    addLabelKeyForType(
+        subtype, labels, objectSubtypes, skipJsonClassCheck = subtype.objectInstance != null)
   }
 }
 
 private fun addLabelKeyForType(
     subtype: KClass<*>,
     labels: MutableMap<String, Class<*>>,
+    objectSubtypes: MutableMap<Class<*>, Any>,
     skipJsonClassCheck: Boolean = false
 ) {
   // Regular subtype, read its label
@@ -199,6 +198,7 @@ private fun addLabelKeyForType(
       error("Duplicate alternate label '$alternate' defined for $subtypeClazz and $prev.")
     }
   }
+  subtype.objectInstance?.let { objectSubtypes[subtypeClazz] = it }
   check(skipJsonClassCheck || subtype.findAnnotation<JsonClass>()?.labelKey() == null) {
     "Sealed subtype $subtype is annotated with @JsonClass(generator = \"sealed:...\") and @TypeLabel."
   }

@@ -239,14 +239,6 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
               return@flatMapTo sequenceOf(Subtype.ObjectType(className))
             }
           } else {
-            if (isObject) {
-              objectAdapters.add(
-                  CodeBlock.of(
-                      ".%1M<%2T>(%3T(%2T))",
-                      MemberName("com.squareup.moshi", "addAdapter"),
-                      className,
-                      ObjectJsonAdapter::class.asClassName()))
-            }
             walkTypeLabels(
                 rootType = type,
                 subtype = subtype,
@@ -254,6 +246,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
                 jsonClassAnnotation = jsonClassAnnotation,
                 labelKey = labelKey,
                 seenLabels = seenLabels,
+                objectAdapters = objectAdapters,
                 originatingKSFiles = originatingKSFiles,
                 className = className)
           }
@@ -287,6 +280,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
       jsonClassAnnotation: KSType,
       labelKey: String,
       seenLabels: MutableMap<String, ClassName>,
+      objectAdapters: MutableList<CodeBlock>,
       originatingKSFiles: MutableSet<KSFile>,
       className: ClassName = subtype.toClassName(),
   ): Sequence<Subtype> {
@@ -314,6 +308,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
                   typeLabelAnnotation,
                   jsonClassAnnotation,
                   seenLabels,
+                  objectAdapters,
                   className,
                   skipJsonClassCheck = true)
           return classType?.let { sequenceOf(it) } ?: emptySequence()
@@ -328,6 +323,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
               jsonClassAnnotation = jsonClassAnnotation,
               labelKey = labelKey,
               seenLabels = seenLabels,
+              objectAdapters = objectAdapters,
               originatingKSFiles = originatingKSFiles)
         }
       }
@@ -339,6 +335,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
               typeLabelAnnotation = typeLabelAnnotation,
               jsonClassAnnotation = jsonClassAnnotation,
               seenLabels = seenLabels,
+              objectAdapters = objectAdapters,
               className = className)
       return classType?.let { sequenceOf(it) } ?: emptySequence()
     }
@@ -350,6 +347,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
       typeLabelAnnotation: KSType,
       jsonClassAnnotation: KSType,
       seenLabels: MutableMap<String, ClassName>,
+      objectAdapters: MutableList<CodeBlock>,
       className: ClassName = subtype.toClassName(),
       skipJsonClassCheck: Boolean = false
   ): Subtype? {
@@ -408,6 +406,15 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     }
 
     labels += alternates
+
+    if (subtype.classKind == OBJECT) {
+      objectAdapters.add(
+          CodeBlock.of(
+              ".%1M<%2T>(%3T(%2T))",
+              MemberName("com.squareup.moshi", "addAdapter"),
+              className,
+              ObjectJsonAdapter::class.asClassName()))
+    }
 
     return Subtype.ClassType(className, labels)
   }

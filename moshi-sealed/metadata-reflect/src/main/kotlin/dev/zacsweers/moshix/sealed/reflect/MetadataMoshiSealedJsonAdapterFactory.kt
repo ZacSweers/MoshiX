@@ -98,12 +98,9 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
             }
           }
         } else {
-          walkTypeLabels(sealedSubclass, labelKey, labels)
+          walkTypeLabels(sealedSubclass, labelKey, labels, objectSubtypes)
           check(sealedSubclass.typeParameters.isEmpty()) {
             "Moshi-sealed subtypes cannot be generic: $sealedSubclass"
-          }
-          if (isObject) {
-            objectSubtypes[sealedSubclass] = sealedSubclass.objectInstance()
           }
         }
       }
@@ -182,12 +179,15 @@ private fun Class<*>.objectInstance(): Any {
 private fun walkTypeLabels(
     subtype: Class<*>,
     labelKey: String,
-    labels: MutableMap<String, Class<*>>
+    labels: MutableMap<String, Class<*>>,
+    objectSubtypes: MutableMap<Class<*>, Any>,
 ) {
   // If it's sealed, check if it's inheriting from our existing type or a separate/new branching off
   // point
-  val subtypeKmClass = subtype.header()?.toKmClass()
-  if (subtypeKmClass != null && Flag.IS_SEALED(subtypeKmClass.flags)) {
+  val subtypeKmClass =
+      subtype.header()?.toKmClass()
+          ?: error("Cannot decode Metadata for $subtype. Is it not a Kotlin class?")
+  if (Flag.IS_SEALED(subtypeKmClass.flags)) {
     val jsonClass = subtype.getAnnotation(JsonClass::class.java)
     if (jsonClass != null && jsonClass.generator.startsWith("sealed:")) {
       val sealedTypeDiscriminator = jsonClass.generator.removePrefix("sealed:")
@@ -198,23 +198,30 @@ private fun walkTypeLabels(
                 "\"sealed:$sealedTypeDiscriminator\").")
       } else {
         // It's a different type, allow it to be used as a label
-        addLabelKeyForType(subtype, labels, skipJsonClassCheck = true)
+        addLabelKeyForType(
+            subtype, subtypeKmClass, labels, objectSubtypes, skipJsonClassCheck = true)
       }
     } else {
       // Recurse, inheriting the top type
       for (nested in subtypeKmClass.sealedSubclasses.map { it.toJavaClass() }) {
-        walkTypeLabels(nested, labelKey, labels)
+        walkTypeLabels(nested, labelKey, labels, objectSubtypes)
       }
     }
   } else {
     addLabelKeyForType(
-        subtype, labels, skipJsonClassCheck = Flag.Class.IS_OBJECT(subtypeKmClass!!.flags))
+        subtype,
+        subtypeKmClass,
+        labels,
+        objectSubtypes,
+        skipJsonClassCheck = Flag.Class.IS_OBJECT(subtypeKmClass.flags))
   }
 }
 
 private fun addLabelKeyForType(
     sealedSubclass: Class<*>,
+    subtypeKmClass: KmClass,
     labels: MutableMap<String, Class<*>>,
+    objectSubtypes: MutableMap<Class<*>, Any>,
     skipJsonClassCheck: Boolean = false
 ) {
   // Regular subtype, read its label
@@ -231,6 +238,9 @@ private fun addLabelKeyForType(
     labels.put(alternate, sealedSubclass)?.let { prev ->
       error("Duplicate alternate label '$alternate' defined for $sealedSubclass and $prev.")
     }
+  }
+  if (Flag.Class.IS_OBJECT(subtypeKmClass.flags)) {
+    objectSubtypes[sealedSubclass] = sealedSubclass.objectInstance()
   }
   check(
       skipJsonClassCheck ||

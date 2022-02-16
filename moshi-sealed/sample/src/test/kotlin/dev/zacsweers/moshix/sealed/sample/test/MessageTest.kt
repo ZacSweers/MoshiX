@@ -154,12 +154,16 @@ class MessageTest(type: Type) {
         .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
     assertThat(adapter.fromJson("{\"type\":\"success_string\",\"value\":\"Okay!\"}"))
         .isEqualTo(NestedMessageTypes.Success.SuccessString("Okay!"))
+    assertThat(adapter.fromJson("{\"type\":\"empty_success\"}"))
+        .isEqualTo(NestedMessageTypes.Success.EmptySuccess)
 
     // Different label keys
     assertThat(
             adapter.fromJson(
                 "{\"type\":\"something_else\",\"second_type\":\"success\",\"value\":\"Okay!\"}"))
         .isEqualTo(NestedMessageTypes.DifferentLabelKey.Success("Okay!"))
+    assertThat(adapter.fromJson("{\"type\":\"something_else\",\"second_type\":\"empty_success\"}"))
+        .isEqualTo(NestedMessageTypes.DifferentLabelKey.EmptySuccess)
 
     // Adapter for the intermediate type works too
     val intermediateAdapter = moshi.adapter<NestedMessageTypes.Success>()
@@ -181,9 +185,7 @@ class MessageTest(type: Type) {
       @JsonClass(generateAdapter = true)
       data class SuccessString(val value: String) : Success()
 
-      @TypeLabel("empty_success")
-      @JsonClass(generateAdapter = true)
-      object EmptySuccess : Success()
+      @TypeLabel("empty_success") object EmptySuccess : Success()
     }
 
     // Nested types with a different label key are fine and treated separately
@@ -198,9 +200,7 @@ class MessageTest(type: Type) {
       @JsonClass(generateAdapter = true)
       data class Error(val error_logs: Map<String, Any>) : DifferentLabelKey
 
-      @TypeLabel("empty_success")
-      @JsonClass(generateAdapter = true)
-      object EmptySuccess : DifferentLabelKey
+      @TypeLabel("empty_success") object EmptySuccess : DifferentLabelKey
     }
 
     @TypeLabel("error")
