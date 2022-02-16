@@ -59,6 +59,7 @@ import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
+import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.util.packageFqName
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -128,10 +129,7 @@ private constructor(
                   return@flatMapTo sequenceOf(Subtype.ObjectType(subtype))
                 }
               } else {
-                if (isObject) {
-                  objectSubtypes += subtype
-                }
-                walkTypeLabels(target, subtype, labelKey, seenLabels)
+                walkTypeLabels(target, subtype, labelKey, seenLabels, objectSubtypes)
               }
             }
 
@@ -159,6 +157,7 @@ private constructor(
       subtype: IrClass,
       labelKey: String,
       seenLabels: MutableMap<String, IrClass>,
+      objectSubtypes: MutableList<IrClass>,
   ): Sequence<Subtype> {
     // If it's sealed, check if it's inheriting from our existing type or a separate/new branching
     // off point
@@ -177,7 +176,8 @@ private constructor(
           emptySequence()
         } else {
           // It's a different type, allow it to be used as a label
-          val classType = addLabelKeyForType(subtype, seenLabels, skipJsonClassCheck = true)
+          val classType =
+              addLabelKeyForType(subtype, seenLabels, objectSubtypes, skipJsonClassCheck = true)
           classType?.let { sequenceOf(it) } ?: emptySequence()
         }
       } else {
@@ -189,11 +189,17 @@ private constructor(
             .map { pluginContext.referenceClass(it.fqNameSafe)!!.owner }
             .flatMap {
               walkTypeLabels(
-                  rootType = rootType, subtype = it, labelKey = labelKey, seenLabels = seenLabels)
+                  rootType = rootType,
+                  subtype = it,
+                  labelKey = labelKey,
+                  seenLabels = seenLabels,
+                  objectSubtypes = objectSubtypes)
             }
       }
     } else {
-      val classType = addLabelKeyForType(subtype = subtype, seenLabels = seenLabels)
+      val classType =
+          addLabelKeyForType(
+              subtype = subtype, seenLabels = seenLabels, objectSubtypes = objectSubtypes)
       classType?.let { sequenceOf(it) } ?: emptySequence()
     }
   }
@@ -201,6 +207,7 @@ private constructor(
   private fun addLabelKeyForType(
       subtype: IrClass,
       seenLabels: MutableMap<String, IrClass>,
+      objectSubtypes: MutableList<IrClass>,
       skipJsonClassCheck: Boolean = false
   ): Subtype? {
     // Regular subtype, read its label
@@ -261,6 +268,10 @@ private constructor(
     }
 
     labels += alternates
+
+    if (subtype.isObject) {
+      objectSubtypes += subtype
+    }
 
     return Subtype.ClassType(subtype, labels)
   }
