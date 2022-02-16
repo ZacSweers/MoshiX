@@ -5,12 +5,14 @@
 # Keep Metadata annotations so they can be parsed at runtime.
 -keep class kotlin.Metadata { *; }
 
+# Keep moshi-sealed annotations for runtime use
+-keep interface dev.zacsweers.moshix.sealed.annotations.DefaultNull { *; }
+-keep interface dev.zacsweers.moshix.sealed.annotations.DefaultObject { *; }
+-keep interface dev.zacsweers.moshix.sealed.annotations.TypeLabel { *; }
+
 # Keep default constructor marker name for lookup in signatures.
 -keepnames class kotlin.jvm.internal.DefaultConstructorMarker
 
 # Keep implementations of service loaded interfaces
 -keep interface kotlinx.metadata.impl.extensions.MetadataExtensions
 -keep class * implements kotlinx.metadata.impl.extensions.MetadataExtensions { public protected *; }
-
-# Keep generic signatures and annotations at runtime.
--keepattributes Signature,RuntimeVisible*Annotations

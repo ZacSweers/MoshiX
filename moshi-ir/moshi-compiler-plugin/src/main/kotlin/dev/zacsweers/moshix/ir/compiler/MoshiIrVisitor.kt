@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.expressions.IrConst
+import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
@@ -114,15 +115,15 @@ internal class MoshiIrVisitor(
         val generatorValue = (call.getValueArgument(1) as? IrConst<String>?)?.value.orEmpty()
         val generator =
             if (generatorValue.isNotBlank()) {
-              if (enableSealed && generatorValue.startsWith("sealed:")) {
-                val typeLabel = generatorValue.removePrefix("sealed:")
+              val labelKey = generatorValue.labelKey()
+              if (enableSealed && labelKey != null) {
                 SealedAdapterGenerator(
-                    pluginContext,
-                    messageCollector,
-                    moshiSymbols,
-                    moshiSealedSymbols,
-                    declaration,
-                    typeLabel)
+                    pluginContext = pluginContext,
+                    logger = messageCollector,
+                    moshiSymbols = moshiSymbols,
+                    moshiSealedSymbols = moshiSealedSymbols,
+                    target = declaration,
+                    labelKey = labelKey)
               } else {
                 return super.visitClassNew(declaration)
               }
@@ -153,5 +154,31 @@ internal class MoshiIrVisitor(
       }
     }
     return super.visitClassNew(declaration)
+  }
+}
+
+internal fun IrConstructorCall.labelKey(checkGenerateAdapter: Boolean = true): String? {
+  // This is generateAdapter
+  @Suppress("UNCHECKED_CAST")
+  if (checkGenerateAdapter && !(getValueArgument(0) as IrConst<Boolean>).value) {
+    return null
+  }
+
+  // This is generator
+  @Suppress("UNCHECKED_CAST")
+  val generatorValue = (getValueArgument(1) as? IrConst<String>?)?.value.orEmpty()
+  return generatorValue.labelKey()
+}
+
+internal fun String.labelKey(): String? {
+  return if (isNotBlank()) {
+    if (startsWith("sealed:")) {
+      removePrefix("sealed:")
+    } else {
+      null
+    }
+  } else {
+    // Unspecified/null - means it's empty/default.
+    null
   }
 }

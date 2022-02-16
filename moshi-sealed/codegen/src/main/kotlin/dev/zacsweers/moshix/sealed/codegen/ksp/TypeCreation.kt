@@ -49,7 +49,7 @@ internal sealed class Subtype(val className: TypeName) {
 internal fun createType(
     targetType: ClassName,
     isInternal: Boolean,
-    typeLabel: String,
+    labelKey: String,
     useDefaultNull: Boolean,
     generatedAnnotation: AnnotationSpec?,
     subtypes: Set<Subtype>,
@@ -82,7 +82,7 @@ internal fun createType(
               "%T.of(%T::class.java, %S)«\n",
               PolymorphicJsonAdapterFactory::class,
               targetType,
-              typeLabel)
+              labelKey)
 
   if (useDefaultNull) {
     defaultCodeBlockBuilder.add("null")

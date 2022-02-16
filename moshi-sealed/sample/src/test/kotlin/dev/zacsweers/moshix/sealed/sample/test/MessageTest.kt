@@ -22,6 +22,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
+import dev.zacsweers.moshix.sealed.annotations.NestedSealed
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.reflect.MetadataMoshiSealedJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.reflect.MoshiSealedJsonAdapterFactory
@@ -35,17 +36,19 @@ import org.junit.runners.Parameterized.Parameters
 @ExperimentalStdlibApi
 class MessageTest(type: Type) {
 
-  enum class Type(val moshi: Moshi = Moshi.Builder().build()) {
+  enum class Type(val moshi: Moshi = Moshi.Builder().add(NestedSealed.Factory()).build()) {
     REFLECT(
         moshi =
             Moshi.Builder()
                 .add(MoshiSealedJsonAdapterFactory())
+                .add(NestedSealed.Factory())
                 .addLast(KotlinJsonAdapterFactory())
                 .build()),
     METADATA_REFLECT(
         moshi =
             Moshi.Builder()
                 .add(MetadataMoshiSealedJsonAdapterFactory())
+                .add(NestedSealed.Factory())
                 .addLast(KotlinJsonAdapterFactory())
                 .build()),
     CODEGEN
@@ -141,5 +144,67 @@ class MessageTest(type: Type) {
     @JsonClass(generateAdapter = true)
     internal data class Error(val error_logs: Map<String, Any>) :
         MessageWithInternalVisibilityModifier()
+  }
+
+  @Test
+  fun nestedMessageTypes() {
+    val adapter = moshi.adapter<NestedMessageTypes>()
+    // Basic nested sealed support
+    assertThat(adapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
+        .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
+    assertThat(adapter.fromJson("{\"type\":\"success_string\",\"value\":\"Okay!\"}"))
+        .isEqualTo(NestedMessageTypes.Success.SuccessString("Okay!"))
+    assertThat(adapter.fromJson("{\"type\":\"empty_success\"}"))
+        .isEqualTo(NestedMessageTypes.Success.EmptySuccess)
+
+    // Different label keys
+    assertThat(
+            adapter.fromJson(
+                "{\"type\":\"something_else\",\"second_type\":\"success\",\"value\":\"Okay!\"}"))
+        .isEqualTo(NestedMessageTypes.DifferentLabelKey.Success("Okay!"))
+    assertThat(adapter.fromJson("{\"type\":\"something_else\",\"second_type\":\"empty_success\"}"))
+        .isEqualTo(NestedMessageTypes.DifferentLabelKey.EmptySuccess)
+
+    // Adapter for the intermediate type works too
+    val intermediateAdapter = moshi.adapter<NestedMessageTypes.Success>()
+    assertThat(intermediateAdapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
+        .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
+  }
+
+  @DefaultNull
+  @JsonClass(generateAdapter = true, generator = "sealed:type")
+  sealed interface NestedMessageTypes {
+
+    @NestedSealed
+    sealed class Success : NestedMessageTypes {
+      @TypeLabel("success_int")
+      @JsonClass(generateAdapter = true)
+      data class SuccessInt(val value: Int) : Success()
+
+      @TypeLabel("success_string")
+      @JsonClass(generateAdapter = true)
+      data class SuccessString(val value: String) : Success()
+
+      @TypeLabel("empty_success") object EmptySuccess : Success()
+    }
+
+    // Nested types with a different label key are fine and treated separately
+    @TypeLabel("something_else")
+    @JsonClass(generateAdapter = true, generator = "sealed:second_type")
+    sealed interface DifferentLabelKey : NestedMessageTypes {
+      @TypeLabel("success")
+      @JsonClass(generateAdapter = true)
+      data class Success(val value: String) : DifferentLabelKey
+
+      @TypeLabel("error")
+      @JsonClass(generateAdapter = true)
+      data class Error(val error_logs: Map<String, Any>) : DifferentLabelKey
+
+      @TypeLabel("empty_success") object EmptySuccess : DifferentLabelKey
+    }
+
+    @TypeLabel("error")
+    @JsonClass(generateAdapter = true)
+    data class Error(val error_logs: Map<String, Any>) : NestedMessageTypes
   }
 }
