@@ -25,7 +25,9 @@ import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
+import org.jetbrains.annotations.Nullable;
 
 /** A {@link JsonAdapter.Factory} that supports Java 17+ {@code sealed} classes via reflection. */
 public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
@@ -44,15 +46,10 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
     if (!rawType.isSealed()) {
       return null;
     }
-    var jsonClass = rawType.getAnnotation(JsonClass.class);
-    if (jsonClass == null) {
+    var labelKey = labelKey(rawType.getAnnotation(JsonClass.class));
+    if (labelKey == null) {
       return null;
     }
-    var generator = jsonClass.generator();
-    if (!generator.startsWith("sealed:")) {
-      return null;
-    }
-    var typeLabel = generator.substring(SEALED_PREFIX_LENGTH);
     var defaultObject = UNSET;
     if (rawType.isAnnotationPresent(DefaultNull.class)) {
       defaultObject = null;
@@ -63,43 +60,7 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
       // TODO check for default object annotations - they don't work here!
       try {
         var sealedSubclass = Class.forName(toBinaryName(sealedSubclassDesc.descriptorString()));
-        var labelAnnotation = sealedSubclass.getAnnotation(TypeLabel.class);
-        if (labelAnnotation == null) {
-          throw new IllegalStateException(
-              "Sealed subtypes must be annotated with @TypeLabel to define their label "
-                  + sealedSubclass.getCanonicalName());
-        }
-
-        if (sealedSubclass.getTypeParameters().length > 0) {
-          throw new IllegalStateException(
-              "Moshi-sealed subtypes cannot be generic: " + sealedSubclass.getCanonicalName());
-        }
-
-        var label = labelAnnotation.label();
-        var prevMain = labels.put(label, sealedSubclass);
-        if (prevMain != null) {
-          throw new IllegalStateException(
-              "Duplicate label '"
-                  + label
-                  + "' defined for "
-                  + sealedSubclass
-                  + " and "
-                  + prevMain
-                  + ".");
-        }
-        for (var alternate : labelAnnotation.alternateLabels()) {
-          var prev = labels.put(alternate, sealedSubclass);
-          if (prev != null) {
-            throw new IllegalStateException(
-                "Duplicate alternate label '"
-                    + label
-                    + "' defined for "
-                    + sealedSubclass
-                    + " and "
-                    + prev
-                    + ".");
-          }
-        }
+        walkTypeLabels(sealedSubclass, labelKey, labels);
       } catch (ClassNotFoundException e) {
         e.printStackTrace();
         return null;
@@ -108,12 +69,12 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     PolymorphicJsonAdapterFactory<Object> factory =
-        PolymorphicJsonAdapterFactory.of((Class) rawType, typeLabel);
+        PolymorphicJsonAdapterFactory.of((Class) rawType, labelKey);
     for (var entry : labels.entrySet()) {
       factory = factory.withSubtype(entry.getValue(), entry.getKey());
     }
     if (defaultObject != UNSET) {
-      factory = factory.withDefaultValue(defaultObject);
+      factory = factory.withDefaultValue(null);
     }
 
     return factory.create(rawType, annotations, moshi);
@@ -121,5 +82,82 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
 
   private static String toBinaryName(String descriptor) {
     return descriptor.substring(1, descriptor.length() - 1).replace('/', '.');
+  }
+
+  @Nullable
+  private static String labelKey(@Nullable JsonClass jsonClass) {
+    if (jsonClass == null) {
+      return null;
+    }
+    var generator = jsonClass.generator();
+    if (!generator.startsWith("sealed:")) {
+      return null;
+    }
+    return generator.substring(SEALED_PREFIX_LENGTH);
+  }
+
+  private static void walkTypeLabels(
+      Class<?> subtype, String labelKey, Map<String, Class<?>> labels) {
+    // If it's sealed, check if it's inheriting from our existing type or a separate/new branching
+    // off
+    // point
+    if (subtype.isSealed()) {
+      var nestedLabelKey = labelKey(subtype.getAnnotation(JsonClass.class));
+      if (nestedLabelKey != null) {
+        // Redundant case
+        if (nestedLabelKey.equals(labelKey)) {
+          throw new IllegalStateException(
+              "Sealed subtype %s is redundantly annotated with @JsonClass(generator = \"sealed:%s\")."
+                  .formatted(subtype, nestedLabelKey));
+        } else {
+          // It's a different type, allow it to be used as a label
+          addLabelKeyForType(subtype, labels, /* skipJsonClassCheck */ true);
+        }
+      } else {
+        // Recurse, inheriting the top type
+        for (var nested : subtype.getPermittedSubclasses()) {
+          walkTypeLabels(nested, labelKey, labels);
+        }
+      }
+    } else {
+      addLabelKeyForType(subtype, labels, /* skipJsonClassCheck */ false);
+    }
+    // else add label
+  }
+
+  private static void addLabelKeyForType(
+      Class<?> sealedSubclass, Map<String, Class<?>> labels, boolean skipJsonClassCheck) {
+    var labelAnnotation = sealedSubclass.getAnnotation(TypeLabel.class);
+    if (labelAnnotation == null) {
+      throw new IllegalStateException(
+          "Sealed subtypes must be annotated with @TypeLabel to define their label %s"
+              .formatted(sealedSubclass.getCanonicalName()));
+    }
+
+    if (sealedSubclass.getTypeParameters().length > 0) {
+      throw new IllegalStateException(
+          "Moshi-sealed subtypes cannot be generic: %s"
+              .formatted(sealedSubclass.getCanonicalName()));
+    }
+
+    var label = labelAnnotation.label();
+    var prevMain = labels.put(label, sealedSubclass);
+    if (prevMain != null) {
+      throw new IllegalStateException(
+          "Duplicate label '%s' defined for %s and %s.".formatted(label, sealedSubclass, prevMain));
+    }
+    for (var alternate : labelAnnotation.alternateLabels()) {
+      var prev = labels.put(alternate, sealedSubclass);
+      if (prev != null) {
+        throw new IllegalStateException(
+            "Duplicate alternate label '%s' defined for %s and %s."
+                .formatted(label, sealedSubclass, prev));
+      }
+    }
+    if (!skipJsonClassCheck && labelKey(sealedSubclass.getAnnotation(JsonClass.class)) != null) {
+      throw new IllegalStateException(
+          "Sealed subtype $subtype is annotated with @JsonClass(generator = \"sealed:.."
+              + ".\") and @TypeLabel.");
+    }
   }
 }
