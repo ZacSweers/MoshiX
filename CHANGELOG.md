@@ -1,6 +1,66 @@
 Changelog
 =========
 
+Version 0.17.0
+--------------
+
+_2022-02-16_
+
+#### **New:** moshi-sealed now supports _nested_ sealed subtypes!
+
+In some cases, it's useful to have more than one level of sealed types that share the same label key.
+
+```kotlin
+sealed interface Response {
+  data class Success(val value: String) : Response
+  sealed interface Failure : Response {
+   data class ErrorMap(val errors: List<String>) : Failure
+   data class ErrorString(val error: String) : Failure
+  }
+}
+```
+
+moshi-sealed now supports this out of the box via `@NestedSealed` annotation. Simply indicate the nested type with this
+annotation.
+
+```kotlin
+@JsonClass(generateAdapter = true, generator = "sealed:type")
+sealed interface Response {
+  @TypeLabel("success")
+  @JsonClass(generateAdapter = true)
+  data class Success(val value: String) : Response
+
+  @NestedSealed
+  sealed interface Failure : Response {
+    @TypeLabel("error_map")
+    @JsonClass(generateAdapter = true)
+    data class ErrorMap(val errors: List<String>) : Failure
+
+    @TypeLabel("error_string")
+    @JsonClass(generateAdapter = true)
+    data class ErrorString(val error: String) : Failure
+  }
+}
+```
+
+In this case, now `Failure`'s subtypes will also participate in `Response` decoding based on the `type` label key.
+
+Caveats:
+* `@DefaultObject` is only supported on direct subtypes.
+* If you want to look up a subtype rather than the root parent sealed type (i.e. `moshi.adapter<Response.Failure>()`),
+  you must add the optional `NestedSealed.Factory` `JsonAdapter.Factory` to your `Moshi` instance for runtime lookup.
+  ```kotlin
+  val moshi = Moshi.Builder()
+    .add(NestedSealed.Factory())
+    .build()
+  ```
+
+#### Kapt is no longer supported by moshi-sealed
+
+`moshi-sealed` has many implementations - `kotlin-reflect`, `kotlinx-metadata`, KSP, Java sealed classes, and
+recently IR. These are a lot to maintain! To cut down on maintenance, Kapt is no longer supported and has been removed
+in this release. Please consider migrating to KSP or Moshi-IR.
+
 Version 0.16.7
 --------------
 
