@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-autoService = "1.0"
+autoService = "1.0.1"
 incap = "0.3"
 gjf = "1.13.0"
 kotlinCompileTesting = "1.4.7"
