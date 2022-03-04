@@ -35,7 +35,7 @@ spotless = { id = "com.diffplug.spotless", version = "6.3.0" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.8.0" }
 
 [libraries]
-autoCommon = { module = "com.google.auto:auto-common", version = "1.1" }
+autoCommon = { module = "com.google.auto:auto-common", version = "1.2.1" }
 
 autoService = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
 autoService-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version = "1.0.0" }
