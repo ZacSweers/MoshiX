@@ -34,7 +34,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-${{ matrix.java_version }}-${{ matrix.job }}-
       - name: Install JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java_version }}
