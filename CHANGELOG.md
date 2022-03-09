@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 0.17.1
+--------------
+
+_2022-03-09_
+
+**Fix:** Fix support for nested sealed types that don't use `@JsonClass`.
+
 Version 0.17.0
 --------------
 
