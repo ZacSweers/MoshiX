@@ -196,11 +196,12 @@ private fun walkTypeLabels(
         error(
             "Sealed subtype $subtype is redundantly annotated with @JsonClass(generator = " +
                 "\"sealed:$sealedTypeDiscriminator\").")
-      } else {
-        // It's a different type, allow it to be used as a label
-        addLabelKeyForType(
-            subtype, subtypeKmClass, labels, objectSubtypes, skipJsonClassCheck = true)
       }
+    }
+
+    if (subtype.isAnnotationPresent(TypeLabel::class.java)) {
+      // It's a different type, allow it to be used as a label and branch off from here.
+      addLabelKeyForType(subtype, subtypeKmClass, labels, objectSubtypes, skipJsonClassCheck = true)
     } else {
       // Recurse, inheriting the top type
       for (nested in subtypeKmClass.sealedSubclasses.map { it.toJavaClass() }) {

@@ -28,6 +28,7 @@ import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import java.lang.reflect.Type
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
 
 private val UNSET = Any()
 
@@ -152,7 +153,7 @@ private fun walkTypeLabels(
     clazz: Class<*> = subtype.java,
 ) {
   // If it's sealed, check if it's inheriting from our existing type or a separate/new branching off
-  // point
+  // point.
   if (subtype.isSealed) {
     val nestedLabelKey = subtype.findAnnotation<JsonClass>()?.labelKey()
     if (nestedLabelKey != null) {
@@ -161,10 +162,12 @@ private fun walkTypeLabels(
         error(
             "Sealed subtype $subtype is redundantly annotated with @JsonClass(generator = " +
                 "\"sealed:$nestedLabelKey\").")
-      } else {
-        // It's a different type, allow it to be used as a label
-        addLabelKeyForType(subtype, labels, objectSubtypes, skipJsonClassCheck = true)
       }
+    }
+
+    if (subtype.hasAnnotation<TypeLabel>()) {
+      // It's a different type, allow it to be used as a label and branch off from here.
+      addLabelKeyForType(subtype, labels, objectSubtypes, skipJsonClassCheck = true)
     } else {
       // Recurse, inheriting the top type
       for (nested in subtype.sealedSubclasses) {

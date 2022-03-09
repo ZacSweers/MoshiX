@@ -299,20 +299,22 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
           error(
               "Sealed subtype $subtype is redundantly annotated with @JsonClass(generator = " +
                   "\"sealed:$nestedLabelKey\").")
-        } else {
-          // It's a different type, allow it to be used as a label
-          val classType =
-              addLabelKeyForType(
-                  rootType,
-                  subtype,
-                  typeLabelAnnotation,
-                  jsonClassAnnotation,
-                  seenLabels,
-                  objectAdapters,
-                  className,
-                  skipJsonClassCheck = true)
-          return classType?.let { sequenceOf(it) } ?: emptySequence()
         }
+      }
+
+      if (subtype.findAnnotationWithType(typeLabelAnnotation) != null) {
+        // It's a different type, allow it to be used as a label and branch off from here.
+        val classType =
+            addLabelKeyForType(
+                rootType,
+                subtype,
+                typeLabelAnnotation,
+                jsonClassAnnotation,
+                seenLabels,
+                objectAdapters,
+                className,
+                skipJsonClassCheck = true)
+        return classType?.let { sequenceOf(it) } ?: emptySequence()
       } else {
         // Recurse, inheriting the top type
         return subtype.getSealedSubclasses().flatMap {

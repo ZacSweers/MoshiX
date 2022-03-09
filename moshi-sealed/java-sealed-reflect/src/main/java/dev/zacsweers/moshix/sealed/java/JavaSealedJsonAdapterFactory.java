@@ -109,10 +109,11 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
           throw new IllegalStateException(
               "Sealed subtype %s is redundantly annotated with @JsonClass(generator = \"sealed:%s\")."
                   .formatted(subtype, nestedLabelKey));
-        } else {
-          // It's a different type, allow it to be used as a label
-          addLabelKeyForType(subtype, labels, /* skipJsonClassCheck */ true);
         }
+      }
+      if (subtype.isAnnotationPresent(TypeLabel.class)) {
+        // It's a different type, allow it to be used as a label and branch off from here.
+        addLabelKeyForType(subtype, labels, /* skipJsonClassCheck */ true);
       } else {
         // Recurse, inheriting the top type
         for (var nested : subtype.getPermittedSubclasses()) {
