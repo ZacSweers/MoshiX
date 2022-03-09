@@ -173,13 +173,16 @@ private constructor(
             "Sealed subtype $subtype is redundantly annotated with @JsonClass(generator = " +
                 "\"sealed:$nestedLabelKey\")."
           }
-          emptySequence()
-        } else {
-          // It's a different type, allow it to be used as a label
-          val classType =
-              addLabelKeyForType(subtype, seenLabels, objectSubtypes, skipJsonClassCheck = true)
-          classType?.let { sequenceOf(it) } ?: emptySequence()
+          return emptySequence()
         }
+      }
+
+      if (subtype.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.TypeLabel")) !=
+          null) {
+        // It's a different type, allow it to be used as a label and branch off from here.
+        val classType =
+            addLabelKeyForType(subtype, seenLabels, objectSubtypes, skipJsonClassCheck = true)
+        classType?.let { sequenceOf(it) } ?: emptySequence()
       } else {
         // Recurse, inheriting the top type
         subtype

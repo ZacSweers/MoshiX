@@ -18,14 +18,18 @@ package dev.zacsweers.moshix.sealed.sample.test
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import dev.zacsweers.moshix.adapters.AdaptedBy
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.NestedSealed
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.reflect.MetadataMoshiSealedJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.reflect.MoshiSealedJsonAdapterFactory
+import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import dev.zacsweers.moshix.sealed.sample.Message
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,11 +40,15 @@ import org.junit.runners.Parameterized.Parameters
 @ExperimentalStdlibApi
 class MessageTest(type: Type) {
 
-  enum class Type(val moshi: Moshi = Moshi.Builder().add(NestedSealed.Factory()).build()) {
+  enum class Type(
+      val moshi: Moshi =
+          Moshi.Builder().add(AdaptedBy.Factory()).add(NestedSealed.Factory()).build()
+  ) {
     REFLECT(
         moshi =
             Moshi.Builder()
                 .add(MoshiSealedJsonAdapterFactory())
+                .add(AdaptedBy.Factory())
                 .add(NestedSealed.Factory())
                 .addLast(KotlinJsonAdapterFactory())
                 .build()),
@@ -48,6 +56,7 @@ class MessageTest(type: Type) {
         moshi =
             Moshi.Builder()
                 .add(MetadataMoshiSealedJsonAdapterFactory())
+                .add(AdaptedBy.Factory())
                 .add(NestedSealed.Factory())
                 .addLast(KotlinJsonAdapterFactory())
                 .build()),
@@ -164,6 +173,8 @@ class MessageTest(type: Type) {
         .isEqualTo(NestedMessageTypes.DifferentLabelKey.Success("Okay!"))
     assertThat(adapter.fromJson("{\"type\":\"something_else\",\"second_type\":\"empty_success\"}"))
         .isEqualTo(NestedMessageTypes.DifferentLabelKey.EmptySuccess)
+    assertThat(adapter.fromJson("{\"type\":\"custom_nested\"}"))
+        .isEqualTo(NestedMessageTypes.CustomDifferentType.SingletonInstance)
 
     // Adapter for the intermediate type works too
     val intermediateAdapter = moshi.adapter<NestedMessageTypes.Success>()
@@ -201,6 +212,24 @@ class MessageTest(type: Type) {
       data class Error(val error_logs: Map<String, Any>) : DifferentLabelKey
 
       @TypeLabel("empty_success") object EmptySuccess : DifferentLabelKey
+    }
+
+    // Cover for https://github.com/ZacSweers/MoshiX/issues/228
+    @AdaptedBy(CustomDifferentType.Adapter::class)
+    @TypeLabel("custom_nested")
+    sealed interface CustomDifferentType : NestedMessageTypes {
+      object SingletonInstance : CustomDifferentType
+
+      class Adapter : JsonAdapter<CustomDifferentType>() {
+        private val delegate = ObjectJsonAdapter<CustomDifferentType>(SingletonInstance)
+        override fun fromJson(reader: JsonReader): CustomDifferentType {
+          return delegate.fromJson(reader)
+        }
+
+        override fun toJson(writer: JsonWriter, value: CustomDifferentType?) {
+          delegate.toJson(writer, value)
+        }
+      }
     }
 
     @TypeLabel("error")

@@ -37,6 +37,7 @@ dependencies {
   testImplementation("com.squareup.moshi:moshi:1.13.0")
   testImplementation(kotlin("reflect"))
   testImplementation(project(":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module"))
+  testImplementation(project(":moshi-adapters"))
   testImplementation(libs.moshi.kotlin)
 }
 

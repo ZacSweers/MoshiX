@@ -32,6 +32,7 @@ dependencies {
   implementation(project(":moshi-sealed:reflect"))
   implementation(project(":moshi-sealed:metadata-reflect"))
 
+  testImplementation(project(":moshi-adapters"))
   testImplementation(libs.junit)
   testImplementation(libs.truth)
 }
