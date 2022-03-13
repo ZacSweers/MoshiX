@@ -86,7 +86,6 @@ spotless {
 subprojects {
   repositories {
     mavenCentral()
-    google()
     // Kotlin bootstrap repository, useful for testing against Kotlin dev builds. Usually only
     // tested on CI shadow jobs
     // https://kotlinlang.slack.com/archives/C0KLZSCHF/p1616514468003200?thread_ts=1616509748.001400&cid=C0KLZSCHF
@@ -102,7 +101,6 @@ subprojects {
   val release = releaseVersion.toInt()
   pluginManager.withPlugin("java") {
     configure<JavaPluginExtension> { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
-
     project.tasks.withType<JavaCompile>().configureEach { options.release.set(release) }
   }
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
