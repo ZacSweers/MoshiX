@@ -259,7 +259,7 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
 
       if (ktParameter != null) {
         require(ktParameter.km.type valueEquals property.returnType) {
-          "'${property.name}' has a constructor parameter of type ${ktParameter.km.type?.canonicalName} but a property of type ${property.returnType.canonicalName}."
+          "'${property.name}' has a constructor parameter of type ${ktParameter.km.type.canonicalName} but a property of type ${property.returnType.canonicalName}."
         }
       }
 

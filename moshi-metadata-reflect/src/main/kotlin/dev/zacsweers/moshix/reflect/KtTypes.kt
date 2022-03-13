@@ -101,7 +101,7 @@ internal data class KtParameter(
   val declaresDefaultValue
     get() = Flag.ValueParameter.DECLARES_DEFAULT_VALUE(km.flags)
   val isNullable
-    get() = km.type!!.isNullable
+    get() = km.type.isNullable
 }
 
 internal data class KtConstructor(
