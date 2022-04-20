@@ -39,7 +39,7 @@ dependencies {
   implementation("com.squareup.moshi:moshi-kotlin-codegen:1.13.0")
   ksp("dev.zacsweers.autoservice:auto-service-ksp:1.0.0")
 
-  testImplementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
+  testImplementation("org.jetbrains.kotlin:kotlin-reflect:1.6.21")
   //  testImplementation(kotlin("compiler"))
   testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.6.21")
   testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.8")
