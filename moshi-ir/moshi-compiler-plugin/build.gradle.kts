@@ -42,7 +42,7 @@ dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
   //  testImplementation(kotlin("compiler"))
   testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.6.10")
-  testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.7")
+  testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.8")
   testImplementation("junit:junit:4.13.2")
   testImplementation("com.google.truth:truth:1.1.3")
 }
