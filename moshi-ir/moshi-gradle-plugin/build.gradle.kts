@@ -19,7 +19,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 plugins {
   id("org.jetbrains.kotlin.jvm") version "1.6.10"
   id("java-gradle-plugin")
-  id("org.jetbrains.dokka") version "1.6.20"
+  id("org.jetbrains.dokka") version "1.6.21"
   id("com.vanniktech.maven.publish") version "0.19.0"
   id("com.diffplug.spotless") version "6.4.2"
 }
