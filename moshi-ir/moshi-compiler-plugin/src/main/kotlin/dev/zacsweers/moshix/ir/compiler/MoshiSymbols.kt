@@ -102,7 +102,7 @@ internal class MoshiSymbols(
           val optionsClass = createClass(this, "Options", ClassKind.CLASS, Modality.FINAL)
 
           addFunction(
-              Name.identifier("selectName").identifier, irBuiltIns.intType, Modality.ABSTRACT)
+                  Name.identifier("selectName").identifier, irBuiltIns.intType, Modality.ABSTRACT)
               .apply { addValueParameter("options", optionsClass.defaultType) }
         }
         .symbol
@@ -152,9 +152,9 @@ internal class MoshiSymbols(
           parent = moshiPackage
 
           addFunction(
-              Name.identifier("adapter").identifier,
-              jsonAdapter.typeWith(irBuiltIns.anyNType),
-              Modality.FINAL)
+                  Name.identifier("adapter").identifier,
+                  jsonAdapter.typeWith(irBuiltIns.anyNType),
+                  Modality.FINAL)
               .apply {
                 addTypeParameter("T", irBuiltIns.anyNType)
                 addValueParameter("type", type.defaultType)
@@ -193,9 +193,9 @@ internal class MoshiSymbols(
           addConstructor {}
 
           addFunction(
-              Name.identifier("fromJson").identifier,
-              t.defaultType.makeNullable(),
-              Modality.ABSTRACT)
+                  Name.identifier("fromJson").identifier,
+                  t.defaultType.makeNullable(),
+                  Modality.ABSTRACT)
               .apply { addValueParameter("reader", jsonReader.defaultType) }
 
           addFunction(Name.identifier("toJson").identifier, irBuiltIns.unitType, Modality.ABSTRACT)

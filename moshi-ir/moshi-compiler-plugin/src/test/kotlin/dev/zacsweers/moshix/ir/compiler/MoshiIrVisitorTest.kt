@@ -782,16 +782,15 @@ class MoshiIrVisitorTest {
       compilerPlugins = listOf(MoshiComponentRegistrar())
       val processor = MoshiCommandLineProcessor()
       commandLineProcessors = listOf(processor)
-      pluginOptions =
-          buildList {
-            add(processor.option(KEY_ENABLED, "true"))
-            add(processor.option(KEY_DEBUG, "false")) // Enable when needed for extra debugging
-            add(processor.option(KEY_GENERATE_PROGUARD_RULES, generateProguardRules.toString()))
-            add(processor.option(KEY_RESOURCES_OUTPUT_DIR, resourcesDir))
-            if (generatedAnnotation != null) {
-              processor.option(KEY_GENERATED_ANNOTATION, generatedAnnotation)
-            }
-          }
+      pluginOptions = buildList {
+        add(processor.option(KEY_ENABLED, "true"))
+        add(processor.option(KEY_DEBUG, "false")) // Enable when needed for extra debugging
+        add(processor.option(KEY_GENERATE_PROGUARD_RULES, generateProguardRules.toString()))
+        add(processor.option(KEY_RESOURCES_OUTPUT_DIR, resourcesDir))
+        if (generatedAnnotation != null) {
+          processor.option(KEY_GENERATED_ANNOTATION, generatedAnnotation)
+        }
+      }
       inheritClassPath = true
       sources = sourceFiles.asList()
       verbose = false

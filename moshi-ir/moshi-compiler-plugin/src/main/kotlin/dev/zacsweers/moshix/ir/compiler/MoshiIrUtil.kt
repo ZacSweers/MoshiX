@@ -86,10 +86,9 @@ internal fun TargetProperty.generator(
 ): PropertyGenerator? {
   if (jsonIgnore) {
     if (!hasDefault) {
-      errors +=
-          {
-            it.error(originalType) { "No default value for transient/ignored property $name" }
-          }
+      errors += {
+        it.error(originalType) { "No default value for transient/ignored property $name" }
+      }
       return null
     }
     return PropertyGenerator(this, DelegateKey(type, emptyList()), true)
@@ -118,12 +117,11 @@ internal fun TargetProperty.generator(
     val retention = retentionValue.symbol.owner.name.identifier
     // Check Java types since that covers both Java and Kotlin annotations.
     if (retention != "RUNTIME") {
-      errors +=
-          {
-            it.error({ jsonQualifier.locationIn(originalType.file) }) {
-              "JsonQualifier @${qualifierRawType.name} must have RUNTIME retention"
-            }
-          }
+      errors += {
+        it.error({ jsonQualifier.locationIn(originalType.file) }) {
+          "JsonQualifier @${qualifierRawType.name} must have RUNTIME retention"
+        }
+      }
     }
   }
 

@@ -298,11 +298,11 @@ internal fun IrClass.generateToStringFun(
     generatedName: String = "GeneratedJsonAdapter",
 ): IrFunction {
   return addOverride(
-      FqName("kotlin.Any"),
-      Name.identifier("toString").identifier,
-      pluginContext.irBuiltIns.stringType,
-      modality = Modality.OPEN,
-  )
+          FqName("kotlin.Any"),
+          Name.identifier("toString").identifier,
+          pluginContext.irBuiltIns.stringType,
+          modality = Modality.OPEN,
+      )
       .apply {
         body =
             DeclarationIrBuilder(pluginContext, symbol).irBlockBody {

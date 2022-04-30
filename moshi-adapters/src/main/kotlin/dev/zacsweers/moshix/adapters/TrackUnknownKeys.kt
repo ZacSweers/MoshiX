@@ -77,8 +77,8 @@ public annotation class TrackUnknownKeys {
   public class Factory(
       private val shouldTrack: (clazz: Class<*>, annotations: Set<Annotation>) -> Boolean =
           { _, _ ->
-        true
-      },
+            true
+          },
       private val tracker: UnknownKeysTracker
   ) : JsonAdapter.Factory {
     override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
