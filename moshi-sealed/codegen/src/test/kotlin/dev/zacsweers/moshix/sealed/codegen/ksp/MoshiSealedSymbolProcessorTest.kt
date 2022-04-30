@@ -20,25 +20,13 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.kspArgs
-import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
 import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import java.io.File
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized::class)
-class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
-
-  companion object {
-    @JvmStatic
-    @Parameterized.Parameters(name = "incremental={0}")
-    fun data(): Collection<Array<Any>> {
-      return listOf(arrayOf(true), arrayOf(false))
-    }
-  }
+class MoshiSealedSymbolProcessorProviderTest {
 
   @Test
   fun smokeTest() {
@@ -64,7 +52,6 @@ class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
           sources = listOf(source)
           inheritClassPath = true
           symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-          kspIncremental = incremental
         }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
@@ -153,7 +140,6 @@ class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
           sources = listOf(source)
           inheritClassPath = true
           symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-          kspIncremental = incremental
           kspArgs[OPTION_GENERATE_PROGUARD_RULES] = "false"
         }
     val result = compilation.compile()
@@ -185,7 +171,6 @@ class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
           sources = listOf(source)
           inheritClassPath = true
           symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-          kspIncremental = incremental
         }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
@@ -216,7 +201,6 @@ class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
           sources = listOf(source)
           inheritClassPath = true
           symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-          kspIncremental = incremental
         }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
@@ -247,7 +231,6 @@ class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
           sources = listOf(source)
           inheritClassPath = true
           symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-          kspIncremental = incremental
         }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
@@ -278,7 +261,6 @@ class MoshiSealedSymbolProcessorProviderTest(private val incremental: Boolean) {
           sources = listOf(source)
           inheritClassPath = true
           symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-          kspIncremental = incremental
         }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
