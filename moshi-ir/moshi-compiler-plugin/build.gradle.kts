@@ -26,7 +26,7 @@ plugins {
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
   }
 }
 

@@ -44,6 +44,6 @@ ksp { arg("moshi.generated", generatedAnnotation) }
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalStdlibApi"
+    freeCompilerArgs += "-opt-in=kotlin.ExperimentalStdlibApi"
   }
 }
