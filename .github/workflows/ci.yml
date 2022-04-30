@@ -4,18 +4,13 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: JDK ${{ matrix.java_version }} - KSP ${{ matrix.ksp_enabled }} - Incremental ${{ matrix.ksp_incremental_enabled }} - Kotlin ${{ matrix.kotlin_version }}
+    name: JDK ${{ matrix.java_version }} - KSP ${{ matrix.ksp_enabled }} - Kotlin ${{ matrix.kotlin_version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         java_version: [ 17 ]
-        kotlin_version: [ 1.6.10 ]
+        kotlin_version: [ 1.6.21 ]
         ksp_enabled: [ true, false ]
-        ksp_incremental_enabled: [ true, false ]
-        exclude:
-          # Don't test incremental KSP if KSP itself isn't enabled
-          - ksp_enabled: false
-            ksp_incremental_enabled: true
       fail-fast: false
     env:
       MOSHIX_KOTLIN: ${{ matrix.kotlin_version }}
@@ -39,7 +34,7 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ matrix.java_version }}
       - name: Build project
-        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} -Pksp.incremental=${{ matrix.ksp_incremental_enabled }} --stacktrace
+        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} --stacktrace
       - name: Upload snapshot (main only)
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}

@@ -65,7 +65,7 @@ spotless {
     targetExclude("**/spotless.java", "**/build/**")
   }
   kotlin {
-    ktfmt("0.30")
+    ktfmt("0.35")
     target("**/*.kt")
     trimTrailingWhitespace()
     endWithNewline()
@@ -76,7 +76,7 @@ spotless {
     )
   }
   kotlinGradle {
-    ktfmt("0.30")
+    ktfmt("0.35")
     target("**/*.gradle.kts")
     trimTrailingWhitespace()
     endWithNewline()
@@ -109,7 +109,7 @@ subprojects {
         jvmTarget = libs.versions.jvmTarget.get()
         @Suppress("SuspiciousCollectionReassignment")
         freeCompilerArgs +=
-            listOf("-Xjsr305=strict", "-progressive", "-Xopt-in=kotlin.RequiresOptIn")
+            listOf("-Xjsr305=strict", "-progressive", "-opt-in=kotlin.RequiresOptIn")
         // TODO disabled because Gradle's Kotlin handling is silly
         //  https://github.com/gradle/gradle/issues/16779
         //        allWarningsAsErrors = true

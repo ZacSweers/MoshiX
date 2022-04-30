@@ -430,10 +430,10 @@ private constructor(
 
   private fun IrClass.generateToJsonFun(delegateField: IrField): IrFunction {
     return addOverride(
-        FqName("com.squareup.moshi.JsonAdapter"),
-        Name.identifier("toJson").identifier,
-        pluginContext.irBuiltIns.unitType,
-        modality = Modality.OPEN) { function ->
+            FqName("com.squareup.moshi.JsonAdapter"),
+            Name.identifier("toJson").identifier,
+            pluginContext.irBuiltIns.unitType,
+            modality = Modality.OPEN) { function ->
       function.valueParameters.size == 2 &&
           function.valueParameters[0].type.classifierOrFail == moshiSymbols.jsonWriter
     }
@@ -461,11 +461,11 @@ private constructor(
 
   private fun IrClass.generateFromJsonFun(delegateField: IrField): IrFunction {
     return addOverride(
-        FqName("com.squareup.moshi.JsonAdapter"),
-        Name.identifier("fromJson").identifier,
-        pluginContext.irBuiltIns.anyNType,
-        modality = Modality.OPEN,
-    ) { function ->
+            FqName("com.squareup.moshi.JsonAdapter"),
+            Name.identifier("fromJson").identifier,
+            pluginContext.irBuiltIns.anyNType,
+            modality = Modality.OPEN,
+        ) { function ->
       function.valueParameters.size == 1 &&
           function.valueParameters[0].type.classifierOrFail == moshiSymbols.jsonReader
     }

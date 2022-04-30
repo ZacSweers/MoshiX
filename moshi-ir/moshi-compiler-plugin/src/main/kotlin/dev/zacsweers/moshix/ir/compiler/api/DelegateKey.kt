@@ -182,11 +182,11 @@ private fun IrBuilderWithScope.addAnnotationsParam(
               argExpression = irVararg(pluginContext.irBuiltIns.annotationType, jsonQualifiers)
             }
             irCall(
-                callee = callee,
-                type =
-                    pluginContext.irBuiltIns.setClass.typeWith(
-                        pluginContext.irBuiltIns.annotationType),
-                typeArguments = listOf(pluginContext.irBuiltIns.annotationType))
+                    callee = callee,
+                    type =
+                        pluginContext.irBuiltIns.setClass.typeWith(
+                            pluginContext.irBuiltIns.annotationType),
+                    typeArguments = listOf(pluginContext.irBuiltIns.annotationType))
                 .apply { putValueArgument(0, argExpression) }
           }
       putValueArgument(1, argumentExpression)

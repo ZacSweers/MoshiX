@@ -139,31 +139,17 @@ implementation "dev.zacsweers.moshix:moshi-sealed-runtime:{version}"
 
 #### Code gen
 
-Code gen works via annotation processor, and only requires adding the kapt dependency:
+Code gen works via [KSP](https://github.com/google/ksp) and only requires adding the KSP configuration dependency:
 
 [![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-codegen.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-codegen)
-```gradle
-kapt "dev.zacsweers.moshix:moshi-sealed-codegen:{version}"
+```kotlin
+dependencies {
+  ksp("dev.zacsweers.moshix:moshi-sealed-codegen:<version>")
+}
 ```
 
 No runtime Moshi instance configuration is needed, code gen will generate `JsonAdapter`s in a way that Moshi understands
 natively.
-
-##### KSP support
-
-There is an experimental [KSP](https://github.com/google/ksp) implementation available in the `moshi-sealed-codegen`
-artifact.
-Note that KSP itself is experimental, so expect this API to break regularly.
-
-Add this dependency as a `ksp` dependency.
-
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-codegen.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-codegen)
-```diff
-dependencies {
--  kapt("dev.zacsweers.moshix:moshi-sealed-codegen:<version>")
-+  ksp("dev.zacsweers.moshix:moshi-sealed-codegen:<version>")
-}
-```
 
 To add `@Generated` controls, add them via ksp arguments
 
