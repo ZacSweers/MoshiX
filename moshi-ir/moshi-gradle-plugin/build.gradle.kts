@@ -21,7 +21,7 @@ plugins {
   id("java-gradle-plugin")
   id("org.jetbrains.dokka") version "1.6.21"
   id("com.vanniktech.maven.publish") version "0.19.0"
-  id("com.diffplug.spotless") version "6.5.2"
+  id("com.diffplug.spotless") version "6.6.1"
 }
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
@@ -89,7 +89,7 @@ spotless {
 
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.6.21")
-  compileOnly("com.android.tools.build:gradle:7.1.3")
+  compileOnly("com.android.tools.build:gradle:7.2.0")
   compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21")
   implementation("com.google.auto.service:auto-service-annotations:1.0.1")
 }
