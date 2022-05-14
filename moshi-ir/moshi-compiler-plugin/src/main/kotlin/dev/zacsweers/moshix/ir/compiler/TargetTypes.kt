@@ -41,9 +41,9 @@ import org.jetbrains.kotlin.ir.util.properties
 
 /** Returns a target type for [type] or null if it cannot be used with code gen. */
 internal fun targetType(
-    type: IrClass,
-    pluginContext: IrPluginContext,
-    logger: MessageCollector,
+  type: IrClass,
+  pluginContext: IrPluginContext,
+  logger: MessageCollector,
 ): TargetType? {
   if (type.isEnumClass) {
     logger.error(type) {
@@ -82,8 +82,8 @@ internal fun targetType(
     return null
   }
   val isNotPublicOrInternal =
-      type.visibility != DescriptorVisibilities.PUBLIC &&
-          type.visibility != DescriptorVisibilities.INTERNAL
+    type.visibility != DescriptorVisibilities.PUBLIC &&
+      type.visibility != DescriptorVisibilities.INTERNAL
   if (isNotPublicOrInternal) {
     logger.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be internal or public"
@@ -95,11 +95,11 @@ internal fun targetType(
   val appliedType = AppliedType(type)
 
   val constructor =
-      primaryConstructor(type)
-          ?: run {
-            logger.error(type) { "No primary constructor found on ${type.fqNameWhenAvailable}" }
-            return null
-          }
+    primaryConstructor(type)
+      ?: run {
+        logger.error(type) { "No primary constructor found on ${type.fqNameWhenAvailable}" }
+        return null
+      }
 
   if (type.isInline && constructor.parameters.values.first().hasDefault) {
     logger.error(constructor.irConstructor) {
@@ -109,7 +109,8 @@ internal fun targetType(
   }
 
   if (constructor.visibility != DescriptorVisibilities.INTERNAL &&
-      constructor.visibility != DescriptorVisibilities.PUBLIC) {
+      constructor.visibility != DescriptorVisibilities.PUBLIC
+  ) {
     logger.error(constructor.irConstructor) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: primary constructor is not internal or public"
     }
@@ -138,30 +139,30 @@ internal fun targetType(
   // If any class in the enclosing class hierarchy is internal, they must all have internal
   // generated adapters.
   val resolvedVisibility =
-      if (visibility == DescriptorVisibilities.INTERNAL) {
-        // Our nested type is already internal, no need to search
-        visibility
-      } else {
-        // Implicitly public, so now look up the hierarchy
-        val forceInternal =
-            generateSequence<IrDeclaration>(type) { it.parentClassOrNull }
-                .filterIsInstance<IrClass>()
-                .any { it.visibility == DescriptorVisibilities.INTERNAL }
-        if (forceInternal) DescriptorVisibilities.INTERNAL else visibility
-      }
+    if (visibility == DescriptorVisibilities.INTERNAL) {
+      // Our nested type is already internal, no need to search
+      visibility
+    } else {
+      // Implicitly public, so now look up the hierarchy
+      val forceInternal =
+        generateSequence<IrDeclaration>(type) { it.parentClassOrNull }
+          .filterIsInstance<IrClass>()
+          .any { it.visibility == DescriptorVisibilities.INTERNAL }
+      if (forceInternal) DescriptorVisibilities.INTERNAL else visibility
+    }
   return TargetType(
-      irClass = type,
-      irType = type.defaultType,
-      constructor = constructor,
-      properties = properties,
-      typeVariables = typeVariables,
-      isDataClass = type.isData,
-      visibility = resolvedVisibility,
+    irClass = type,
+    irType = type.defaultType,
+    constructor = constructor,
+    properties = properties,
+    typeVariables = typeVariables,
+    isDataClass = type.isData,
+    visibility = resolvedVisibility,
   )
 }
 
 internal fun primaryConstructor(
-    targetType: IrClass,
+  targetType: IrClass,
 ): TargetConstructor? {
   val primaryConstructor = targetType.primaryConstructor ?: return null
 
@@ -170,26 +171,27 @@ internal fun primaryConstructor(
     val index = parameter.index
     val name = parameter.name.identifier
     parameters[name] =
-        TargetParameter(
-            name = name,
-            index = index,
-            type = parameter.type,
-            hasDefault = parameter.hasDefaultValue(),
-            qualifiers = parameter.jsonQualifiers(),
-            jsonIgnore = parameter.jsonIgnore(),
-            jsonName = parameter.jsonName())
+      TargetParameter(
+        name = name,
+        index = index,
+        type = parameter.type,
+        hasDefault = parameter.hasDefaultValue(),
+        qualifiers = parameter.jsonQualifiers(),
+        jsonIgnore = parameter.jsonIgnore(),
+        jsonName = parameter.jsonName()
+      )
   }
 
   return TargetConstructor(
-      primaryConstructor,
-      parameters,
-      primaryConstructor.visibility,
+    primaryConstructor,
+    parameters,
+    primaryConstructor.visibility,
   )
 }
 
 private fun declaredProperties(
-    constructor: TargetConstructor,
-    classDecl: IrClass,
+  constructor: TargetConstructor,
+  classDecl: IrClass,
 ): Map<String, TargetProperty> {
   val result = mutableMapOf<String, TargetProperty>()
   for (property in classDecl.properties) {
@@ -198,13 +200,14 @@ private fun declaredProperties(
     // TODO what about java/modifier transient?
     val isTransient = property.isTransient
     result[name] =
-        TargetProperty(
-            property = property,
-            parameter = parameter,
-            visibility = property.visibility,
-            jsonName = property.jsonNameFromAnywhere() ?: parameter?.jsonName ?: name,
-            jsonIgnore =
-                isTransient || parameter?.jsonIgnore == true || property.jsonIgnoreFromAnywhere())
+      TargetProperty(
+        property = property,
+        parameter = parameter,
+        visibility = property.visibility,
+        jsonName = property.jsonNameFromAnywhere() ?: parameter?.jsonName ?: name,
+        jsonIgnore =
+          isTransient || parameter?.jsonIgnore == true || property.jsonIgnoreFromAnywhere()
+      )
   }
 
   return result

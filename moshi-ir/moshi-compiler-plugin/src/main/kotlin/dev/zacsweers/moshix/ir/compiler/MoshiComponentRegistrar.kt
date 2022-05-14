@@ -31,8 +31,8 @@ import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
 public class MoshiComponentRegistrar : ComponentRegistrar {
 
   override fun registerProjectComponents(
-      project: MockProject,
-      configuration: CompilerConfiguration
+    project: MockProject,
+    configuration: CompilerConfiguration
   ) {
 
     if (configuration[KEY_ENABLED] == false) return
@@ -41,24 +41,27 @@ public class MoshiComponentRegistrar : ComponentRegistrar {
     val generateProguardRules = configuration[KEY_GENERATE_PROGUARD_RULES] ?: true
 
     val messageCollector =
-        configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
+      configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
     val fqGeneratedAnnotation = configuration[KEY_GENERATED_ANNOTATION]?.let(::FqName)
 
     if (generateProguardRules) {
       val resourceOutputDir =
-          configuration.get(KEY_RESOURCES_OUTPUT_DIR)?.let(::File)
-              ?: error("No resources dir provided for proguard rule generation")
+        configuration.get(KEY_RESOURCES_OUTPUT_DIR)?.let(::File)
+          ?: error("No resources dir provided for proguard rule generation")
       AnalysisHandlerExtension.registerExtension(
-          project,
-          ProguardRuleGenerationExtension(
-              messageCollector = messageCollector,
-              resourcesDir = resourceOutputDir,
-              enableSealed = enableSealed,
-              debug = debug))
+        project,
+        ProguardRuleGenerationExtension(
+          messageCollector = messageCollector,
+          resourcesDir = resourceOutputDir,
+          enableSealed = enableSealed,
+          debug = debug
+        )
+      )
     }
 
     IrGenerationExtension.registerExtension(
-        project,
-        MoshiIrGenerationExtension(messageCollector, fqGeneratedAnnotation, enableSealed, debug))
+      project,
+      MoshiIrGenerationExtension(messageCollector, fqGeneratedAnnotation, enableSealed, debug)
+    )
   }
 }

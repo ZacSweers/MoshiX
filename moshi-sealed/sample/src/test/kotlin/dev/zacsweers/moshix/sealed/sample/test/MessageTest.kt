@@ -41,25 +41,26 @@ import org.junit.runners.Parameterized.Parameters
 class MessageTest(type: Type) {
 
   enum class Type(
-      val moshi: Moshi =
-          Moshi.Builder().add(AdaptedBy.Factory()).add(NestedSealed.Factory()).build()
+    val moshi: Moshi = Moshi.Builder().add(AdaptedBy.Factory()).add(NestedSealed.Factory()).build()
   ) {
     REFLECT(
-        moshi =
-            Moshi.Builder()
-                .add(MoshiSealedJsonAdapterFactory())
-                .add(AdaptedBy.Factory())
-                .add(NestedSealed.Factory())
-                .addLast(KotlinJsonAdapterFactory())
-                .build()),
+      moshi =
+        Moshi.Builder()
+          .add(MoshiSealedJsonAdapterFactory())
+          .add(AdaptedBy.Factory())
+          .add(NestedSealed.Factory())
+          .addLast(KotlinJsonAdapterFactory())
+          .build()
+    ),
     METADATA_REFLECT(
-        moshi =
-            Moshi.Builder()
-                .add(MetadataMoshiSealedJsonAdapterFactory())
-                .add(AdaptedBy.Factory())
-                .add(NestedSealed.Factory())
-                .addLast(KotlinJsonAdapterFactory())
-                .build()),
+      moshi =
+        Moshi.Builder()
+          .add(MetadataMoshiSealedJsonAdapterFactory())
+          .add(AdaptedBy.Factory())
+          .add(NestedSealed.Factory())
+          .addLast(KotlinJsonAdapterFactory())
+          .build()
+    ),
     CODEGEN
   }
 
@@ -77,42 +78,48 @@ class MessageTest(type: Type) {
   fun assertDefaultBehavior() {
     val adapter = moshi.adapter<Message>()
     assertPolymorphicBehavior(
-        adapter, Message.Success("Okay!"), Message.Error(mapOf("order" to 66.0)), Message.Unknown)
+      adapter,
+      Message.Success("Okay!"),
+      Message.Error(mapOf("order" to 66.0)),
+      Message.Unknown
+    )
   }
 
   @Test
   fun assertDefaultNullBehavior() {
     val adapter = moshi.adapter<MessageWithNullDefault>()
     assertPolymorphicBehavior(
-        adapter,
-        MessageWithNullDefault.Success("Okay!"),
-        MessageWithNullDefault.Error(mapOf("order" to 66.0)),
-        null)
+      adapter,
+      MessageWithNullDefault.Success("Okay!"),
+      MessageWithNullDefault.Error(mapOf("order" to 66.0)),
+      null
+    )
   }
 
   @Test
   fun assertNoDefaultBehavior() {
     val adapter = moshi.adapter<MessageWithNoDefault>()
     assertPolymorphicBehavior(
-        adapter,
-        MessageWithNoDefault.Success("Okay!"),
-        MessageWithNoDefault.Error(mapOf("order" to 66.0)),
-        null)
+      adapter,
+      MessageWithNoDefault.Success("Okay!"),
+      MessageWithNoDefault.Error(mapOf("order" to 66.0)),
+      null
+    )
   }
 
   private fun <T> assertPolymorphicBehavior(
-      adapter: JsonAdapter<T>,
-      success: T,
-      error: T,
-      defaultInstance: T?
+    adapter: JsonAdapter<T>,
+    success: T,
+    error: T,
+    defaultInstance: T?
   ) {
     assertThat(adapter.fromJson("{\"type\":\"success\",\"value\":\"Okay!\"}")).isEqualTo(success)
     // Test alternates
     assertThat(adapter.fromJson("{\"type\":\"successful\",\"value\":\"Okay!\"}")).isEqualTo(success)
     assertThat(adapter.fromJson("{\"type\":\"error\",\"error_logs\":{\"order\":66}}"))
-        .isEqualTo(error)
+      .isEqualTo(error)
     assertThat(adapter.fromJson("{\"type\":\"taco\",\"junkdata\":100}"))
-        .isSameInstanceAs(defaultInstance)
+      .isSameInstanceAs(defaultInstance)
   }
 
   @DefaultNull
@@ -152,7 +159,7 @@ class MessageTest(type: Type) {
     @TypeLabel("error")
     @JsonClass(generateAdapter = true)
     internal data class Error(val error_logs: Map<String, Any>) :
-        MessageWithInternalVisibilityModifier()
+      MessageWithInternalVisibilityModifier()
   }
 
   @Test
@@ -160,26 +167,28 @@ class MessageTest(type: Type) {
     val adapter = moshi.adapter<NestedMessageTypes>()
     // Basic nested sealed support
     assertThat(adapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
-        .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
+      .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
     assertThat(adapter.fromJson("{\"type\":\"success_string\",\"value\":\"Okay!\"}"))
-        .isEqualTo(NestedMessageTypes.Success.SuccessString("Okay!"))
+      .isEqualTo(NestedMessageTypes.Success.SuccessString("Okay!"))
     assertThat(adapter.fromJson("{\"type\":\"empty_success\"}"))
-        .isEqualTo(NestedMessageTypes.Success.EmptySuccess)
+      .isEqualTo(NestedMessageTypes.Success.EmptySuccess)
 
     // Different label keys
     assertThat(
-            adapter.fromJson(
-                "{\"type\":\"something_else\",\"second_type\":\"success\",\"value\":\"Okay!\"}"))
-        .isEqualTo(NestedMessageTypes.DifferentLabelKey.Success("Okay!"))
+        adapter.fromJson(
+          "{\"type\":\"something_else\",\"second_type\":\"success\",\"value\":\"Okay!\"}"
+        )
+      )
+      .isEqualTo(NestedMessageTypes.DifferentLabelKey.Success("Okay!"))
     assertThat(adapter.fromJson("{\"type\":\"something_else\",\"second_type\":\"empty_success\"}"))
-        .isEqualTo(NestedMessageTypes.DifferentLabelKey.EmptySuccess)
+      .isEqualTo(NestedMessageTypes.DifferentLabelKey.EmptySuccess)
     assertThat(adapter.fromJson("{\"type\":\"custom_nested\"}"))
-        .isEqualTo(NestedMessageTypes.CustomDifferentType.SingletonInstance)
+      .isEqualTo(NestedMessageTypes.CustomDifferentType.SingletonInstance)
 
     // Adapter for the intermediate type works too
     val intermediateAdapter = moshi.adapter<NestedMessageTypes.Success>()
     assertThat(intermediateAdapter.fromJson("{\"type\":\"success_int\",\"value\":3}"))
-        .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
+      .isEqualTo(NestedMessageTypes.Success.SuccessInt(3))
   }
 
   @DefaultNull

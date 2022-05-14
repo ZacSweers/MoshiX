@@ -22,11 +22,11 @@ import org.jetbrains.kotlin.ir.types.IrType
 
 /** A property in user code that maps to JSON. */
 internal data class TargetProperty(
-    val property: IrProperty,
-    val parameter: TargetParameter?,
-    val visibility: DescriptorVisibility,
-    val jsonName: String?,
-    val jsonIgnore: Boolean
+  val property: IrProperty,
+  val parameter: TargetParameter?,
+  val visibility: DescriptorVisibility,
+  val jsonName: String?,
+  val jsonIgnore: Boolean
 ) {
   val name: String
     get() = property.name.identifier

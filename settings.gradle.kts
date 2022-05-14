@@ -35,18 +35,18 @@ pluginManagement {
 rootProject.name = "moshix-root"
 
 include(
-    ":moshi-adapters",
-    ":moshi-ir:moshi-compiler-plugin",
-    ":moshi-ir:moshi-kotlin-tests",
-    ":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module",
-    ":moshi-metadata-reflect",
-    ":moshi-sealed:codegen",
-    ":moshi-sealed:java-sealed-reflect",
-    ":moshi-sealed:metadata-reflect",
-    ":moshi-sealed:reflect",
-    ":moshi-sealed:runtime",
-    ":moshi-sealed:sample",
-    ":moshi-sealed:sealed-interfaces-samples:java",
+  ":moshi-adapters",
+  ":moshi-ir:moshi-compiler-plugin",
+  ":moshi-ir:moshi-kotlin-tests",
+  ":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module",
+  ":moshi-metadata-reflect",
+  ":moshi-sealed:codegen",
+  ":moshi-sealed:java-sealed-reflect",
+  ":moshi-sealed:metadata-reflect",
+  ":moshi-sealed:reflect",
+  ":moshi-sealed:runtime",
+  ":moshi-sealed:sample",
+  ":moshi-sealed:sealed-interfaces-samples:java",
 )
 
 includeBuild("moshi-ir/moshi-gradle-plugin") {

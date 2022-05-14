@@ -89,111 +89,116 @@ internal fun IrDeclaration.location(): CompilerMessageSourceLocation {
 /** Finds the line and column of [this] within this [file]. */
 internal fun IrElement?.locationIn(file: IrFile): CompilerMessageSourceLocation {
   val sourceRangeInfo =
-      file.fileEntry.getSourceRangeInfo(
-          beginOffset = this?.startOffset ?: SYNTHETIC_OFFSET,
-          endOffset = this?.endOffset ?: SYNTHETIC_OFFSET)
+    file.fileEntry.getSourceRangeInfo(
+      beginOffset = this?.startOffset ?: SYNTHETIC_OFFSET,
+      endOffset = this?.endOffset ?: SYNTHETIC_OFFSET
+    )
   return CompilerMessageLocationWithRange.create(
-      path = sourceRangeInfo.filePath,
-      lineStart = sourceRangeInfo.startLineNumber + 1,
-      columnStart = sourceRangeInfo.startColumnNumber + 1,
-      lineEnd = sourceRangeInfo.endLineNumber + 1,
-      columnEnd = sourceRangeInfo.endColumnNumber + 1,
-      lineContent = null)!!
+    path = sourceRangeInfo.filePath,
+    lineStart = sourceRangeInfo.startLineNumber + 1,
+    columnStart = sourceRangeInfo.startColumnNumber + 1,
+    lineEnd = sourceRangeInfo.endLineNumber + 1,
+    columnEnd = sourceRangeInfo.endColumnNumber + 1,
+    lineContent = null
+  )!!
 }
 
 internal inline fun MessageCollector.error(message: () -> String) = error(null, message)
 
 internal inline fun MessageCollector.error(declaration: IrDeclaration, message: () -> String) =
-    error(declaration::location, message)
+  error(declaration::location, message)
 
 internal inline fun MessageCollector.error(
-    noinline location: (() -> CompilerMessageSourceLocation)?,
-    message: () -> String
+  noinline location: (() -> CompilerMessageSourceLocation)?,
+  message: () -> String
 ) {
   report(CompilerMessageSeverity.ERROR, message(), location?.invoke())
 }
 
 internal fun IrConstructor.irConstructorBody(
-    context: IrGeneratorContext,
-    blockBody: DeclarationIrBuilder.(MutableList<IrStatement>) -> Unit
+  context: IrGeneratorContext,
+  blockBody: DeclarationIrBuilder.(MutableList<IrStatement>) -> Unit
 ) {
   val startOffset = UNDEFINED_OFFSET
   val endOffset = UNDEFINED_OFFSET
   val constructorIrBuilder =
-      DeclarationIrBuilder(
-          generatorContext = context,
-          symbol = IrSimpleFunctionSymbolImpl(),
-          startOffset = startOffset,
-          endOffset = endOffset)
+    DeclarationIrBuilder(
+      generatorContext = context,
+      symbol = IrSimpleFunctionSymbolImpl(),
+      startOffset = startOffset,
+      endOffset = endOffset
+    )
   body =
-      context.irFactory.createBlockBody(
-          startOffset = startOffset,
-          endOffset = endOffset,
-      ) { constructorIrBuilder.blockBody(statements) }
+    context.irFactory.createBlockBody(
+      startOffset = startOffset,
+      endOffset = endOffset,
+    ) { constructorIrBuilder.blockBody(statements) }
 }
 
 internal fun DeclarationIrBuilder.irInstanceInitializerCall(
-    context: IrGeneratorContext,
-    classSymbol: IrClassSymbol,
+  context: IrGeneratorContext,
+  classSymbol: IrClassSymbol,
 ): IrInstanceInitializerCall {
   return IrInstanceInitializerCallImpl(
-      startOffset = startOffset,
-      endOffset = endOffset,
-      classSymbol = classSymbol,
-      type = context.irBuiltIns.unitType,
+    startOffset = startOffset,
+    endOffset = endOffset,
+    classSymbol = classSymbol,
+    type = context.irBuiltIns.unitType,
   )
 }
 
 internal fun IrClass.isSubclassOfFqName(fqName: String): Boolean =
-    fqNameWhenAvailable?.asString() == fqName ||
-        superTypes.any { it.erasedUpperBound.isSubclassOfFqName(fqName) }
+  fqNameWhenAvailable?.asString() == fqName ||
+    superTypes.any { it.erasedUpperBound.isSubclassOfFqName(fqName) }
 
 internal fun IrSimpleFunction.overridesFunctionIn(fqName: FqName): Boolean =
-    parentClassOrNull?.fqNameWhenAvailable == fqName ||
-        allOverridden().any { it.parentClassOrNull?.fqNameWhenAvailable == fqName }
+  parentClassOrNull?.fqNameWhenAvailable == fqName ||
+    allOverridden().any { it.parentClassOrNull?.fqNameWhenAvailable == fqName }
 
 internal fun IrPluginContext.createIrBuilder(symbol: IrSymbol): DeclarationIrBuilder {
   return DeclarationIrBuilder(this, symbol, symbol.owner.startOffset, symbol.owner.endOffset)
 }
 
 internal fun IrPluginContext.irType(
-    qualifiedName: String,
-    nullable: Boolean = false,
-    arguments: List<IrTypeArgument> = emptyList()
+  qualifiedName: String,
+  nullable: Boolean = false,
+  arguments: List<IrTypeArgument> = emptyList()
 ): IrType =
-    referenceClass(FqName(qualifiedName))!!.createType(
-        hasQuestionMark = nullable, arguments = arguments)
+  referenceClass(FqName(qualifiedName))!!.createType(
+    hasQuestionMark = nullable,
+    arguments = arguments
+  )
 
 // returns null: Any? for boxed types and 0: <number type> for primitives
 internal fun IrBuilderWithScope.defaultPrimitiveValue(
-    type: IrType,
-    pluginContext: IrPluginContext
+  type: IrType,
+  pluginContext: IrPluginContext
 ): IrExpression {
   // TODO check unit/void/nothing
   val defaultPrimitive: IrExpression? =
-      if (type.isMarkedNullable()) {
-        null
-      } else {
-        when (type.getPrimitiveType()) {
-          PrimitiveType.BOOLEAN -> irBoolean(false)
-          PrimitiveType.CHAR -> irChar(0.toChar())
-          PrimitiveType.BYTE -> IrConstImpl.byte(startOffset, endOffset, type, 0)
-          PrimitiveType.SHORT -> IrConstImpl.short(startOffset, endOffset, type, 0)
-          PrimitiveType.INT -> irInt(0)
-          PrimitiveType.FLOAT -> IrConstImpl.float(startOffset, endOffset, type, 0.0f)
-          PrimitiveType.LONG -> irLong(0L)
-          PrimitiveType.DOUBLE -> IrConstImpl.double(startOffset, endOffset, type, 0.0)
-          else -> null
-        }
+    if (type.isMarkedNullable()) {
+      null
+    } else {
+      when (type.getPrimitiveType()) {
+        PrimitiveType.BOOLEAN -> irBoolean(false)
+        PrimitiveType.CHAR -> irChar(0.toChar())
+        PrimitiveType.BYTE -> IrConstImpl.byte(startOffset, endOffset, type, 0)
+        PrimitiveType.SHORT -> IrConstImpl.short(startOffset, endOffset, type, 0)
+        PrimitiveType.INT -> irInt(0)
+        PrimitiveType.FLOAT -> IrConstImpl.float(startOffset, endOffset, type, 0.0f)
+        PrimitiveType.LONG -> irLong(0L)
+        PrimitiveType.DOUBLE -> IrConstImpl.double(startOffset, endOffset, type, 0.0)
+        else -> null
       }
+    }
   return defaultPrimitive ?: irNull(pluginContext.irBuiltIns.anyNType)
 }
 
 internal val IrProperty.type: IrType
   get() =
-      getter?.returnType
-          ?: setter?.valueParameters?.first()?.type ?: backingField?.type
-              ?: error("No type for property $name")
+    getter?.returnType
+      ?: setter?.valueParameters?.first()?.type ?: backingField?.type
+        ?: error("No type for property $name")
 
 internal fun DescriptorVisibility.checkIsVisibile() {
   require(this == DescriptorVisibilities.PUBLIC || this == DescriptorVisibilities.INTERNAL) {
@@ -215,38 +220,37 @@ internal fun IrType.rawTypeOrNull(): IrClass? {
 }
 
 internal fun IrClass.addOverride(
-    baseFqName: FqName,
-    name: String,
-    returnType: IrType,
-    modality: Modality = Modality.FINAL,
-    overloadFilter: (function: IrSimpleFunction) -> Boolean = { true }
+  baseFqName: FqName,
+  name: String,
+  returnType: IrType,
+  modality: Modality = Modality.FINAL,
+  overloadFilter: (function: IrSimpleFunction) -> Boolean = { true }
 ): IrSimpleFunction =
-    addFunction(name, returnType, modality).apply {
-      overriddenSymbols =
-          superTypes
-              .mapNotNull { superType ->
-                superType.classOrNull?.owner?.takeIf { superClass ->
-                  superClass.isSubclassOfFqName(baseFqName.asString())
-                }
-              }
-              .flatMap { superClass ->
-                superClass
-                    .functions
-                    .filter { function ->
-                      function.name.asString() == name &&
-                          function.overridesFunctionIn(baseFqName) &&
-                          overloadFilter(function)
-                    }
-                    .map { it.symbol }
-                    .toList()
-              }
-    }
+  addFunction(name, returnType, modality).apply {
+    overriddenSymbols =
+      superTypes
+        .mapNotNull { superType ->
+          superType.classOrNull?.owner?.takeIf { superClass ->
+            superClass.isSubclassOfFqName(baseFqName.asString())
+          }
+        }
+        .flatMap { superClass ->
+          superClass.functions
+            .filter { function ->
+              function.name.asString() == name &&
+                function.overridesFunctionIn(baseFqName) &&
+                overloadFilter(function)
+            }
+            .map { it.symbol }
+            .toList()
+        }
+  }
 
 internal fun IrBuilderWithScope.irBinOp(
-    pluginContext: IrPluginContext,
-    name: Name,
-    lhs: IrExpression,
-    rhs: IrExpression
+  pluginContext: IrPluginContext,
+  name: Name,
+  lhs: IrExpression,
+  rhs: IrExpression
 ): IrExpression {
   val classFqName = (lhs.type as IrSimpleType).classOrNull!!.owner.fqNameWhenAvailable!!
   val symbol = pluginContext.referenceFunctions(classFqName.child(name)).single()
@@ -254,10 +258,10 @@ internal fun IrBuilderWithScope.irBinOp(
 }
 
 internal fun IrBuilderWithScope.irInvoke(
-    dispatchReceiver: IrExpression? = null,
-    callee: IrFunctionSymbol,
-    vararg args: IrExpression,
-    typeHint: IrType? = null
+  dispatchReceiver: IrExpression? = null,
+  callee: IrFunctionSymbol,
+  vararg args: IrExpression,
+  typeHint: IrType? = null
 ): IrMemberAccessExpression<*> {
   assert(callee.isBound) { "Symbol $callee expected to be bound" }
   val returnType = typeHint ?: callee.owner.returnType
@@ -271,47 +275,48 @@ internal val IrProperty.isTransient: Boolean
   get() = backingField?.hasAnnotation(FqName("kotlin.jvm.Transient")) == true
 
 internal fun IrBuilderWithScope.irAnd(
-    pluginContext: IrPluginContext,
-    lhs: IrExpression,
-    rhs: IrExpression
+  pluginContext: IrPluginContext,
+  lhs: IrExpression,
+  rhs: IrExpression
 ): IrExpression = irBinOp(pluginContext, OperatorNameConventions.AND, lhs, rhs)
 
 internal fun Sequence<IrExpression>.joinToIrAnd(
-    scope: IrBuilderWithScope,
-    pluginContext: IrPluginContext,
+  scope: IrBuilderWithScope,
+  pluginContext: IrPluginContext,
 ): IrExpression {
   var compositeExpression: IrExpression? = null
   for (singleCheckExpr in this) {
     compositeExpression =
-        if (compositeExpression == null) {
-          singleCheckExpr
-        } else {
-          scope.irAnd(pluginContext, compositeExpression, singleCheckExpr)
-        }
+      if (compositeExpression == null) {
+        singleCheckExpr
+      } else {
+        scope.irAnd(pluginContext, compositeExpression, singleCheckExpr)
+      }
   }
   return compositeExpression ?: error("No expressions to join")
 }
 
 internal fun IrClass.generateToStringFun(
-    pluginContext: IrPluginContext,
-    targetName: String,
-    generatedName: String = "GeneratedJsonAdapter",
+  pluginContext: IrPluginContext,
+  targetName: String,
+  generatedName: String = "GeneratedJsonAdapter",
 ): IrFunction {
   return addOverride(
-          FqName("kotlin.Any"),
-          Name.identifier("toString").identifier,
-          pluginContext.irBuiltIns.stringType,
-          modality = Modality.OPEN,
-      )
-      .apply {
-        body =
-            DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
-              +irReturn(
-                  irConcat().apply {
-                    addArgument(irString("$generatedName("))
-                    addArgument(irString(targetName))
-                    addArgument(irString(")"))
-                  })
+      FqName("kotlin.Any"),
+      Name.identifier("toString").identifier,
+      pluginContext.irBuiltIns.stringType,
+      modality = Modality.OPEN,
+    )
+    .apply {
+      body =
+        DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
+          +irReturn(
+            irConcat().apply {
+              addArgument(irString("$generatedName("))
+              addArgument(irString(targetName))
+              addArgument(irString(")"))
             }
-      }
+          )
+        }
+    }
 }

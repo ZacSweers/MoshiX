@@ -26,13 +26,13 @@ import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
 
 private val MOSHI_REFLECTIVE_NAME = Moshi::class.asClassName().reflectionName()
 private val TYPE_ARRAY_REFLECTIVE_NAME =
-    "${java.lang.reflect.Type::class.asClassName().reflectionName()}[]"
+  "${java.lang.reflect.Type::class.asClassName().reflectionName()}[]"
 
 internal class ProguardRuleGenerationExtension(
-    private val messageCollector: MessageCollector,
-    private val resourcesDir: File,
-    private val enableSealed: Boolean,
-    private val debug: Boolean
+  private val messageCollector: MessageCollector,
+  private val resourcesDir: File,
+  private val enableSealed: Boolean,
+  private val debug: Boolean
 ) : AnalysisHandlerExtension {
 
   private var initialized = false
@@ -40,12 +40,12 @@ internal class ProguardRuleGenerationExtension(
 
   @OptIn(InternalMoshiCodegenApi::class)
   override fun doAnalysis(
-      project: Project,
-      module: ModuleDescriptor,
-      projectContext: ProjectContext,
-      files: Collection<KtFile>,
-      bindingTrace: BindingTrace,
-      componentProvider: ComponentProvider
+    project: Project,
+    module: ModuleDescriptor,
+    projectContext: ProjectContext,
+    files: Collection<KtFile>,
+    bindingTrace: BindingTrace,
+    componentProvider: ComponentProvider
   ): AnalysisResult? {
     val moshiModule = MoshiModuleDescriptor(module)
 
@@ -57,9 +57,10 @@ internal class ProguardRuleGenerationExtension(
     if (!initialized) {
       // Dummy extension point; Required by dropPsiCaches().
       project.extensionArea.registerExtensionPoint(
-          PsiTreeChangeListener.EP.name,
-          PsiTreeChangeAdapter::class.java.canonicalName,
-          ExtensionPoint.Kind.INTERFACE)
+        PsiTreeChangeListener.EP.name,
+        PsiTreeChangeAdapter::class.java.canonicalName,
+        ExtensionPoint.Kind.INTERFACE
+      )
       generator = ProguardRuleGenerator(resourcesDir)
       initialized = true
     } else {
@@ -68,7 +69,7 @@ internal class ProguardRuleGenerationExtension(
 
     files.flatMap(KtFile::classesAndInnerClasses).forEach { clazz ->
       val jsonClassAnnotation =
-          clazz.findAnnotation(JsonClass::class.fqName, moshiModule) ?: return@forEach
+        clazz.findAnnotation(JsonClass::class.fqName, moshiModule) ?: return@forEach
       if (jsonClassAnnotation.findAnnotationArgument<Boolean>("generateAdapter", 0) == false) {
         return@forEach
       }
@@ -78,27 +79,30 @@ internal class ProguardRuleGenerationExtension(
         val hasGenerics = !clazz.typeParameterList?.parameters.isNullOrEmpty()
         val adapterName = "${targetType.simpleNames.joinToString(separator = "_")}JsonAdapter"
         val adapterConstructorParams =
-            when (hasGenerics) {
-              false -> listOf(MOSHI_REFLECTIVE_NAME)
-              true -> listOf(MOSHI_REFLECTIVE_NAME, TYPE_ARRAY_REFLECTIVE_NAME)
-            }
+          when (hasGenerics) {
+            false -> listOf(MOSHI_REFLECTIVE_NAME)
+            true -> listOf(MOSHI_REFLECTIVE_NAME, TYPE_ARRAY_REFLECTIVE_NAME)
+          }
         val config =
-            ProguardConfig(
-                targetClass = targetType,
-                adapterName = adapterName,
-                adapterConstructorParams = adapterConstructorParams,
-                // Not actually true but in our case we don't need the generated rules for htis
-                targetConstructorHasDefaults = false,
-                targetConstructorParams = emptyList())
+          ProguardConfig(
+            targetClass = targetType,
+            adapterName = adapterName,
+            adapterConstructorParams = adapterConstructorParams,
+            // Not actually true but in our case we don't need the generated rules for htis
+            targetConstructorHasDefaults = false,
+            targetConstructorParams = emptyList()
+          )
         val fileName = "${targetType.canonicalName}.pro"
         if (debug) {
           messageCollector.report(
-              CompilerMessageSeverity.WARNING, "MOSHI: Writing rules for $fileName: $config")
+            CompilerMessageSeverity.WARNING,
+            "MOSHI: Writing rules for $fileName: $config"
+          )
         }
         generator
-            .createNewFile(config.outputFilePathWithoutExtension(fileName))
-            .bufferedWriter()
-            .use(config::writeTo)
+          .createNewFile(config.outputFilePathWithoutExtension(fileName))
+          .bufferedWriter()
+          .use(config::writeTo)
       }
     }
 
@@ -143,8 +147,8 @@ private fun KtFile.classesAndInnerClasses(): List<KtClassOrObject> {
   val children = findChildrenByClass(KtClassOrObject::class.java)
 
   return generateSequence(children.toList()) { list ->
-        list.flatMap { it.declarations.filterIsInstance<KtClassOrObject>() }.ifEmpty { null }
-      }
-      .flatten()
-      .toList()
+      list.flatMap { it.declarations.filterIsInstance<KtClassOrObject>() }.ifEmpty { null }
+    }
+    .flatten()
+    .toList()
 }

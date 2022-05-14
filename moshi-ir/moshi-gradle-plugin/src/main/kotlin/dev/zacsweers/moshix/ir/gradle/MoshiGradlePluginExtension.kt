@@ -29,5 +29,5 @@ abstract class MoshiPluginExtension @Inject constructor(objects: ObjectFactory) 
   val enableSealed: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
   /** Enables automatic generation of proguard rules. Enabled by default. */
   val generateProguardRules: Property<Boolean> =
-      objects.property(Boolean::class.java).convention(true)
+    objects.property(Boolean::class.java).convention(true)
 }

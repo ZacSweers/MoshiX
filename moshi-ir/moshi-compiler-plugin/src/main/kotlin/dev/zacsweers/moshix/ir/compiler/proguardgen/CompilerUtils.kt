@@ -23,26 +23,27 @@ import org.jetbrains.kotlin.types.TypeUtils
 import org.jetbrains.kotlin.types.typeUtil.supertypes
 
 internal fun ClassDescriptor.annotationOrNull(
-    annotationFqName: FqName,
-    scope: FqName? = null
+  annotationFqName: FqName,
+  scope: FqName? = null
 ): AnnotationDescriptor? {
   // Must be JVM, we don't support anything else.
   if (!module.platform.has<JvmPlatform>()) return null
   val annotationDescriptor =
-      try {
-        annotations.findAnnotation(annotationFqName)
-      } catch (e: IllegalStateException) {
-        // In some scenarios this exception is thrown. Throw a new exception with a better
-        // explanation.
-        // Caused by: java.lang.IllegalStateException: Should not be called!
-        // at org.jetbrains.kotlin.types.ErrorUtils$1.getPackage(ErrorUtils.java:95)
-        throw MoshiCompilationException(
-            this,
-            message =
-                "It seems like you tried to contribute an inner class to its outer class. This " +
-                    "is not supported and results in a compiler error.",
-            cause = e)
-      }
+    try {
+      annotations.findAnnotation(annotationFqName)
+    } catch (e: IllegalStateException) {
+      // In some scenarios this exception is thrown. Throw a new exception with a better
+      // explanation.
+      // Caused by: java.lang.IllegalStateException: Should not be called!
+      // at org.jetbrains.kotlin.types.ErrorUtils$1.getPackage(ErrorUtils.java:95)
+      throw MoshiCompilationException(
+        this,
+        message =
+          "It seems like you tried to contribute an inner class to its outer class. This " +
+            "is not supported and results in a compiler error.",
+        cause = e
+      )
+    }
   return if (scope == null || annotationDescriptor == null) {
     annotationDescriptor
   } else {
@@ -51,12 +52,12 @@ internal fun ClassDescriptor.annotationOrNull(
 }
 
 internal fun ClassDescriptor.annotation(
-    annotationFqName: FqName,
-    scope: FqName? = null
+  annotationFqName: FqName,
+  scope: FqName? = null
 ): AnnotationDescriptor =
-    requireNotNull(annotationOrNull(annotationFqName, scope)) {
-      "Couldn't find $annotationFqName with scope $scope for $fqNameSafe."
-    }
+  requireNotNull(annotationOrNull(annotationFqName, scope)) {
+    "Couldn't find $annotationFqName with scope $scope for $fqNameSafe."
+  }
 
 /**
  * Returns only the super class (excluding [Any]) and implemented interfaces declared directly by
@@ -76,17 +77,19 @@ internal fun KotlinType.classDescriptorOrNull(): ClassDescriptor? {
 
 internal fun KotlinType.requireClassDescriptor(): ClassDescriptor {
   return classDescriptorOrNull()
-      ?: throw MoshiCompilationException("Unable to resolve type for ${this.asTypeName()}")
+    ?: throw MoshiCompilationException("Unable to resolve type for ${this.asTypeName()}")
 }
 
 internal fun AnnotationDescriptor.getAnnotationValue(key: String): ConstantValue<*>? =
-    allValueArguments[Name.identifier(key)]
+  allValueArguments[Name.identifier(key)]
 
 internal fun AnnotationDescriptor.scope(module: ModuleDescriptor): ClassDescriptor {
   val annotationValue =
-      getAnnotationValue("scope") as? KClassValue
-          ?: throw MoshiCompilationException(
-              annotationDescriptor = this, message = "Couldn't find scope for $fqName.")
+    getAnnotationValue("scope") as? KClassValue
+      ?: throw MoshiCompilationException(
+        annotationDescriptor = this,
+        message = "Couldn't find scope for $fqName."
+      )
 
   return annotationValue.argumentType(module).requireClassDescriptor()
 }
@@ -103,23 +106,27 @@ internal fun ConstantValue<*>.argumentType(module: ModuleDescriptor): KotlinType
 
   val classId = normalClass.value.classId
 
-  return module.findClassAcrossModuleDependencies(
-          classId =
-              ClassId(
-                  classId.packageFqName,
-                  FqName(classId.relativeClassName.asString().replace('$', '.')),
-                  false))
-      ?.defaultType
-      ?: throw MoshiCompilationException(
-          "Couldn't resolve class across module dependencies for class ID: $classId")
+  return module
+    .findClassAcrossModuleDependencies(
+      classId =
+        ClassId(
+          classId.packageFqName,
+          FqName(classId.relativeClassName.asString().replace('$', '.')),
+          false
+        )
+    )
+    ?.defaultType
+    ?: throw MoshiCompilationException(
+      "Couldn't resolve class across module dependencies for class ID: $classId"
+    )
 }
 
 internal fun List<KotlinType>.getAllSuperTypes(): Sequence<FqName> =
-    generateSequence(this) { kotlinTypes ->
+  generateSequence(this) { kotlinTypes ->
       kotlinTypes.ifEmpty { null }?.flatMap { it.supertypes() }
     }
-        .flatMap { it.asSequence() }
-        .map { it.requireClassDescriptor().fqNameSafe }
+    .flatMap { it.asSequence() }
+    .map { it.requireClassDescriptor().fqNameSafe }
 
 /**
  * This function should only be used for package names. If the FqName is the root (no package at
@@ -128,16 +135,16 @@ internal fun List<KotlinType>.getAllSuperTypes(): Sequence<FqName> =
  * additional dot. The root package never will use a prefix or suffix.
  */
 internal fun FqName.safePackageString(
-    dotPrefix: Boolean = false,
-    dotSuffix: Boolean = true
+  dotPrefix: Boolean = false,
+  dotSuffix: Boolean = true
 ): String =
-    if (isRoot) {
-      ""
-    } else {
-      val prefix = if (dotPrefix) "." else ""
-      val suffix = if (dotSuffix) "." else ""
-      "$prefix$this$suffix"
-    }
+  if (isRoot) {
+    ""
+  } else {
+    val prefix = if (dotPrefix) "." else ""
+    val suffix = if (dotSuffix) "." else ""
+    "$prefix$this$suffix"
+  }
 
 internal fun FqName.classIdBestGuess(): ClassId {
   val segments = pathSegments().map { it.asString() }

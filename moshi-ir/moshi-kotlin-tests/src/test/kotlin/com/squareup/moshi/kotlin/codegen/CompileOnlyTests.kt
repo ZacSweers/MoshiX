@@ -52,8 +52,8 @@ data class TestModel(val someVariable: Int, val anotherVariable: String)
 // Regression test for https://github.com/square/moshi/issues/1022
 @JsonClass(generateAdapter = true)
 internal data class MismatchParentAndNestedClassVisibility(
-    val type: Int,
-    val name: String? = null
+  val type: Int,
+  val name: String? = null
 ) {
 
   @JsonClass(generateAdapter = true) data class NestedClass(val nestedProperty: String)
@@ -62,12 +62,12 @@ internal data class MismatchParentAndNestedClassVisibility(
 // Regression test for https://github.com/square/moshi/issues/1052
 @JsonClass(generateAdapter = true)
 data class KeysWithSpaces(
-    @Json(name = "1. Information") val information: String,
-    @Json(name = "2. Symbol") val symbol: String,
-    @Json(name = "3. Last Refreshed") val lastRefreshed: String,
-    @Json(name = "4. Interval") val interval: String,
-    @Json(name = "5. Output Size") val size: String,
-    @Json(name = "6. Time Zone") val timeZone: String
+  @Json(name = "1. Information") val information: String,
+  @Json(name = "2. Symbol") val symbol: String,
+  @Json(name = "3. Last Refreshed") val lastRefreshed: String,
+  @Json(name = "4. Interval") val interval: String,
+  @Json(name = "5. Output Size") val size: String,
+  @Json(name = "6. Time Zone") val timeZone: String
 )
 
 // Regression test for https://github.com/square/moshi/issues/848
@@ -79,32 +79,32 @@ data class KeysWithSpaces(
  */
 @JsonClass(generateAdapter = true)
 data class SmokeTestType(
-    @Json(name = "first_name") val firstName: String,
-    @Json(name = "last_name") val lastName: String,
-    val age: Int,
-    val nationalities: List<String> = emptyList(),
-    val weight: Float,
-    val tattoos: Boolean = false,
-    val race: String?,
-    val hasChildren: Boolean = false,
-    val favoriteFood: String? = null,
-    val favoriteDrink: String? = "Water",
-    val wildcardOut: MutableList<out String> = mutableListOf(),
-    val nullableWildcardOut: MutableList<out String?> = mutableListOf(),
-    val wildcardIn: Array<in String>,
-    val any: List<*>,
-    val anyTwo: List<Any>,
-    val anyOut: MutableList<out Any>,
-    val nullableAnyOut: MutableList<out Any?>,
-    val favoriteThreeNumbers: IntArray,
-    val favoriteArrayValues: Array<String>,
-    val favoriteNullableArrayValues: Array<String?>,
-    val nullableSetListMapArrayNullableIntWithDefault: Set<List<Map<String, Array<IntArray?>>>>? =
-        null,
-    val aliasedName: TypeAliasName = "Woah",
-    val genericAlias: GenericTypeAlias = listOf("Woah"),
-    // Regression test for https://github.com/square/moshi/issues/1272
-    val nestedArray: Array<Map<String, Any>>? = null
+  @Json(name = "first_name") val firstName: String,
+  @Json(name = "last_name") val lastName: String,
+  val age: Int,
+  val nationalities: List<String> = emptyList(),
+  val weight: Float,
+  val tattoos: Boolean = false,
+  val race: String?,
+  val hasChildren: Boolean = false,
+  val favoriteFood: String? = null,
+  val favoriteDrink: String? = "Water",
+  val wildcardOut: MutableList<out String> = mutableListOf(),
+  val nullableWildcardOut: MutableList<out String?> = mutableListOf(),
+  val wildcardIn: Array<in String>,
+  val any: List<*>,
+  val anyTwo: List<Any>,
+  val anyOut: MutableList<out Any>,
+  val nullableAnyOut: MutableList<out Any?>,
+  val favoriteThreeNumbers: IntArray,
+  val favoriteArrayValues: Array<String>,
+  val favoriteNullableArrayValues: Array<String?>,
+  val nullableSetListMapArrayNullableIntWithDefault: Set<List<Map<String, Array<IntArray?>>>>? =
+    null,
+  val aliasedName: TypeAliasName = "Woah",
+  val genericAlias: GenericTypeAlias = listOf("Woah"),
+  // Regression test for https://github.com/square/moshi/issues/1272
+  val nestedArray: Array<Map<String, Any>>? = null
 )
 
 typealias TypeAliasName = String

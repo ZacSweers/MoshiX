@@ -19,22 +19,23 @@ import java.lang.reflect.Constructor
 import kotlinx.metadata.jvm.JvmMethodSignature
 
 private val PRIMITIVE_CLASS_TO_DESC =
-    mapOf(
-        Byte::class.javaPrimitiveType to 'B',
-        Char::class.javaPrimitiveType to 'C',
-        Double::class.javaPrimitiveType to 'D',
-        Float::class.javaPrimitiveType to 'F',
-        Int::class.javaPrimitiveType to 'I',
-        Long::class.javaPrimitiveType to 'J',
-        Short::class.javaPrimitiveType to 'S',
-        Boolean::class.javaPrimitiveType to 'Z',
-        Void::class.javaPrimitiveType to 'V')
+  mapOf(
+    Byte::class.javaPrimitiveType to 'B',
+    Char::class.javaPrimitiveType to 'C',
+    Double::class.javaPrimitiveType to 'D',
+    Float::class.javaPrimitiveType to 'F',
+    Int::class.javaPrimitiveType to 'I',
+    Long::class.javaPrimitiveType to 'J',
+    Short::class.javaPrimitiveType to 'S',
+    Boolean::class.javaPrimitiveType to 'Z',
+    Void::class.javaPrimitiveType to 'V'
+  )
 
 internal val Class<*>.descriptor: String
   get() {
     return when {
       isPrimitive -> PRIMITIVE_CLASS_TO_DESC[this]?.toString()
-              ?: throw RuntimeException("Unrecognized primitive $this")
+          ?: throw RuntimeException("Unrecognized primitive $this")
       isArray -> "[${componentType.descriptor}"
       else -> "L$name;".replace('.', '/')
     }
@@ -149,4 +150,4 @@ internal fun JvmMethodSignature.decodeParameterTypes(): List<Class<*>> {
  */
 internal val Constructor<*>.jvmMethodSignature: String
   get() =
-      "<init>${parameterTypes.joinToString(separator = "", prefix = "(", postfix = ")V") { it.descriptor }}"
+    "<init>${parameterTypes.joinToString(separator = "", prefix = "(", postfix = ")V") { it.descriptor }}"

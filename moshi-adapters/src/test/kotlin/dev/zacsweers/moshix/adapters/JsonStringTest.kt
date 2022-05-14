@@ -48,8 +48,8 @@ class JsonStringTest {
 
   @JsonClass(generateAdapter = true)
   data class ExampleClass(
-      val type: Int,
-      @JsonString val rawJson: String,
+    val type: Int,
+    @JsonString val rawJson: String,
   )
 
   @Test
@@ -69,8 +69,8 @@ class JsonStringTest {
 
   @JsonClass(generateAdapter = true)
   data class NullableExampleClass(
-      val type: Int,
-      @JsonString val rawJson: String?,
+    val type: Int,
+    @JsonString val rawJson: String?,
   )
 
   @Test
@@ -86,22 +86,22 @@ class JsonStringTest {
     server.start()
 
     val aService =
-        Retrofit.Builder()
-            .baseUrl(server.url("/"))
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .build()
-            .create<AService>()
+      Retrofit.Builder()
+        .baseUrl(server.url("/"))
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .build()
+        .create<AService>()
 
     assertThat(aService.aJsonStringMethod().execute().body()).isEqualTo(json)
 
     val exception =
-        assertThrows(JsonDataException::class.java) {
-          aService.aNonJsonStringMethod().execute().body()
-        }
+      assertThrows(JsonDataException::class.java) {
+        aService.aNonJsonStringMethod().execute().body()
+      }
 
     assertThat(exception)
-        .hasMessageThat()
-        .contains("Expected a string but was BEGIN_OBJECT at path \$")
+      .hasMessageThat()
+      .contains("Expected a string but was BEGIN_OBJECT at path \$")
 
     server.shutdown()
   }

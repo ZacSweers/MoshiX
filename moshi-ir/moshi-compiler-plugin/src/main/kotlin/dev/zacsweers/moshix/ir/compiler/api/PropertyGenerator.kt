@@ -27,9 +27,9 @@ import org.jetbrains.kotlin.ir.types.makeNullable
 
 /** Generates functions to encode and decode a property as JSON. */
 internal class PropertyGenerator(
-    val target: TargetProperty,
-    val delegateKey: DelegateKey,
-    val isTransientOrIgnored: Boolean = false
+  val target: TargetProperty,
+  val delegateKey: DelegateKey,
+  val isTransientOrIgnored: Boolean = false
 ) {
   val name: String = target.name
   val jsonName: String = target.jsonName ?: target.name
@@ -56,7 +56,7 @@ internal class PropertyGenerator(
    * to an absent value
    */
   val hasLocalIsPresentName: Boolean =
-      !isTransientOrIgnored && hasDefault && !hasConstructorParameter && delegateKey.nullable
+    !isTransientOrIgnored && hasDefault && !hasConstructorParameter && delegateKey.nullable
   val hasConstructorDefault: Boolean = hasDefault && hasConstructorParameter
 
   internal fun allocateNames(nameAllocator: NameAllocator) {
@@ -66,47 +66,53 @@ internal class PropertyGenerator(
   }
 
   internal fun generateLocalProperty(
-      builder: IrStatementsBuilder<*>,
-      pluginContext: IrPluginContext
+    builder: IrStatementsBuilder<*>,
+    pluginContext: IrPluginContext
   ): IrVariable {
     builder.apply {
       val expression =
-          if (hasConstructorDefault) {
-            // We default to the primitive default type, as reflectively invoking the constructor
-            // without this (even though it's a throwaway) will fail argument type resolution in
-            // the reflective invocation.
-            defaultPrimitiveValue(target.type, pluginContext)
-          } else {
-            irNull(target.type.makeNullable())
-          }
+        if (hasConstructorDefault) {
+          // We default to the primitive default type, as reflectively invoking the constructor
+          // without this (even though it's a throwaway) will fail argument type resolution in
+          // the reflective invocation.
+          defaultPrimitiveValue(target.type, pluginContext)
+        } else {
+          irNull(target.type.makeNullable())
+        }
       return irTemporary(
-          expression, isMutable = true, nameHint = localName, irType = expression.type)
+        expression,
+        isMutable = true,
+        nameHint = localName,
+        irType = expression.type
+      )
     }
   }
 
   internal fun generateLocalIsPresentProperty(
-      builder: IrStatementsBuilder<*>,
-      pluginContext: IrPluginContext
+    builder: IrStatementsBuilder<*>,
+    pluginContext: IrPluginContext
   ): IrVariable {
     builder.apply {
       return irTemporary(
-          irBoolean(false),
-          isMutable = true,
-          nameHint = localIsPresentName,
-          irType = pluginContext.irBuiltIns.booleanType)
+        irBoolean(false),
+        isMutable = true,
+        nameHint = localIsPresentName,
+        irType = pluginContext.irBuiltIns.booleanType
+      )
     }
   }
 
   internal fun generateLocalHasErrorProperty(
-      builder: IrStatementsBuilder<*>,
-      pluginContext: IrPluginContext
+    builder: IrStatementsBuilder<*>,
+    pluginContext: IrPluginContext
   ): IrVariable {
     builder.apply {
       return irTemporary(
-          irBoolean(false),
-          isMutable = true,
-          nameHint = localHasErrorName,
-          irType = pluginContext.irBuiltIns.booleanType)
+        irBoolean(false),
+        isMutable = true,
+        nameHint = localHasErrorName,
+        irType = pluginContext.irBuiltIns.booleanType
+      )
     }
   }
 }

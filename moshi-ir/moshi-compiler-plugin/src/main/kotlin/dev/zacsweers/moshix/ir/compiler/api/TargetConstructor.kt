@@ -20,7 +20,7 @@ import org.jetbrains.kotlin.ir.declarations.IrConstructor
 
 /** A constructor in user code that should be called by generated code. */
 internal data class TargetConstructor(
-    val irConstructor: IrConstructor,
-    val parameters: LinkedHashMap<String, TargetParameter>,
-    val visibility: DescriptorVisibility,
+  val irConstructor: IrConstructor,
+  val parameters: LinkedHashMap<String, TargetParameter>,
+  val visibility: DescriptorVisibility,
 )

@@ -30,11 +30,12 @@ class MixingReflectAndCodeGen {
     val reflectionAdapter = moshi.adapter<UsesReflectionAdapter>()
 
     assertThat(generatedAdapter.toString())
-        .isEqualTo("GeneratedJsonAdapter(MixingReflectAndCodeGen.UsesGeneratedAdapter).nullSafe()")
+      .isEqualTo("GeneratedJsonAdapter(MixingReflectAndCodeGen.UsesGeneratedAdapter).nullSafe()")
     assertThat(reflectionAdapter.toString())
-        .isEqualTo(
-            "KotlinJsonAdapter(com.squareup.moshi.kotlin.codegen.MixingReflectAndCodeGen" +
-                ".UsesReflectionAdapter).nullSafe()")
+      .isEqualTo(
+        "KotlinJsonAdapter(com.squareup.moshi.kotlin.codegen.MixingReflectAndCodeGen" +
+          ".UsesReflectionAdapter).nullSafe()"
+      )
   }
 
   @JsonClass(generateAdapter = true) class UsesGeneratedAdapter(var a: Int, var b: Int)

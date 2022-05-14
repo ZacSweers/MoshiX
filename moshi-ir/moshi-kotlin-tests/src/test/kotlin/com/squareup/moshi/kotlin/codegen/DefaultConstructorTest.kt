@@ -34,7 +34,7 @@ class DefaultConstructorTest {
   fun allSet() {
     val expected = TestClass("requiredClass", "customOptional", 4, "setDynamic", 5, 6)
     val json =
-        """{"required":"requiredClass","optional":"customOptional","optional2":4,"dynamicSelfReferenceOptional":"setDynamic","dynamicOptional":5,"dynamicInlineOptional":6}"""
+      """{"required":"requiredClass","optional":"customOptional","optional2":4,"dynamicSelfReferenceOptional":"setDynamic","dynamicOptional":5,"dynamicInlineOptional":6}"""
     val instance = Moshi.Builder().build().adapter<TestClass>().fromJson(json)!!
     check(instance == expected) { "No match:\nActual  : $instance\nExpected: $expected" }
   }
@@ -50,12 +50,12 @@ class DefaultConstructorTest {
 
 @JsonClass(generateAdapter = true)
 data class TestClass(
-    val required: String,
-    val optional: String = "optional",
-    val optional2: Int = 2,
-    val dynamicSelfReferenceOptional: String = required,
-    val dynamicOptional: Int = createInt(),
-    val dynamicInlineOptional: Int = createInlineInt()
+  val required: String,
+  val optional: String = "optional",
+  val optional2: Int = 2,
+  val dynamicSelfReferenceOptional: String = required,
+  val dynamicOptional: Int = createInt(),
+  val dynamicInlineOptional: Int = createInlineInt()
 )
 
 private fun createInt(): Int {

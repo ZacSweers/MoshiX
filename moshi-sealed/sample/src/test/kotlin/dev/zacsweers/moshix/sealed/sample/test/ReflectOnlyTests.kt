@@ -34,17 +34,19 @@ class ReflectOnlyTests(type: Type) {
 
   enum class Type(val moshi: Moshi = Moshi.Builder().build()) {
     REFLECT(
-        moshi =
-            Moshi.Builder()
-                .add(MoshiSealedJsonAdapterFactory())
-                .addLast(KotlinJsonAdapterFactory())
-                .build()),
+      moshi =
+        Moshi.Builder()
+          .add(MoshiSealedJsonAdapterFactory())
+          .addLast(KotlinJsonAdapterFactory())
+          .build()
+    ),
     METADATA_REFLECT(
-        moshi =
-            Moshi.Builder()
-                .add(MetadataMoshiSealedJsonAdapterFactory())
-                .addLast(KotlinJsonAdapterFactory())
-                .build())
+      moshi =
+        Moshi.Builder()
+          .add(MetadataMoshiSealedJsonAdapterFactory())
+          .addLast(KotlinJsonAdapterFactory())
+          .build()
+    )
   }
 
   companion object {
@@ -98,9 +100,10 @@ class ReflectOnlyTests(type: Type) {
       fail()
     } catch (e: IllegalStateException) {
       assertThat(e)
-          .hasMessageThat()
-          .contains(
-              "Moshi-sealed subtypes cannot be generic: class dev.zacsweers.moshix.sealed.sample.test.ReflectOnlyTests\$GenericSubtypes\$TypeB")
+        .hasMessageThat()
+        .contains(
+          "Moshi-sealed subtypes cannot be generic: class dev.zacsweers.moshix.sealed.sample.test.ReflectOnlyTests\$GenericSubtypes\$TypeB"
+        )
     }
   }
 

@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 
 internal class RealMoshiModuleDescriptor(delegate: ModuleDescriptor) :
-    MoshiModuleDescriptor, ModuleDescriptor by delegate {
+  MoshiModuleDescriptor, ModuleDescriptor by delegate {
 
   private val classesMap = mutableMapOf<String, List<KtClassOrObject>>()
   private val allClasses: Sequence<KtClassOrObject>

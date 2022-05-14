@@ -51,15 +51,15 @@ internal fun IrProperty.jsonNameFromAnywhere(): String? {
 
 internal fun IrProperty.jsonIgnoreFromAnywhere(): Boolean {
   return jsonIgnore() ||
-      backingField?.jsonIgnore() == true ||
-      getter?.jsonIgnore() == true ||
-      setter?.jsonIgnore() == true
+    backingField?.jsonIgnore() == true ||
+    getter?.jsonIgnore() == true ||
+    setter?.jsonIgnore() == true
 }
 
 internal fun IrAnnotationContainer.jsonName(): String? {
   @Suppress("UNCHECKED_CAST")
-  return (getAnnotation(JSON_ANNOTATION)?.getValueArgument(0) as? IrConst<String>?)?.value
-      ?.takeUnless { it == Json.UNSET_NAME }
+  return (getAnnotation(JSON_ANNOTATION)?.getValueArgument(0) as? IrConst<String>?)
+    ?.value?.takeUnless { it == Json.UNSET_NAME }
 }
 
 internal fun IrAnnotationContainer.jsonIgnore(): Boolean {
@@ -72,8 +72,8 @@ private val TargetProperty.isSettable
 private val TargetProperty.isVisible: Boolean
   get() {
     return visibility == DescriptorVisibilities.INTERNAL ||
-        visibility == DescriptorVisibilities.PROTECTED ||
-        visibility == DescriptorVisibilities.PUBLIC
+      visibility == DescriptorVisibilities.PROTECTED ||
+      visibility == DescriptorVisibilities.PUBLIC
   }
 
 /**
@@ -81,8 +81,8 @@ private val TargetProperty.isVisible: Boolean
  * cannot be used with code gen, or if no codegen is necessary for this property.
  */
 internal fun TargetProperty.generator(
-    originalType: IrClass,
-    errors: MutableList<(logger: MessageCollector) -> Unit>
+  originalType: IrClass,
+  errors: MutableList<(logger: MessageCollector) -> Unit>
 ): PropertyGenerator? {
   if (jsonIgnore) {
     if (!hasDefault) {
@@ -108,11 +108,9 @@ internal fun TargetProperty.generator(
   for (jsonQualifier in qualifiers) {
     val qualifierRawType = jsonQualifier.type.classOrNull!!.owner
     val retentionValue =
-        qualifierRawType
-            .getAnnotation(FqName("kotlin.annotation.Retention"))
-            ?.getValueArgument(0) as
-            IrGetEnumValue?
-            ?: continue
+      qualifierRawType.getAnnotation(FqName("kotlin.annotation.Retention"))?.getValueArgument(0)
+        as IrGetEnumValue?
+        ?: continue
     // TODO what about java qualifiers types?
     val retention = retentionValue.symbol.owner.name.identifier
     // Check Java types since that covers both Java and Kotlin annotations.

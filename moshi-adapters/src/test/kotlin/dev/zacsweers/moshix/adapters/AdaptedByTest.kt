@@ -29,7 +29,7 @@ import org.junit.Test
 class AdaptedByTest {
 
   private val moshi =
-      Moshi.Builder().add(AdaptedBy.Factory()).addLast(KotlinJsonAdapterFactory()).build()
+    Moshi.Builder().add(AdaptedBy.Factory()).addLast(KotlinJsonAdapterFactory()).build()
 
   @Test
   fun adapterProperty() {
@@ -137,14 +137,17 @@ class AdaptedByTest {
     val adapter = moshi.adapter<ClassUsingAnnotatedClasses>()
     val instance = adapter.fromJson("{\"alias1\":\"value\",\"alias2\":\"value\"}")
     assertThat(instance)
-        .isEqualTo(
-            ClassUsingAnnotatedClasses(
-                AnnotatedStringAlias("value"), AnnotatedFactoryStringAlias("value")))
+      .isEqualTo(
+        ClassUsingAnnotatedClasses(
+          AnnotatedStringAlias("value"),
+          AnnotatedFactoryStringAlias("value")
+        )
+      )
   }
 
   data class ClassUsingAnnotatedClasses(
-      val alias1: AnnotatedStringAlias,
-      val alias2: AnnotatedFactoryStringAlias
+    val alias1: AnnotatedStringAlias,
+    val alias2: AnnotatedFactoryStringAlias
   )
 
   @Test
@@ -160,12 +163,12 @@ class AdaptedByTest {
   class NullHandlingStringAliasAdapter : JsonAdapter<NullHandlingStringAlias>() {
     override fun fromJson(reader: JsonReader): NullHandlingStringAlias? {
       val value =
-          if (reader.peek() == JsonReader.Token.NULL) {
-            reader.nextNull<String>()
-            "null"
-          } else {
-            reader.nextString()
-          }
+        if (reader.peek() == JsonReader.Token.NULL) {
+          reader.nextNull<String>()
+          "null"
+        } else {
+          reader.nextString()
+        }
       return NullHandlingStringAlias(value)
     }
 

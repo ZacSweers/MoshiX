@@ -58,7 +58,7 @@ public annotation class JsonString {
 
     private class JsonStringJsonAdapter : JsonAdapter<String>() {
       override fun fromJson(reader: JsonReader): String =
-          reader.nextSource().use(BufferedSource::readUtf8)
+        reader.nextSource().use(BufferedSource::readUtf8)
 
       override fun toJson(writer: JsonWriter, value: String?) {
         writer.valueSink().use { sink -> sink.writeUtf8(checkNotNull(value)) }

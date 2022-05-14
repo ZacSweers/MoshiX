@@ -70,24 +70,25 @@ class ComplexGenericsInheritanceTest {
 
     @Language("JSON")
     val json =
-        """{"layer4E":{"name":"layer4E"},"layer4F":{"data":{"name":"layer4F"},"data2":"layer4F","data3":"layer4F"},"layer3C":[1,2,3],"layer3D":"layer3D","layer2":"layer2","layer1":"layer1"}"""
+      """{"layer4E":{"name":"layer4E"},"layer4F":{"data":{"name":"layer4F"},"data2":"layer4F","data3":"layer4F"},"layer3C":[1,2,3],"layer3D":"layer3D","layer2":"layer2","layer1":"layer1"}"""
 
     val instance = adapter.fromJson(json)!!
     val testInstance =
-        Layer4(
-                layer4E = Person("layer4E"),
-                layer4F =
-                    UntypedNestedPersonResponse<Person>().apply {
-                      data = Person("layer4F")
-                      data2 = "layer4F"
-                      data3 = "layer4F"
-                    })
-            .apply {
-              layer3C = listOf(1, 2, 3)
-              layer3D = "layer3D"
-              layer2 = "layer2"
-              layer1 = "layer1"
+      Layer4(
+          layer4E = Person("layer4E"),
+          layer4F =
+            UntypedNestedPersonResponse<Person>().apply {
+              data = Person("layer4F")
+              data2 = "layer4F"
+              data3 = "layer4F"
             }
+        )
+        .apply {
+          layer3C = listOf(1, 2, 3)
+          layer3D = "layer3D"
+          layer2 = "layer2"
+          layer1 = "layer1"
+        }
     assertThat(instance).isEqualTo(testInstance)
     assertThat(adapter.toJson(testInstance)).isEqualTo(json)
   }
@@ -105,7 +106,7 @@ interface Personable
 
 @JsonClass(generateAdapter = true)
 data class PersonResponse(val extra: String? = null) :
-    ResponseWithSettableProperty<Person, String>()
+  ResponseWithSettableProperty<Person, String>()
 
 abstract class NestedResponse<T : Personable> : ResponseWithSettableProperty<T, String>()
 
@@ -114,7 +115,7 @@ data class NestedPersonResponse(val extra: String? = null) : NestedResponse<Pers
 
 @JsonClass(generateAdapter = true)
 data class UntypedNestedPersonResponse<T : Personable>(val extra: String? = null) :
-    NestedResponse<T>()
+  NestedResponse<T>()
 
 interface LayerInterface<I>
 
@@ -133,4 +134,4 @@ abstract class Layer3<C, D> : Layer2<D>() {
 
 @JsonClass(generateAdapter = true)
 data class Layer4<E : Personable, F>(val layer4E: E, val layer4F: F? = null) :
-    Layer3<List<Int>, String>(), LayerInterface<String>
+  Layer3<List<Int>, String>(), LayerInterface<String>

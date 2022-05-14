@@ -100,21 +100,22 @@ public annotation class AdaptedBy(val adapter: KClass<*>, val nullSafe: Boolean 
       val adapterClass = adaptedBy.adapter
       val javaClass = adapterClass.java
       val adapter =
-          when {
-            JsonAdapter.Factory::class.java.isAssignableFrom(javaClass) -> {
-              val factory = javaClass.getDeclaredConstructor().newInstance() as JsonAdapter.Factory
-              factory.create(type, nextAnnotations.orEmpty(), moshi)
-            }
-            JsonAdapter::class.java.isAssignableFrom(javaClass) -> {
-              javaClass.getDeclaredConstructor().newInstance() as JsonAdapter<*>
-            }
-            else -> {
-              error(
-                  "Invalid attempt to bind an instance of ${javaClass.name} as a @AdaptedBy for $type. @AdaptedBy " +
-                      "value must be a JsonAdapter or JsonAdapter.Factory.")
-            }
+        when {
+          JsonAdapter.Factory::class.java.isAssignableFrom(javaClass) -> {
+            val factory = javaClass.getDeclaredConstructor().newInstance() as JsonAdapter.Factory
+            factory.create(type, nextAnnotations.orEmpty(), moshi)
           }
-              ?: return null
+          JsonAdapter::class.java.isAssignableFrom(javaClass) -> {
+            javaClass.getDeclaredConstructor().newInstance() as JsonAdapter<*>
+          }
+          else -> {
+            error(
+              "Invalid attempt to bind an instance of ${javaClass.name} as a @AdaptedBy for $type. @AdaptedBy " +
+                "value must be a JsonAdapter or JsonAdapter.Factory."
+            )
+          }
+        }
+          ?: return null
 
       return if (adaptedBy.nullSafe) {
         adapter.nullSafe()

@@ -12,25 +12,25 @@ internal interface MoshiModuleDescriptor : ModuleDescriptor {
 
   companion object {
     operator fun invoke(delegate: ModuleDescriptor): ModuleDescriptor =
-        RealMoshiModuleDescriptor(delegate)
+      RealMoshiModuleDescriptor(delegate)
   }
 }
 
 @Suppress("NOTHING_TO_INLINE")
 private inline fun ModuleDescriptor.asAnvilModuleDescriptor(): MoshiModuleDescriptor =
-    this as MoshiModuleDescriptor
+  this as MoshiModuleDescriptor
 
 internal fun ModuleDescriptor.resolveFqNameOrNull(fqName: FqName): FqName? =
-    asAnvilModuleDescriptor().resolveClassIdOrNull(fqName.classIdBestGuess())
+  asAnvilModuleDescriptor().resolveClassIdOrNull(fqName.classIdBestGuess())
 
 internal fun ModuleDescriptor.getKtClassOrObjectOrNull(fqName: FqName): KtClassOrObject? =
-    asAnvilModuleDescriptor().getKtClassOrObjectOrNull(fqName)
+  asAnvilModuleDescriptor().getKtClassOrObjectOrNull(fqName)
 
 internal fun ModuleDescriptor.canResolveFqName(fqName: FqName): Boolean =
-    resolveFqNameOrNull(fqName) != null
+  resolveFqNameOrNull(fqName) != null
 
 internal fun ModuleDescriptor.resolveFqNameOrNull(packageName: FqName, className: String): FqName? =
-    asAnvilModuleDescriptor().resolveClassIdOrNull(ClassId(packageName, Name.identifier(className)))
+  asAnvilModuleDescriptor().resolveClassIdOrNull(ClassId(packageName, Name.identifier(className)))
 
 internal fun ModuleDescriptor.canResolveFqName(packageName: FqName, className: String): Boolean =
-    resolveFqNameOrNull(packageName, className) != null
+  resolveFqNameOrNull(packageName, className) != null

@@ -23,13 +23,13 @@ import org.jetbrains.kotlin.ir.types.IrType
 
 /** A user type that should be decoded and encoded by generated code. */
 internal data class TargetType(
-    val irClass: IrClass,
-    val irType: IrType,
-    val constructor: TargetConstructor,
-    val properties: Map<String, TargetProperty>,
-    val typeVariables: List<IrTypeParameter>,
-    val isDataClass: Boolean,
-    val visibility: DescriptorVisibility,
+  val irClass: IrClass,
+  val irType: IrType,
+  val constructor: TargetConstructor,
+  val properties: Map<String, TargetProperty>,
+  val typeVariables: List<IrTypeParameter>,
+  val isDataClass: Boolean,
+  val visibility: DescriptorVisibility,
 ) {
 
   init {

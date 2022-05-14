@@ -19,54 +19,62 @@ import org.jetbrains.kotlin.util.getExceptionMessage
  * occurs while generating code.
  */
 internal class MoshiCompilationException(
-    message: String,
-    cause: Throwable? = null,
-    element: PsiElement? = null
+  message: String,
+  cause: Throwable? = null,
+  element: PsiElement? = null
 ) : CompilationException(message, cause, element) {
   companion object {
     operator fun invoke(
-        annotationDescriptor: AnnotationDescriptor,
-        message: String,
-        cause: Throwable? = null
+      annotationDescriptor: AnnotationDescriptor,
+      message: String,
+      cause: Throwable? = null
     ): MoshiCompilationException {
       return MoshiCompilationException(
-          message = message, cause = cause, element = annotationDescriptor.identifier)
+        message = message,
+        cause = cause,
+        element = annotationDescriptor.identifier
+      )
     }
 
     operator fun invoke(
-        classDescriptor: ClassDescriptor,
-        message: String,
-        cause: Throwable? = null
+      classDescriptor: ClassDescriptor,
+      message: String,
+      cause: Throwable? = null
     ): MoshiCompilationException {
       return MoshiCompilationException(
-          message = message, cause = cause, element = classDescriptor.identifier)
+        message = message,
+        cause = cause,
+        element = classDescriptor.identifier
+      )
     }
 
     operator fun invoke(
-        element: IrElement? = null,
-        message: String,
-        cause: Throwable? = null
+      element: IrElement? = null,
+      message: String,
+      cause: Throwable? = null
     ): MoshiCompilationException {
       return MoshiCompilationException(
-              message =
-                  getExceptionMessage(
-                      subsystemName = "Anvil",
-                      message = message,
-                      cause = cause,
-                      location = element?.render()),
+          message =
+            getExceptionMessage(
+              subsystemName = "Anvil",
+              message = message,
               cause = cause,
-              element = element?.psi)
-          .apply {
-            if (element != null) {
-              withAttachment("element.kt", element.render())
-            }
+              location = element?.render()
+            ),
+          cause = cause,
+          element = element?.psi
+        )
+        .apply {
+          if (element != null) {
+            withAttachment("element.kt", element.render())
           }
+        }
     }
 
     operator fun invoke(
-        element: IrSymbol? = null,
-        message: String,
-        cause: Throwable? = null,
+      element: IrSymbol? = null,
+      message: String,
+      cause: Throwable? = null,
     ): MoshiCompilationException {
       return MoshiCompilationException(message = message, cause = cause, element = element?.owner)
     }
@@ -81,7 +89,7 @@ private val AnnotationDescriptor.identifier: PsiElement?
 
 private val IrElement.psi: PsiElement?
   get() =
-      when (this) {
-        is IrClass -> (this.source.getPsi() as? PsiNameIdentifierOwner)?.identifyingElement
-        else -> null
-      }
+    when (this) {
+      is IrClass -> (this.source.getPsi() as? PsiNameIdentifierOwner)?.identifyingElement
+      else -> null
+    }

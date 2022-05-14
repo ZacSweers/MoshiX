@@ -27,7 +27,7 @@ class ObjectSerializationTest {
   fun smokeTest() {
     // language=json
     val json =
-        """
+      """
      {
        "name": "tacoFactory",
        "returnType": { "type": "void" },
@@ -41,10 +41,12 @@ class ObjectSerializationTest {
     val functionSpec = moshi.adapter<FunctionSpec>().fromJson(json)
     checkNotNull(functionSpec)
     assertThat(functionSpec)
-        .isEqualTo(
-            FunctionSpec(
-                name = "tacoFactory",
-                returnType = Type.VoidType,
-                parameters = mapOf("param1" to Type.IntType, "param2" to Type.BooleanType)))
+      .isEqualTo(
+        FunctionSpec(
+          name = "tacoFactory",
+          returnType = Type.VoidType,
+          parameters = mapOf("param1" to Type.IntType, "param2" to Type.BooleanType)
+        )
+      )
   }
 }

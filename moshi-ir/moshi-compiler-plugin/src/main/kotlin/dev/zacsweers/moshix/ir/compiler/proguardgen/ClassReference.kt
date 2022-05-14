@@ -20,10 +20,10 @@ internal sealed class ClassReference {
   abstract val fqName: FqName
 
   class Psi internal constructor(val clazz: KtClassOrObject, override val fqName: FqName) :
-      ClassReference()
+    ClassReference()
 
   class Descriptor internal constructor(val clazz: ClassDescriptor, override val fqName: FqName) :
-      ClassReference()
+    ClassReference()
 
   override fun toString(): String {
     return "${this::class.qualifiedName}($fqName)"
@@ -50,7 +50,7 @@ internal sealed class ClassReference {
  */
 internal fun ModuleDescriptor.classReferenceOrNull(fqName: FqName): ClassReference? {
   return fqName.classDescriptorOrNull(this)?.toClassReference()
-      ?: getKtClassOrObjectOrNull(fqName)?.toClassReference()
+    ?: getKtClassOrObjectOrNull(fqName)?.toClassReference()
 }
 
 internal fun ClassDescriptor.toClassReference(): Descriptor {
@@ -63,7 +63,7 @@ internal fun KtClassOrObject.toClassReference(): Psi {
 
 internal fun ModuleDescriptor.requireClassReference(fqName: FqName): ClassReference {
   return classReferenceOrNull(fqName)
-      ?: throw MoshiCompilationException("Couldn't resolve ClassReference for $fqName")
+    ?: throw MoshiCompilationException("Couldn't resolve ClassReference for $fqName")
 }
 
 /**
@@ -77,31 +77,33 @@ internal fun ModuleDescriptor.requireClassReference(fqName: FqName): ClassRefere
  * @param includeSelf If true, the receiver class is the first element of the sequence
  */
 internal fun ClassReference.allSuperTypeClassReferences(
-    module: ModuleDescriptor,
-    includeSelf: Boolean = false
+  module: ModuleDescriptor,
+  includeSelf: Boolean = false
 ): Sequence<ClassReference> {
   return generateSequence(sequenceOf(this)) { superTypes ->
-    superTypes.map { classRef -> classRef.directSuperClassReferences(module) }.flatten().takeIf {
-      it.firstOrNull() != null
+      superTypes
+        .map { classRef -> classRef.directSuperClassReferences(module) }
+        .flatten()
+        .takeIf { it.firstOrNull() != null }
     }
-  }
-      .drop(if (includeSelf) 0 else 1)
-      .flatten()
-      .distinctBy { it.fqName }
+    .drop(if (includeSelf) 0 else 1)
+    .flatten()
+    .distinctBy { it.fqName }
 }
 
 internal fun ClassReference.directSuperClassReferences(
-    module: ModuleDescriptor
+  module: ModuleDescriptor
 ): Sequence<ClassReference> {
   return when (this) {
     is Descriptor ->
-        clazz.directSuperClassAndInterfaces().asSequence().map {
-          module.requireClassReference(it.fqNameSafe)
-        }
+      clazz.directSuperClassAndInterfaces().asSequence().map {
+        module.requireClassReference(it.fqNameSafe)
+      }
     is Psi ->
-        clazz.superTypeListEntries.asSequence().map { it.requireFqName(module) }.map {
-          module.requireClassReference(it)
-        }
+      clazz.superTypeListEntries
+        .asSequence()
+        .map { it.requireFqName(module) }
+        .map { module.requireClassReference(it) }
   }
 }
 
@@ -112,7 +114,7 @@ internal fun ClassReference.directSuperClassReferences(
 internal fun ClassReference.indexOfTypeParameter(parameterName: String): Int {
   return when (this) {
     is Descriptor ->
-        clazz.declaredTypeParameters.indexOfFirst { it.name.asString() == parameterName }
+      clazz.declaredTypeParameters.indexOfFirst { it.name.asString() == parameterName }
     is Psi -> clazz.typeParameters.indexOfFirst { it.identifyingElement?.text == parameterName }
   }
 }
