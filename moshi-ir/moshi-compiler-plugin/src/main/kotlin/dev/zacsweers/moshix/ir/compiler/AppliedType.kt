@@ -33,7 +33,7 @@ internal class AppliedType private constructor(val type: IrClass) {
    * other types.
    */
   fun superclasses(
-      pluginContext: IrPluginContext,
+    pluginContext: IrPluginContext,
   ): LinkedHashSet<AppliedType> {
     val result: LinkedHashSet<AppliedType> = LinkedHashSet()
     result.add(this)

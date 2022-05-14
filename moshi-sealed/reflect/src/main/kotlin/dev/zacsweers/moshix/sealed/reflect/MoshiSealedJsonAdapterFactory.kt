@@ -50,14 +50,14 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       // If this is a nested sealed type of a moshi-sealed parent, defer to the parent
       if (rawType.getAnnotation(NestedSealed::class.java) != null) {
         val parentLabelKey =
-            rawTypeKotlin.supertypes.firstNotNullOfOrNull { supertype ->
-              // Weird that we need to check the classifier ourselves
-              val nestedJsonClass =
-                  (supertype.classifier as? KClass<*>)?.findAnnotation<JsonClass>()
-                      ?: supertype.findAnnotation()
-              nestedJsonClass?.labelKey()
-            }
-                ?: error("No JsonClass-annotated sealed supertype found for $rawTypeKotlin")
+          rawTypeKotlin.supertypes.firstNotNullOfOrNull { supertype ->
+            // Weird that we need to check the classifier ourselves
+            val nestedJsonClass =
+              (supertype.classifier as? KClass<*>)?.findAnnotation<JsonClass>()
+                ?: supertype.findAnnotation()
+            nestedJsonClass?.labelKey()
+          }
+            ?: error("No JsonClass-annotated sealed supertype found for $rawTypeKotlin")
         check(parentLabelKey != labelKey) {
           "@NestedSealed-annotated subtype $rawType is inappropriately annotated with @JsonClass(generator = \"sealed:$labelKey\")."
         }
@@ -79,7 +79,7 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       for (sealedSubclass in rawTypeKotlin.sealedSubclasses) {
         val objectInstance = sealedSubclass.objectInstance
         val isAnnotatedDefaultObject =
-            sealedSubclass.java.isAnnotationPresent(DefaultObject::class.java)
+          sealedSubclass.java.isAnnotationPresent(DefaultObject::class.java)
         if (isAnnotatedDefaultObject) {
           if (objectInstance == null) {
             error("Must be an object type to use as a @DefaultObject: $sealedSubclass")
@@ -90,7 +90,8 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
               error("Can not have both @DefaultObject and @DefaultNull: $sealedSubclass")
             } else {
               error(
-                  "Can only have one @DefaultObject: $sealedSubclass and ${defaultObjectInstance.javaClass} are both annotated")
+                "Can only have one @DefaultObject: $sealedSubclass and ${defaultObjectInstance.javaClass} are both annotated"
+              )
             }
           }
         } else {
@@ -105,31 +106,31 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       }
 
       val delegateMoshi =
-          if (objectSubtypes.isEmpty()) {
-            moshi
-          } else {
-            moshi
-                .newBuilder()
-                .apply {
-                  for ((subtype, instance) in objectSubtypes) {
-                    add(subtype, ObjectJsonAdapter(instance))
-                  }
-                }
-                .build()
-          }
+        if (objectSubtypes.isEmpty()) {
+          moshi
+        } else {
+          moshi
+            .newBuilder()
+            .apply {
+              for ((subtype, instance) in objectSubtypes) {
+                add(subtype, ObjectJsonAdapter(instance))
+              }
+            }
+            .build()
+        }
 
       @Suppress("UNCHECKED_CAST")
       val seed = PolymorphicJsonAdapterFactory.of(rawType as Class<Any>?, labelKey)
       val polymorphicFactory =
-          labels.entries
-              .fold(seed) { factory, (label, subtype) -> factory.withSubtype(subtype, label) }
-              .let { factory ->
-                if (defaultObjectInstance !== UNSET) {
-                  factory.withDefaultValue(defaultObjectInstance)
-                } else {
-                  factory
-                }
-              }
+        labels.entries
+          .fold(seed) { factory, (label, subtype) -> factory.withSubtype(subtype, label) }
+          .let { factory ->
+            if (defaultObjectInstance !== UNSET) {
+              factory.withDefaultValue(defaultObjectInstance)
+            } else {
+              factory
+            }
+          }
 
       return polymorphicFactory.create(rawType, annotations, delegateMoshi)
     }
@@ -139,18 +140,18 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
 }
 
 private fun JsonClass.labelKey(): String? =
-    if (generator.startsWith("sealed:")) {
-      generator.removePrefix("sealed:")
-    } else {
-      null
-    }
+  if (generator.startsWith("sealed:")) {
+    generator.removePrefix("sealed:")
+  } else {
+    null
+  }
 
 private fun walkTypeLabels(
-    subtype: KClass<*>,
-    labelKey: String,
-    labels: MutableMap<String, Class<*>>,
-    objectSubtypes: MutableMap<Class<*>, Any>,
-    clazz: Class<*> = subtype.java,
+  subtype: KClass<*>,
+  labelKey: String,
+  labels: MutableMap<String, Class<*>>,
+  objectSubtypes: MutableMap<Class<*>, Any>,
+  clazz: Class<*> = subtype.java,
 ) {
   // If it's sealed, check if it's inheriting from our existing type or a separate/new branching off
   // point.
@@ -160,8 +161,9 @@ private fun walkTypeLabels(
       // Redundant case
       if (labelKey == nestedLabelKey) {
         error(
-            "Sealed subtype $subtype is redundantly annotated with @JsonClass(generator = " +
-                "\"sealed:$nestedLabelKey\").")
+          "Sealed subtype $subtype is redundantly annotated with @JsonClass(generator = " +
+            "\"sealed:$nestedLabelKey\")."
+        )
       }
     }
 
@@ -176,22 +178,27 @@ private fun walkTypeLabels(
     }
   } else {
     addLabelKeyForType(
-        subtype, labels, objectSubtypes, skipJsonClassCheck = subtype.objectInstance != null)
+      subtype,
+      labels,
+      objectSubtypes,
+      skipJsonClassCheck = subtype.objectInstance != null
+    )
   }
 }
 
 private fun addLabelKeyForType(
-    subtype: KClass<*>,
-    labels: MutableMap<String, Class<*>>,
-    objectSubtypes: MutableMap<Class<*>, Any>,
-    skipJsonClassCheck: Boolean = false
+  subtype: KClass<*>,
+  labels: MutableMap<String, Class<*>>,
+  objectSubtypes: MutableMap<Class<*>, Any>,
+  skipJsonClassCheck: Boolean = false
 ) {
   // Regular subtype, read its label
   val subtypeClazz = subtype.java
   val labelAnnotation =
-      subtype.findAnnotation<TypeLabel>()
-          ?: throw IllegalArgumentException(
-              "Sealed subtypes must be annotated with @TypeLabel to define their label ${subtype.qualifiedName}")
+    subtype.findAnnotation<TypeLabel>()
+      ?: throw IllegalArgumentException(
+        "Sealed subtypes must be annotated with @TypeLabel to define their label ${subtype.qualifiedName}"
+      )
   val label = labelAnnotation.label
   labels.put(label, subtypeClazz)?.let { prev ->
     error("Duplicate label '$label' defined for $subtypeClazz and $prev.")

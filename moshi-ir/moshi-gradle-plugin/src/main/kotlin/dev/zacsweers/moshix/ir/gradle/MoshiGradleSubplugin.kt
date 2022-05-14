@@ -36,11 +36,11 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
   companion object {
     @JvmStatic
     fun getMoshiXOutputDir(project: Project, sourceSetName: String) =
-        File(project.project.buildDir, "generated/moshix/$sourceSetName")
+      File(project.project.buildDir, "generated/moshix/$sourceSetName")
 
     @JvmStatic
     fun getMoshiXResourceOutputDir(project: Project, sourceSetName: String) =
-        File(getMoshiXOutputDir(project, sourceSetName), "resources")
+      File(getMoshiXOutputDir(project, sourceSetName), "resources")
   }
 
   override fun apply(target: Project) {
@@ -50,13 +50,16 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
   override fun getCompilerPluginId(): String = "moshi-compiler-plugin"
 
   override fun getPluginArtifact(): SubpluginArtifact =
-      SubpluginArtifact(
-          groupId = "dev.zacsweers.moshix", artifactId = "moshi-compiler-plugin", version = VERSION)
+    SubpluginArtifact(
+      groupId = "dev.zacsweers.moshix",
+      artifactId = "moshi-compiler-plugin",
+      version = VERSION
+    )
 
   override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
 
   override fun applyToCompilation(
-      kotlinCompilation: KotlinCompilation<*>
+    kotlinCompilation: KotlinCompilation<*>
   ): Provider<List<SubpluginOption>> {
     val project = kotlinCompilation.target.project
     val extension = project.extensions.getByType(MoshiPluginExtension::class.java)
@@ -70,7 +73,9 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     val enableSealed = extension.enableSealed.get()
     if (enableSealed) {
       project.dependencies.add(
-          "implementation", "dev.zacsweers.moshix:moshi-sealed-runtime:$VERSION")
+        "implementation",
+        "dev.zacsweers.moshix:moshi-sealed-runtime:$VERSION"
+      )
     }
 
     if (generateProguardRules) {
@@ -78,8 +83,8 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       val compilationTask = kotlinCompilation.compileKotlinTask
       compilationTask.outputs.dirs(resourceOutputDir)
       val processResourcesTaskName =
-          (kotlinCompilation as? KotlinCompilationWithResources)?.processResourcesTaskName
-              ?: "processResources"
+        (kotlinCompilation as? KotlinCompilationWithResources)?.processResourcesTaskName
+          ?: "processResources"
       project.locateTask<ProcessResources>(processResourcesTaskName)?.let { provider ->
         provider.configure { resourcesTask ->
           resourcesTask.dependsOn(compilationTask)
@@ -88,7 +93,8 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       }
       if (kotlinCompilation is KotlinJvmAndroidCompilation) {
         kotlinCompilation.androidVariant.registerPostJavacGeneratedBytecode(
-            project.files(resourceOutputDir))
+          project.files(resourceOutputDir)
+        )
       }
     }
 
@@ -112,8 +118,8 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
 // Copied from kotlin-gradle-plugin, because they are internal.
 internal inline fun <reified T : Task> Project.locateTask(name: String): TaskProvider<T>? =
-    try {
-      tasks.withType(T::class.java).named(name)
-    } catch (e: UnknownTaskException) {
-      null
-    }
+  try {
+    tasks.withType(T::class.java).named(name)
+  } catch (e: UnknownTaskException) {
+    null
+  }

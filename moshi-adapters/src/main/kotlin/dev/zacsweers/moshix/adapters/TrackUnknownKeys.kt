@@ -75,26 +75,25 @@ public annotation class TrackUnknownKeys {
    * a callback function for tracking unknown names for a given class.
    */
   public class Factory(
-      private val shouldTrack: (clazz: Class<*>, annotations: Set<Annotation>) -> Boolean =
-          { _, _ ->
-            true
-          },
-      private val tracker: UnknownKeysTracker
+    private val shouldTrack: (clazz: Class<*>, annotations: Set<Annotation>) -> Boolean = { _, _ ->
+      true
+    },
+    private val tracker: UnknownKeysTracker
   ) : JsonAdapter.Factory {
     override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
       if (type !is Class<*>) return null
       val nextAnnotations = annotations.nextAnnotations<TrackUnknownKeys>()
       if (nextAnnotations == null && !type.isAnnotationPresent(TrackUnknownKeys::class.java))
-          return null
+        return null
       if (!shouldTrack(type, annotations)) return null
       val delegate = moshi.nextAdapter<Any>(this, type, nextAnnotations ?: annotations)
       return TrackUnknownKeysJsonAdapter(delegate, type, tracker)
     }
 
     private class TrackUnknownKeysJsonAdapter<T>(
-        private val delegate: JsonAdapter<T>,
-        private val clazz: Class<*>,
-        private val tracker: UnknownKeysTracker
+      private val delegate: JsonAdapter<T>,
+      private val clazz: Class<*>,
+      private val tracker: UnknownKeysTracker
     ) : JsonAdapter<T>() {
       override fun fromJson(reader: JsonReader): T? {
         val token = reader.peek()
@@ -183,7 +182,10 @@ private fun JsonReader.readTo(writer: JsonWriter) {
     }
     Token.BOOLEAN -> writer.value(nextBoolean())
     Token.NULL -> writer.value(nextNull<String>())
-    Token.NAME, Token.END_ARRAY, Token.END_OBJECT, Token.END_DOCUMENT -> {
+    Token.NAME,
+    Token.END_ARRAY,
+    Token.END_OBJECT,
+    Token.END_DOCUMENT -> {
       throw JsonDataException("Unexpected token $token at $path")
     }
   }

@@ -27,7 +27,7 @@ tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
     freeCompilerArgs +=
-        listOf("-opt-in=kotlin.RequiresOptIn", "-opt-in=kotlin.ExperimentalStdlibApi")
+      listOf("-opt-in=kotlin.RequiresOptIn", "-opt-in=kotlin.ExperimentalStdlibApi")
   }
 }
 
@@ -44,8 +44,8 @@ dependencies {
 configurations.configureEach {
   resolutionStrategy.dependencySubstitution {
     substitute(module("dev.zacsweers.moshix:moshi-compiler-plugin"))
-        .using(project(":moshi-ir:moshi-compiler-plugin"))
+      .using(project(":moshi-ir:moshi-compiler-plugin"))
     substitute(module("dev.zacsweers.moshix:moshi-sealed-runtime"))
-        .using(project(":moshi-sealed:runtime"))
+      .using(project(":moshi-sealed:runtime"))
   }
 }

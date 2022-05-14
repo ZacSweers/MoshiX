@@ -32,45 +32,48 @@ class SealedInterfaceMessageTest {
   fun assertDefaultBehavior() {
     val adapter = moshi.adapter<SealedInterfaceMessage>()
     assertPolymorphicBehavior(
-        adapter,
-        SealedInterfaceMessage.Success("Okay!"),
-        SealedInterfaceMessage.Error(mapOf("order" to 66.0)),
-        SealedInterfaceMessage.Unknown)
+      adapter,
+      SealedInterfaceMessage.Success("Okay!"),
+      SealedInterfaceMessage.Error(mapOf("order" to 66.0)),
+      SealedInterfaceMessage.Unknown
+    )
   }
 
   @Test
   fun assertDefaultNullBehavior() {
     val adapter = moshi.adapter<MessageWithNullDefault>()
     assertPolymorphicBehavior(
-        adapter,
-        MessageWithNullDefault.Success("Okay!"),
-        MessageWithNullDefault.Error(mapOf("order" to 66.0)),
-        null)
+      adapter,
+      MessageWithNullDefault.Success("Okay!"),
+      MessageWithNullDefault.Error(mapOf("order" to 66.0)),
+      null
+    )
   }
 
   @Test
   fun assertNoDefaultBehavior() {
     val adapter = moshi.adapter<MessageWithNoDefault>()
     assertPolymorphicBehavior(
-        adapter,
-        MessageWithNoDefault.Success("Okay!"),
-        MessageWithNoDefault.Error(mapOf("order" to 66.0)),
-        null)
+      adapter,
+      MessageWithNoDefault.Success("Okay!"),
+      MessageWithNoDefault.Error(mapOf("order" to 66.0)),
+      null
+    )
   }
 
   private fun <T> assertPolymorphicBehavior(
-      adapter: JsonAdapter<T>,
-      success: T,
-      error: T,
-      defaultInstance: T?
+    adapter: JsonAdapter<T>,
+    success: T,
+    error: T,
+    defaultInstance: T?
   ) {
     assertThat(adapter.fromJson("{\"type\":\"success\",\"value\":\"Okay!\"}")).isEqualTo(success)
     // Test alternates
     assertThat(adapter.fromJson("{\"type\":\"successful\",\"value\":\"Okay!\"}")).isEqualTo(success)
     assertThat(adapter.fromJson("{\"type\":\"error\",\"error_logs\":{\"order\":66}}"))
-        .isEqualTo(error)
+      .isEqualTo(error)
     assertThat(adapter.fromJson("{\"type\":\"taco\",\"junkdata\":100}"))
-        .isSameInstanceAs(defaultInstance)
+      .isSameInstanceAs(defaultInstance)
   }
 
   @DefaultNull

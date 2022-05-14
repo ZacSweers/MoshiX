@@ -19,30 +19,31 @@ import org.jetbrains.kotlin.types.Variance.OUT_VARIANCE
 import org.jetbrains.kotlin.types.typeUtil.isTypeParameter
 
 internal fun KtClassOrObject.asClassName(): ClassName =
-    ClassName(
-        packageName =
-            containingKtFile.packageFqName.safePackageString(dotPrefix = false, dotSuffix = false),
-        simpleNames =
-            parentsWithSelf
-                .filterIsInstance<KtClassOrObject>()
-                .map { it.nameAsSafeName.asString() }
-                .toList()
-                .reversed())
+  ClassName(
+    packageName =
+      containingKtFile.packageFqName.safePackageString(dotPrefix = false, dotSuffix = false),
+    simpleNames =
+      parentsWithSelf
+        .filterIsInstance<KtClassOrObject>()
+        .map { it.nameAsSafeName.asString() }
+        .toList()
+        .reversed()
+  )
 
 internal fun ClassDescriptor.asClassName(): ClassName =
-    ClassName(
-        packageName =
-            parents
-                .filterIsInstance<PackageFragmentDescriptor>()
-                .first()
-                .fqName
-                .safePackageString(dotSuffix = false),
-        simpleNames =
-            parentsWithSelf
-                .filterIsInstance<ClassDescriptor>()
-                .map { it.name.asString() }
-                .toList()
-                .reversed())
+  ClassName(
+    packageName =
+      parents
+        .filterIsInstance<PackageFragmentDescriptor>()
+        .first()
+        .fqName.safePackageString(dotSuffix = false),
+    simpleNames =
+      parentsWithSelf
+        .filterIsInstance<ClassDescriptor>()
+        .map { it.name.asString() }
+        .toList()
+        .reversed()
+  )
 
 internal fun KotlinType.asTypeName(): TypeName {
   return asTypeNameOrNull { true }!!
@@ -56,7 +57,7 @@ internal fun KotlinType.asTypeName(): TypeName {
  * ```
  */
 internal fun KotlinType.asTypeNameOrNull(
-    rawTypeFilter: (ClassName) -> Boolean = { true }
+  rawTypeFilter: (ClassName) -> Boolean = { true }
 ): TypeName? {
   if (isTypeParameter()) return TypeVariableName(toString())
 
@@ -67,18 +68,18 @@ internal fun KotlinType.asTypeNameOrNull(
   if (arguments.isEmpty()) return className.copy(nullable = isMarkedNullable)
 
   val argumentTypeNames =
-      arguments.map { typeProjection ->
-        if (typeProjection.isStarProjection) {
-          STAR
-        } else {
-          val typeName = typeProjection.type.asTypeName()
-          when (typeProjection.projectionKind) {
-            INVARIANT -> typeName
-            OUT_VARIANCE -> WildcardTypeName.producerOf(typeName)
-            IN_VARIANCE -> WildcardTypeName.consumerOf(typeName)
-          }
+    arguments.map { typeProjection ->
+      if (typeProjection.isStarProjection) {
+        STAR
+      } else {
+        val typeName = typeProjection.type.asTypeName()
+        when (typeProjection.projectionKind) {
+          INVARIANT -> typeName
+          OUT_VARIANCE -> WildcardTypeName.producerOf(typeName)
+          IN_VARIANCE -> WildcardTypeName.consumerOf(typeName)
         }
       }
+    }
 
   return className.parameterizedBy(argumentTypeNames).copy(nullable = isMarkedNullable)
 }

@@ -23,15 +23,16 @@ import org.jetbrains.kotlin.name.FqName
 internal class MoshiSealedSymbols(private val pluginContext: IrPluginContext) {
   val pjaf by lazy {
     pluginContext.referenceClass(
-        FqName("com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory"))!!
+      FqName("com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory")
+    )!!
   }
   val pjafOf by lazy { pjaf.getSimpleFunction("of")!! }
   val pjafWithSubtype by lazy { pjaf.getSimpleFunction("withSubtype")!! }
   val pjafWithDefaultValue by lazy { pjaf.getSimpleFunction("withDefaultValue")!! }
 
   val objectJsonAdapterCtor by lazy {
-    pluginContext.referenceClass(
-            FqName("dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter"))!!
-        .constructors.single()
+    pluginContext
+      .referenceClass(FqName("dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter"))!!
+      .constructors.single()
   }
 }

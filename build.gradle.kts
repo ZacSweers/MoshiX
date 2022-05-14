@@ -22,9 +22,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 buildscript {
   dependencies {
     classpath(
-        kotlin(
-            "gradle-plugin",
-            version = (System.getenv()["MOSHIX_KOTLIN"] ?: libs.versions.kotlin.get())))
+      kotlin(
+        "gradle-plugin",
+        version = (System.getenv()["MOSHIX_KOTLIN"] ?: libs.versions.kotlin.get())
+      )
+    )
     // Include our included build
     classpath("dev.zacsweers.moshix:moshi-gradle-plugin")
   }
@@ -41,13 +43,13 @@ plugins {
 
 apiValidation {
   ignoredProjects +=
-      listOf(
-          /* :moshi-ir: */
-          "moshi-kotlin-tests",
-          "extra-moshi-test-module",
-          /* :moshi-sealed: */
-          "sample",
-      )
+    listOf(
+      /* :moshi-ir: */
+      "moshi-kotlin-tests",
+      "extra-moshi-test-module",
+      /* :moshi-sealed: */
+      "sample",
+    )
 }
 
 repositories { mavenCentral() }
@@ -65,18 +67,18 @@ spotless {
     targetExclude("**/spotless.java", "**/build/**")
   }
   kotlin {
-    ktfmt("0.37")
+    ktfmt("0.37").googleStyle()
     target("**/*.kt")
     trimTrailingWhitespace()
     endWithNewline()
     targetExclude(
-        "**/Dependencies.kt",
-        "**/spotless.kt",
-        "**/build/**",
+      "**/Dependencies.kt",
+      "**/spotless.kt",
+      "**/build/**",
     )
   }
   kotlinGradle {
-    ktfmt("0.37")
+    ktfmt("0.37").googleStyle()
     target("**/*.gradle.kts")
     trimTrailingWhitespace()
     endWithNewline()
@@ -109,7 +111,7 @@ subprojects {
         jvmTarget = libs.versions.jvmTarget.get()
         @Suppress("SuspiciousCollectionReassignment")
         freeCompilerArgs +=
-            listOf("-Xjsr305=strict", "-progressive", "-opt-in=kotlin.RequiresOptIn")
+          listOf("-Xjsr305=strict", "-progressive", "-opt-in=kotlin.RequiresOptIn")
         // TODO disabled because Gradle's Kotlin handling is silly
         //  https://github.com/gradle/gradle/issues/16779
         //        allWarningsAsErrors = true
@@ -117,7 +119,8 @@ subprojects {
     }
     if (project.name != "sample" &&
         !project.path.contains("sample") &&
-        !project.path.contains("test")) {
+        !project.path.contains("test")
+    ) {
       configure<KotlinProjectExtension> { explicitApi() }
     }
   }

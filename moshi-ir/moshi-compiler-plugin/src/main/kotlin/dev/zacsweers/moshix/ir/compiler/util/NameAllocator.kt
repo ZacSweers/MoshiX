@@ -75,8 +75,8 @@ import java.util.UUID
  */
 internal class NameAllocator
 private constructor(
-    private val allocatedNames: MutableSet<String>,
-    private val tagToName: MutableMap<Any, String>
+  private val allocatedNames: MutableSet<String>,
+  private val tagToName: MutableMap<Any, String>
 ) {
   constructor() : this(mutableSetOf(), mutableMapOf())
 
@@ -122,16 +122,17 @@ private fun toJavaIdentifier(suggestion: String) = buildString {
     val codePoint = suggestion.codePointAt(i)
     if (i == 0 &&
         !Character.isJavaIdentifierStart(codePoint) &&
-        Character.isJavaIdentifierPart(codePoint)) {
+        Character.isJavaIdentifierPart(codePoint)
+    ) {
       append("_")
     }
 
     val validCodePoint: Int =
-        if (Character.isJavaIdentifierPart(codePoint)) {
-          codePoint
-        } else {
-          '_'.code
-        }
+      if (Character.isJavaIdentifierPart(codePoint)) {
+        codePoint
+      } else {
+        '_'.code
+      }
     appendCodePoint(validCodePoint)
     i += Character.charCount(codePoint)
   }
@@ -142,88 +143,88 @@ internal val String.isKeyword
 
 // https://kotlinlang.org/docs/reference/keyword-reference.html
 private val KEYWORDS =
-    setOf(
-        // Hard keywords
-        "as",
-        "break",
-        "class",
-        "continue",
-        "do",
-        "else",
-        "false",
-        "for",
-        "fun",
-        "if",
-        "in",
-        "interface",
-        "is",
-        "null",
-        "object",
-        "package",
-        "return",
-        "super",
-        "this",
-        "throw",
-        "true",
-        "try",
-        "typealias",
-        "typeof",
-        "val",
-        "var",
-        "when",
-        "while",
+  setOf(
+    // Hard keywords
+    "as",
+    "break",
+    "class",
+    "continue",
+    "do",
+    "else",
+    "false",
+    "for",
+    "fun",
+    "if",
+    "in",
+    "interface",
+    "is",
+    "null",
+    "object",
+    "package",
+    "return",
+    "super",
+    "this",
+    "throw",
+    "true",
+    "try",
+    "typealias",
+    "typeof",
+    "val",
+    "var",
+    "when",
+    "while",
 
-        // Soft keywords
-        "by",
-        "catch",
-        "constructor",
-        "delegate",
-        "dynamic",
-        "field",
-        "file",
-        "finally",
-        "get",
-        "import",
-        "init",
-        "param",
-        "property",
-        "receiver",
-        "set",
-        "setparam",
-        "where",
+    // Soft keywords
+    "by",
+    "catch",
+    "constructor",
+    "delegate",
+    "dynamic",
+    "field",
+    "file",
+    "finally",
+    "get",
+    "import",
+    "init",
+    "param",
+    "property",
+    "receiver",
+    "set",
+    "setparam",
+    "where",
 
-        // Modifier keywords
-        "actual",
-        "abstract",
-        "annotation",
-        "companion",
-        "const",
-        "crossinline",
-        "data",
-        "enum",
-        "expect",
-        "external",
-        "final",
-        "infix",
-        "inline",
-        "inner",
-        "internal",
-        "lateinit",
-        "noinline",
-        "open",
-        "operator",
-        "out",
-        "override",
-        "private",
-        "protected",
-        "public",
-        "reified",
-        "sealed",
-        "suspend",
-        "tailrec",
-        "value",
-        "vararg",
+    // Modifier keywords
+    "actual",
+    "abstract",
+    "annotation",
+    "companion",
+    "const",
+    "crossinline",
+    "data",
+    "enum",
+    "expect",
+    "external",
+    "final",
+    "infix",
+    "inline",
+    "inner",
+    "internal",
+    "lateinit",
+    "noinline",
+    "open",
+    "operator",
+    "out",
+    "override",
+    "private",
+    "protected",
+    "public",
+    "reified",
+    "sealed",
+    "suspend",
+    "tailrec",
+    "value",
+    "vararg",
 
-        // Other reserved keywords
-        "yield",
-    )
+    // Other reserved keywords
+    "yield",
+  )

@@ -27,7 +27,7 @@ internal val KEY_DEBUG = CompilerConfigurationKey<Boolean>("debug")
 internal val KEY_GENERATED_ANNOTATION = CompilerConfigurationKey<String>("generatedAnnotation")
 internal val KEY_ENABLE_SEALED = CompilerConfigurationKey<Boolean>("enableSealed")
 internal val KEY_GENERATE_PROGUARD_RULES =
-    CompilerConfigurationKey<Boolean>("generateProguardRules")
+  CompilerConfigurationKey<Boolean>("generateProguardRules")
 internal val KEY_RESOURCES_OUTPUT_DIR = CompilerConfigurationKey<String>("resourcesOutputDir")
 
 @AutoService(CommandLineProcessor::class)
@@ -36,27 +36,27 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
   override val pluginId: String = "moshi-compiler-plugin"
 
   override val pluginOptions: Collection<AbstractCliOption> =
-      listOf(
-          CliOption("enabled", "<true | false>", "", required = true),
-          CliOption("debug", "<true | false>", "", required = false),
-          CliOption("enableSealed", "<true | false>", "", required = false),
-          CliOption("generatedAnnotation", "String", "", required = false),
-          CliOption("generateProguardRules", "<true | false>", "", required = false),
-          CliOption("resourcesOutputDir", "String", "", required = false),
-      )
+    listOf(
+      CliOption("enabled", "<true | false>", "", required = true),
+      CliOption("debug", "<true | false>", "", required = false),
+      CliOption("enableSealed", "<true | false>", "", required = false),
+      CliOption("generatedAnnotation", "String", "", required = false),
+      CliOption("generateProguardRules", "<true | false>", "", required = false),
+      CliOption("resourcesOutputDir", "String", "", required = false),
+    )
 
   override fun processOption(
-      option: AbstractCliOption,
-      value: String,
-      configuration: CompilerConfiguration
+    option: AbstractCliOption,
+    value: String,
+    configuration: CompilerConfiguration
   ): Unit =
-      when (option.optionName) {
-        "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
-        "debug" -> configuration.put(KEY_DEBUG, value.toBoolean())
-        "enableSealed" -> configuration.put(KEY_ENABLE_SEALED, value.toBoolean())
-        "generatedAnnotation" -> configuration.put(KEY_GENERATED_ANNOTATION, value)
-        "generateProguardRules" -> configuration.put(KEY_GENERATE_PROGUARD_RULES, value.toBoolean())
-        "resourcesOutputDir" -> configuration.put(KEY_RESOURCES_OUTPUT_DIR, value)
-        else -> error("Unknown plugin option: ${option.optionName}")
-      }
+    when (option.optionName) {
+      "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
+      "debug" -> configuration.put(KEY_DEBUG, value.toBoolean())
+      "enableSealed" -> configuration.put(KEY_ENABLE_SEALED, value.toBoolean())
+      "generatedAnnotation" -> configuration.put(KEY_GENERATED_ANNOTATION, value)
+      "generateProguardRules" -> configuration.put(KEY_GENERATE_PROGUARD_RULES, value.toBoolean())
+      "resourcesOutputDir" -> configuration.put(KEY_RESOURCES_OUTPUT_DIR, value)
+      else -> error("Unknown plugin option: ${option.optionName}")
+    }
 }

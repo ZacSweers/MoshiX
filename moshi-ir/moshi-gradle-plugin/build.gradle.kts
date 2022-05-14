@@ -32,13 +32,13 @@ tasks.withType<JavaCompile>().configureEach { options.release.set(8) }
 sourceSets { main { java.srcDir("$buildDir/generated/sources/version-templates/kotlin/main") } }
 
 val copyVersionTemplatesProvider =
-    tasks.register<Copy>("copyVersionTemplates") {
-      inputs.property("version", project.property("VERSION_NAME"))
-      from(project.layout.projectDirectory.dir("version-templates"))
-      into(project.layout.buildDirectory.dir("generated/sources/version-templates/kotlin/main"))
-      expand(mapOf("projectVersion" to "${project.property("VERSION_NAME")}"))
-      filteringCharset = "UTF-8"
-    }
+  tasks.register<Copy>("copyVersionTemplates") {
+    inputs.property("version", project.property("VERSION_NAME"))
+    from(project.layout.projectDirectory.dir("version-templates"))
+    into(project.layout.buildDirectory.dir("generated/sources/version-templates/kotlin/main"))
+    expand(mapOf("projectVersion" to "${project.property("VERSION_NAME")}"))
+    filteringCharset = "UTF-8"
+  }
 // endregion
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
@@ -46,7 +46,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
     freeCompilerArgs +=
-        listOf("-opt-in=kotlin.RequiresOptIn", "-opt-in=kotlin.ExperimentalStdlibApi")
+      listOf("-opt-in=kotlin.RequiresOptIn", "-opt-in=kotlin.ExperimentalStdlibApi")
     jvmTarget = "1.8"
   }
 }
@@ -79,7 +79,7 @@ spotless {
   }
   kotlin {
     target("**/*.kt")
-    ktfmt("0.37")
+    ktfmt("0.37").googleStyle()
     trimTrailingWhitespace()
     endWithNewline()
     licenseHeaderFile("../../spotless/spotless.kt")

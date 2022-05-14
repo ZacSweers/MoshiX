@@ -68,70 +68,72 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 internal class SealedAdapterGenerator
 private constructor(
-    private val pluginContext: IrPluginContext,
-    private val logger: MessageCollector,
-    private val moshiSymbols: MoshiSymbols,
-    private val moshiSealedSymbols: MoshiSealedSymbols,
-    private val target: IrClass,
-    private val labelKey: String,
+  private val pluginContext: IrPluginContext,
+  private val logger: MessageCollector,
+  private val moshiSymbols: MoshiSymbols,
+  private val moshiSealedSymbols: MoshiSealedSymbols,
+  private val target: IrClass,
+  private val labelKey: String,
 ) : AdapterGenerator {
   override fun prepare(): PreparedAdapter? {
     // If this is a nested sealed type of a moshi-sealed parent, defer to the parent
     val sealedParent =
-        if (target.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.NestedSealed"))) {
-          target.superTypes.firstNotNullOfOrNull { supertype ->
-            pluginContext.referenceClass(supertype.classFqName!!)!!
-                .owner
-                .getAnnotation(FqName("com.squareup.moshi.JsonClass"))
-                ?.labelKey()
-                ?.let { supertype to it }
-          }
-              ?: error(
-                  "No JsonClass-annotated sealed supertype found for ${target.fqNameWhenAvailable}")
-        } else {
-          null
+      if (target.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.NestedSealed"))) {
+        target.superTypes.firstNotNullOfOrNull { supertype ->
+          pluginContext
+            .referenceClass(supertype.classFqName!!)!!
+            .owner
+            .getAnnotation(FqName("com.squareup.moshi.JsonClass"))
+            ?.labelKey()
+            ?.let { supertype to it }
         }
+          ?: error(
+            "No JsonClass-annotated sealed supertype found for ${target.fqNameWhenAvailable}"
+          )
+      } else {
+        null
+      }
 
     sealedParent?.let { (_, parentLabelKey) ->
       if (parentLabelKey == labelKey) {
         logger.error(target) {
           "@NestedSealed-annotated subtype ${target.fqNameWhenAvailable} is inappropriately annotated with @JsonClass(generator = " +
-              "\"sealed:$labelKey\")."
+            "\"sealed:$labelKey\")."
         }
       }
     }
 
     // TODO there's no non-descriptor API for this yet
     val useDefaultNull =
-        target.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.DefaultNull"))
+      target.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.DefaultNull"))
     val objectSubtypes = mutableListOf<IrClass>()
     val seenLabels = mutableMapOf<String, IrClass>()
     var hasErrors = false
     val sealedSubtypes =
-        target.descriptor.sealedSubclasses
-            .map { pluginContext.referenceClass(it.fqNameSafe)!!.owner }
-            .flatMapTo(LinkedHashSet()) { subtype ->
-              val isObject = subtype.kind == ClassKind.OBJECT
-              if (isObject &&
-                  subtype.hasAnnotation(
-                      FqName("dev.zacsweers.moshix.sealed.annotations.DefaultObject"))) {
-                if (useDefaultNull) {
-                  // Print both for reference
-                  logger.error(subtype) {
-                    """
+      target.descriptor.sealedSubclasses
+        .map { pluginContext.referenceClass(it.fqNameSafe)!!.owner }
+        .flatMapTo(LinkedHashSet()) { subtype ->
+          val isObject = subtype.kind == ClassKind.OBJECT
+          if (isObject &&
+              subtype.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.DefaultObject"))
+          ) {
+            if (useDefaultNull) {
+              // Print both for reference
+              logger.error(subtype) {
+                """
                       Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type: ${target.fqNameWhenAvailable}
                       Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: ${subtype.fqNameWhenAvailable}
                     """.trimIndent()
-                  }
-                  hasErrors = true
-                  return@flatMapTo emptySequence()
-                } else {
-                  return@flatMapTo sequenceOf(Subtype.ObjectType(subtype))
-                }
-              } else {
-                walkTypeLabels(target, subtype, labelKey, seenLabels, objectSubtypes)
               }
+              hasErrors = true
+              return@flatMapTo emptySequence()
+            } else {
+              return@flatMapTo sequenceOf(Subtype.ObjectType(subtype))
             }
+          } else {
+            walkTypeLabels(target, subtype, labelKey, seenLabels, objectSubtypes)
+          }
+        }
 
     if (hasErrors) {
       return null
@@ -139,12 +141,13 @@ private constructor(
 
     pluginContext.irFactory.run {
       return createType(
-          targetType = target,
-          labelKey = labelKey,
-          useDefaultNull = useDefaultNull,
-          generatedAnnotation = null,
-          subtypes = sealedSubtypes,
-          objectSubtypes = objectSubtypes)
+        targetType = target,
+        labelKey = labelKey,
+        useDefaultNull = useDefaultNull,
+        generatedAnnotation = null,
+        subtypes = sealedSubtypes,
+        objectSubtypes = objectSubtypes
+      )
     }
 
     // TODO sealedParent gen?
@@ -153,73 +156,75 @@ private constructor(
 
   @OptIn(ObsoleteDescriptorBasedAPI::class)
   private fun walkTypeLabels(
-      rootType: IrClass,
-      subtype: IrClass,
-      labelKey: String,
-      seenLabels: MutableMap<String, IrClass>,
-      objectSubtypes: MutableList<IrClass>,
+    rootType: IrClass,
+    subtype: IrClass,
+    labelKey: String,
+    seenLabels: MutableMap<String, IrClass>,
+    objectSubtypes: MutableList<IrClass>,
   ): Sequence<Subtype> {
     // If it's sealed, check if it's inheriting from our existing type or a separate/new branching
     // off point
     return if (subtype.modality == Modality.SEALED) {
       val nestedLabelKey =
-          subtype
-              .getAnnotation(FqName("com.squareup.moshi.JsonClass"))
-              ?.labelKey(checkGenerateAdapter = false)
+        subtype
+          .getAnnotation(FqName("com.squareup.moshi.JsonClass"))
+          ?.labelKey(checkGenerateAdapter = false)
       if (nestedLabelKey != null) {
         // Redundant case
         if (labelKey == nestedLabelKey) {
           logger.error(subtype) {
             "Sealed subtype $subtype is redundantly annotated with @JsonClass(generator = " +
-                "\"sealed:$nestedLabelKey\")."
+              "\"sealed:$nestedLabelKey\")."
           }
           return emptySequence()
         }
       }
 
-      if (subtype.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.TypeLabel")) !=
-          null) {
+      if (subtype.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.TypeLabel")) != null
+      ) {
         // It's a different type, allow it to be used as a label and branch off from here.
         val classType =
-            addLabelKeyForType(subtype, seenLabels, objectSubtypes, skipJsonClassCheck = true)
+          addLabelKeyForType(subtype, seenLabels, objectSubtypes, skipJsonClassCheck = true)
         classType?.let { sequenceOf(it) } ?: emptySequence()
       } else {
         // Recurse, inheriting the top type
-        subtype
-            .descriptor
-            .sealedSubclasses
-            .asSequence()
-            .map { pluginContext.referenceClass(it.fqNameSafe)!!.owner }
-            .flatMap {
-              walkTypeLabels(
-                  rootType = rootType,
-                  subtype = it,
-                  labelKey = labelKey,
-                  seenLabels = seenLabels,
-                  objectSubtypes = objectSubtypes)
-            }
+        subtype.descriptor.sealedSubclasses
+          .asSequence()
+          .map { pluginContext.referenceClass(it.fqNameSafe)!!.owner }
+          .flatMap {
+            walkTypeLabels(
+              rootType = rootType,
+              subtype = it,
+              labelKey = labelKey,
+              seenLabels = seenLabels,
+              objectSubtypes = objectSubtypes
+            )
+          }
       }
     } else {
       val classType =
-          addLabelKeyForType(
-              subtype = subtype, seenLabels = seenLabels, objectSubtypes = objectSubtypes)
+        addLabelKeyForType(
+          subtype = subtype,
+          seenLabels = seenLabels,
+          objectSubtypes = objectSubtypes
+        )
       classType?.let { sequenceOf(it) } ?: emptySequence()
     }
   }
 
   private fun addLabelKeyForType(
-      subtype: IrClass,
-      seenLabels: MutableMap<String, IrClass>,
-      objectSubtypes: MutableList<IrClass>,
-      skipJsonClassCheck: Boolean = false
+    subtype: IrClass,
+    seenLabels: MutableMap<String, IrClass>,
+    objectSubtypes: MutableList<IrClass>,
+    skipJsonClassCheck: Boolean = false
   ): Subtype? {
     // Regular subtype, read its label
     val labelAnnotation =
-        subtype.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.TypeLabel"))
-            ?: run {
-              logger.error(subtype) { "Missing @TypeLabel" }
-              return null
-            }
+      subtype.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.TypeLabel"))
+        ?: run {
+          logger.error(subtype) { "Missing @TypeLabel" }
+          return null
+        }
 
     if (subtype.typeParameters.isNotEmpty()) {
       logger.error(subtype) { "Moshi-sealed subtypes cannot be generic." }
@@ -230,11 +235,11 @@ private constructor(
 
     @Suppress("UNCHECKED_CAST")
     val mainLabel =
-        (labelAnnotation.getValueArgument(0) as? IrConst<String>)?.value
-            ?: run {
-              logger.error(subtype) { "No label member for TypeLabel annotation!" }
-              return null
-            }
+      (labelAnnotation.getValueArgument(0) as? IrConst<String>)?.value
+        ?: run {
+          logger.error(subtype) { "No label member for TypeLabel annotation!" }
+          return null
+        }
 
     seenLabels.put(mainLabel, subtype)?.let { prev ->
       logger.error(target) {
@@ -257,9 +262,9 @@ private constructor(
 
     @Suppress("UNCHECKED_CAST")
     val alternates =
-        (labelAnnotation.getValueArgument(1) as IrVararg?)?.elements.orEmpty().map {
-          (it as IrConst<String>).value
-        }
+      (labelAnnotation.getValueArgument(1) as IrVararg?)?.elements.orEmpty().map {
+        (it as IrConst<String>).value
+      }
 
     for (alternate in alternates) {
       seenLabels.put(alternate, subtype)?.let { prev ->
@@ -280,20 +285,20 @@ private constructor(
   }
 
   private fun IrFactory.createType(
-      targetType: IrClass,
-      labelKey: String,
-      useDefaultNull: Boolean,
-      generatedAnnotation: IrConstructorCall?,
-      subtypes: Set<Subtype>,
-      objectSubtypes: List<IrClass>,
+    targetType: IrClass,
+    labelKey: String,
+    useDefaultNull: Boolean,
+    generatedAnnotation: IrConstructorCall?,
+    subtypes: Set<Subtype>,
+    objectSubtypes: List<IrClass>,
   ): PreparedAdapter {
     val packageName = targetType.packageFqName!!.asString()
     val simpleNames =
-        targetType.fqNameWhenAvailable!!
-            .asString()
-            .removePrefix(packageName)
-            .removePrefix(".")
-            .split(".")
+      targetType.fqNameWhenAvailable!!
+        .asString()
+        .removePrefix(packageName)
+        .removePrefix(".")
+        .split(".")
     val adapterName = "${simpleNames.joinToString(separator = "_")}JsonAdapter"
 
     val adapterCls = buildClass {
@@ -306,229 +311,236 @@ private constructor(
     adapterCls.origin = MoshiSealedOrigin
 
     val adapterReceiver =
-        buildValueParameter(adapterCls) {
-          name = Name.special("<this>")
-          type =
-              IrSimpleTypeImpl(
-                  classifier = adapterCls.symbol,
-                  hasQuestionMark = false,
-                  arguments = emptyList(),
-                  annotations = emptyList())
-          origin = IrDeclarationOrigin.INSTANCE_RECEIVER
-        }
+      buildValueParameter(adapterCls) {
+        name = Name.special("<this>")
+        type =
+          IrSimpleTypeImpl(
+            classifier = adapterCls.symbol,
+            hasQuestionMark = false,
+            arguments = emptyList(),
+            annotations = emptyList()
+          )
+        origin = IrDeclarationOrigin.INSTANCE_RECEIVER
+      }
     adapterCls.thisReceiver = adapterReceiver
     val jsonAdapterType =
-        pluginContext
-            .irType("com.squareup.moshi.JsonAdapter")
-            .classifierOrFail
-            .typeWith(targetType.defaultType)
+      pluginContext
+        .irType("com.squareup.moshi.JsonAdapter")
+        .classifierOrFail.typeWith(targetType.defaultType)
     adapterCls.superTypes = listOf(jsonAdapterType)
 
     val hasObjectSubtypes = objectSubtypes.isNotEmpty()
     val ctor = adapterCls.generateConstructor()
 
     val runtimeAdapter =
-        adapterCls
-            .addField {
-              name = Name.identifier("runtimeAdapter")
-              type = jsonAdapterType
-              visibility = DescriptorVisibilities.PRIVATE
-              isFinal = true
-            }
-            .apply {
-              initializer =
-                  pluginContext.createIrBuilder(symbol).run {
-                    val ofCreatorExpression =
-                        irCall(moshiSealedSymbols.pjafOf).apply {
-                          putTypeArgument(0, targetType.defaultType)
-                          putValueArgument(
-                              0, moshiSymbols.javaClassReference(this@run, targetType.defaultType))
-                          putValueArgument(1, irString(labelKey))
-                        }
+      adapterCls
+        .addField {
+          name = Name.identifier("runtimeAdapter")
+          type = jsonAdapterType
+          visibility = DescriptorVisibilities.PRIVATE
+          isFinal = true
+        }
+        .apply {
+          initializer =
+            pluginContext.createIrBuilder(symbol).run {
+              val ofCreatorExpression =
+                irCall(moshiSealedSymbols.pjafOf).apply {
+                  putTypeArgument(0, targetType.defaultType)
+                  putValueArgument(
+                    0,
+                    moshiSymbols.javaClassReference(this@run, targetType.defaultType)
+                  )
+                  putValueArgument(1, irString(labelKey))
+                }
 
-                    val subtypesExpression =
-                        subtypes.filterIsInstance<Subtype.ClassType>().fold(ofCreatorExpression) {
-                            receiver,
-                            subtype ->
-                          subtype.labels.fold(receiver) { nestedReceiver, label ->
-                            irCall(moshiSealedSymbols.pjafWithSubtype).apply {
-                              dispatchReceiver = nestedReceiver
-                              putValueArgument(
-                                  0,
-                                  moshiSymbols.javaClassReference(
-                                      this@run, subtype.className.defaultType))
-                              putValueArgument(1, irString(label))
-                            }
-                          }
-                        }
-
-                    val possiblyWithDefaultExpression =
-                        if (useDefaultNull) {
-                          irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
-                            dispatchReceiver = subtypesExpression
-                            putValueArgument(0, irNull(targetType.defaultType))
-                          }
-                        } else {
-                          subtypes.filterIsInstance<Subtype.ObjectType>().firstOrNull()?.let {
-                              defaultObject ->
-                            irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
-                              dispatchReceiver = subtypesExpression
-                              putValueArgument(0, irGetObject(defaultObject.className.symbol))
-                            }
-                          }
-                              ?: subtypesExpression
-                        }
-
-                    val moshiParam = irGet(ctor.valueParameters[0])
-                    val moshiAccess: IrExpression =
-                        if (hasObjectSubtypes) {
-                          val initial =
-                              irCall(moshiSymbols.moshiNewBuilder).apply {
-                                dispatchReceiver = moshiParam
-                              }
-                          val newBuilds =
-                              objectSubtypes.fold(initial) { receiver, subtype ->
-                                irCall(moshiSymbols.addAdapter).apply {
-                                  extensionReceiver = receiver
-                                  putTypeArgument(0, subtype.defaultType)
-                                  putValueArgument(
-                                      0,
-                                      irCall(moshiSealedSymbols.objectJsonAdapterCtor).apply {
-                                        putValueArgument(0, irGetObject(subtype.symbol))
-                                      })
-                                }
-                              }
-                          irCall(moshiSymbols.moshiBuilderBuild).apply {
-                            dispatchReceiver = newBuilds
-                          }
-                        } else {
-                          moshiParam
-                        }
-
-                    // .create(Message::class.java, emptySet(), moshi) as JsonAdapter<Message>
-                    irExprBody(
-                        irAs(
-                            irCall(moshiSymbols.jsonAdapterFactoryCreate).apply {
-                              dispatchReceiver = possiblyWithDefaultExpression
-                              putValueArgument(
-                                  0,
-                                  moshiSymbols.javaClassReference(this@run, targetType.defaultType))
-                              putValueArgument(1, irCall(moshiSymbols.emptySet))
-                              putValueArgument(2, moshiAccess)
-                            },
-                            jsonAdapterType))
+              val subtypesExpression =
+                subtypes.filterIsInstance<Subtype.ClassType>().fold(ofCreatorExpression) {
+                  receiver,
+                  subtype ->
+                  subtype.labels.fold(receiver) { nestedReceiver, label ->
+                    irCall(moshiSealedSymbols.pjafWithSubtype).apply {
+                      dispatchReceiver = nestedReceiver
+                      putValueArgument(
+                        0,
+                        moshiSymbols.javaClassReference(this@run, subtype.className.defaultType)
+                      )
+                      putValueArgument(1, irString(label))
+                    }
                   }
+                }
+
+              val possiblyWithDefaultExpression =
+                if (useDefaultNull) {
+                  irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
+                    dispatchReceiver = subtypesExpression
+                    putValueArgument(0, irNull(targetType.defaultType))
+                  }
+                } else {
+                  subtypes.filterIsInstance<Subtype.ObjectType>().firstOrNull()?.let { defaultObject
+                    ->
+                    irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
+                      dispatchReceiver = subtypesExpression
+                      putValueArgument(0, irGetObject(defaultObject.className.symbol))
+                    }
+                  }
+                    ?: subtypesExpression
+                }
+
+              val moshiParam = irGet(ctor.valueParameters[0])
+              val moshiAccess: IrExpression =
+                if (hasObjectSubtypes) {
+                  val initial =
+                    irCall(moshiSymbols.moshiNewBuilder).apply { dispatchReceiver = moshiParam }
+                  val newBuilds =
+                    objectSubtypes.fold(initial) { receiver, subtype ->
+                      irCall(moshiSymbols.addAdapter).apply {
+                        extensionReceiver = receiver
+                        putTypeArgument(0, subtype.defaultType)
+                        putValueArgument(
+                          0,
+                          irCall(moshiSealedSymbols.objectJsonAdapterCtor).apply {
+                            putValueArgument(0, irGetObject(subtype.symbol))
+                          }
+                        )
+                      }
+                    }
+                  irCall(moshiSymbols.moshiBuilderBuild).apply { dispatchReceiver = newBuilds }
+                } else {
+                  moshiParam
+                }
+
+              // .create(Message::class.java, emptySet(), moshi) as JsonAdapter<Message>
+              irExprBody(
+                irAs(
+                  irCall(moshiSymbols.jsonAdapterFactoryCreate).apply {
+                    dispatchReceiver = possiblyWithDefaultExpression
+                    putValueArgument(
+                      0,
+                      moshiSymbols.javaClassReference(this@run, targetType.defaultType)
+                    )
+                    putValueArgument(1, irCall(moshiSymbols.emptySet))
+                    putValueArgument(2, moshiAccess)
+                  },
+                  jsonAdapterType
+                )
+              )
             }
+        }
 
     adapterCls.generateFromJsonFun(runtimeAdapter)
     adapterCls.generateToJsonFun(runtimeAdapter)
     adapterCls.generateToStringFun(
-        pluginContext, simpleNames.joinToString("."), generatedName = "GeneratedSealedJsonAdapter")
+      pluginContext,
+      simpleNames.joinToString("."),
+      generatedName = "GeneratedSealedJsonAdapter"
+    )
 
     return PreparedAdapter(adapterCls)
   }
 
   private fun IrClass.generateToJsonFun(delegateField: IrField): IrFunction {
     return addOverride(
-            FqName("com.squareup.moshi.JsonAdapter"),
-            Name.identifier("toJson").identifier,
-            pluginContext.irBuiltIns.unitType,
-            modality = Modality.OPEN) { function ->
-      function.valueParameters.size == 2 &&
+        FqName("com.squareup.moshi.JsonAdapter"),
+        Name.identifier("toJson").identifier,
+        pluginContext.irBuiltIns.unitType,
+        modality = Modality.OPEN
+      ) { function ->
+        function.valueParameters.size == 2 &&
           function.valueParameters[0].type.classifierOrFail == moshiSymbols.jsonWriter
-    }
-        .apply {
-          val writer = addValueParameter {
-            name = Name.identifier("writer")
-            type =
-                moshiSymbols.jsonWriter.createType(hasQuestionMark = false, arguments = emptyList())
-          }
-          val value = addValueParameter {
-            name = Name.identifier("value")
-            type = pluginContext.irBuiltIns.anyNType
-          }
-          body =
-              DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
-                +irCall(moshiSymbols.jsonAdapter.getSimpleFunction("toJson")!!).apply {
-                  dispatchReceiver = irGetField(irGet(dispatchReceiverParameter!!), delegateField)
-                  putValueArgument(0, irGet(writer))
-                  putValueArgument(1, irGet(value))
-                }
-                +irReturnUnit()
-              }
+      }
+      .apply {
+        val writer = addValueParameter {
+          name = Name.identifier("writer")
+          type =
+            moshiSymbols.jsonWriter.createType(hasQuestionMark = false, arguments = emptyList())
         }
+        val value = addValueParameter {
+          name = Name.identifier("value")
+          type = pluginContext.irBuiltIns.anyNType
+        }
+        body =
+          DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
+            +irCall(moshiSymbols.jsonAdapter.getSimpleFunction("toJson")!!).apply {
+              dispatchReceiver = irGetField(irGet(dispatchReceiverParameter!!), delegateField)
+              putValueArgument(0, irGet(writer))
+              putValueArgument(1, irGet(value))
+            }
+            +irReturnUnit()
+          }
+      }
   }
 
   private fun IrClass.generateFromJsonFun(delegateField: IrField): IrFunction {
     return addOverride(
-            FqName("com.squareup.moshi.JsonAdapter"),
-            Name.identifier("fromJson").identifier,
-            pluginContext.irBuiltIns.anyNType,
-            modality = Modality.OPEN,
-        ) { function ->
-      function.valueParameters.size == 1 &&
+        FqName("com.squareup.moshi.JsonAdapter"),
+        Name.identifier("fromJson").identifier,
+        pluginContext.irBuiltIns.anyNType,
+        modality = Modality.OPEN,
+      ) { function ->
+        function.valueParameters.size == 1 &&
           function.valueParameters[0].type.classifierOrFail == moshiSymbols.jsonReader
-    }
-        .apply {
-          val readerParam = addValueParameter {
-            name = Name.identifier("reader")
-            type = moshiSymbols.jsonReader.defaultType
-          }
-          body =
-              DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
-                +irReturn(
-                    irCall(moshiSymbols.jsonAdapter.getSimpleFunction("fromJson")!!).apply {
-                      dispatchReceiver =
-                          irGetField(irGet(dispatchReceiverParameter!!), delegateField)
-                      putValueArgument(0, irGet(readerParam))
-                    })
-              }
+      }
+      .apply {
+        val readerParam = addValueParameter {
+          name = Name.identifier("reader")
+          type = moshiSymbols.jsonReader.defaultType
         }
+        body =
+          DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
+            +irReturn(
+              irCall(moshiSymbols.jsonAdapter.getSimpleFunction("fromJson")!!).apply {
+                dispatchReceiver = irGetField(irGet(dispatchReceiverParameter!!), delegateField)
+                putValueArgument(0, irGet(readerParam))
+              }
+            )
+          }
+      }
   }
 
   private fun IrClass.generateConstructor(): IrConstructor {
     val adapterCls = this
     val ctor =
-        adapterCls
-            .addConstructor {
-              isPrimary = true
-              returnType = adapterCls.defaultType
-            }
-            .apply {
-              addValueParameter {
-                name = Name.identifier("moshi")
-                type = moshiSymbols.moshi.defaultType
-              }
-            }
+      adapterCls
+        .addConstructor {
+          isPrimary = true
+          returnType = adapterCls.defaultType
+        }
+        .apply {
+          addValueParameter {
+            name = Name.identifier("moshi")
+            type = moshiSymbols.moshi.defaultType
+          }
+        }
     ctor.irConstructorBody(pluginContext) { statements ->
       statements += generateJsonAdapterSuperConstructorCall()
       statements +=
-          irInstanceInitializerCall(
-              context = pluginContext,
-              classSymbol = adapterCls.symbol,
-          )
+        irInstanceInitializerCall(
+          context = pluginContext,
+          classSymbol = adapterCls.symbol,
+        )
     }
 
     return ctor
   }
 
   private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
-      IrDelegatingConstructorCall {
+    IrDelegatingConstructorCall {
     return IrDelegatingConstructorCallImpl.fromSymbolOwner(
-        startOffset,
-        endOffset,
-        pluginContext.irBuiltIns.unitType,
-        moshiSymbols.jsonAdapter.constructors.single())
+      startOffset,
+      endOffset,
+      pluginContext.irBuiltIns.unitType,
+      moshiSymbols.jsonAdapter.constructors.single()
+    )
   }
 
   companion object {
     operator fun invoke(
-        pluginContext: IrPluginContext,
-        logger: MessageCollector,
-        moshiSymbols: MoshiSymbols,
-        moshiSealedSymbols: MoshiSealedSymbols,
-        target: IrClass,
-        labelKey: String,
+      pluginContext: IrPluginContext,
+      logger: MessageCollector,
+      moshiSymbols: MoshiSymbols,
+      moshiSealedSymbols: MoshiSealedSymbols,
+      target: IrClass,
+      labelKey: String,
     ): AdapterGenerator? {
       if (target.kind != ClassKind.CLASS && target.kind != ClassKind.INTERFACE) {
         logger.error(target) {
@@ -541,12 +553,13 @@ private constructor(
         return null
       }
       return SealedAdapterGenerator(
-          pluginContext = pluginContext,
-          logger = logger,
-          moshiSymbols = moshiSymbols,
-          moshiSealedSymbols = moshiSealedSymbols,
-          target = target,
-          labelKey = labelKey)
+        pluginContext = pluginContext,
+        logger = logger,
+        moshiSymbols = moshiSymbols,
+        moshiSealedSymbols = moshiSealedSymbols,
+        target = target,
+        labelKey = labelKey
+      )
     }
   }
 }
