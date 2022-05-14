@@ -65,7 +65,7 @@ spotless {
     targetExclude("**/spotless.java", "**/build/**")
   }
   kotlin {
-    ktfmt("0.35")
+    ktfmt("0.37")
     target("**/*.kt")
     trimTrailingWhitespace()
     endWithNewline()
@@ -76,7 +76,7 @@ spotless {
     )
   }
   kotlinGradle {
-    ktfmt("0.35")
+    ktfmt("0.37")
     target("**/*.gradle.kts")
     trimTrailingWhitespace()
     endWithNewline()

@@ -79,10 +79,10 @@ spotless {
   }
   kotlin {
     target("**/*.kt")
-    ktfmt("0.30")
+    ktfmt("0.37")
     trimTrailingWhitespace()
     endWithNewline()
-    licenseHeaderFile("../spotless/spotless.kt")
+    licenseHeaderFile("../../spotless/spotless.kt")
     targetExclude("**/spotless.kt", "build/**")
   }
 }
