@@ -24,13 +24,11 @@ import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
 import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.backend.jvm.codegen.anyTypeArgument
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
-import org.jetbrains.kotlin.ir.builders.declarations.buildFun
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrClass
@@ -55,25 +53,17 @@ import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.getPropertyGetter
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
-import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.getArgument
-import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.getArguments
 
 private val JSON_CLASS_ANNOTATION = FqName("com.squareup.moshi.JsonClass")
 
 internal data class GeneratedAdapter(val adapterClass: IrDeclaration, val irFile: IrFile)
 
 internal class ReflexiveIrVisitor(
-  moduleFragment: IrModuleFragment,
   private val pluginContext: IrPluginContext,
-  private val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
 
   private val targetFunction by lazy {
-    pluginContext
-      .irBuiltIns.kClassClass
-      .getPropertyGetter("sealedSubclasses")!!
-      .owner
-      .symbol
+    pluginContext.irBuiltIns.kClassClass.getPropertyGetter("sealedSubclasses")!!.owner.symbol
   }
 
   private val listOfVararg by lazy {
@@ -92,16 +82,15 @@ internal class ReflexiveIrVisitor(
       val type = kclassType.arguments.single().typeOrNull!!
       val target = type.classOrNull ?: return super.visitCall(expression)
       val subtypes =
-        target.descriptor.sealedSubclasses
-          .map { pluginContext.referenceClass(it.fqNameSafe)!!.owner }
+        target.descriptor.sealedSubclasses.map {
+          pluginContext.referenceClass(it.fqNameSafe)!!.owner
+        }
       return pluginContext.createIrBuilder(expression.symbol).run {
         irCall(listOfVararg).apply {
-          val subtypesExpression = subtypes.map {
-            kClassReference(it.defaultType)
-          }
+          val subtypesExpression = subtypes.map { kClassReference(it.defaultType) }
           putValueArgument(0, irVararg(kclassType, subtypesExpression))
         }
-      }.apply { dumpSrc() }
+      }
     }
     return super.visitCall(expression)
   }
