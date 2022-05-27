@@ -52,6 +52,7 @@ import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAnnotation
+import org.jetbrains.kotlin.ir.util.getPropertyGetter
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.getArgument
@@ -69,8 +70,10 @@ internal class ReflexiveIrVisitor(
 
   private val targetFunction by lazy {
     pluginContext
-      .referenceProperties(FqName("dev.zacsweers.moshix.sealed.runtime.reflexiveSealedSubclasses"))
-      .single()
+      .irBuiltIns.kClassClass
+      .getPropertyGetter("sealedSubclasses")!!
+      .owner
+      .symbol
   }
 
   private val listOfVararg by lazy {
@@ -81,9 +84,9 @@ internal class ReflexiveIrVisitor(
 
   @OptIn(ObsoleteDescriptorBasedAPI::class)
   override fun visitCall(expression: IrCall): IrExpression {
-    if (expression.symbol.owner == targetFunction.owner.getter) {
+    if (expression.symbol == targetFunction) {
       // KClass<Foo>
-      val kclassType = expression.extensionReceiver!!.type
+      val kclassType = expression.dispatchReceiver!!.type
       check(kclassType is IrSimpleType)
       // Foo
       val type = kclassType.arguments.single().typeOrNull!!

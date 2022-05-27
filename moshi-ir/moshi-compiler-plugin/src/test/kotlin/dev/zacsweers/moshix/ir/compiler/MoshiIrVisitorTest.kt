@@ -56,13 +56,12 @@ class MoshiIrVisitorTest {
           import com.squareup.moshi.Json
           import com.squareup.moshi.JsonClass
           import com.squareup.moshi.JsonQualifier
-          import dev.zacsweers.moshix.sealed.runtime.reflexiveSealedSubclasses
 
           sealed class Foo
           class Subtype : Foo()
 
           fun doStuff() {
-            Foo::class.reflexiveSealedSubclasses
+            Foo::class.sealedSubclasses
           }
           """
         )
