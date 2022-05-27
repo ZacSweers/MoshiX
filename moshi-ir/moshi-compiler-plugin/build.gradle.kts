@@ -44,4 +44,14 @@ dependencies {
   testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.8")
   testImplementation("junit:junit:4.13.2")
   testImplementation("com.google.truth:truth:1.1.3")
+  testImplementation(project(":moshi-sealed:runtime"))
+}
+
+configurations.configureEach {
+  resolutionStrategy.dependencySubstitution {
+    substitute(module("dev.zacsweers.moshix:moshi-compiler-plugin"))
+      .using(project(":moshi-ir:moshi-compiler-plugin"))
+    substitute(module("dev.zacsweers.moshix:moshi-sealed-runtime"))
+      .using(project(":moshi-sealed:runtime"))
+  }
 }

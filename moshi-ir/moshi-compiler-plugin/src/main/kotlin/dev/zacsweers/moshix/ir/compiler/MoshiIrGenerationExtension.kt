@@ -40,6 +40,13 @@ internal class MoshiIrGenerationExtension(
         }
       }
     val deferred = mutableListOf<GeneratedAdapter>()
+    val reflexiveIrVisitor =
+      ReflexiveIrVisitor(
+        moduleFragment,
+        pluginContext,
+        messageCollector,
+      )
+    moduleFragment.transform(reflexiveIrVisitor, null)
     val moshiTransformer =
       MoshiIrVisitor(
         moduleFragment,

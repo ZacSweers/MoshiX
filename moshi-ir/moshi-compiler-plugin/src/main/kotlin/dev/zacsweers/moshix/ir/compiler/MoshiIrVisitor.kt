@@ -19,28 +19,99 @@ import dev.zacsweers.moshix.ir.compiler.api.MoshiAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.sealed.MoshiSealedSymbols
 import dev.zacsweers.moshix.ir.compiler.sealed.SealedAdapterGenerator
+import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
 import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
+import org.jetbrains.kotlin.backend.jvm.codegen.anyTypeArgument
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
+import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
+import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
+import org.jetbrains.kotlin.ir.builders.declarations.buildFun
+import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
+import org.jetbrains.kotlin.ir.expressions.IrExpression
+import org.jetbrains.kotlin.ir.expressions.impl.IrClassReferenceImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+import org.jetbrains.kotlin.ir.types.IrSimpleType
+import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.classOrNull
+import org.jetbrains.kotlin.ir.types.starProjectedType
+import org.jetbrains.kotlin.ir.types.typeOrNull
+import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
+import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.getArgument
+import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.getArguments
 
 private val JSON_CLASS_ANNOTATION = FqName("com.squareup.moshi.JsonClass")
 
 internal data class GeneratedAdapter(val adapterClass: IrDeclaration, val irFile: IrFile)
+
+internal class ReflexiveIrVisitor(
+  moduleFragment: IrModuleFragment,
+  private val pluginContext: IrPluginContext,
+  private val messageCollector: MessageCollector,
+) : IrElementTransformerVoidWithContext() {
+
+  private val targetFunction by lazy {
+    pluginContext
+      .referenceProperties(FqName("dev.zacsweers.moshix.sealed.runtime.reflexiveSealedSubclasses"))
+      .single()
+  }
+
+  private val listOfVararg by lazy {
+    pluginContext.referenceFunctions(FqName("kotlin.collections.listOf")).first {
+      it.owner.valueParameters.size == 1 && it.owner.valueParameters[0].varargElementType != null
+    }
+  }
+
+  @OptIn(ObsoleteDescriptorBasedAPI::class)
+  override fun visitCall(expression: IrCall): IrExpression {
+    if (expression.symbol.owner == targetFunction.owner.getter) {
+      // KClass<Foo>
+      val kclassType = expression.extensionReceiver!!.type
+      check(kclassType is IrSimpleType)
+      // Foo
+      val type = kclassType.arguments.single().typeOrNull!!
+      val target = type.classOrNull ?: return super.visitCall(expression)
+      val subtypes =
+        target.descriptor.sealedSubclasses
+          .map { pluginContext.referenceClass(it.fqNameSafe)!!.owner }
+      return pluginContext.createIrBuilder(expression.symbol).run {
+        irCall(listOfVararg).apply {
+          val subtypesExpression = subtypes.map {
+            kClassReference(it.defaultType)
+          }
+          putValueArgument(0, irVararg(kclassType, subtypesExpression))
+        }
+      }.apply { dumpSrc() }
+    }
+    return super.visitCall(expression)
+  }
+
+  private fun IrBuilderWithScope.kClassReference(classType: IrType) =
+    IrClassReferenceImpl(
+      startOffset,
+      endOffset,
+      context.irBuiltIns.kClassClass.starProjectedType,
+      context.irBuiltIns.kClassClass,
+      classType
+    )
+}
 
 internal class MoshiIrVisitor(
   moduleFragment: IrModuleFragment,
