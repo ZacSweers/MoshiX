@@ -267,13 +267,13 @@ internal class MoshiSymbols(
 
   val setOfVararg by lazy {
     pluginContext.referenceFunctions(FqName("kotlin.collections.setOf")).first {
-      it.owner.valueParameters.size == 1 || it.owner.valueParameters[0].varargElementType != null
+      it.owner.valueParameters.size == 1 && it.owner.valueParameters[0].varargElementType != null
     }
   }
 
   val setOfSingleton by lazy {
     pluginContext.referenceFunctions(FqName("kotlin.collections.setOf")).first {
-      it.owner.valueParameters.size == 1 || it.owner.valueParameters[0].varargElementType == null
+      it.owner.valueParameters.size == 1 && it.owner.valueParameters[0].varargElementType == null
     }
   }
 
