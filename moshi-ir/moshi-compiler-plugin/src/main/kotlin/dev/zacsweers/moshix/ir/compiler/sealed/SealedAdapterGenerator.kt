@@ -17,7 +17,6 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.addField
@@ -63,9 +62,7 @@ import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.util.packageFqName
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 
-@OptIn(ObsoleteDescriptorBasedAPI::class)
 internal class SealedAdapterGenerator
 private constructor(
   private val pluginContext: IrPluginContext,
@@ -110,8 +107,8 @@ private constructor(
     val seenLabels = mutableMapOf<String, IrClass>()
     var hasErrors = false
     val sealedSubtypes =
-      target.descriptor.sealedSubclasses
-        .map { pluginContext.referenceClass(it.fqNameSafe)!!.owner }
+      target.sealedSubclasses
+        .map { it.owner }
         .flatMapTo(LinkedHashSet()) { subtype ->
           val isObject = subtype.kind == ClassKind.OBJECT
           if (isObject &&
@@ -154,7 +151,6 @@ private constructor(
     //  Requires a runtime adapter! Or JsonClass(generator = "sealed-nested")
   }
 
-  @OptIn(ObsoleteDescriptorBasedAPI::class)
   private fun walkTypeLabels(
     rootType: IrClass,
     subtype: IrClass,
@@ -188,18 +184,15 @@ private constructor(
         classType?.let { sequenceOf(it) } ?: emptySequence()
       } else {
         // Recurse, inheriting the top type
-        subtype.descriptor.sealedSubclasses
-          .asSequence()
-          .map { pluginContext.referenceClass(it.fqNameSafe)!!.owner }
-          .flatMap {
-            walkTypeLabels(
-              rootType = rootType,
-              subtype = it,
-              labelKey = labelKey,
-              seenLabels = seenLabels,
-              objectSubtypes = objectSubtypes
-            )
-          }
+        subtype.sealedSubclasses.asSequence().flatMap {
+          walkTypeLabels(
+            rootType = rootType,
+            subtype = it.owner,
+            labelKey = labelKey,
+            seenLabels = seenLabels,
+            objectSubtypes = objectSubtypes
+          )
+        }
       }
     } else {
       val classType =

@@ -1,6 +1,23 @@
 Changelog
 =========
 
+Version 0.17.2
+--------------
+
+_2022-05-27_
+
+**Fix:** Fix IR lookups of `setOf()` overloads. There are two `setOf()` functions with one arg - one
+is the vararg and the other is a shorthand for `Collections.singleton(element)`. It's important we
+pick the right one, otherwise we can accidentally send a vararg array into the `singleton()`
+function.
+
+Dependency updates:
+```
+Kotlin 1.6.21
+kotlinpoet 1.11.0
+kotlinx-metadata 0.4.2
+```
+
 Version 0.17.1
 --------------
 
