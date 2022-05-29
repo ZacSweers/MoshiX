@@ -27,7 +27,6 @@ import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irVararg
@@ -52,7 +51,6 @@ import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.getPropertyGetter
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 
 private val JSON_CLASS_ANNOTATION = FqName("com.squareup.moshi.JsonClass")
 
@@ -72,7 +70,6 @@ internal class ReflexiveIrVisitor(
     }
   }
 
-  @OptIn(ObsoleteDescriptorBasedAPI::class)
   override fun visitCall(expression: IrCall): IrExpression {
     if (expression.symbol == targetFunction) {
       // KClass<Foo>
@@ -81,10 +78,7 @@ internal class ReflexiveIrVisitor(
       // Foo
       val type = kclassType.arguments.single().typeOrNull!!
       val target = type.classOrNull ?: return super.visitCall(expression)
-      val subtypes =
-        target.descriptor.sealedSubclasses.map {
-          pluginContext.referenceClass(it.fqNameSafe)!!.owner
-        }
+      val subtypes = target.owner.sealedSubclasses.map { it.owner }
       return pluginContext.createIrBuilder(expression.symbol).run {
         irCall(listOfVararg).apply {
           val subtypesExpression = subtypes.map { kClassReference(it.defaultType) }
