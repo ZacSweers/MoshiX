@@ -22,6 +22,7 @@ javaRelease = "8"
 jvmTarget = "1.8"
 kotlinpoet = "1.11.0"
 ksp = "1.6.21-1.0.5"
+ktfmt = "0.37"
 moshi = "1.13.0"
 okhttp = "4.9.3"
 retrofit = "2.9.0"
@@ -55,6 +56,9 @@ kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlin
 
 ksp = { module = "com.google.devtools.ksp:symbol-processing", version.ref = "ksp" }
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+
+# Only present to trigger automatic renovate updates
+ktfmt = { module = "com.facebook:ktfmt", version.ref = "ktfmt" }
 
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }

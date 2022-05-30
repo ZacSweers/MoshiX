@@ -54,6 +54,8 @@ apiValidation {
 
 repositories { mavenCentral() }
 
+val ktfmtVersion = libs.versions.ktfmt.get()
+
 spotless {
   format("misc") {
     target("*.md", ".gitignore")
@@ -67,7 +69,7 @@ spotless {
     targetExclude("**/spotless.java", "**/build/**")
   }
   kotlin {
-    ktfmt("0.37").googleStyle()
+    ktfmt(ktfmtVersion).googleStyle()
     target("**/*.kt")
     trimTrailingWhitespace()
     endWithNewline()
@@ -78,7 +80,7 @@ spotless {
     )
   }
   kotlinGradle {
-    ktfmt("0.37").googleStyle()
+    ktfmt(ktfmtVersion).googleStyle()
     target("**/*.gradle.kts")
     trimTrailingWhitespace()
     endWithNewline()
