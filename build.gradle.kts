@@ -55,6 +55,7 @@ apiValidation {
 repositories { mavenCentral() }
 
 val ktfmtVersion = libs.versions.ktfmt.get()
+
 spotless {
   format("misc") {
     target("*.md", ".gitignore")
