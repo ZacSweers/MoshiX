@@ -25,23 +25,24 @@ plugins {
 
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
-    @Suppress("SuspiciousCollectionReassignment") freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    @Suppress("SuspiciousCollectionReassignment")
+    this.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
   }
 }
 
 dependencies {
   //  compileOnly(kotlin("compiler"))
-  compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.6.21")
-  implementation("com.google.auto.service:auto-service-annotations:1.0.1")
-  implementation("com.squareup.moshi:moshi:1.13.0")
-  implementation("com.squareup:kotlinpoet:1.11.0")
-  implementation("com.squareup.moshi:moshi-kotlin-codegen:1.13.0")
-  ksp("dev.zacsweers.autoservice:auto-service-ksp:1.0.0")
+  compileOnly(libs.kotlin.compilerEmbeddable)
+  implementation(libs.autoService)
+  implementation(libs.moshi)
+  implementation(libs.kotlinpoet)
+  implementation(libs.moshi.kotlinCodegen)
+  ksp(libs.autoService.ksp)
 
-  testImplementation("org.jetbrains.kotlin:kotlin-reflect:1.6.21")
+  testImplementation(libs.kotlin.reflect)
   //  testImplementation(kotlin("compiler"))
-  testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.6.21")
-  testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.8")
-  testImplementation("junit:junit:4.13.2")
-  testImplementation("com.google.truth:truth:1.1.3")
+  testImplementation(libs.kotlin.compilerEmbeddable)
+  testImplementation(libs.kotlinCompileTesting)
+  testImplementation(libs.junit)
+  testImplementation(libs.truth)
 }

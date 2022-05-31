@@ -16,12 +16,12 @@
 autoService = "1.0.1"
 incap = "0.3"
 gjf = "1.13.0"
-kotlinCompileTesting = "1.4.8"
+kotlinCompileTesting = "1.4.9-alpha01"
 kotlin = "1.7.0-RC"
 javaRelease = "8"
 jvmTarget = "1.8"
 kotlinpoet = "1.11.0"
-ksp = "1.6.21-1.0.5"
+ksp = "1.7.0-RC-1.0.5"
 ktfmt = "0.37"
 moshi = "1.13.0"
 okhttp = "4.9.3"
@@ -64,6 +64,7 @@ moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }
 moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
+moshi-kotlinCodegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
 
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
