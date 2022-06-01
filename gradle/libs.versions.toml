@@ -13,6 +13,7 @@
 # limitations under the License.
 
 [versions]
+agp = "7.2.1"
 autoService = "1.0.1"
 incap = "0.3"
 gjf = "1.13.0"
@@ -35,6 +36,8 @@ spotless = { id = "com.diffplug.spotless", version = "6.6.1" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.10.0" }
 
 [libraries]
+agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+
 autoCommon = { module = "com.google.auto:auto-common", version = "1.2.1" }
 
 autoService = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
@@ -49,6 +52,8 @@ incap-processor = { module = "net.ltgt.gradle.incap:incap-processor", version.re
 kotlin-compilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlin-metadata = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", version = "0.4.2" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-gradlePlugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
 
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-metadata = { module = "com.squareup:kotlinpoet-metadata", version.ref = "kotlinpoet" }

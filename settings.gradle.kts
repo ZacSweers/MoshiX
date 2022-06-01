@@ -32,6 +32,8 @@ pluginManagement {
   }
 }
 
+dependencyResolutionManagement { repositories { mavenCentral() } }
+
 rootProject.name = "moshix-root"
 
 include(
