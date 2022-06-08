@@ -31,7 +31,7 @@ tasks.withType<KotlinCompile>().configureEach {
 
 dependencies {
   //  compileOnly(kotlin("compiler"))
-  compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.6.21")
+  compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.7.0")
   implementation("com.google.auto.service:auto-service-annotations:1.0.1")
   implementation("com.squareup.moshi:moshi:1.13.0")
   implementation("com.squareup:kotlinpoet:1.11.0")
@@ -40,7 +40,7 @@ dependencies {
 
   testImplementation("org.jetbrains.kotlin:kotlin-reflect:1.6.21")
   //  testImplementation(kotlin("compiler"))
-  testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.6.21")
+  testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.7.0")
   testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.8")
   testImplementation("junit:junit:4.13.2")
   testImplementation("com.google.truth:truth:1.1.3")
