@@ -90,6 +90,6 @@ spotless {
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.6.21")
   compileOnly("com.android.tools.build:gradle:7.2.1")
-  compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21")
+  compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.0")
   implementation("com.google.auto.service:auto-service-annotations:1.0.1")
 }
