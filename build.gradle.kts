@@ -52,8 +52,6 @@ apiValidation {
     )
 }
 
-repositories { mavenCentral() }
-
 val ktfmtVersion = libs.versions.ktfmt.get()
 
 spotless {

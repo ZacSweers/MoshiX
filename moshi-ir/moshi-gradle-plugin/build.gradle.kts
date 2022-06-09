@@ -65,11 +65,6 @@ tasks.named<DokkaTask>("dokkaHtml") {
   dokkaSourceSets.configureEach { skipDeprecated.set(true) }
 }
 
-repositories {
-  mavenCentral()
-  google()
-}
-
 spotless {
   format("misc") {
     target("*.gradle", "*.md", ".gitignore")
@@ -88,8 +83,7 @@ spotless {
 }
 
 dependencies {
-  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.6.21")
-  compileOnly("com.android.tools.build:gradle:7.2.1")
-  compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21")
-  implementation("com.google.auto.service:auto-service-annotations:1.0.1")
+  compileOnly(libs.kotlin.gradlePlugin)
+  compileOnly(libs.kotlin.gradlePlugin.api)
+  compileOnly(libs.agp)
 }
