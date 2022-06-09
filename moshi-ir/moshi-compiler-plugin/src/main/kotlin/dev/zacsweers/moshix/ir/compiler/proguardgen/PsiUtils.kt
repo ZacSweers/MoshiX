@@ -108,7 +108,8 @@ internal inline fun <reified T> KtAnnotationEntry.findAnnotationArgument(
   annotationValues
     .firstNotNullOfOrNull { valueArgument ->
       val children = valueArgument.children
-      if (children.size == 2 &&
+      if (
+        children.size == 2 &&
           children[0] is KtValueArgumentName &&
           (children[0] as KtValueArgumentName).asName.asString() == name &&
           children[1] is T
@@ -312,7 +313,8 @@ internal fun PsiElement.requireFqName(module: ModuleDescriptor): FqName {
   // Check if it's a named import.
   containingKtFile.importDirectives
     .firstOrNull { classReference == it.importPath?.importedName?.asString() }
-    ?.importedFqName?.let {
+    ?.importedFqName
+    ?.let {
       return it
     }
 

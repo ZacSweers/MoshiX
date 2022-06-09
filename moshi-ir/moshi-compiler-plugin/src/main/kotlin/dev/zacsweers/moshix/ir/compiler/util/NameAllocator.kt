@@ -120,7 +120,8 @@ private fun toJavaIdentifier(suggestion: String) = buildString {
   var i = 0
   while (i < suggestion.length) {
     val codePoint = suggestion.codePointAt(i)
-    if (i == 0 &&
+    if (
+      i == 0 &&
         !Character.isJavaIdentifierStart(codePoint) &&
         Character.isJavaIdentifierPart(codePoint)
     ) {

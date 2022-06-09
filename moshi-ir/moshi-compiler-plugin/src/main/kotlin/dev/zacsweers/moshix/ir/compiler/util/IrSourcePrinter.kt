@@ -204,7 +204,8 @@ internal class IrSourcePrinterVisitor(
     if (declaration.overriddenSymbols.isNotEmpty()) {
       print("override ")
     } else {
-      if (declaration.visibility != DescriptorVisibilities.PUBLIC &&
+      if (
+        declaration.visibility != DescriptorVisibilities.PUBLIC &&
           declaration.visibility != DescriptorVisibilities.LOCAL
       ) {
         print(declaration.visibility.toString().toLowerCase(Locale.ROOT))
@@ -838,7 +839,8 @@ internal class IrSourcePrinterVisitor(
   }
 
   override fun visitField(declaration: IrField) {
-    if (declaration.visibility != DescriptorVisibilities.PUBLIC &&
+    if (
+      declaration.visibility != DescriptorVisibilities.PUBLIC &&
         declaration.visibility != DescriptorVisibilities.LOCAL
     ) {
       print(declaration.visibility.toString().toLowerCase(Locale.ROOT))
@@ -1010,7 +1012,8 @@ internal class IrSourcePrinterVisitor(
   override fun visitClass(declaration: IrClass) {
     val primaryConstructor = declaration.primaryConstructor
     declaration.printAnnotations(onePerLine = true)
-    if (declaration.visibility != DescriptorVisibilities.PUBLIC &&
+    if (
+      declaration.visibility != DescriptorVisibilities.PUBLIC &&
         declaration.visibility != DescriptorVisibilities.LOCAL
     ) {
       print(declaration.visibility.toString().toLowerCase(Locale.ROOT))

@@ -108,7 +108,8 @@ internal fun targetType(
     return null
   }
 
-  if (constructor.visibility != DescriptorVisibilities.INTERNAL &&
+  if (
+    constructor.visibility != DescriptorVisibilities.INTERNAL &&
       constructor.visibility != DescriptorVisibilities.PUBLIC
   ) {
     logger.error(constructor.irConstructor) {

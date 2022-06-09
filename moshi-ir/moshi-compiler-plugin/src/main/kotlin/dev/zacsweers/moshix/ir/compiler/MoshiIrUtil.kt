@@ -59,7 +59,8 @@ internal fun IrProperty.jsonIgnoreFromAnywhere(): Boolean {
 internal fun IrAnnotationContainer.jsonName(): String? {
   @Suppress("UNCHECKED_CAST")
   return (getAnnotation(JSON_ANNOTATION)?.getValueArgument(0) as? IrConst<String>?)
-    ?.value?.takeUnless { it == Json.UNSET_NAME }
+    ?.value
+    ?.takeUnless { it == Json.UNSET_NAME }
 }
 
 internal fun IrAnnotationContainer.jsonIgnore(): Boolean {

@@ -36,7 +36,8 @@ internal fun ClassDescriptor.asClassName(): ClassName =
       parents
         .filterIsInstance<PackageFragmentDescriptor>()
         .first()
-        .fqName.safePackageString(dotSuffix = false),
+        .fqName
+        .safePackageString(dotSuffix = false),
     simpleNames =
       parentsWithSelf
         .filterIsInstance<ClassDescriptor>()
