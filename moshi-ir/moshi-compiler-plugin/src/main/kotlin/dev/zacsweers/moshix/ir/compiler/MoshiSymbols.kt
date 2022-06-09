@@ -113,7 +113,8 @@ internal class MoshiSymbols(
   val jsonReaderOptionsOf by lazy {
     pluginContext
       .referenceClass(FqName("com.squareup.moshi.JsonReader.Options"))!!
-      .functions.single { it.owner.name.asString() == "of" }
+      .functions
+      .single { it.owner.name.asString() == "of" }
   }
 
   val jsonWriter: IrClassSymbol by lazy {
@@ -184,9 +185,8 @@ internal class MoshiSymbols(
 
   val jsonAdapterFactoryCreate by lazy {
     pluginContext
-      .referenceClass(FqName("com.squareup.moshi.JsonAdapter.Factory"))!!.getSimpleFunction(
-        "create"
-      )!!
+      .referenceClass(FqName("com.squareup.moshi.JsonAdapter.Factory"))!!
+      .getSimpleFunction("create")!!
   }
 
   internal val jsonAdapter: IrClassSymbol by lazy {
@@ -366,10 +366,8 @@ internal class MoshiSymbols(
     arguments: List<IrTypeArgument> = emptyList()
   ): IrType =
     pluginContext
-      .referenceClass(FqName(qualifiedName))!!.createType(
-        hasQuestionMark = nullable,
-        arguments = arguments
-      )
+      .referenceClass(FqName(qualifiedName))!!
+      .createType(hasQuestionMark = nullable, arguments = arguments)
 
   private fun IrBuilderWithScope.kClassReference(classType: IrType) =
     IrClassReferenceImpl(

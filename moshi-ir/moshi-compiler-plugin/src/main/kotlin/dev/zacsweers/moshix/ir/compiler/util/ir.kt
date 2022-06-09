@@ -133,7 +133,9 @@ internal fun IrConstructor.irConstructorBody(
     context.irFactory.createBlockBody(
       startOffset = startOffset,
       endOffset = endOffset,
-    ) { constructorIrBuilder.blockBody(statements) }
+    ) {
+      constructorIrBuilder.blockBody(statements)
+    }
 }
 
 internal fun DeclarationIrBuilder.irInstanceInitializerCall(

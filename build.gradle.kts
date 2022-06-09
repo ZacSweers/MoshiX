@@ -117,9 +117,8 @@ subprojects {
         //        allWarningsAsErrors = true
       }
     }
-    if (project.name != "sample" &&
-        !project.path.contains("sample") &&
-        !project.path.contains("test")
+    if (
+      project.name != "sample" && !project.path.contains("sample") && !project.path.contains("test")
     ) {
       configure<KotlinProjectExtension> { explicitApi() }
     }

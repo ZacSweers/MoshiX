@@ -330,7 +330,8 @@ internal class MoshiAdapterGenerator(
                     // TODO why can't I use kotlin.NullPointerException here?
                     pluginContext
                       .referenceClass(FqName("kotlin.KotlinNullPointerException"))!!
-                      .constructors.first { it.owner.valueParameters.size == 1 }
+                      .constructors
+                      .first { it.owner.valueParameters.size == 1 }
                   )
                   .apply {
                     putValueArgument(
@@ -694,7 +695,8 @@ internal class MoshiAdapterGenerator(
 
         val branches = buildList {
           for (input in components) {
-            if (input is ParameterOnly ||
+            if (
+              input is ParameterOnly ||
                 (input is ParameterProperty && input.property.isTransientOrIgnored)
             ) {
               updateMaskIndexes()
@@ -833,7 +835,8 @@ internal class MoshiAdapterGenerator(
       for (input in components.filterIsInstance<ParameterComponent>()) {
         lastIndex = input.parameter.index
         if (useDefaultsConstructor) {
-          if (input is ParameterOnly ||
+          if (
+            input is ParameterOnly ||
               (input is ParameterProperty && input.property.isTransientOrIgnored)
           ) {
             // We have to use the default primitive for the available type in

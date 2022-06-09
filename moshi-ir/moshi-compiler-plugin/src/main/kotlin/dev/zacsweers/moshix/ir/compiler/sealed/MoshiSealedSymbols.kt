@@ -33,6 +33,7 @@ internal class MoshiSealedSymbols(private val pluginContext: IrPluginContext) {
   val objectJsonAdapterCtor by lazy {
     pluginContext
       .referenceClass(FqName("dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter"))!!
-      .constructors.single()
+      .constructors
+      .single()
   }
 }

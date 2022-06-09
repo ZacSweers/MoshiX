@@ -1358,7 +1358,8 @@ class GeneratedAdaptersTest {
       Class.forName(
           "com.squareup.moshi.kotlin.codegen.GeneratedAdaptersTest_MultipleGenericsJsonAdapter"
         )
-        .constructors[0].newInstance(moshi, arrayOf(typeOf<String>().javaType))
+        .constructors[0]
+        .newInstance(moshi, arrayOf(typeOf<String>().javaType))
       fail("Should have failed to construct the adapter due to wrong number of generics")
     } catch (e: InvocationTargetException) {
       assertThat(e.cause)

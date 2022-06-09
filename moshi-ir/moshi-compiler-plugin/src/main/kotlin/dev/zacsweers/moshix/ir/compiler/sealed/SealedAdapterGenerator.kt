@@ -111,7 +111,8 @@ private constructor(
         .map { it.owner }
         .flatMapTo(LinkedHashSet()) { subtype ->
           val isObject = subtype.kind == ClassKind.OBJECT
-          if (isObject &&
+          if (
+            isObject &&
               subtype.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.DefaultObject"))
           ) {
             if (useDefaultNull) {
@@ -176,7 +177,8 @@ private constructor(
         }
       }
 
-      if (subtype.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.TypeLabel")) != null
+      if (
+        subtype.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.TypeLabel")) != null
       ) {
         // It's a different type, allow it to be used as a label and branch off from here.
         val classType =
@@ -319,7 +321,8 @@ private constructor(
     val jsonAdapterType =
       pluginContext
         .irType("com.squareup.moshi.JsonAdapter")
-        .classifierOrFail.typeWith(targetType.defaultType)
+        .classifierOrFail
+        .typeWith(targetType.defaultType)
     adapterCls.superTypes = listOf(jsonAdapterType)
 
     val hasObjectSubtypes = objectSubtypes.isNotEmpty()
