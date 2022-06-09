@@ -21,3 +21,13 @@ pluginManagement {
     gradlePluginPortal()
   }
 }
+
+dependencyResolutionManagement {
+  versionCatalogs { maybeCreate("libs").apply { from(files("../../gradle/libs.versions.toml")) } }
+  repositories {
+    mavenCentral()
+    google()
+  }
+}
+
+enableFeaturePreview("VERSION_CATALOGS")

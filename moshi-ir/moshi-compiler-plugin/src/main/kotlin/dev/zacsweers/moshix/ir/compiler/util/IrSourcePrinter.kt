@@ -969,7 +969,7 @@ internal class IrSourcePrinterVisitor(
     return "${if (value < 0) "-" else ""}0b$result"
   }
 
-  override fun <T> visitConst(expression: IrConst<T>) {
+  override fun visitConst(expression: IrConst<*>) {
     val result =
       when (expression.kind) {
         is IrConstKind.Null -> "${expression.value}"
@@ -1232,8 +1232,8 @@ internal class IrSourcePrinterVisitor(
     print("<<SPREAD>>")
   }
 
-  override fun visitVariableAccess(expression: IrValueAccessExpression) {
-    print("<<VARACCESS>>")
+  override fun visitValueAccess(expression: IrValueAccessExpression) {
+    print("<<VALACCESS>>")
   }
 
   override fun visitTry(aTry: IrTry) {

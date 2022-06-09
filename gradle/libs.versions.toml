@@ -13,15 +13,16 @@
 # limitations under the License.
 
 [versions]
+agp = "7.2.1"
 autoService = "1.0.1"
 incap = "0.3"
 gjf = "1.13.0"
-kotlinCompileTesting = "1.4.8"
-kotlin = "1.6.21"
+kotlinCompileTesting = "1.4.9-alpha01"
+kotlin = "1.7.0"
 javaRelease = "8"
 jvmTarget = "1.8"
 kotlinpoet = "1.11.0"
-ksp = "1.6.21-1.0.5"
+ksp = "1.7.0-RC-1.0.5"
 ktfmt = "0.38"
 moshi = "1.13.0"
 okhttp = "4.9.3"
@@ -31,10 +32,12 @@ retrofit = "2.9.0"
 dokka = { id = "org.jetbrains.dokka", version = "1.6.21" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.19.0" }
-spotless = { id = "com.diffplug.spotless", version = "6.6.1" }
+spotless = { id = "com.diffplug.spotless", version = "6.7.0" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.10.0" }
 
 [libraries]
+agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+
 autoCommon = { module = "com.google.auto:auto-common", version = "1.2.1" }
 
 autoService = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
@@ -49,6 +52,8 @@ incap-processor = { module = "net.ltgt.gradle.incap:incap-processor", version.re
 kotlin-compilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlin-metadata = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", version = "0.4.2" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-gradlePlugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
 
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-metadata = { module = "com.squareup:kotlinpoet-metadata", version.ref = "kotlinpoet" }
@@ -64,6 +69,7 @@ moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }
 moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
+moshi-kotlinCodegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
 
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
