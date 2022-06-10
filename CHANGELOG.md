@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Version 0.18.0
+--------------
+
+_2022-06-10_
+
+* Update to Kotlin 1.7.0 (Kotlin 1.6.x is no longer supported).
+* Remove remaining use of deprecated descriptor APIs in IR.
+* Update to KSP 1.7.0-1.0.6
+
 Version 0.17.2
 --------------
 
