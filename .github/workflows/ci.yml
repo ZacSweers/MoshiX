@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         java_version: [ 17 ]
-        kotlin_version: [ 1.6.21 ]
+        kotlin_version: [ 1.7.0 ]
         ksp_enabled: [ true, false ]
       fail-fast: false
     env:
