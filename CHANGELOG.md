@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Version 0.18.1
+--------------
+
+_2022-06-11_
+
+Add a missing proguard rule for `@AdaptedBy` annotations to ensure they're kept on classes that use 
+them. Unfortunately there doesn't appear to be a more granular way preserve these annotations without
+also keeping the whole class.
+
 Version 0.18.0
 --------------
 
