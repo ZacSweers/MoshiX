@@ -25,7 +25,7 @@ kotlinpoet = "1.11.0"
 ksp = "1.7.0-1.0.6"
 ktfmt = "0.38"
 moshi = "1.13.0"
-okhttp = "4.9.3"
+okhttp = "4.10.0"
 retrofit = "2.9.0"
 
 [plugins]
