@@ -275,9 +275,8 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         }
       }
 
-    val ksFile = preparedAdapter.spec.originatingKSFiles().single()
     preparedAdapter.spec.writeTo(codeGenerator, aggregating = true)
-    preparedAdapter.proguardConfig?.writeTo(codeGenerator, ksFile)
+    preparedAdapter.proguardConfig?.writeTo(codeGenerator, type.containingFile)
   }
 
   private fun walkTypeLabels(
@@ -437,9 +436,14 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
 }
 
 /** Writes this to `filer`. */
-internal fun ProguardConfig.writeTo(codeGenerator: CodeGenerator, originatingKSFile: KSFile) {
+internal fun ProguardConfig.writeTo(codeGenerator: CodeGenerator, originatingKSFile: KSFile?) {
   codeGenerator
-    .createNewFile(Dependencies(false, originatingKSFile), "", outputFile, "")
+    .createNewFile(
+      Dependencies(false, sources = originatingKSFile?.let { arrayOf(it) } ?: emptyArray()),
+      packageName = "",
+      fileName = outputFile,
+      extensionName = "",
+    )
     .bufferedWriter()
     .use(::writeTo)
 }
