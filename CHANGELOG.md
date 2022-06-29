@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Version 0.18.2
+--------------
+
+_2022-06-29_
+
+**Fix:** Incremental processing when sealed types are spread across multiple files now works 
+correctly for KSP code gen in moshi-sealed.
+
 Version 0.18.1
 --------------
 
