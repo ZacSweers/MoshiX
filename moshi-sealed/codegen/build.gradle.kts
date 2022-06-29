@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
   kotlin("jvm")
   id("com.google.devtools.ksp")
   id("com.vanniktech.maven.publish")
-}
-
-tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
-    freeCompilerArgs = freeCompilerArgs + "-opt-in=com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview"
-  }
 }
 
 // --add-opens for kapt to work. KGP covers this for us but local JVMs in tests do not

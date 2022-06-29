@@ -6,8 +6,10 @@ Version 0.18.2
 
 _2022-06-29_
 
-**Fix:** Incremental processing when sealed types are spread across multiple files now works 
-correctly for KSP code gen in moshi-sealed.
+* **Fix:** Incremental processing when sealed types are spread across multiple files now works
+  correctly for KSP code gen in moshi-sealed. Thanks to [@efemoney](https://github.com/efemoney).
+* Update KotlinPoet to 1.12.0.
+* Update kotlinx-metadata to 0.5.0.
 
 Version 0.18.1
 --------------
