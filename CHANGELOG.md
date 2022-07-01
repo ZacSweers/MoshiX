@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 0.18.3
+--------------
+
+_2022-07-01_
+
+* **Fix:** Support `@Json.ignore` in `MetadataKotlinJsonAdapterFactory`.
+
 Version 0.18.2
 --------------
 
