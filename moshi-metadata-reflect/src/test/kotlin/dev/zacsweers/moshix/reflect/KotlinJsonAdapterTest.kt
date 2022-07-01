@@ -339,12 +339,29 @@ class KotlinJsonAdapterTest {
       assertThat(expected)
         .hasMessageThat()
         .contains(
-          "No default value for transient constructor parameter 'a' on type '${RequiredTransientConstructorParameter::class.qualifiedName}'"
+          "No default value for transient/ignored constructor parameter 'a' on type '${RequiredTransientConstructorParameter::class.qualifiedName}'"
         )
     }
   }
 
   class RequiredTransientConstructorParameter(@Transient var a: Int)
+
+  @Test
+  fun requiredIgnoredConstructorParameterFails() {
+    val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
+    try {
+      moshi.adapter<RequiredIgnoredConstructorParameter>()
+      fail()
+    } catch (expected: IllegalArgumentException) {
+      assertThat(expected)
+        .hasMessageThat()
+        .contains(
+          "No default value for transient/ignored constructor parameter 'a' on type '${RequiredIgnoredConstructorParameter::class.qualifiedName}'"
+        )
+    }
+  }
+
+  class RequiredIgnoredConstructorParameter(@Json(ignore = true) var a: Int)
 
   @Test
   fun transientProperty() {

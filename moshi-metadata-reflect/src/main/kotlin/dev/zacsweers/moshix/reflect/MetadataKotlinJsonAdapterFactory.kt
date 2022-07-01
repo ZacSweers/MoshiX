@@ -60,7 +60,7 @@ private val ABSENT_VALUE = Any()
 internal class KotlinJsonAdapter<T>(
   private val constructor: KtConstructor,
   private val allBindings: List<Binding<T, Any?>?>,
-  private val nonTransientBindings: List<Binding<T, Any?>>,
+  private val nonIgnoredBindings: List<Binding<T, Any?>>,
   private val options: JsonReader.Options
 ) : JsonAdapter<T>() {
 
@@ -77,7 +77,7 @@ internal class KotlinJsonAdapter<T>(
         reader.skipValue()
         continue
       }
-      val binding = nonTransientBindings[index]
+      val binding = nonIgnoredBindings[index]
 
       val propertyIndex = binding.propertyIndex
       if (values[propertyIndex] !== ABSENT_VALUE) {
@@ -251,15 +251,6 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
       val propertyField = signatureSearcher.field(property)
       val ktParameter = parametersByName[property.name]
 
-      if (Modifier.isTransient(propertyField?.modifiers ?: 0)) {
-        ktParameter?.run {
-          require(declaresDefaultValue) {
-            "No default value for transient constructor parameter '$name' on type '${rawType.canonicalName}'"
-          }
-        }
-        continue
-      }
-
       if (ktParameter != null) {
         require(ktParameter.km.type valueEquals property.returnType) {
           "'${property.name}' has a constructor parameter of type ${ktParameter.km.type.canonicalName} but a property of type ${property.returnType.canonicalName}."
@@ -284,6 +275,18 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
       val allAnnotations = ktProperty.annotations.toMutableList()
       val jsonAnnotation = allAnnotations.filterIsInstance<Json>().firstOrNull()
 
+      val isIgnored =
+        Modifier.isTransient(propertyField?.modifiers ?: 0) || jsonAnnotation?.ignore == true
+
+      if (isIgnored) {
+        ktParameter?.run {
+          require(declaresDefaultValue) {
+            "No default value for transient/ignored constructor parameter '$name' on type '${rawType.canonicalName}'"
+          }
+        }
+        continue
+      }
+
       val name = jsonAnnotation?.name ?: property.name
       val resolvedPropertyType = resolve(type, rawType, ktProperty.javaType)
       val adapter =
@@ -293,7 +296,6 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
           property.name
         )
 
-      @Suppress("UNCHECKED_CAST")
       bindingsByName[property.name] =
         KotlinJsonAdapter.Binding(name, jsonAnnotation?.name ?: name, adapter, ktProperty)
     }
@@ -313,9 +315,9 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
       bindings += bindingByName.value.copy(propertyIndex = index++)
     }
 
-    val nonTransientBindings = bindings.filterNotNull()
-    val options = JsonReader.Options.of(*nonTransientBindings.map { it.name }.toTypedArray())
-    return KotlinJsonAdapter(ktConstructor, bindings, nonTransientBindings, options).nullSafe()
+    val nonIgnoredBindings = bindings.filterNotNull()
+    val options = JsonReader.Options.of(*nonIgnoredBindings.map { it.name }.toTypedArray())
+    return KotlinJsonAdapter(ktConstructor, bindings, nonIgnoredBindings, options).nullSafe()
   }
 
   private infix fun KmType?.valueEquals(other: KmType?): Boolean {
