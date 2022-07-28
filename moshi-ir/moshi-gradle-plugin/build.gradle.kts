@@ -21,7 +21,7 @@ plugins {
   id("java-gradle-plugin")
   id("org.jetbrains.dokka") version "1.7.0"
   id("com.vanniktech.maven.publish") version "0.20.0"
-  id("com.diffplug.spotless") version "6.8.0"
+  id("com.diffplug.spotless") version "6.9.0"
 }
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
