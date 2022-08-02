@@ -32,7 +32,6 @@ import dev.zacsweers.moshix.ir.compiler.util.irType
 import dev.zacsweers.moshix.ir.compiler.util.joinToIrAnd
 import dev.zacsweers.moshix.ir.compiler.util.rawType
 import dev.zacsweers.moshix.ir.compiler.util.rawTypeOrNull
-import org.jetbrains.kotlin.backend.common.deepCopyWithVariables
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irIfThen
@@ -81,6 +80,7 @@ import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.IrVariable
+import org.jetbrains.kotlin.ir.deepCopyWithVariables
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
