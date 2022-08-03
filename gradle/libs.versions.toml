@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-agp = "7.2.1"
+agp = "7.2.2"
 autoService = "1.0.1"
 incap = "0.3"
 gjf = "1.13.0"
