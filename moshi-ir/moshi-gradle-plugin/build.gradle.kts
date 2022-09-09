@@ -20,7 +20,7 @@ plugins {
   id("org.jetbrains.kotlin.jvm") version "1.7.10"
   id("java-gradle-plugin")
   id("org.jetbrains.dokka") version "1.7.10"
-  id("com.vanniktech.maven.publish") version "0.20.0"
+  id("com.vanniktech.maven.publish") version "0.22.0"
   id("com.diffplug.spotless") version "6.10.0"
 }
 
