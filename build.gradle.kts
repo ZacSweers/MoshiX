@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import java.net.URL
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
@@ -132,6 +133,10 @@ subprojects {
         externalDocumentationLink { url.set(URL("https://square.github.io/okio/2.x/okio/")) }
         externalDocumentationLink { url.set(URL("https://square.github.io/moshi/1.x/moshi/")) }
       }
+    }
+    configure<MavenPublishBaseExtension> {
+      // Can't do automatic release due to publishing both a plugin and regular artifacts
+      publishToMavenCentral()
     }
   }
   // configuration required to produce unique META-INF/*.kotlin_module file names
