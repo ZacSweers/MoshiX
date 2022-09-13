@@ -187,7 +187,7 @@ of including kotlin-reflect. In your moshi instance construction, use
 ```kotlin
 val moshi = Moshi.Builder()
     .add(MetadataMoshiSealedJsonAdapterFactory())
-    .add(KotlinJsonAdapterFactory())
+    .add(MetadataKotlinJsonAdapterFactory())
     .build()
 ```
 
