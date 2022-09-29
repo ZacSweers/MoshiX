@@ -121,7 +121,8 @@ private constructor(
                 """
                       Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type: ${target.fqNameWhenAvailable}
                       Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: ${subtype.fqNameWhenAvailable}
-                    """.trimIndent()
+                    """
+                  .trimIndent()
               }
               hasErrors = true
               return@flatMapTo emptySequence()

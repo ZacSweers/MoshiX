@@ -65,7 +65,8 @@ class DualKotlinTest {
           """
               Required value 'b' missing at $
               Required value 'c' missing at $
-              """.trimIndent()
+              """
+            .trimIndent()
         )
     }
   }
@@ -120,7 +121,8 @@ class DualKotlinTest {
           """
               Non-null value 'a' was null at $.a
               Non-null value 'b' was null at $.b
-              """.trimIndent()
+              """
+            .trimIndent()
         )
     }
   }
@@ -374,7 +376,8 @@ class DualKotlinTest {
       .isEqualTo(
         """
         {"text":"root","r":{"number":0,"r":{"text":"grand child 1"},"t":{"number":1}},"t":{"text":"child 1"}}
-        """.trimIndent()
+        """
+          .trimIndent()
       )
   }
 

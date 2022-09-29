@@ -127,7 +127,8 @@ internal fun targetType(
           @JsonClass can't be applied to ${type.fqNameWhenAvailable}: supertype $superclass is not a Kotlin type.
           Origin=${classDecl.origin}
           Annotations=${classDecl.annotations.joinToString(prefix = "[", postfix = "]") { it.type.rawType().name.identifier }}
-          """.trimIndent()
+          """
+          .trimIndent()
       }
       return null
     }
