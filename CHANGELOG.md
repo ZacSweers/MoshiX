@@ -1,6 +1,16 @@
 Changelog
 =========
 
+Version 0.19.0
+--------------
+
+_2022-09-29_
+
+* Update to Kotlin `1.7.20`.
+* Update to KSP `1.7.20-1.0.6`.
+
+Note this release requires Kotlin 1.7.20 or newer.
+
 Version 0.18.3
 --------------
 
