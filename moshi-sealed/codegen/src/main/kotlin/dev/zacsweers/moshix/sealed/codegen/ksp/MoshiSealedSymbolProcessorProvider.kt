@@ -236,7 +236,8 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
               """
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type: $type
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: $subtype
-              """.trimIndent(),
+              """
+                .trimIndent(),
               subtype
             )
             return

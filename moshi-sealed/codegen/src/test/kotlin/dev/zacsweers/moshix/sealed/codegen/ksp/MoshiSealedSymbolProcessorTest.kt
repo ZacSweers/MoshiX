@@ -95,7 +95,8 @@ class MoshiSealedSymbolProcessorProviderTest {
           runtimeAdapter.toJson(writer, value_)
         }
       }
-      """.trimIndent()
+      """
+          .trimIndent()
       )
 
     val proguardFiles = generatedSourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()
@@ -112,7 +113,8 @@ class MoshiSealedSymbolProcessorProviderTest {
           -keep class test.BaseTypeJsonAdapter {
               public <init>(com.squareup.moshi.Moshi);
           }
-          """.trimIndent()
+          """
+                .trimIndent()
             )
         else -> error("Unrecognized proguard file: $generatedFile")
       }
@@ -318,7 +320,8 @@ class MoshiSealedSymbolProcessorProviderTest {
           runtimeAdapter.toJson(writer, value_)
         }
       }
-      """.trimIndent()
+      """
+          .trimIndent()
       )
   }
 
@@ -399,7 +402,8 @@ class MoshiSealedSymbolProcessorProviderTest {
           runtimeAdapter.toJson(writer, value_)
         }
       }
-      """.trimIndent()
+      """
+          .trimIndent()
       )
   }
 }

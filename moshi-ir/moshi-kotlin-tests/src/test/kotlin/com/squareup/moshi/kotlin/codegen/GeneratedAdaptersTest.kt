@@ -126,7 +126,8 @@ class GeneratedAdaptersTest {
     val json2 =
       """
       {"foo":"fooString","bar":"barString","nullableBar":"bar","bazList":["baz"]}
-      """.trimIndent()
+      """
+        .trimIndent()
 
     val instance2 = adapter.fromJson(json2)!!
     assertThat(instance2.foo).isEqualTo("fooString")

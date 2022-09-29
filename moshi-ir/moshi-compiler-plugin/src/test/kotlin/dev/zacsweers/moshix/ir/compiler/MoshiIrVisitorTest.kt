@@ -701,7 +701,8 @@ class MoshiIrVisitorTest {
           -keep class testPackage.AliasesJsonAdapter {
               public <init>(com.squareup.moshi.Moshi);
           }
-          """.trimIndent()
+          """
+                  .trimIndent()
               )
           "moshi-testPackage.Simple" ->
             assertThat(generatedFile.readText())
@@ -713,7 +714,8 @@ class MoshiIrVisitorTest {
           -keep class testPackage.SimpleJsonAdapter {
               public <init>(com.squareup.moshi.Moshi);
           }
-          """.trimIndent()
+          """
+                  .trimIndent()
               )
           "moshi-testPackage.Generic" ->
             assertThat(generatedFile.readText())
@@ -725,7 +727,8 @@ class MoshiIrVisitorTest {
           -keep class testPackage.GenericJsonAdapter {
               public <init>(com.squareup.moshi.Moshi,java.lang.reflect.Type[]);
           }
-          """.trimIndent()
+          """
+                  .trimIndent()
               )
           "moshi-testPackage.UsingQualifiers" -> {
             assertThat(generatedFile.readText())
@@ -737,7 +740,8 @@ class MoshiIrVisitorTest {
             -keep class testPackage.UsingQualifiersJsonAdapter {
                 public <init>(com.squareup.moshi.Moshi);
             }
-            """.trimIndent()
+            """
+                  .trimIndent()
               )
           }
           "moshi-testPackage.MixedTypes" ->
@@ -750,7 +754,8 @@ class MoshiIrVisitorTest {
           -keep class testPackage.MixedTypesJsonAdapter {
               public <init>(com.squareup.moshi.Moshi);
           }
-          """.trimIndent()
+          """
+                  .trimIndent()
               )
           "moshi-testPackage.DefaultParams" ->
             assertThat(generatedFile.readText())
@@ -762,7 +767,8 @@ class MoshiIrVisitorTest {
           -keep class testPackage.DefaultParamsJsonAdapter {
               public <init>(com.squareup.moshi.Moshi);
           }
-          """.trimIndent()
+          """
+                  .trimIndent()
               )
           "moshi-testPackage.Complex" -> {
             assertThat(generatedFile.readText())
@@ -774,7 +780,8 @@ class MoshiIrVisitorTest {
             -keep class testPackage.ComplexJsonAdapter {
                 public <init>(com.squareup.moshi.Moshi,java.lang.reflect.Type[]);
             }
-            """.trimIndent()
+            """
+                  .trimIndent()
               )
           }
           "moshi-testPackage.MultipleMasks" ->
@@ -787,7 +794,8 @@ class MoshiIrVisitorTest {
           -keep class testPackage.MultipleMasksJsonAdapter {
               public <init>(com.squareup.moshi.Moshi);
           }
-          """.trimIndent()
+          """
+                  .trimIndent()
               )
           "moshi-testPackage.NestedType.NestedSimple" -> {
             assertThat(generatedFile.readText())
@@ -799,7 +807,8 @@ class MoshiIrVisitorTest {
             -keep class testPackage.NestedType_NestedSimpleJsonAdapter {
                 public <init>(com.squareup.moshi.Moshi);
             }
-            """.trimIndent()
+            """
+                  .trimIndent()
               )
           }
           else -> error("Unexpected proguard file! ${generatedFile.name}")
