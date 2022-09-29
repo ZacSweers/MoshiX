@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
   id("org.jetbrains.kotlin.jvm") version "1.7.10"
   id("java-gradle-plugin")
   id("org.jetbrains.dokka") version "1.7.10"
-  id("com.vanniktech.maven.publish") version "0.20.0"
-  id("com.diffplug.spotless") version "6.9.0"
+  id("com.vanniktech.maven.publish") version "0.22.0"
+  id("com.diffplug.spotless") version "6.11.0"
 }
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
@@ -63,6 +64,11 @@ gradlePlugin {
 tasks.named<DokkaTask>("dokkaHtml") {
   outputDirectory.set(rootProject.file("../docs/0.x"))
   dokkaSourceSets.configureEach { skipDeprecated.set(true) }
+}
+
+configure<MavenPublishBaseExtension> {
+  // Can't do automatic release due to publishing both a plugin and regular artifacts
+  publishToMavenCentral()
 }
 
 spotless {

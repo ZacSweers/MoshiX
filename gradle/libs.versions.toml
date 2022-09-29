@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-agp = "7.2.1"
+agp = "7.3.0"
 autoService = "1.0.1"
 incap = "0.3"
 gjf = "1.13.0"
@@ -23,17 +23,17 @@ javaRelease = "8"
 jvmTarget = "1.8"
 kotlinpoet = "1.12.0"
 ksp = "1.7.20-RC-1.0.6"
-ktfmt = "0.39"
-moshi = "1.13.0"
+ktfmt = "0.41"
+moshi = "1.14.0"
 okhttp = "4.10.0"
 retrofit = "2.9.0"
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version = "1.7.10" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.20.0" }
-spotless = { id = "com.diffplug.spotless", version = "6.9.0" }
-kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.11.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.22.0" }
+spotless = { id = "com.diffplug.spotless", version = "6.11.0" }
+kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.11.1" }
 
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }

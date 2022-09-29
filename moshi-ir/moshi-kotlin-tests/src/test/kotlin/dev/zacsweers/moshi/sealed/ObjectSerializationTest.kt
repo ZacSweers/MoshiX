@@ -36,7 +36,8 @@ class ObjectSerializationTest {
          "param2": { "type": "boolean" }
        }
      }
-    """.trimIndent()
+    """
+        .trimIndent()
 
     val functionSpec = moshi.adapter<FunctionSpec>().fromJson(json)
     checkNotNull(functionSpec)
