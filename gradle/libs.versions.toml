@@ -33,7 +33,7 @@ dokka = { id = "org.jetbrains.dokka", version = "1.7.20" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.22.0" }
 spotless = { id = "com.diffplug.spotless", version = "6.11.0" }
-kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.11.1" }
+kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.12.0" }
 
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
