@@ -22,7 +22,7 @@ plugins {
   id("java-gradle-plugin")
   id("org.jetbrains.dokka") version "1.7.20"
   id("com.vanniktech.maven.publish") version "0.22.0"
-  id("com.diffplug.spotless") version "6.11.0"
+  id("com.diffplug.spotless") version "6.12.0"
 }
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
