@@ -1,18 +1,17 @@
 package dev.zacsweers.moshix.ir.compiler.proguardgen
 
+import com.squareup.anvil.compiler.internal.classIdBestGuess
+import com.squareup.anvil.compiler.internal.reference.AnvilModuleDescriptor
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.KtClassOrObject
 
-internal interface MoshiModuleDescriptor : ModuleDescriptor {
-  fun resolveClassIdOrNull(classId: ClassId): FqName?
-  fun getKtClassOrObjectOrNull(fqName: FqName): KtClassOrObject?
-
+internal interface MoshiModuleDescriptor : AnvilModuleDescriptor {
   companion object {
     operator fun invoke(delegate: ModuleDescriptor): ModuleDescriptor =
-      RealMoshiModuleDescriptor(delegate)
+      RealMoshiModuleDescriptor.Factory().create(delegate)
   }
 }
 

@@ -1,5 +1,11 @@
 package dev.zacsweers.moshix.ir.compiler.proguardgen
 
+import com.squareup.anvil.compiler.internal.asClassName
+import com.squareup.anvil.compiler.internal.fqName
+import com.squareup.anvil.compiler.internal.reference.argumentAt
+import com.squareup.anvil.compiler.internal.reference.asClassName
+import com.squareup.anvil.compiler.internal.reference.classAndInnerClassReferences
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
@@ -18,8 +24,13 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiTreeChangeAdapter
 import org.jetbrains.kotlin.com.intellij.psi.PsiTreeChangeListener
 import org.jetbrains.kotlin.container.ComponentProvider
 import org.jetbrains.kotlin.context.ProjectContext
+import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
-import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.descriptors.isSealed
+import org.jetbrains.kotlin.descriptors.resolveClassByFqName
+import org.jetbrains.kotlin.incremental.KotlinLookupLocation
+import org.jetbrains.kotlin.lexer.KtTokens
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.BindingTrace
 import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
@@ -27,6 +38,8 @@ import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
 private val MOSHI_REFLECTIVE_NAME = Moshi::class.asClassName().reflectionName()
 private val TYPE_ARRAY_REFLECTIVE_NAME =
   "${java.lang.reflect.Type::class.asClassName().reflectionName()}[]"
+private val NESTED_SEALED_FQ_NAME = FqName("dev.zacsweers.moshix.sealed.annotations.NestedSealed")
+private val JSON_CLASS_FQ_NAME = JsonClass::class.fqName
 
 internal class ProguardRuleGenerationExtension(
   private val messageCollector: MessageCollector,
@@ -67,22 +80,41 @@ internal class ProguardRuleGenerationExtension(
       psiManager.dropPsiCaches()
     }
 
-    files.flatMap(KtFile::classesAndInnerClasses).forEach { clazz ->
+    files.classAndInnerClassReferences(moshiModule).forEach { psiClass ->
       val jsonClassAnnotation =
-        clazz.findAnnotation(JsonClass::class.fqName, moshiModule) ?: return@forEach
-      if (jsonClassAnnotation.findAnnotationArgument<Boolean>("generateAdapter", 0) == false) {
+        psiClass.annotations.find { it.fqName == JSON_CLASS_FQ_NAME } ?: return@forEach
+
+      if (!jsonClassAnnotation.argumentAt("generateAdapter", 0)!!.value<Boolean>()) {
         return@forEach
       }
-      val generatorKey = jsonClassAnnotation.findAnnotationArgument<String>("generator", 1) ?: ""
-      if (generatorKey.isEmpty() || (enableSealed && generatorKey.startsWith("sealed:"))) {
-        val targetType = clazz.asClassName()
-        val hasGenerics = !clazz.typeParameterList?.parameters.isNullOrEmpty()
+      val generatorKey = jsonClassAnnotation.argumentAt("generator", 1)?.value() ?: ""
+      val isMoshiSealed = (enableSealed && generatorKey.startsWith("sealed:"))
+      if (generatorKey.isEmpty() || isMoshiSealed) {
+        val targetType = psiClass.asClassName()
+        val hasGenerics = !psiClass.typeParameters.isNullOrEmpty()
         val adapterName = "${targetType.simpleNames.joinToString(separator = "_")}JsonAdapter"
         val adapterConstructorParams =
           when (hasGenerics) {
             false -> listOf(MOSHI_REFLECTIVE_NAME)
             true -> listOf(MOSHI_REFLECTIVE_NAME, TYPE_ARRAY_REFLECTIVE_NAME)
           }
+
+        val nestedSealedClassNames: Set<ClassName>
+        if (isMoshiSealed && psiClass.clazz.hasModifier(KtTokens.SEALED_KEYWORD)) {
+          nestedSealedClassNames = mutableSetOf()
+          val descriptor =
+            moshiModule.resolveClassByFqName(psiClass.fqName, KotlinLookupLocation(psiClass.clazz))
+              ?: throw MoshiCompilationException(
+                "Could not resolve class descriptor for ${psiClass.fqName}",
+                null,
+                psiClass.clazz
+              )
+          // Skip initial annotation check because this is top level
+          descriptor.walkSealedSubtypes(nestedSealedClassNames, skipAnnotationCheck = true)
+        } else {
+          nestedSealedClassNames = emptySet()
+        }
+
         val config =
           ProguardConfig(
             targetClass = targetType,
@@ -102,7 +134,25 @@ internal class ProguardRuleGenerationExtension(
         generator
           .createNewFile(config.outputFilePathWithoutExtension(fileName))
           .bufferedWriter()
-          .use(config::writeTo)
+          .use { writer ->
+            config.writeTo(writer)
+            if (nestedSealedClassNames.size > 0) {
+              // Add a note for reference
+              writer.appendLine(
+                "\n# Conditionally keep this adapter for every possible nested subtype that uses it."
+              )
+              val adapterCanonicalName =
+                ClassName(targetType.packageName, adapterName).canonicalName
+              for (target in nestedSealedClassNames.sorted()) {
+                writer.appendLine("-if class $target")
+                writer.appendLine("-keep class $adapterCanonicalName {")
+                // Keep the constructor for Moshi's reflective lookup
+                val constructorArgs = adapterConstructorParams.joinToString(",")
+                writer.appendLine("    public <init>($constructorArgs);")
+                writer.appendLine("}")
+              }
+            }
+          }
       }
     }
 
@@ -143,12 +193,20 @@ private class ProguardRuleGenerator(resourcesDir: File) {
   }
 }
 
-private fun KtFile.classesAndInnerClasses(): List<KtClassOrObject> {
-  val children = findChildrenByClass(KtClassOrObject::class.java)
-
-  return generateSequence(children.toList()) { list ->
-      list.flatMap { it.declarations.filterIsInstance<KtClassOrObject>() }.ifEmpty { null }
+private fun ClassDescriptor.walkSealedSubtypes(
+  elements: MutableSet<ClassName>,
+  skipAnnotationCheck: Boolean
+) {
+  if (isSealed()) {
+    if (!skipAnnotationCheck) {
+      if (annotations.findAnnotation(NESTED_SEALED_FQ_NAME) != null) {
+        elements += asClassName()
+      } else {
+        return
+      }
     }
-    .flatten()
-    .toList()
+    for (nested in sealedSubclasses) {
+      nested.walkSealedSubtypes(elements, skipAnnotationCheck = false)
+    }
+  }
 }
