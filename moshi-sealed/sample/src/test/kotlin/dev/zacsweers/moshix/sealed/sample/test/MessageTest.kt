@@ -125,7 +125,8 @@ class MessageTest(type: Type) {
     data class Error(val error_logs: Map<String, Any>) : MessageWithFallbackAdapter()
 
     class SuccessAdapter(moshi: Moshi) : JsonAdapter<MessageWithFallbackAdapter>() {
-      val delegate = moshi.adapter<Success>()
+      private val delegate = moshi.adapter<Success>()
+
       override fun fromJson(reader: JsonReader): MessageWithFallbackAdapter? {
         return delegate.fromJson(reader)
       }
