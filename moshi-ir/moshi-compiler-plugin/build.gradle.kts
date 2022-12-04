@@ -17,10 +17,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  kotlin("jvm")
-  id("org.jetbrains.dokka")
-  id("com.vanniktech.maven.publish")
-  id("com.google.devtools.ksp")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.dokka)
+  alias(libs.plugins.mavenPublish)
+  alias(libs.plugins.ksp)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
