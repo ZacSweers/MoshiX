@@ -18,11 +18,11 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "1.7.22"
-  id("java-gradle-plugin")
-  id("org.jetbrains.dokka") version "1.7.20"
-  id("com.vanniktech.maven.publish") version "0.22.0"
-  id("com.diffplug.spotless") version "6.12.0"
+  alias(libs.plugins.kotlinJvm)
+  `java-gradle-plugin`
+  alias(libs.plugins.dokka)
+  alias(libs.plugins.mavenPublish)
+  alias(libs.plugins.spotless)
 }
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }

@@ -17,8 +17,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  kotlin("jvm")
-  id("com.google.devtools.ksp")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.ksp)
 }
 
 dependencies {

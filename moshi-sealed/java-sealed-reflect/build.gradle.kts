@@ -16,7 +16,7 @@
 
 plugins {
   `java-library`
-  id("com.vanniktech.maven.publish")
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {

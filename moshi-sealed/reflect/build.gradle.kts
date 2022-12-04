@@ -15,8 +15,8 @@
  */
 
 plugins {
-  kotlin("jvm")
-  id("com.vanniktech.maven.publish")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
