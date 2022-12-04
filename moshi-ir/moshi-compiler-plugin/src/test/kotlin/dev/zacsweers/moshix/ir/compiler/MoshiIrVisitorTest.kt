@@ -881,6 +881,66 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       )
   }
 
+  @Test
+  fun sealedProguardGenSmokeTest() {
+    assumeFalse(useK2)
+    val source =
+      kotlin(
+        "BaseType.kt",
+        """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+      import dev.zacsweers.moshix.sealed.annotations.NestedSealed
+
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a", ["aa"])
+        class TypeA : BaseType()
+        @TypeLabel("b")
+        class TypeB : BaseType()
+        @NestedSealed
+        sealed class TypeC : BaseType() {
+          @TypeLabel("c")
+          class TypeCImpl : TypeC()
+        }
+      }
+    """
+      )
+
+    val compilation = prepareCompilation(null, generateProguardRules = true, source)
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+
+    val generatedSourcesDir = resourcesDir.resolve("META-INF/proguard")
+    val proguardFiles = generatedSourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()
+    check(proguardFiles.isNotEmpty())
+    proguardFiles.forEach { generatedFile ->
+      when (generatedFile.nameWithoutExtension) {
+        "moshi-test.BaseType" ->
+          assertThat(generatedFile.readText())
+            .contains(
+              """
+                -if class test.BaseType
+                -keepnames class test.BaseType
+                -if class test.BaseType
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+
+                # Conditionally keep this adapter for every possible nested subtype that uses it.
+                -if class test.BaseType.TypeC
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+              """
+                .trimIndent()
+            )
+        else -> error("Unrecognized proguard file: $generatedFile")
+      }
+    }
+  }
+
   private fun prepareCompilation(
     generatedAnnotation: String? = null,
     generateProguardRules: Boolean = false,
@@ -896,6 +956,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         add(processor.option(KEY_DEBUG, "false")) // Enable when needed for extra debugging
         add(processor.option(KEY_GENERATE_PROGUARD_RULES, generateProguardRules.toString()))
         add(processor.option(KEY_RESOURCES_OUTPUT_DIR, resourcesDir))
+        add(processor.option(KEY_ENABLE_SEALED, "true"))
         if (generatedAnnotation != null) {
           processor.option(KEY_GENERATED_ANNOTATION, generatedAnnotation)
         }
