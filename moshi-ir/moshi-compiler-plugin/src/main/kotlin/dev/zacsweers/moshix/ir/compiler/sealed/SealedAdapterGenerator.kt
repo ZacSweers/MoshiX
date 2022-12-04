@@ -100,7 +100,6 @@ private constructor(
       }
     }
 
-    // TODO there's no non-descriptor API for this yet
     val useDefaultNull =
       target.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.DefaultNull"))
     val objectSubtypes = mutableListOf<IrClass>()
@@ -148,9 +147,6 @@ private constructor(
         objectSubtypes = objectSubtypes
       )
     }
-
-    // TODO sealedParent gen?
-    //  Requires a runtime adapter! Or JsonClass(generator = "sealed-nested")
   }
 
   private fun walkTypeLabels(

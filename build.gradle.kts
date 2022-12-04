@@ -20,26 +20,14 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript {
-  dependencies {
-    classpath(
-      kotlin(
-        "gradle-plugin",
-        version = (System.getenv()["MOSHIX_KOTLIN"] ?: libs.versions.kotlin.get())
-      )
-    )
-    // Include our included build
-    classpath("dev.zacsweers.moshix:moshi-gradle-plugin")
-  }
-}
-
 plugins {
-  kotlin("jvm") version (System.getenv()["MOSHIX_KOTLIN"] ?: libs.versions.kotlin.get()) apply false
+  alias(libs.plugins.kotlinJvm) apply false
   alias(libs.plugins.ksp) apply false
   alias(libs.plugins.dokka) apply false
   alias(libs.plugins.mavenPublish) apply false
   alias(libs.plugins.spotless)
   alias(libs.plugins.kotlinBinaryCompatibilityValidator)
+  alias(libs.plugins.moshix) apply false
 }
 
 apiValidation {
@@ -65,7 +53,7 @@ spotless {
   java {
     googleJavaFormat(libs.versions.gjf.get())
     target("**/*.java")
-    targetExclude("**/spotless.java", "**/build/**")
+    targetExclude("**/spotless.java", "**/build/**", "**/.gradle/**")
   }
   kotlin {
     ktfmt(ktfmtVersion).googleStyle()
@@ -87,19 +75,6 @@ spotless {
 }
 
 subprojects {
-  repositories {
-    mavenCentral()
-    // Kotlin bootstrap repository, useful for testing against Kotlin dev builds. Usually only
-    // tested on CI shadow jobs
-    // https://kotlinlang.slack.com/archives/C0KLZSCHF/p1616514468003200?thread_ts=1616509748.001400&cid=C0KLZSCHF
-    maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap") {
-      name = "Kotlin-Bootstrap"
-      content {
-        // this repository *only* contains Kotlin artifacts (don't try others here)
-        includeGroupByRegex("org\\.jetbrains.*")
-      }
-    }
-  }
   val releaseVersion = project.findProperty("moshix.javaReleaseVersion")?.toString() ?: "8"
   val release = releaseVersion.toInt()
   pluginManager.withPlugin("java") {

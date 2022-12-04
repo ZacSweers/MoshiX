@@ -31,7 +31,8 @@ import com.squareup.kotlinpoet.ClassName
 internal data class ProguardConfig(
   val targetClass: ClassName,
   val adapterName: String,
-  val adapterConstructorParams: List<String>
+  val adapterConstructorParams: List<String>,
+  val nestedSubtypes: List<ClassName>,
 ) {
   internal val outputFile = "META-INF/proguard/moshi-sealed-${targetClass.canonicalName}.pro"
 
@@ -51,11 +52,23 @@ internal data class ProguardConfig(
       appendLine("-if class $targetName")
       appendLine("-keepnames class $targetName")
 
-      appendLine("-if class $targetName")
-      appendLine("-keep class $adapterCanonicalName {")
-      // Keep the constructor for Moshi's reflective lookup
-      val constructorArgs = adapterConstructorParams.joinToString(",")
-      appendLine("    public <init>($constructorArgs);")
-      appendLine("}")
+      val allTargets = buildList {
+        add(targetName)
+        nestedSubtypes.mapTo(this) { it.reflectionName() }
+      }
+      if (allTargets.size > 1) {
+        // Add a note for reference
+        appendLine(
+          "# Conditionally keep this adapter for every possible nested subtype that uses it."
+        )
+      }
+      for (target in allTargets) {
+        appendLine("-if class $target")
+        appendLine("-keep class $adapterCanonicalName {")
+        // Keep the constructor for Moshi's reflective lookup
+        val constructorArgs = adapterConstructorParams.joinToString(",")
+        appendLine("    public <init>($constructorArgs);")
+        appendLine("}")
+      }
     }
 }

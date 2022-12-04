@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  kotlin("jvm")
-  id("org.jetbrains.dokka")
-  id("com.vanniktech.maven.publish")
-  id("com.google.devtools.ksp")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.dokka)
+  alias(libs.plugins.mavenPublish)
+  alias(libs.plugins.ksp)
+  alias(libs.plugins.mavenShadow)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
-    this.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    this.freeCompilerArgs += "-opt-in=com.squareup.anvil.annotations.ExperimentalAnvilApi"
   }
 }
 
 tasks.withType<Test>().configureEach {
   systemProperty("moshix.jvmTarget", libs.versions.jvmTarget.get())
 }
+
+val shade: Configuration = configurations.maybeCreate("compileShaded")
+
+configurations.getByName("compileOnly").extendsFrom(shade)
 
 dependencies {
   //  compileOnly(kotlin("compiler"))
@@ -41,12 +47,44 @@ dependencies {
   implementation(libs.moshi)
   implementation(libs.kotlinpoet)
   implementation(libs.moshi.kotlinCodegen)
+  shade(libs.anvilUtils) {
+    exclude(group = "org.jetbrains.kotlin")
+    exclude(group = "com.squareup", module = "kotlinpoet")
+  }
   ksp(libs.autoService.ksp)
 
+  testImplementation(libs.anvilUtils) // Included in tests due to shading
   testImplementation(libs.kotlin.reflect)
   //  testImplementation(kotlin("compiler"))
   testImplementation(libs.kotlin.compilerEmbeddable)
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.junit)
   testImplementation(libs.truth)
+  testImplementation(project(":moshi-sealed:runtime"))
+}
+
+val relocateShadowJar =
+  tasks.register<ConfigureShadowRelocation>("relocateShadowJar") { target = tasks.shadowJar.get() }
+
+val shadowJar =
+  tasks.shadowJar.apply {
+    configure {
+      dependsOn(relocateShadowJar)
+      archiveClassifier.set("")
+      configurations = listOf(shade)
+      val shadedPrefix = "dev.zacsweers.moshix.ir.compiler.anvil"
+      relocate("com.squareup.anvil.compiler.internal", "$shadedPrefix.compiler.internal")
+      relocate(
+        "com.squareup.anvil.compiler.internal.reference",
+        "$shadedPrefix.compiler.internal.reference"
+      )
+      relocate("com.squareup.anvil.compiler.api", "$shadedPrefix.compiler.api")
+      relocate("com.squareup.anvil.annotations", "$shadedPrefix.annotations")
+      relocate("com.squareup.anvil.annotations.compat", "$shadedPrefix.annotations.compat")
+    }
+  }
+
+artifacts {
+  runtimeOnly(shadowJar)
+  archives(shadowJar)
 }

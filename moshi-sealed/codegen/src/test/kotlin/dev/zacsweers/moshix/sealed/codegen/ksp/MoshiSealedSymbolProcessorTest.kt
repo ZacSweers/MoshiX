@@ -32,11 +32,12 @@ class MoshiSealedSymbolProcessorProviderTest {
   fun smokeTest() {
     val source =
       kotlin(
-        "CustomCallable.kt",
+        "BaseType.kt",
         """
       package test
       import com.squareup.moshi.JsonClass
       import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+      import dev.zacsweers.moshix.sealed.annotations.NestedSealed
 
       @JsonClass(generateAdapter = true, generator = "sealed:type")
       sealed class BaseType {
@@ -44,6 +45,11 @@ class MoshiSealedSymbolProcessorProviderTest {
         class TypeA : BaseType()
         @TypeLabel("b")
         class TypeB : BaseType()
+        @NestedSealed
+        sealed class TypeC : BaseType() {
+          @TypeLabel("c")
+          class TypeCImpl : TypeC()
+        }
       }
     """
       )
@@ -86,6 +92,7 @@ class MoshiSealedSymbolProcessorProviderTest {
               .withSubtype(BaseType.TypeA::class.java, "a")
               .withSubtype(BaseType.TypeA::class.java, "aa")
               .withSubtype(BaseType.TypeB::class.java, "b")
+              .withSubtype(BaseType.TypeC.TypeCImpl::class.java, "c")
               .create(BaseType::class.java, emptySet(), moshi) as JsonAdapter<BaseType>
 
 
@@ -107,13 +114,18 @@ class MoshiSealedSymbolProcessorProviderTest {
           assertThat(generatedFile.readText())
             .contains(
               """
-          -if class test.BaseType
-          -keepnames class test.BaseType
-          -if class test.BaseType
-          -keep class test.BaseTypeJsonAdapter {
-              public <init>(com.squareup.moshi.Moshi);
-          }
-          """
+                -if class test.BaseType
+                -keepnames class test.BaseType
+                # Conditionally keep this adapter for every possible nested subtype that uses it.
+                -if class test.BaseType
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+                -if class test.BaseType${'$'}TypeC
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+              """
                 .trimIndent()
             )
         else -> error("Unrecognized proguard file: $generatedFile")

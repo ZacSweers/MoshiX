@@ -15,9 +15,9 @@
  */
 
 plugins {
-  kotlin("jvm")
-  id("com.google.devtools.ksp")
-  id("com.vanniktech.maven.publish")
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.ksp)
+  alias(libs.plugins.mavenPublish)
 }
 
 // --add-opens for kapt to work. KGP covers this for us but local JVMs in tests do not
