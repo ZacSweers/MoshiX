@@ -17,6 +17,7 @@ package dev.zacsweers.moshix.sealed.codegen.ksp
 
 import com.google.auto.service.AutoService
 import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.isVisibleFrom
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
@@ -214,17 +215,18 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     if (fallbackAdapterAnnotation != null) {
       val adapterType = (fallbackAdapterAnnotation.arguments[0].value as KSType)
       // TODO can we check adapter type is valid? Compiler will check it for us
-      val constructor =
-        (adapterType.declaration as KSClassDeclaration).primaryConstructor
-          ?: run {
-            logger.error(
-              "Fallback adapter type must have a primary constructor",
-              fallbackAdapterAnnotation
-            )
-            return
-          }
+      val adapterDeclaration = adapterType.declaration as KSClassDeclaration
+      val constructor = adapterDeclaration.primaryConstructor
+      if (constructor?.isVisibleFrom(type) == false) {
+        logger.error(
+          "Fallback adapter type $adapterType and its primary constructor must be visible from $type",
+          fallbackAdapterAnnotation
+        )
+        return
+      }
       val constructorParams =
-        when (constructor.parameters.size) {
+        when (constructor?.parameters?.size) {
+          null,
           0 -> {
             // Nothing to do
             CodeBlock.of("")
@@ -233,10 +235,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
             // Check it's a Moshi parameter
             val moshiParam = constructor.parameters[0]
             // TODO can this be simpler?
-            if (
-              moshiParam.type.resolve().declaration.qualifiedName?.asString() !=
-                "com.squareup.moshi.Moshi"
-            ) {
+            if (!symbols.moshi.isAssignableFrom(moshiParam.type.resolve())) {
               logger.error(
                 "Fallback adapter type's primary constructor can only have a Moshi parameter",
                 fallbackAdapterAnnotation
@@ -301,8 +300,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         }
       }
 
-    val preparedAdapter =
-      createType(
+    createType(
         targetType = type.toClassName(),
         isInternal = Modifier.INTERNAL in type.modifiers,
         labelKey = labelKey,
@@ -311,16 +309,18 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         nestedSealedClassNames = nestedSealedClassNames,
         subtypes = sealedSubtypes,
         objectAdapters = objectAdapters,
-        generateProguardConfig = generateProguardConfig
+        generateProguardConfig = generateProguardConfig,
+        errorLogger = { message -> logger.error(message, type) }
       ) {
         addAnnotation(COMMON_SUPPRESS)
         for (file in originatingKSFiles) {
           addOriginatingKSFile(file)
         }
       }
-
-    preparedAdapter.spec.writeTo(codeGenerator, aggregating = true)
-    preparedAdapter.proguardConfig?.writeTo(codeGenerator, type.containingFile)
+      ?.let { (spec, proguardConfig) ->
+        spec.writeTo(codeGenerator, aggregating = true)
+        proguardConfig?.writeTo(codeGenerator, type.containingFile)
+      }
   }
 
   private fun walkTypeLabels(

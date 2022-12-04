@@ -56,8 +56,9 @@ internal fun createType(
   subtypes: Set<Subtype>,
   objectAdapters: List<CodeBlock>,
   generateProguardConfig: Boolean,
+  errorLogger: (String) -> Unit,
   typeSpecHook: TypeSpec.Builder.() -> Unit
-): PreparedAdapter {
+): PreparedAdapter? {
   var finalFallbackStrategy = fallbackStrategy
   val adapterName =
     ClassName.bestGuess(Types.generatedJsonAdapterName(targetType.reflectionName())).simpleName
@@ -89,7 +90,14 @@ internal fun createType(
   for (subtype in subtypes) {
     when (subtype) {
       is ObjectType -> {
-        finalFallbackStrategy = FallbackStrategy.DefaultObject(subtype.className)
+        if (finalFallbackStrategy == null) {
+          finalFallbackStrategy = FallbackStrategy.DefaultObject(subtype.className)
+        } else {
+          errorLogger(
+            "Only one of @DefaultObject, @DefaultNull, or @FallbackAdapter can be used at a time."
+          )
+          return null
+        }
       }
       is ClassType -> {
         for (label in subtype.labels) {

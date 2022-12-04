@@ -2,6 +2,7 @@ package dev.zacsweers.moshix.sealed.codegen.ksp
 
 import com.google.devtools.ksp.processing.Resolver
 import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 import dev.zacsweers.moshix.sealed.annotations.FallbackAdapter
@@ -15,4 +16,5 @@ internal class MoshiSealedSymbols(resolver: Resolver) {
   val defaultObject = resolver.getClassDeclarationByName<DefaultObject>().asType()
   val typeLabel = resolver.getClassDeclarationByName<TypeLabel>().asType()
   val nestedSealed = resolver.getClassDeclarationByName<NestedSealed>().asType()
+  val moshi = resolver.getClassDeclarationByName<Moshi>().asType()
 }
