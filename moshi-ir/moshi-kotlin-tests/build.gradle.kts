@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   alias(libs.plugins.kotlinJvm)
-  id("dev.zacsweers.moshix")
+  alias(libs.plugins.moshix)
 }
 
 moshi { enableSealed.set(true) }

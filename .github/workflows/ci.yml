@@ -1,43 +1,41 @@
 name: CI
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
   build:
-    name: JDK ${{ matrix.java_version }} - KSP ${{ matrix.ksp_enabled }} - Kotlin ${{ matrix.kotlin_version }}
+    name: 'JDK ${{ matrix.java }} - KSP ${{ matrix.ksp_enabled }} - Kotlin ${{ matrix.kotlin }}'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java_version: [ 17 ]
-        kotlin_version: [ 1.7.20 ]
+        java: [ '17' ]
+        kotlin: [ '1.7.22' ]
         ksp_enabled: [ true, false ]
       fail-fast: false
+
     env:
-      MOSHIX_KOTLIN: ${{ matrix.kotlin_version }}
-      MOSHIX_JAVA: ${{ matrix.java_version }}
+      DEP_OVERRIDE_kotlin: ${{ matrix.kotlin }}
+      DEP_OVERRIDE_java: ${{ matrix.java }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1
-      - name: Generate cache key
-        run: ./checksum.sh checksum.txt
-      - uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ matrix.java_version }}-${{ matrix.job }}-${{ hashFiles('checksum.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-${{ matrix.java_version }}-${{ matrix.job }}-
+
       - name: Install JDK
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: ${{ matrix.java_version }}
+          java-version: ${{ matrix.java }}
+
       - name: Build project
         run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} --stacktrace
+
       - name: Upload snapshot (main only)
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
         run: ./publish.sh --snapshot
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java_version == '17' && !matrix.ksp_enabled
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java == '17' && !matrix.ksp_enabled
