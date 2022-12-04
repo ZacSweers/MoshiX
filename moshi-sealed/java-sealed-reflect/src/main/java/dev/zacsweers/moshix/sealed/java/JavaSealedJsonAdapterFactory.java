@@ -21,6 +21,7 @@ import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory;
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull;
+import dev.zacsweers.moshix.sealed.annotations.DefaultObject;
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -57,7 +58,6 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
 
     var labels = new LinkedHashMap<String, Class<?>>();
     for (var sealedSubclassDesc : rawType.getPermittedSubclasses()) {
-      // TODO check for default object annotations - they don't work here!
       try {
         var sealedSubclass = Class.forName(toBinaryName(sealedSubclassDesc.descriptorString()));
         walkTypeLabels(sealedSubclass, labelKey, labels);
@@ -98,9 +98,11 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
 
   private static void walkTypeLabels(
       Class<?> subtype, String labelKey, Map<String, Class<?>> labels) {
+    if (subtype.isAnnotationPresent(DefaultObject.class)) {
+      throw new IllegalStateException("DefaultObject is not supported on Java sealed subclasses");
+    }
     // If it's sealed, check if it's inheriting from our existing type or a separate/new branching
-    // off
-    // point
+    // off point
     if (subtype.isSealed()) {
       var nestedLabelKey = labelKey(subtype.getAnnotation(JsonClass.class));
       if (nestedLabelKey != null) {
