@@ -28,7 +28,6 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
-import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
@@ -40,10 +39,6 @@ import com.squareup.kotlinpoet.ksp.originatingKSFiles
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import com.squareup.moshi.JsonClass
-import dev.zacsweers.moshix.sealed.annotations.DefaultNull
-import dev.zacsweers.moshix.sealed.annotations.DefaultObject
-import dev.zacsweers.moshix.sealed.annotations.NestedSealed
-import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.codegen.ProguardConfig
 import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATED
 import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
@@ -315,7 +310,8 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         if (subtype.hasAnnotation(symbols.nestedSealed)) {
           nestedSealedClassNames += className
         }
-        // Add the file as an originating element as it's indirectly participating in adapter generation
+        // Add the file as an originating element as it's indirectly participating in adapter
+        // generation
         originatingKSFiles += subtype.containingFile!!
         // Recurse, inheriting the top type
         return subtype.getSealedSubclasses().flatMap {

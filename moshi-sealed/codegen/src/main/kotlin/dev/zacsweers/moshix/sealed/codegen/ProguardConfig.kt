@@ -58,7 +58,9 @@ internal data class ProguardConfig(
       }
       if (allTargets.size > 1) {
         // Add a note for reference
-        appendLine("# Conditionally keep this adapter for every possible nested subtype that uses it.")
+        appendLine(
+          "# Conditionally keep this adapter for every possible nested subtype that uses it."
+        )
       }
       for (target in allTargets) {
         appendLine("-if class $target")

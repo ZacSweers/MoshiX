@@ -125,7 +125,8 @@ class MoshiSealedSymbolProcessorProviderTest {
                 -keep class test.BaseTypeJsonAdapter {
                     public <init>(com.squareup.moshi.Moshi);
                 }
-              """.trimIndent()
+              """
+                .trimIndent()
             )
         else -> error("Unrecognized proguard file: $generatedFile")
       }
