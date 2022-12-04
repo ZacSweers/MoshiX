@@ -34,7 +34,6 @@ buildscript {
 }
 
 plugins {
-  kotlin("jvm") version (System.getenv()["MOSHIX_KOTLIN"] ?: libs.versions.kotlin.get()) apply false
   alias(libs.plugins.ksp) apply false
   alias(libs.plugins.dokka) apply false
   alias(libs.plugins.mavenPublish) apply false
