@@ -25,13 +25,22 @@ import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import java.io.File
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.JvmTarget
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-class MoshiIrVisitorTest {
+@RunWith(Parameterized::class)
+class MoshiIrVisitorTest(private val useK2: Boolean) {
+
+  companion object {
+    @JvmStatic @Parameterized.Parameters(name = "useK2 = {0}") fun data() = listOf(true, false)
+  }
 
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
@@ -478,6 +487,7 @@ class MoshiIrVisitorTest {
 
   @Test
   fun nonFieldApplicableQualifier() {
+    assumeFalse(useK2) // TODO uses referenceClass
     val result =
       compile(
         kotlin(
@@ -537,6 +547,7 @@ class MoshiIrVisitorTest {
 
   @Test
   fun `TypeAliases with the same backing type should share the same adapter`() {
+    assumeFalse(useK2) // TODO uses referenceClass
     val result =
       compile(
         kotlin(
@@ -567,8 +578,11 @@ class MoshiIrVisitorTest {
 
   @Test
   fun `Processor should generate comprehensive proguard rules`() {
+    assumeFalse(useK2)
     val compilation =
       prepareCompilation(
+        generatedAnnotation = null,
+        generateProguardRules = true,
         kotlin(
           "source.kt",
           """
@@ -818,6 +832,7 @@ class MoshiIrVisitorTest {
 
   @Test
   fun `Disabled proguard rules gen should generate no rules`() {
+    assumeFalse(useK2) // TODO uses referenceClass
     val compilation =
       prepareCompilation(
         null,
@@ -839,17 +854,36 @@ class MoshiIrVisitorTest {
     assertThat(resourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()).isEmpty()
   }
 
-  private fun prepareCompilation(vararg sourceFiles: SourceFile): KotlinCompilation {
-    return prepareCompilation(
-      generatedAnnotation = null,
-      generateProguardRules = true,
-      *sourceFiles
-    )
+  @Test
+  fun `Enabling proguard rule gen with K2 should error`() {
+    assumeTrue(useK2)
+    val compilation =
+      prepareCompilation(
+        null,
+        generateProguardRules = true,
+        kotlin(
+          "source.kt",
+          """
+          package testPackage
+          import com.squareup.moshi.JsonClass
+
+          @JsonClass(generateAdapter = true)
+          data class Example(val firstName: String)
+          """
+        )
+      )
+    val result = compilation.compile()
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
+
+    assertThat(result.messages)
+      .contains(
+        "moshi-ir's proguard rule generation currently doesn't support the experimental K2 compiler"
+      )
   }
 
   private fun prepareCompilation(
     generatedAnnotation: String? = null,
-    generateProguardRules: Boolean = true,
+    generateProguardRules: Boolean = false,
     vararg sourceFiles: SourceFile
   ): KotlinCompilation {
     return KotlinCompilation().apply {
@@ -869,7 +903,9 @@ class MoshiIrVisitorTest {
       inheritClassPath = true
       sources = sourceFiles.asList()
       verbose = false
-      jvmTarget = JvmTarget.fromString(System.getenv()["ci_java_version"] ?: "11")!!.description
+      jvmTarget = JvmTarget.fromString(System.getProperty("moshix.jvmTarget"))!!.description
+      supportsK2 = true
+      this.useK2 = this@MoshiIrVisitorTest.useK2
     }
   }
 
@@ -878,6 +914,6 @@ class MoshiIrVisitorTest {
   }
 
   private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {
-    return prepareCompilation(null, true, *sourceFiles).compile()
+    return prepareCompilation(null, false, *sourceFiles).compile()
   }
 }
