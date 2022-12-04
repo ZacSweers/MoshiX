@@ -18,6 +18,7 @@ package dev.zacsweers.moshix.sealed.codegen.ksp
 import com.google.common.truth.Truth.assertThat
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
+import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspSourcesDir
@@ -54,12 +55,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
+    val compilation = prepareCompilation(source)
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
     val generatedSourcesDir = compilation.kspSourcesDir
@@ -185,13 +181,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains("Duplicate label")
   }
@@ -216,13 +206,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains("Duplicate alternate label")
   }
@@ -247,13 +231,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains("Moshi-sealed subtypes cannot be generic.")
   }
@@ -292,13 +270,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages)
       .contains("Only one of @DefaultNull or @FallbackAdapter can be used at a time")
@@ -327,13 +299,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains("Cannot have both @DefaultNull and @DefaultObject")
   }
@@ -373,13 +339,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages)
       .contains(
@@ -422,13 +382,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages)
       .contains(
@@ -489,12 +443,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
+    val compilation = prepareCompilation(source)
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
     val generatedSourcesDir = compilation.kspSourcesDir
@@ -577,13 +526,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         data class SubType(val foo: String): BaseType"""
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(base, subType)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-
+    val compilation = prepareCompilation(base, subType)
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
 
@@ -628,5 +571,20 @@ class MoshiSealedSymbolProcessorProviderTest {
       """
           .trimIndent()
       )
+  }
+
+  private fun prepareCompilation(
+    vararg sourceFiles: SourceFile,
+  ): KotlinCompilation =
+    KotlinCompilation().apply {
+      sources = sourceFiles.toList()
+      inheritClassPath = true
+      symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
+    }
+
+  private fun compile(
+    vararg sourceFiles: SourceFile,
+  ): KotlinCompilation.Result {
+    return prepareCompilation(*sourceFiles).compile()
   }
 }
