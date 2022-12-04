@@ -20,5 +20,8 @@ import kotlin.annotation.AnnotationTarget.CLASS
 
 /**
  * Use this annotation to specify that a given sealed type's deserialization should default to null.
+ *
+ * Only one of [DefaultObject], [FallbackAdapter], or [DefaultNull] may be used on a moshi-sealed
+ * class.
  */
 @Target(CLASS) @Retention(RUNTIME) public annotation class DefaultNull
