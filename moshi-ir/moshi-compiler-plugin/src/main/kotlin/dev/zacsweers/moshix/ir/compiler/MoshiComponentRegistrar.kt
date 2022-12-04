@@ -20,9 +20,11 @@ import dev.zacsweers.moshix.ir.compiler.proguardgen.ProguardRuleGenerationExtens
 import java.io.File
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
@@ -30,11 +32,12 @@ import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
 @AutoService(ComponentRegistrar::class)
 public class MoshiComponentRegistrar : ComponentRegistrar {
 
+  override val supportsK2: Boolean = true
+
   override fun registerProjectComponents(
     project: MockProject,
     configuration: CompilerConfiguration
   ) {
-
     if (configuration[KEY_ENABLED] == false) return
     val debug = configuration[KEY_DEBUG] ?: false
     val enableSealed = configuration[KEY_ENABLE_SEALED] ?: false
@@ -45,6 +48,13 @@ public class MoshiComponentRegistrar : ComponentRegistrar {
     val fqGeneratedAnnotation = configuration[KEY_GENERATED_ANNOTATION]?.let(::FqName)
 
     if (generateProguardRules) {
+      if (configuration.getBoolean(CommonConfigurationKeys.USE_FIR)) {
+        configuration[CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY]?.report(
+          CompilerMessageSeverity.ERROR,
+          "moshi-ir's proguard rule generation currently doesn't support the experimental K2 compiler\nDisable the K2 compiler by removing -Xuse-k2 flag or disable proguard rule gen."
+        )
+        return
+      }
       val resourceOutputDir =
         configuration.get(KEY_RESOURCES_OUTPUT_DIR)?.let(::File)
           ?: error("No resources dir provided for proguard rule generation")

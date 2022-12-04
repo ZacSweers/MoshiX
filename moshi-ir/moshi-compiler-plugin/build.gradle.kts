@@ -30,6 +30,10 @@ tasks.withType<KotlinCompile>().configureEach {
   }
 }
 
+tasks.withType<Test>().configureEach {
+  systemProperty("moshix.jvmTarget", libs.versions.jvmTarget.get())
+}
+
 dependencies {
   //  compileOnly(kotlin("compiler"))
   compileOnly(libs.kotlin.compilerEmbeddable)
