@@ -26,7 +26,7 @@ plugins {
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     @Suppress("SuspiciousCollectionReassignment")
-    this.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    this.freeCompilerArgs += "-opt-in=com.squareup.anvil.annotations.ExperimentalAnvilApi"
   }
 }
 
@@ -41,6 +41,8 @@ dependencies {
   implementation(libs.moshi)
   implementation(libs.kotlinpoet)
   implementation(libs.moshi.kotlinCodegen)
+  // TODO shade this
+  implementation(libs.anvilUtils)
   ksp(libs.autoService.ksp)
 
   testImplementation(libs.kotlin.reflect)
@@ -49,4 +51,5 @@ dependencies {
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.junit)
   testImplementation(libs.truth)
+  testImplementation(project(":moshi-sealed:runtime"))
 }
