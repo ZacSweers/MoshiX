@@ -181,9 +181,6 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
       createType(type, labelKey, generatedAnnotation, symbols)
     }
 
-    // TODO sealedParent gen?
-    //  Requires a runtime adapter! Or JsonClass(generator = "sealed-nested")
-
     return emptyList()
   }
 
