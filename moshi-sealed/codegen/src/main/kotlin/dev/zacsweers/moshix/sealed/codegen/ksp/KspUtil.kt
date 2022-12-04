@@ -26,7 +26,7 @@ internal inline fun <reified T> Resolver.getClassDeclarationByName(): KSClassDec
 }
 
 internal fun Resolver.getClassDeclarationByName(fqcn: String): KSClassDeclaration {
-  return getClassDeclarationByName(getKSNameFromString(fqcn)) ?: error("Class '$fqcn' not found.")
+  return getClassDeclarationByName(getKSNameFromString(fqcn)) ?: error("Class '$fqcn' not found on the classpath. Are you missing this dependency?")
 }
 
 internal fun KSClassDeclaration.asType() = asType(emptyList())

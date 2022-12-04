@@ -52,6 +52,7 @@ internal fun createType(
   labelKey: String,
   useDefaultNull: Boolean,
   generatedAnnotation: AnnotationSpec?,
+  nestedSealedClassNames: Set<ClassName>,
   subtypes: Set<Subtype>,
   objectAdapters: List<CodeBlock>,
   generateProguardConfig: Boolean,
@@ -181,7 +182,8 @@ internal fun createType(
       ProguardConfig(
         targetClass = targetType,
         adapterName = adapterName,
-        adapterConstructorParams = listOf(Moshi::class.asClassName().reflectionName())
+        adapterConstructorParams = listOf(Moshi::class.asClassName().reflectionName()),
+        nestedSubtypes = nestedSealedClassNames.sorted()
       )
     } else {
       null
