@@ -28,16 +28,20 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
+import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Modifier
+import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.ksp.addOriginatingKSFile
 import com.squareup.kotlinpoet.ksp.originatingKSFiles
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.sealed.codegen.ProguardConfig
 import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATED
@@ -204,6 +208,63 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     symbols: MoshiSealedSymbols,
   ) {
     val useDefaultNull = type.hasAnnotation(symbols.defaultNull)
+    val fallbackAdapterAnnotation = type.findAnnotationWithType(symbols.fallbackAdapter)
+    if (useDefaultNull && (fallbackAdapterAnnotation != null)) {
+      logger.error("Only one of @DefaultNull or @FallbackAdapter can be used at a time", type)
+      return
+    }
+    var fallbackStrategy: FallbackStrategy? = null
+    if (fallbackAdapterAnnotation != null) {
+      val adapterType = (fallbackAdapterAnnotation.arguments[0].value as KSType)
+      // TODO can we check adapter type is valid? Compiler will check it for us
+      val constructor =
+        (adapterType.declaration as KSClassDeclaration).primaryConstructor
+          ?: run {
+            logger.error(
+              "Fallback adapter type must have a primary constructor",
+              fallbackAdapterAnnotation
+            )
+            return
+          }
+      val constructorParams =
+        when (constructor.parameters.size) {
+          0 -> {
+            // Nothing to do
+            CodeBlock.of("")
+          }
+          1 -> {
+            // Check it's a Moshi parameter
+            val moshiParam = constructor.parameters[0]
+            // TODO can this be simpler?
+            if (
+              moshiParam.type.resolve().declaration.qualifiedName?.asString() !=
+                "com.squareup.moshi.Moshi"
+            ) {
+              logger.error(
+                "Fallback adapter type's primary constructor can only have a Moshi parameter",
+                fallbackAdapterAnnotation
+              )
+              return
+            }
+            CodeBlock.of("moshi")
+          }
+          else -> {
+            logger.error(
+              "Fallback adapter type's primary constructor can only have a Moshi parameter",
+              fallbackAdapterAnnotation
+            )
+            return
+          }
+        }
+      fallbackStrategy =
+        FallbackStrategy.FallbackAdapter(
+          className = adapterType.toClassName(),
+          constructorParams = constructorParams
+        )
+    } else if (useDefaultNull) {
+      fallbackStrategy = FallbackStrategy.Null
+    }
+
     val objectAdapters = mutableListOf<CodeBlock>()
     val seenLabels = mutableMapOf<String, ClassName>()
     val originatingKSFiles = mutableSetOf<KSFile>()
@@ -248,7 +309,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         targetType = type.toClassName(),
         isInternal = Modifier.INTERNAL in type.modifiers,
         labelKey = labelKey,
-        useDefaultNull = useDefaultNull,
+        fallbackStrategy = fallbackStrategy,
         generatedAnnotation = generatedAnnotation,
         nestedSealedClassNames = nestedSealedClassNames,
         subtypes = sealedSubtypes,
@@ -421,6 +482,31 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     }
 
     return Subtype.ClassType(className, labels)
+  }
+}
+
+internal sealed interface FallbackStrategy {
+  fun statement(): CodeBlock
+
+  object Null : FallbackStrategy {
+    override fun statement() = CodeBlock.of(".withDefaultValue(null)")
+  }
+
+  class FallbackAdapter(val className: TypeName, val constructorParams: CodeBlock) :
+    FallbackStrategy {
+    override fun statement(): CodeBlock {
+      return CodeBlock.of(
+        ".withFallbackJsonAdapter(%T(%L)·as·%T<%T>)",
+        className,
+        constructorParams,
+        JsonAdapter::class.asClassName(),
+        ANY
+      )
+    }
+  }
+
+  class DefaultObject(val className: TypeName) : FallbackStrategy {
+    override fun statement() = CodeBlock.of(".withDefaultValue(%T)", className)
   }
 }
 

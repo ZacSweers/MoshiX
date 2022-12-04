@@ -50,7 +50,7 @@ internal fun createType(
   targetType: ClassName,
   isInternal: Boolean,
   labelKey: String,
-  useDefaultNull: Boolean,
+  fallbackStrategy: FallbackStrategy?,
   generatedAnnotation: AnnotationSpec?,
   nestedSealedClassNames: Set<ClassName>,
   subtypes: Set<Subtype>,
@@ -58,7 +58,7 @@ internal fun createType(
   generateProguardConfig: Boolean,
   typeSpecHook: TypeSpec.Builder.() -> Unit
 ): PreparedAdapter {
-  val defaultCodeBlockBuilder = CodeBlock.builder()
+  var finalFallbackStrategy = fallbackStrategy
   val adapterName =
     ClassName.bestGuess(Types.generatedJsonAdapterName(targetType.reflectionName())).simpleName
   val visibilityModifier = if (isInternal) KModifier.INTERNAL else KModifier.PUBLIC
@@ -86,14 +86,10 @@ internal fun createType(
         labelKey
       )
 
-  if (useDefaultNull) {
-    defaultCodeBlockBuilder.add("null")
-  }
-
   for (subtype in subtypes) {
     when (subtype) {
       is ObjectType -> {
-        defaultCodeBlockBuilder.add("%T", subtype.className)
+        finalFallbackStrategy = FallbackStrategy.DefaultObject(subtype.className)
       }
       is ClassType -> {
         for (label in subtype.labels) {
@@ -107,9 +103,7 @@ internal fun createType(
     }
   }
 
-  if (defaultCodeBlockBuilder.isNotEmpty()) {
-    runtimeAdapterInitializer.add("  .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
-  }
+  finalFallbackStrategy?.let { runtimeAdapterInitializer.add("  %L\n", it.statement()) }
 
   val moshiArg =
     if (objectAdapters.isEmpty()) {
