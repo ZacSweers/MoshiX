@@ -50,8 +50,6 @@ dependencies {
   shade(libs.anvilUtils) {
     exclude(group = "org.jetbrains.kotlin")
     exclude(group = "com.squareup", module = "kotlinpoet")
-    exclude(group = "javax.inject")
-    exclude(group = "com.google.dagger")
   }
   ksp(libs.autoService.ksp)
 

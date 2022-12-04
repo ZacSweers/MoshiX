@@ -34,7 +34,7 @@ buildscript {
 }
 
 plugins {
-  alias(libs.plugins.kotlinJvm) version (System.getenv()["MOSHIX_KOTLIN"] ?: libs.versions.kotlin.get()) apply false
+  kotlin("jvm") version (System.getenv()["MOSHIX_KOTLIN"] ?: libs.versions.kotlin.get()) apply false
   alias(libs.plugins.ksp) apply false
   alias(libs.plugins.dokka) apply false
   alias(libs.plugins.mavenPublish) apply false
@@ -65,7 +65,7 @@ spotless {
   java {
     googleJavaFormat(libs.versions.gjf.get())
     target("**/*.java")
-    targetExclude("**/spotless.java", "**/build/**")
+    targetExclude("**/spotless.java", "**/build/**", "**/.gradle/**")
   }
   kotlin {
     ktfmt(ktfmtVersion).googleStyle()

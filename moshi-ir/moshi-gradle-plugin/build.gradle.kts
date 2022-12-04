@@ -79,8 +79,8 @@ spotless {
     endWithNewline()
   }
   kotlin {
-    target("**/*.kt")
-    ktfmt("0.37").googleStyle()
+    target("src/**/*.kt")
+    ktfmt(libs.versions.ktfmt.get()).googleStyle()
     trimTrailingWhitespace()
     endWithNewline()
     licenseHeaderFile("../../spotless/spotless.kt")
