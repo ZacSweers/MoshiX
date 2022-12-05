@@ -78,6 +78,25 @@ internal fun createType(
 
   generatedAnnotation?.let { classBuilder.addAnnotation(it) }
 
+  val moshiArg =
+    if (objectAdapters.isEmpty()) {
+      CodeBlock.of("%N", moshiParam)
+    } else {
+      val moshiProp =
+        PropertySpec.builder(allocator.newName("moshi"), Moshi::class)
+          .addModifiers(KModifier.PRIVATE)
+          .initializer(
+            CodeBlock.builder()
+              .add("%N.newBuilder()\n", moshiParam)
+              .apply { add("%L\n", objectAdapters.joinToCode("\n", prefix = "    ")) }
+              .add(".build()")
+              .build()
+          )
+          .build()
+      classBuilder.addProperty(moshiProp)
+      CodeBlock.of("%N", moshiProp)
+    }
+
   val runtimeAdapterInitializer =
     CodeBlock.builder()
       .add(
@@ -111,18 +130,7 @@ internal fun createType(
     }
   }
 
-  finalFallbackStrategy?.let { runtimeAdapterInitializer.add("  %L\n", it.statement()) }
-
-  val moshiArg =
-    if (objectAdapters.isEmpty()) {
-      CodeBlock.of("%N", moshiParam)
-    } else {
-      CodeBlock.builder()
-        .add("%N.newBuilder()\n", moshiParam)
-        .apply { add("%L\n", objectAdapters.joinToCode("\n", prefix = "    ")) }
-        .add(".build()")
-        .build()
-    }
+  finalFallbackStrategy?.let { runtimeAdapterInitializer.add("  %L\n", it.statement(moshiArg)) }
   runtimeAdapterInitializer.add(
     "  .create(%T::class.java, %M(), %L)·as·%T\n»",
     targetType,

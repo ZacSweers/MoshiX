@@ -468,16 +468,18 @@ class MoshiSealedSymbolProcessorProviderTest {
       public class BaseTypeJsonAdapter(
         moshi: Moshi,
       ) : JsonAdapter<BaseType>() {
+        private val moshi_: Moshi = moshi.newBuilder()
+                .addAdapter<BaseType.TypeA>(ObjectJsonAdapter(BaseType.TypeA))
+            .addAdapter<BaseType.TypeB>(ObjectJsonAdapter(BaseType.TypeB))
+            .build()
+
         @Suppress("UNCHECKED_CAST")
         @OptIn(ExperimentalStdlibApi::class)
         private val runtimeAdapter: JsonAdapter<BaseType> =
             PolymorphicJsonAdapterFactory.of(BaseType::class.java, "type")
               .withSubtype(BaseType.TypeA::class.java, "a")
               .withSubtype(BaseType.TypeB::class.java, "b")
-              .create(BaseType::class.java, emptySet(), moshi.newBuilder()
-                .addAdapter<BaseType.TypeA>(ObjectJsonAdapter(BaseType.TypeA))
-            .addAdapter<BaseType.TypeB>(ObjectJsonAdapter(BaseType.TypeB))
-            .build()) as JsonAdapter<BaseType>
+              .create(BaseType::class.java, emptySet(), moshi_) as JsonAdapter<BaseType>
 
 
         public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)

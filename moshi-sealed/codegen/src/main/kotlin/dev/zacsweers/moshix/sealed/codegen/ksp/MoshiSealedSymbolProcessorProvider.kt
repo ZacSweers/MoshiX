@@ -224,12 +224,12 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         )
         return
       }
-      val constructorParams =
+      val hasMoshiParam =
         when (constructor?.parameters?.size) {
           null,
           0 -> {
             // Nothing to do
-            CodeBlock.of("")
+            false
           }
           1 -> {
             // Check it's a Moshi parameter
@@ -242,7 +242,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
               )
               return
             }
-            CodeBlock.of("moshi")
+            true
           }
           else -> {
             logger.error(
@@ -255,7 +255,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
       fallbackStrategy =
         FallbackStrategy.FallbackAdapter(
           className = adapterType.toClassName(),
-          constructorParams = constructorParams
+          hasMoshiParam = hasMoshiParam
         )
     } else if (useDefaultNull) {
       fallbackStrategy = FallbackStrategy.Null
@@ -483,15 +483,21 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
 }
 
 internal sealed interface FallbackStrategy {
-  fun statement(): CodeBlock
+  fun statement(moshiParam: CodeBlock): CodeBlock
 
   object Null : FallbackStrategy {
-    override fun statement() = CodeBlock.of(".withDefaultValue(null)")
+    override fun statement(moshiParam: CodeBlock) = CodeBlock.of(".withDefaultValue(null)")
   }
 
-  class FallbackAdapter(val className: TypeName, val constructorParams: CodeBlock) :
-    FallbackStrategy {
-    override fun statement(): CodeBlock {
+  class FallbackAdapter(val className: TypeName, val hasMoshiParam: Boolean) : FallbackStrategy {
+    // TODO handle which moshi param comes in here
+    override fun statement(moshiParam: CodeBlock): CodeBlock {
+      val constructorParams =
+        if (hasMoshiParam) {
+          moshiParam
+        } else {
+          CodeBlock.of("")
+        }
       return CodeBlock.of(
         ".withFallbackJsonAdapter(%T(%L)·as·%T<%T>)",
         className,
@@ -503,7 +509,7 @@ internal sealed interface FallbackStrategy {
   }
 
   class DefaultObject(val className: TypeName) : FallbackStrategy {
-    override fun statement() = CodeBlock.of(".withDefaultValue(%T)", className)
+    override fun statement(moshiParam: CodeBlock) = CodeBlock.of(".withDefaultValue(%T)", className)
   }
 }
 
