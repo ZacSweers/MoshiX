@@ -24,7 +24,7 @@ import com.squareup.moshi.Types;
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory;
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull;
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject;
-import dev.zacsweers.moshix.sealed.annotations.FallbackAdapter;
+import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter;
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -59,7 +59,7 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
       defaultValue = null;
     }
     JsonAdapter<Object> fallbackAdapter = null;
-    var fallbackAdapterAnnotation = rawType.getAnnotation(FallbackAdapter.class);
+    var fallbackAdapterAnnotation = rawType.getAnnotation(FallbackJsonAdapter.class);
     if (fallbackAdapterAnnotation != null) {
       var clazz = fallbackAdapterAnnotation.value();
       fallbackAdapter = fallbackAdapter(moshi, clazz);
@@ -67,7 +67,7 @@ public final class JavaSealedJsonAdapterFactory implements JsonAdapter.Factory {
 
     if (defaultValue != UNSET && fallbackAdapter != null) {
       throw new IllegalStateException(
-          "Only one of @DefaultNull or @FallbackAdapter can be used at a time. Found both on "
+          "Only one of @DefaultNull or @FallbackJsonAdapter can be used at a time. Found both on "
               + rawType);
     }
 

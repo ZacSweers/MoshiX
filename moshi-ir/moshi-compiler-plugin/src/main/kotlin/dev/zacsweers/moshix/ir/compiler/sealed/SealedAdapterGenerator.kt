@@ -117,10 +117,12 @@ private constructor(
       target.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.DefaultNull"))
 
     val fallbackAdapterAnnotation =
-      target.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.FallbackAdapter"))
+      target.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter"))
 
     if (useDefaultNull && (fallbackAdapterAnnotation != null)) {
-      logger.error(target) { "Only one of @DefaultNull or @FallbackAdapter can be used at a time" }
+      logger.error(target) {
+        "Only one of @DefaultNull or @FallbackJsonAdapter can be used at a time"
+      }
       return null
     }
 
@@ -463,7 +465,7 @@ private constructor(
                     FallbackStrategy.DefaultObject(defaultObject.className.symbol)
                 } else {
                   logger.error(target) {
-                    "Only one of @DefaultObject, @DefaultNull, or @FallbackAdapter can be used at a time."
+                    "Only one of @DefaultObject, @DefaultNull, or @FallbackJsonAdapter can be used at a time."
                   }
                 }
               }

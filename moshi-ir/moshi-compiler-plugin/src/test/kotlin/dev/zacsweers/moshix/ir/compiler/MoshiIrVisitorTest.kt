@@ -951,7 +951,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       import com.squareup.moshi.JsonClass
       import dev.zacsweers.moshix.sealed.annotations.TypeLabel
       import dev.zacsweers.moshix.sealed.annotations.DefaultNull
-      import dev.zacsweers.moshix.sealed.annotations.FallbackAdapter
+      import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
       import com.squareup.moshi.JsonReader
       import com.squareup.moshi.JsonWriter
       import com.squareup.moshi.JsonAdapter
@@ -965,7 +965,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         }
       }
 
-      @FallbackAdapter(BaseTypeFallback::class)
+      @FallbackJsonAdapter(BaseTypeFallback::class)
       @DefaultNull
       @JsonClass(generateAdapter = true, generator = "sealed:type")
       sealed class BaseType {
@@ -978,7 +978,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
     val result = compile(source)
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages)
-      .contains("Only one of @DefaultNull or @FallbackAdapter can be used at a time")
+      .contains("Only one of @DefaultNull or @FallbackJsonAdapter can be used at a time")
   }
 
   @Test
@@ -1020,7 +1020,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       import com.squareup.moshi.JsonClass
       import dev.zacsweers.moshix.sealed.annotations.TypeLabel
       import dev.zacsweers.moshix.sealed.annotations.DefaultObject
-      import dev.zacsweers.moshix.sealed.annotations.FallbackAdapter
+      import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
       import com.squareup.moshi.JsonReader
       import com.squareup.moshi.JsonWriter
       import com.squareup.moshi.JsonAdapter
@@ -1034,7 +1034,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         }
       }
 
-      @FallbackAdapter(BaseTypeFallback::class)
+      @FallbackJsonAdapter(BaseTypeFallback::class)
       @JsonClass(generateAdapter = true, generator = "sealed:type")
       sealed class BaseType {
         @TypeLabel("a")
@@ -1049,7 +1049,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
     assertThat(result.messages)
       .contains(
-        "Only one of @DefaultObject, @DefaultNull, or @FallbackAdapter can be used at a time"
+        "Only one of @DefaultObject, @DefaultNull, or @FallbackJsonAdapter can be used at a time"
       )
   }
 
@@ -1064,7 +1064,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       import com.squareup.moshi.JsonClass
       import dev.zacsweers.moshix.sealed.annotations.TypeLabel
       import dev.zacsweers.moshix.sealed.annotations.DefaultObject
-      import dev.zacsweers.moshix.sealed.annotations.FallbackAdapter
+      import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
       import com.squareup.moshi.JsonReader
       import com.squareup.moshi.JsonWriter
       import com.squareup.moshi.JsonAdapter
@@ -1078,7 +1078,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         }
       }
 
-      @FallbackAdapter(BaseTypeFallback::class)
+      @FallbackJsonAdapter(BaseTypeFallback::class)
       @JsonClass(generateAdapter = true, generator = "sealed:type")
       sealed class BaseType {
         @TypeLabel("a")
@@ -1104,10 +1104,10 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       package test
       import com.squareup.moshi.JsonClass
       import dev.zacsweers.moshix.sealed.annotations.TypeLabel
-      import dev.zacsweers.moshix.sealed.annotations.FallbackAdapter
+      import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
       import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 
-      @FallbackAdapter(ObjectJsonAdapter::class)
+      @FallbackJsonAdapter(ObjectJsonAdapter::class)
       @JsonClass(generateAdapter = true, generator = "sealed:type")
       sealed class BaseType {
         @TypeLabel("a")

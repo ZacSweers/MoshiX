@@ -25,7 +25,7 @@ import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dev.zacsweers.moshix.adapters.AdaptedBy
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
-import dev.zacsweers.moshix.sealed.annotations.FallbackAdapter
+import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
 import dev.zacsweers.moshix.sealed.annotations.NestedSealed
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.reflect.MetadataMoshiSealedJsonAdapterFactory
@@ -112,7 +112,7 @@ class MessageTest(type: Type) {
     assertThat(adapter.fromJson("{\"type\":\"unknown\",\"value\":\"Okay!\"}")).isEqualTo(success)
   }
 
-  @FallbackAdapter(MessageWithFallbackAdapter.SuccessAdapter::class)
+  @FallbackJsonAdapter(MessageWithFallbackAdapter.SuccessAdapter::class)
   @JsonClass(generateAdapter = true, generator = "sealed:type")
   sealed class MessageWithFallbackAdapter {
 

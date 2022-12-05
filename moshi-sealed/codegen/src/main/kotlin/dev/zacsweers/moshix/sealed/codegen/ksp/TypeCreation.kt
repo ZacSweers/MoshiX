@@ -109,7 +109,7 @@ internal fun createType(
           finalFallbackStrategy = FallbackStrategy.DefaultObject(subtype.className)
         } else {
           errorLogger(
-            "Only one of @DefaultObject, @DefaultNull, or @FallbackAdapter can be used at a time."
+            "Only one of @DefaultObject, @DefaultNull, or @FallbackJsonAdapter can be used at a time."
           )
           return null
         }

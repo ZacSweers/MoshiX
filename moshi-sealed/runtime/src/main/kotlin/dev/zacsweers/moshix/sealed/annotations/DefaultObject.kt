@@ -21,7 +21,7 @@ import kotlin.annotation.AnnotationTarget.CLASS
 /**
  * Use this annotation to specify specific `object` subtype to be the default instance.
  *
- * Only one of [DefaultObject], [FallbackAdapter], or [DefaultNull] may be used on a moshi-sealed
- * class.
+ * Only one of [DefaultObject], [FallbackJsonAdapter], or [DefaultNull] may be used on a
+ * moshi-sealed class.
  */
 @Target(CLASS) @Retention(RUNTIME) public annotation class DefaultObject

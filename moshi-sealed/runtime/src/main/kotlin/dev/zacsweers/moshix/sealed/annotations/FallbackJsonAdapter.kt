@@ -29,9 +29,9 @@ import kotlin.reflect.KClass
  * The referenced class _must_ have a single primary constructor that accepts either a [Moshi]
  * parameter or no parameters.
  *
- * Only one of [DefaultObject], [FallbackAdapter], or [DefaultNull] may be used on a moshi-sealed
- * class.
+ * Only one of [DefaultObject], [FallbackJsonAdapter], or [DefaultNull] may be used on a
+ * moshi-sealed class.
  */
 @Target(CLASS)
 @Retention(RUNTIME)
-public annotation class FallbackAdapter(val value: KClass<out JsonAdapter<*>>)
+public annotation class FallbackJsonAdapter(val value: KClass<out JsonAdapter<*>>)

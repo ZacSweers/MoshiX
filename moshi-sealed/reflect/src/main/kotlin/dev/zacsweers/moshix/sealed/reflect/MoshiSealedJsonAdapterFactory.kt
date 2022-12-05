@@ -22,7 +22,7 @@ import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.rawType
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
-import dev.zacsweers.moshix.sealed.annotations.FallbackAdapter
+import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
 import dev.zacsweers.moshix.sealed.annotations.NestedSealed
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
@@ -75,9 +75,9 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         defaultObjectInstance = null
       }
       var fallbackAdapter: JsonAdapter<Any>? = null
-      val fallbackAdapterAnnotation = rawType.getAnnotation(FallbackAdapter::class.java)
-      if (fallbackAdapterAnnotation != null) {
-        val clazz = fallbackAdapterAnnotation.value
+      val fallbackJsonAdapterAnnotation = rawType.getAnnotation(FallbackJsonAdapter::class.java)
+      if (fallbackJsonAdapterAnnotation != null) {
+        val clazz = fallbackJsonAdapterAnnotation.value
         // Find a constructor we can use
         fallbackAdapter = moshi.fallbackAdapter(clazz.java)
       }
@@ -97,7 +97,7 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
           } else {
             if (defaultObjectInstance == null || fallbackAdapter == null) {
               error(
-                "Only one of @DefaultNull, @DefaultObject, and @FallbackAdapter can be used at a time: $sealedSubclass"
+                "Only one of @DefaultNull, @DefaultObject, and @FallbackJsonAdapter can be used at a time: $sealedSubclass"
               )
             } else {
               error(

@@ -39,7 +39,6 @@ import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.ksp.addOriginatingKSFile
-import com.squareup.kotlinpoet.ksp.originatingKSFiles
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import com.squareup.moshi.JsonAdapter
@@ -206,9 +205,9 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     symbols: MoshiSealedSymbols,
   ) {
     val useDefaultNull = type.hasAnnotation(symbols.defaultNull)
-    val fallbackAdapterAnnotation = type.findAnnotationWithType(symbols.fallbackAdapter)
+    val fallbackAdapterAnnotation = type.findAnnotationWithType(symbols.fallbackJsonAdapter)
     if (useDefaultNull && (fallbackAdapterAnnotation != null)) {
-      logger.error("Only one of @DefaultNull or @FallbackAdapter can be used at a time", type)
+      logger.error("Only one of @DefaultNull or @FallbackJsonAdapter can be used at a time", type)
       return
     }
     var fallbackStrategy: FallbackStrategy? = null
