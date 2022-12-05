@@ -411,13 +411,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages)
       .contains("Fallback adapter type's primary constructor can only have a Moshi parameter")
