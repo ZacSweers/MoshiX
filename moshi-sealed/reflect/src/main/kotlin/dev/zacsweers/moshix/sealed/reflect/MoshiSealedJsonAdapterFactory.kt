@@ -22,9 +22,11 @@ import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.rawType
 import dev.zacsweers.moshix.sealed.annotations.DefaultNull
 import dev.zacsweers.moshix.sealed.annotations.DefaultObject
+import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
 import dev.zacsweers.moshix.sealed.annotations.NestedSealed
 import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
+import dev.zacsweers.moshix.sealed.runtime.internal.Util.fallbackAdapter
 import java.lang.reflect.Type
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
@@ -72,6 +74,13 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       if (rawTypeKotlin.annotations.any { it is DefaultNull }) {
         defaultObjectInstance = null
       }
+      var fallbackAdapter: JsonAdapter<Any>? = null
+      val fallbackJsonAdapterAnnotation = rawType.getAnnotation(FallbackJsonAdapter::class.java)
+      if (fallbackJsonAdapterAnnotation != null) {
+        val clazz = fallbackJsonAdapterAnnotation.value
+        // Find a constructor we can use
+        fallbackAdapter = moshi.fallbackAdapter(clazz.java)
+      }
 
       val objectSubtypes = mutableMapOf<Class<*>, Any>()
       val labels = mutableMapOf<String, Class<*>>()
@@ -83,11 +92,13 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         if (isAnnotatedDefaultObject) {
           if (objectInstance == null) {
             error("Must be an object type to use as a @DefaultObject: $sealedSubclass")
-          } else if (defaultObjectInstance === UNSET) {
+          } else if (defaultObjectInstance === UNSET && fallbackAdapter == null) {
             defaultObjectInstance = objectInstance
           } else {
-            if (defaultObjectInstance == null) {
-              error("Can not have both @DefaultObject and @DefaultNull: $sealedSubclass")
+            if (defaultObjectInstance == null || fallbackAdapter == null) {
+              error(
+                "Only one of @DefaultNull, @DefaultObject, and @FallbackJsonAdapter can be used at a time: $sealedSubclass"
+              )
             } else {
               error(
                 "Can only have one @DefaultObject: $sealedSubclass and ${defaultObjectInstance.javaClass} are both annotated"
@@ -127,6 +138,8 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
           .let { factory ->
             if (defaultObjectInstance !== UNSET) {
               factory.withDefaultValue(defaultObjectInstance)
+            } else if (fallbackAdapter != null) {
+              factory.withFallbackJsonAdapter(fallbackAdapter)
             } else {
               factory
             }

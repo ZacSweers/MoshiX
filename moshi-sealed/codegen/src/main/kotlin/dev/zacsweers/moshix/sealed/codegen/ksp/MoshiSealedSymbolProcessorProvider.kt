@@ -17,6 +17,7 @@ package dev.zacsweers.moshix.sealed.codegen.ksp
 
 import com.google.auto.service.AutoService
 import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.isVisibleFrom
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
@@ -28,16 +29,19 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
+import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Modifier
+import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.ksp.addOriginatingKSFile
-import com.squareup.kotlinpoet.ksp.originatingKSFiles
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import dev.zacsweers.moshix.sealed.codegen.ProguardConfig
 import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATED
@@ -177,9 +181,6 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
       createType(type, labelKey, generatedAnnotation, symbols)
     }
 
-    // TODO sealedParent gen?
-    //  Requires a runtime adapter! Or JsonClass(generator = "sealed-nested")
-
     return emptyList()
   }
 
@@ -204,6 +205,61 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     symbols: MoshiSealedSymbols,
   ) {
     val useDefaultNull = type.hasAnnotation(symbols.defaultNull)
+    val fallbackAdapterAnnotation = type.findAnnotationWithType(symbols.fallbackJsonAdapter)
+    if (useDefaultNull && (fallbackAdapterAnnotation != null)) {
+      logger.error("Only one of @DefaultNull or @FallbackJsonAdapter can be used at a time", type)
+      return
+    }
+    var fallbackStrategy: FallbackStrategy? = null
+    if (fallbackAdapterAnnotation != null) {
+      val adapterType = (fallbackAdapterAnnotation.arguments[0].value as KSType)
+      // TODO can we check adapter type is valid? Compiler will check it for us
+      val adapterDeclaration = adapterType.declaration as KSClassDeclaration
+      val constructor = adapterDeclaration.primaryConstructor
+      if (constructor?.isVisibleFrom(type) == false) {
+        logger.error(
+          "Fallback adapter type $adapterType and its primary constructor must be visible from $type",
+          fallbackAdapterAnnotation
+        )
+        return
+      }
+      val hasMoshiParam =
+        when (constructor?.parameters?.size) {
+          null,
+          0 -> {
+            // Nothing to do
+            false
+          }
+          1 -> {
+            // Check it's a Moshi parameter
+            val moshiParam = constructor.parameters[0]
+            // TODO can this be simpler?
+            if (!symbols.moshi.isAssignableFrom(moshiParam.type.resolve())) {
+              logger.error(
+                "Fallback adapter type's primary constructor can only have a Moshi parameter",
+                fallbackAdapterAnnotation
+              )
+              return
+            }
+            true
+          }
+          else -> {
+            logger.error(
+              "Fallback adapter type's primary constructor can only have a Moshi parameter",
+              fallbackAdapterAnnotation
+            )
+            return
+          }
+        }
+      fallbackStrategy =
+        FallbackStrategy.FallbackAdapter(
+          className = adapterType.toClassName(),
+          hasMoshiParam = hasMoshiParam
+        )
+    } else if (useDefaultNull) {
+      fallbackStrategy = FallbackStrategy.Null
+    }
+
     val objectAdapters = mutableListOf<CodeBlock>()
     val seenLabels = mutableMapOf<String, ClassName>()
     val originatingKSFiles = mutableSetOf<KSFile>()
@@ -243,26 +299,27 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         }
       }
 
-    val preparedAdapter =
-      createType(
+    createType(
         targetType = type.toClassName(),
         isInternal = Modifier.INTERNAL in type.modifiers,
         labelKey = labelKey,
-        useDefaultNull = useDefaultNull,
+        fallbackStrategy = fallbackStrategy,
         generatedAnnotation = generatedAnnotation,
         nestedSealedClassNames = nestedSealedClassNames,
         subtypes = sealedSubtypes,
         objectAdapters = objectAdapters,
-        generateProguardConfig = generateProguardConfig
+        generateProguardConfig = generateProguardConfig,
+        errorLogger = { message -> logger.error(message, type) }
       ) {
         addAnnotation(COMMON_SUPPRESS)
         for (file in originatingKSFiles) {
           addOriginatingKSFile(file)
         }
       }
-
-    preparedAdapter.spec.writeTo(codeGenerator, aggregating = true)
-    preparedAdapter.proguardConfig?.writeTo(codeGenerator, type.containingFile)
+      ?.let { (spec, proguardConfig) ->
+        spec.writeTo(codeGenerator, aggregating = true)
+        proguardConfig?.writeTo(codeGenerator, type.containingFile)
+      }
   }
 
   private fun walkTypeLabels(
@@ -421,6 +478,37 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     }
 
     return Subtype.ClassType(className, labels)
+  }
+}
+
+internal sealed interface FallbackStrategy {
+  fun statement(moshiParam: CodeBlock): CodeBlock
+
+  object Null : FallbackStrategy {
+    override fun statement(moshiParam: CodeBlock) = CodeBlock.of(".withDefaultValue(null)")
+  }
+
+  class FallbackAdapter(val className: TypeName, val hasMoshiParam: Boolean) : FallbackStrategy {
+    // TODO handle which moshi param comes in here
+    override fun statement(moshiParam: CodeBlock): CodeBlock {
+      val constructorParams =
+        if (hasMoshiParam) {
+          moshiParam
+        } else {
+          CodeBlock.of("")
+        }
+      return CodeBlock.of(
+        ".withFallbackJsonAdapter(%T(%L)·as·%T<%T>)",
+        className,
+        constructorParams,
+        JsonAdapter::class.asClassName(),
+        ANY
+      )
+    }
+  }
+
+  class DefaultObject(val className: TypeName) : FallbackStrategy {
+    override fun statement(moshiParam: CodeBlock) = CodeBlock.of(".withDefaultValue(%T)", className)
   }
 }
 

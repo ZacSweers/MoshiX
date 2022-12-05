@@ -18,6 +18,7 @@ package dev.zacsweers.moshix.sealed.codegen.ksp
 import com.google.common.truth.Truth.assertThat
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
+import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspSourcesDir
@@ -54,12 +55,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
+    val compilation = prepareCompilation(source)
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
     val generatedSourcesDir = compilation.kspSourcesDir
@@ -94,7 +90,6 @@ class MoshiSealedSymbolProcessorProviderTest {
               .withSubtype(BaseType.TypeB::class.java, "b")
               .withSubtype(BaseType.TypeC.TypeCImpl::class.java, "c")
               .create(BaseType::class.java, emptySet(), moshi) as JsonAdapter<BaseType>
-
 
         public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 
@@ -185,13 +180,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains("Duplicate label")
   }
@@ -216,13 +205,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains("Duplicate alternate label")
   }
@@ -247,15 +230,190 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-    val result = compilation.compile()
+    val result = compile(source)
     assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
     assertThat(result.messages).contains("Moshi-sealed subtypes cannot be generic.")
+  }
+
+  @Test
+  fun nullAndFallback() {
+    val source =
+      kotlin(
+        "BaseType.kt",
+        """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+      import dev.zacsweers.moshix.sealed.annotations.DefaultNull
+      import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
+      import com.squareup.moshi.JsonReader
+      import com.squareup.moshi.JsonWriter
+      import com.squareup.moshi.JsonAdapter
+
+      class BaseTypeFallback : JsonAdapter<String>() {
+        override fun fromJson(reader: JsonReader): String? {
+          return null
+        }
+
+        override fun toJson(writer: JsonWriter, value: String?) {
+        }
+      }
+
+      @FallbackJsonAdapter(BaseTypeFallback::class)
+      @DefaultNull
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a")
+        class TypeA : BaseType()
+      }
+    """
+      )
+
+    val result = compile(source)
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages)
+      .contains("Only one of @DefaultNull or @FallbackJsonAdapter can be used at a time")
+  }
+
+  @Test
+  fun nullAndDefaultObject() {
+    val source =
+      kotlin(
+        "BaseType.kt",
+        """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+      import dev.zacsweers.moshix.sealed.annotations.DefaultNull
+      import dev.zacsweers.moshix.sealed.annotations.DefaultObject
+
+      @DefaultNull
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a")
+        class TypeA : BaseType()
+        @DefaultObject
+        object TypeB : BaseType()
+      }
+    """
+      )
+
+    val result = compile(source)
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages).contains("Cannot have both @DefaultNull and @DefaultObject")
+  }
+
+  @Test
+  fun defaultObjectAndFallbackAdapter() {
+    val source =
+      kotlin(
+        "BaseType.kt",
+        """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+      import dev.zacsweers.moshix.sealed.annotations.DefaultObject
+      import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
+      import com.squareup.moshi.JsonReader
+      import com.squareup.moshi.JsonWriter
+      import com.squareup.moshi.JsonAdapter
+
+      class BaseTypeFallback : JsonAdapter<String>() {
+        override fun fromJson(reader: JsonReader): String? {
+          return null
+        }
+
+        override fun toJson(writer: JsonWriter, value: String?) {
+        }
+      }
+
+      @FallbackJsonAdapter(BaseTypeFallback::class)
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a")
+        class TypeA : BaseType()
+        @DefaultObject
+        object TypeB : BaseType()
+      }
+    """
+      )
+
+    val result = compile(source)
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages)
+      .contains(
+        "Only one of @DefaultObject, @DefaultNull, or @FallbackJsonAdapter can be used at a time"
+      )
+  }
+
+  @Test
+  fun invisibleFallbackAdapterConstructor() {
+    val source =
+      kotlin(
+        "BaseType.kt",
+        """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+      import dev.zacsweers.moshix.sealed.annotations.DefaultObject
+      import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
+      import com.squareup.moshi.JsonReader
+      import com.squareup.moshi.JsonWriter
+      import com.squareup.moshi.JsonAdapter
+
+      class BaseTypeFallback private constructor() : JsonAdapter<String>() {
+        override fun fromJson(reader: JsonReader): String? {
+          return null
+        }
+
+        override fun toJson(writer: JsonWriter, value: String?) {
+        }
+      }
+
+      @FallbackJsonAdapter(BaseTypeFallback::class)
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a")
+        class TypeA : BaseType()
+        @DefaultObject
+        object TypeB : BaseType()
+      }
+    """
+      )
+
+    val result = compile(source)
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages)
+      .contains(
+        "Fallback adapter type BaseTypeFallback and its primary constructor must be visible from BaseType"
+      )
+  }
+
+  @Test
+  fun invalidConstructorParam() {
+    val source =
+      kotlin(
+        "BaseType.kt",
+        """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+      import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
+      import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
+
+      @FallbackJsonAdapter(ObjectJsonAdapter::class)
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class BaseType {
+        @TypeLabel("a")
+        class TypeA : BaseType()
+      }
+    """
+      )
+
+    val result = compile(source)
+    assertThat(result.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+    assertThat(result.messages)
+      .contains("Fallback adapter type's primary constructor can only have a Moshi parameter")
   }
 
   @Test
@@ -278,12 +436,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     """
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
+    val compilation = prepareCompilation(source)
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
     val generatedSourcesDir = compilation.kspSourcesDir
@@ -314,17 +467,20 @@ class MoshiSealedSymbolProcessorProviderTest {
       public class BaseTypeJsonAdapter(
         moshi: Moshi,
       ) : JsonAdapter<BaseType>() {
-        @Suppress("UNCHECKED_CAST")
-        @OptIn(ExperimentalStdlibApi::class)
-        private val runtimeAdapter: JsonAdapter<BaseType> =
-            PolymorphicJsonAdapterFactory.of(BaseType::class.java, "type")
-              .withSubtype(BaseType.TypeA::class.java, "a")
-              .withSubtype(BaseType.TypeB::class.java, "b")
-              .create(BaseType::class.java, emptySet(), moshi.newBuilder()
-                .addAdapter<BaseType.TypeA>(ObjectJsonAdapter(BaseType.TypeA))
-            .addAdapter<BaseType.TypeB>(ObjectJsonAdapter(BaseType.TypeB))
-            .build()) as JsonAdapter<BaseType>
+        private val runtimeAdapter: JsonAdapter<BaseType>
 
+        init {
+          val moshi_ = moshi.newBuilder()
+                  .addAdapter<BaseType.TypeA>(ObjectJsonAdapter(BaseType.TypeA))
+              .addAdapter<BaseType.TypeB>(ObjectJsonAdapter(BaseType.TypeB))
+              .build()
+          @Suppress("UNCHECKED_CAST")
+          @OptIn(ExperimentalStdlibApi::class)
+          runtimeAdapter = PolymorphicJsonAdapterFactory.of(BaseType::class.java, "type")
+                .withSubtype(BaseType.TypeA::class.java, "a")
+                .withSubtype(BaseType.TypeB::class.java, "b")
+                .create(BaseType::class.java, emptySet(), moshi_) as JsonAdapter<BaseType>
+        }
 
         public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 
@@ -366,13 +522,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         data class SubType(val foo: String): BaseType"""
       )
 
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(base, subType)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-      }
-
+    val compilation = prepareCompilation(base, subType)
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
 
@@ -407,7 +557,6 @@ class MoshiSealedSymbolProcessorProviderTest {
               .withSubtype(SubType::class.java, "a")
               .create(BaseType::class.java, emptySet(), moshi) as JsonAdapter<BaseType>
 
-
         public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 
         public override fun toJson(writer: JsonWriter, value_: BaseType?): Unit {
@@ -417,5 +566,20 @@ class MoshiSealedSymbolProcessorProviderTest {
       """
           .trimIndent()
       )
+  }
+
+  private fun prepareCompilation(
+    vararg sourceFiles: SourceFile,
+  ): KotlinCompilation =
+    KotlinCompilation().apply {
+      sources = sourceFiles.toList()
+      inheritClassPath = true
+      symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
+    }
+
+  private fun compile(
+    vararg sourceFiles: SourceFile,
+  ): KotlinCompilation.Result {
+    return prepareCompilation(*sourceFiles).compile()
   }
 }

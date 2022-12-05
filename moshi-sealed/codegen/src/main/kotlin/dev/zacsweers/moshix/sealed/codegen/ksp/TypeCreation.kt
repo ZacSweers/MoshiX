@@ -50,15 +50,16 @@ internal fun createType(
   targetType: ClassName,
   isInternal: Boolean,
   labelKey: String,
-  useDefaultNull: Boolean,
+  fallbackStrategy: FallbackStrategy?,
   generatedAnnotation: AnnotationSpec?,
   nestedSealedClassNames: Set<ClassName>,
   subtypes: Set<Subtype>,
   objectAdapters: List<CodeBlock>,
   generateProguardConfig: Boolean,
+  errorLogger: (String) -> Unit,
   typeSpecHook: TypeSpec.Builder.() -> Unit
-): PreparedAdapter {
-  val defaultCodeBlockBuilder = CodeBlock.builder()
+): PreparedAdapter? {
+  var finalFallbackStrategy = fallbackStrategy
   val adapterName =
     ClassName.bestGuess(Types.generatedJsonAdapterName(targetType.reflectionName())).simpleName
   val visibilityModifier = if (isInternal) KModifier.INTERNAL else KModifier.PUBLIC
@@ -77,23 +78,41 @@ internal fun createType(
 
   generatedAnnotation?.let { classBuilder.addAnnotation(it) }
 
+  var intermediateMoshiInit: CodeBlock? = null
+  var moshiArg = CodeBlock.of("%N", moshiParam)
+  if (objectAdapters.isEmpty()) {
+    CodeBlock.of("%N", moshiParam)
+  } else {
+    val moshiPropName = allocator.newName("moshi")
+    moshiArg = CodeBlock.of("%L", moshiPropName)
+    intermediateMoshiInit =
+      CodeBlock.builder()
+        .add("%N.newBuilder()\n", moshiParam)
+        .apply { add("%L\n", objectAdapters.joinToCode("\n", prefix = "    ")) }
+        .add(".build()")
+        .build()
+  }
+
   val runtimeAdapterInitializer =
     CodeBlock.builder()
       .add(
-        "%T.of(%T::class.java, %S)«\n",
+        "%T.of(%T::class.java, %S)\n",
         PolymorphicJsonAdapterFactory::class,
         targetType,
         labelKey
       )
 
-  if (useDefaultNull) {
-    defaultCodeBlockBuilder.add("null")
-  }
-
   for (subtype in subtypes) {
     when (subtype) {
       is ObjectType -> {
-        defaultCodeBlockBuilder.add("%T", subtype.className)
+        if (finalFallbackStrategy == null) {
+          finalFallbackStrategy = FallbackStrategy.DefaultObject(subtype.className)
+        } else {
+          errorLogger(
+            "Only one of @DefaultObject, @DefaultNull, or @FallbackJsonAdapter can be used at a time."
+          )
+          return null
+        }
       }
       is ClassType -> {
         for (label in subtype.labels) {
@@ -107,22 +126,9 @@ internal fun createType(
     }
   }
 
-  if (defaultCodeBlockBuilder.isNotEmpty()) {
-    runtimeAdapterInitializer.add("  .withDefaultValue(%L)\n", defaultCodeBlockBuilder.build())
-  }
-
-  val moshiArg =
-    if (objectAdapters.isEmpty()) {
-      CodeBlock.of("%N", moshiParam)
-    } else {
-      CodeBlock.builder()
-        .add("%N.newBuilder()\n", moshiParam)
-        .apply { add("%L\n", objectAdapters.joinToCode("\n", prefix = "    ")) }
-        .add(".build()")
-        .build()
-    }
+  finalFallbackStrategy?.let { runtimeAdapterInitializer.add("  %L\n", it.statement(moshiArg)) }
   runtimeAdapterInitializer.add(
-    "  .create(%T::class.java, %M(), %L)·as·%T\n»",
+    "  .create(%T::class.java, %M(), %L)·as·%T",
     targetType,
     MemberName("kotlin.collections", "emptySet"),
     moshiArg,
@@ -131,27 +137,42 @@ internal fun createType(
 
   val runtimeAdapterProperty =
     PropertySpec.builder(allocator.newName("runtimeAdapter"), jsonAdapterType, KModifier.PRIVATE)
-      .addAnnotation(
-        AnnotationSpec.builder(Suppress::class).addMember("%S", "UNCHECKED_CAST").build()
-      )
       .apply {
-        if (objectAdapters.isNotEmpty()) {
-          addAnnotation(
-            AnnotationSpec.builder(ClassName("kotlin", "OptIn"))
-              .addMember("%T::class", ClassName("kotlin", "ExperimentalStdlibApi"))
-              .build()
-          )
+        if (intermediateMoshiInit == null) {
+          // Initialize inline
+          addAnnotation(suppressUncheckedCastAnnotation())
+          if (objectAdapters.isNotEmpty()) {
+            addAnnotation(optInExperimentalApiAnnotation())
+          }
+          initializer(runtimeAdapterInitializer.build())
         }
       }
-      .initializer(runtimeAdapterInitializer.build())
       .build()
+
+  // Must add this first!
+  classBuilder.addProperty(runtimeAdapterProperty)
+
+  if (intermediateMoshiInit != null) {
+    // Need to do a custom init block!
+    classBuilder.addInitializerBlock(
+      CodeBlock.builder()
+        .addStatement("val·%L·=·%L", moshiArg, intermediateMoshiInit)
+        .addStatement("%L", suppressUncheckedCastAnnotation())
+        .apply {
+          if (objectAdapters.isNotEmpty()) {
+            addStatement("%L", optInExperimentalApiAnnotation())
+          }
+        }
+        .addStatement("%N·=·%L", runtimeAdapterProperty, runtimeAdapterInitializer.build())
+        .build()
+    )
+  }
 
   val nullableTargetType = targetType.copy(nullable = true)
   val readerParam = ParameterSpec(allocator.newName("reader"), JsonReader::class.asClassName())
   val writerParam = ParameterSpec(allocator.newName("writer"), JsonWriter::class.asClassName())
   val valueParam = ParameterSpec(allocator.newName("value"), nullableTargetType)
   classBuilder
-    .addProperty(runtimeAdapterProperty)
     .addFunction(
       FunSpec.builder("fromJson")
         .addModifiers(KModifier.OVERRIDE)
@@ -191,3 +212,11 @@ internal fun createType(
 
   return PreparedAdapter(fileSpec, proguardConfig)
 }
+
+private fun suppressUncheckedCastAnnotation(): AnnotationSpec =
+  AnnotationSpec.builder(Suppress::class).addMember("%S", "UNCHECKED_CAST").build()
+
+private fun optInExperimentalApiAnnotation(): AnnotationSpec =
+  AnnotationSpec.builder(ClassName("kotlin", "OptIn"))
+    .addMember("%T::class", ClassName("kotlin", "ExperimentalStdlibApi"))
+    .build()

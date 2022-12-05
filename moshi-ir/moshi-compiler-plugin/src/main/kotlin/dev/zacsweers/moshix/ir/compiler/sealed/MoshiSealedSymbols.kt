@@ -29,6 +29,7 @@ internal class MoshiSealedSymbols(private val pluginContext: IrPluginContext) {
   val pjafOf by lazy { pjaf.getSimpleFunction("of")!! }
   val pjafWithSubtype by lazy { pjaf.getSimpleFunction("withSubtype")!! }
   val pjafWithDefaultValue by lazy { pjaf.getSimpleFunction("withDefaultValue")!! }
+  val pjafWithFallbackJsonAdapter by lazy { pjaf.getSimpleFunction("withFallbackJsonAdapter")!! }
 
   val objectJsonAdapterCtor by lazy {
     pluginContext

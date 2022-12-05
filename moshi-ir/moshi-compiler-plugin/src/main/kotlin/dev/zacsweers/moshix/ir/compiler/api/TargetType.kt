@@ -15,7 +15,7 @@
  */
 package dev.zacsweers.moshix.ir.compiler.api
 
-import dev.zacsweers.moshix.ir.compiler.util.checkIsVisibile
+import dev.zacsweers.moshix.ir.compiler.util.checkIsVisible
 import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrTypeParameter
@@ -33,6 +33,6 @@ internal data class TargetType(
 ) {
 
   init {
-    visibility.checkIsVisibile()
+    visibility.checkIsVisible()
   }
 }

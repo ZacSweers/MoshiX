@@ -5,12 +5,15 @@ import dev.zacsweers.moshix.ir.compiler.api.AdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PreparedAdapter
 import dev.zacsweers.moshix.ir.compiler.labelKey
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
+import dev.zacsweers.moshix.ir.compiler.util.checkIsVisible
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.error
 import dev.zacsweers.moshix.ir.compiler.util.generateToStringFun
 import dev.zacsweers.moshix.ir.compiler.util.irConstructorBody
 import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
+import dev.zacsweers.moshix.ir.compiler.util.irInvoke
 import dev.zacsweers.moshix.ir.compiler.util.irType
+import dev.zacsweers.moshix.ir.compiler.util.rawType
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -40,6 +43,9 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
+import org.jetbrains.kotlin.ir.expressions.IrCall
+import org.jetbrains.kotlin.ir.expressions.IrClassReference
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
@@ -47,6 +53,9 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrVararg
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.interpreter.hasAnnotation
+import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
+import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.createType
@@ -60,6 +69,7 @@ import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
 import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.util.packageFqName
+import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
@@ -97,11 +107,72 @@ private constructor(
           "@NestedSealed-annotated subtype ${target.fqNameWhenAvailable} is inappropriately annotated with @JsonClass(generator = " +
             "\"sealed:$labelKey\")."
         }
+        return null
       }
     }
 
+    var fallbackStrategy: FallbackStrategy? = null
+
     val useDefaultNull =
       target.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.DefaultNull"))
+
+    val fallbackAdapterAnnotation =
+      target.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter"))
+
+    if (useDefaultNull && (fallbackAdapterAnnotation != null)) {
+      logger.error(target) {
+        "Only one of @DefaultNull or @FallbackJsonAdapter can be used at a time"
+      }
+      return null
+    }
+
+    if (fallbackAdapterAnnotation != null) {
+      val adapterType = fallbackAdapterAnnotation.getValueArgument(0) as IrClassReference
+      // TODO can we check adapter type is valid? Compiler will check it for us
+      val adapterDeclaration = adapterType.classType.rawType()
+      val constructor =
+        adapterDeclaration.primaryConstructor
+          ?: run {
+            logger.error(adapterDeclaration) {
+              "No primary constructor found for fallback adapter ${adapterDeclaration.fqNameWhenAvailable}"
+            }
+            return null
+          }
+      constructor.visibility.checkIsVisible()
+      val hasMoshiParam =
+        when (constructor.valueParameters.size) {
+          0 -> {
+            // Nothing to do
+            false
+          }
+          1 -> {
+            // Check it's a Moshi parameter
+            val moshiParam = constructor.valueParameters[0]
+            // TODO can this be simpler?
+            if (moshiSymbols.moshi != moshiParam.type) {
+              logger.error(target) {
+                "Fallback adapter type's primary constructor can only have a Moshi parameter"
+              }
+              return null
+            }
+            true
+          }
+          else -> {
+            logger.error(target) {
+              "Fallback adapter type's primary constructor can only have a Moshi parameter"
+            }
+            return null
+          }
+        }
+      fallbackStrategy =
+        FallbackStrategy.FallbackAdapter(
+          targetConstructor = constructor.symbol,
+          hasMoshiParam = hasMoshiParam
+        )
+    } else if (useDefaultNull) {
+      fallbackStrategy = FallbackStrategy.Null
+    }
+
     val objectSubtypes = mutableListOf<IrClass>()
     val seenLabels = mutableMapOf<String, IrClass>()
     var hasErrors = false
@@ -141,7 +212,7 @@ private constructor(
       return createType(
         targetType = target,
         labelKey = labelKey,
-        useDefaultNull = useDefaultNull,
+        fallbackStrategy = fallbackStrategy,
         generatedAnnotation = null,
         subtypes = sealedSubtypes,
         objectSubtypes = objectSubtypes
@@ -279,7 +350,7 @@ private constructor(
   private fun IrFactory.createType(
     targetType: IrClass,
     labelKey: String,
-    useDefaultNull: Boolean,
+    fallbackStrategy: FallbackStrategy?,
     generatedAnnotation: IrConstructorCall?,
     subtypes: Set<Subtype>,
     objectSubtypes: List<IrClass>,
@@ -346,6 +417,31 @@ private constructor(
                   putValueArgument(1, irString(labelKey))
                 }
 
+              val moshiParam = ctor.valueParameters[0]
+              val moshiAccess: IrExpression =
+                if (hasObjectSubtypes) {
+                  val initial =
+                    irCall(moshiSymbols.moshiNewBuilder).apply {
+                      dispatchReceiver = irGet(moshiParam)
+                    }
+                  val newBuilds =
+                    objectSubtypes.fold(initial) { receiver, subtype ->
+                      irCall(moshiSymbols.addAdapter).apply {
+                        extensionReceiver = receiver
+                        putTypeArgument(0, subtype.defaultType)
+                        putValueArgument(
+                          0,
+                          irCall(moshiSealedSymbols.objectJsonAdapterCtor).apply {
+                            putValueArgument(0, irGetObject(subtype.symbol))
+                          }
+                        )
+                      }
+                    }
+                  irCall(moshiSymbols.moshiBuilderBuild).apply { dispatchReceiver = newBuilds }
+                } else {
+                  irGet(moshiParam)
+                }
+
               val subtypesExpression =
                 subtypes.filterIsInstance<Subtype.ClassType>().fold(ofCreatorExpression) {
                   receiver,
@@ -362,45 +458,29 @@ private constructor(
                   }
                 }
 
-              val possiblyWithDefaultExpression =
-                if (useDefaultNull) {
-                  irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
-                    dispatchReceiver = subtypesExpression
-                    putValueArgument(0, irNull(targetType.defaultType))
-                  }
+              var finalFallbackStrategy = fallbackStrategy
+              subtypes.filterIsInstance<Subtype.ObjectType>().firstOrNull()?.let { defaultObject ->
+                if (fallbackStrategy == null) {
+                  finalFallbackStrategy =
+                    FallbackStrategy.DefaultObject(defaultObject.className.symbol)
                 } else {
-                  subtypes.filterIsInstance<Subtype.ObjectType>().firstOrNull()?.let { defaultObject
-                    ->
-                    irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
-                      dispatchReceiver = subtypesExpression
-                      putValueArgument(0, irGetObject(defaultObject.className.symbol))
-                    }
+                  logger.error(target) {
+                    "Only one of @DefaultObject, @DefaultNull, or @FallbackJsonAdapter can be used at a time."
                   }
-                    ?: subtypesExpression
                 }
+              }
 
-              val moshiParam = irGet(ctor.valueParameters[0])
-              val moshiAccess: IrExpression =
-                if (hasObjectSubtypes) {
-                  val initial =
-                    irCall(moshiSymbols.moshiNewBuilder).apply { dispatchReceiver = moshiParam }
-                  val newBuilds =
-                    objectSubtypes.fold(initial) { receiver, subtype ->
-                      irCall(moshiSymbols.addAdapter).apply {
-                        extensionReceiver = receiver
-                        putTypeArgument(0, subtype.defaultType)
-                        putValueArgument(
-                          0,
-                          irCall(moshiSealedSymbols.objectJsonAdapterCtor).apply {
-                            putValueArgument(0, irGetObject(subtype.symbol))
-                          }
-                        )
-                      }
-                    }
-                  irCall(moshiSymbols.moshiBuilderBuild).apply { dispatchReceiver = newBuilds }
-                } else {
-                  moshiParam
+              val possiblyWithDefaultExpression =
+                finalFallbackStrategy?.let {
+                  it.statement(
+                    builder = this,
+                    moshiSealedSymbols = moshiSealedSymbols,
+                    subtypesExpression = subtypesExpression,
+                    targetType = targetType.defaultType,
+                    moshiParam = moshiParam
+                  )
                 }
+                  ?: subtypesExpression
 
               // .create(Message::class.java, emptySet(), moshi) as JsonAdapter<Message>
               irExprBody(
@@ -560,4 +640,72 @@ private constructor(
 private sealed class Subtype(val className: IrClass) {
   class ObjectType(className: IrClass) : Subtype(className)
   class ClassType(className: IrClass, val labels: List<String>) : Subtype(className)
+}
+
+private sealed interface FallbackStrategy {
+  fun statement(
+    builder: IrBuilderWithScope,
+    moshiSealedSymbols: MoshiSealedSymbols,
+    subtypesExpression: IrExpression,
+    targetType: IrType,
+    moshiParam: IrValueParameter,
+  ): IrCall
+
+  object Null : FallbackStrategy {
+    override fun statement(
+      builder: IrBuilderWithScope,
+      moshiSealedSymbols: MoshiSealedSymbols,
+      subtypesExpression: IrExpression,
+      targetType: IrType,
+      moshiParam: IrValueParameter,
+    ) =
+      with(builder) {
+        irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
+          dispatchReceiver = subtypesExpression
+          putValueArgument(0, irNull(targetType))
+        }
+      }
+  }
+
+  class FallbackAdapter(val targetConstructor: IrFunctionSymbol, val hasMoshiParam: Boolean) :
+    FallbackStrategy {
+    override fun statement(
+      builder: IrBuilderWithScope,
+      moshiSealedSymbols: MoshiSealedSymbols,
+      subtypesExpression: IrExpression,
+      targetType: IrType,
+      moshiParam: IrValueParameter,
+    ): IrCall {
+      return with(builder) {
+        irCall(moshiSealedSymbols.pjafWithFallbackJsonAdapter).apply {
+          dispatchReceiver = subtypesExpression
+          // TODO cast to JsonAdapter<Any>
+          val args =
+            if (hasMoshiParam) {
+              arrayOf(irGet(moshiParam))
+            } else {
+              emptyArray()
+            }
+          putValueArgument(0, irInvoke(callee = targetConstructor, args = args))
+        }
+      }
+    }
+  }
+
+  class DefaultObject(val defaultObject: IrClassSymbol) : FallbackStrategy {
+    override fun statement(
+      builder: IrBuilderWithScope,
+      moshiSealedSymbols: MoshiSealedSymbols,
+      subtypesExpression: IrExpression,
+      targetType: IrType,
+      moshiParam: IrValueParameter,
+    ): IrCall {
+      return with(builder) {
+        irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
+          dispatchReceiver = subtypesExpression
+          putValueArgument(0, irGetObject(defaultObject))
+        }
+      }
+    }
+  }
 }

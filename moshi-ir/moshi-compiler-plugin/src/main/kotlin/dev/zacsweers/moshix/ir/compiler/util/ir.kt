@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.codegen.CompilationException
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.descriptors.Modality
@@ -203,9 +204,9 @@ internal val IrProperty.type: IrType
       ?: setter?.valueParameters?.first()?.type ?: backingField?.type
         ?: error("No type for property $name")
 
-internal fun DescriptorVisibility.checkIsVisibile() {
-  require(this == DescriptorVisibilities.PUBLIC || this == DescriptorVisibilities.INTERNAL) {
-    "Visibility must be one of public or internal. Is $name"
+internal fun DescriptorVisibility.checkIsVisible() {
+  if (this != DescriptorVisibilities.PUBLIC && this != DescriptorVisibilities.INTERNAL) {
+    throw CompilationException("Visibility must be one of public or internal. Is $name", null, null)
   }
 }
 
