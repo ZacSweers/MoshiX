@@ -1,6 +1,53 @@
 Changelog
 =========
 
+Version 0.20.0
+--------------
+
+_2022-12-04_
+
+#### **New:** `@FallbackJsonAdapter`
+
+moshi-sealed now supports a new `@FallbackJsonAdapter`. This is a proxy to Moshi's `PolymorphicJsonAdapter.withFallbackJsonAdapter()`. This allows you to specify a custom `JsonAdapter` to handle cases of unrecognized type labels in decoding. It's advanced usage and not recommended for regular cases.
+
+The specified `JsonAdapter` must have a public constructor with no parameters or a single `Moshi` parameter.
+
+```kotlin
+@FallbackJsonAdapter(FrogFallbackJsonAdapter::class)
+@JsonClass(generateAdapter = true, generator = "sealed:type")
+sealed class Frog {
+
+  @JsonClass(generateAdapter = true)
+  @TypeLabel("original", null)
+  data class OriginalFrog(...)
+
+  @JsonClass(generateAdapter = true)
+  @TypeLabel("poisonous")
+  data class PoisonousFrog(...)
+  
+  class FrogFallbackJsonAdapter(moshi: Moshi) : JsonAdapter<Frog>() {
+    private val delegate = moshi.adapter<OriginalFrog>()
+    override fun fromJson(reader: JsonReader): Frog? {
+      // Default to original frog
+      return delegate.fromJson(reader)
+    }
+    
+    //...
+  }
+}
+```
+
+#### Misc
+
+* **Enhancement:** Generate extra proguard rules for `@NestedSealed` types to prevent R8 from inlining the parent sealed type into the subtype in some cases.
+* **Enhancement:** Proguard generation in moshi-ir now uses [Anvil](https://github.com/square/anvil)'s more optimized compiler util APIs.
+* **Enhancement:** Check and report more error cases in moshi-ir and moshi-sealed code gen.
+* **Fix:** moshi-ir now properly generates proguard rules for moshi-sealed types.
+* **Fix:** track `@NestedSealed` types as originating files in moshi-sealed KSP.
+* **Enhancement:** Substantially improved KSP and IR test coverage of error cases.
+* Update to Kotlin `1.7.22`.
+* Update to KSP `1.7.22-1.0.8`.
+
 Version 0.19.0
 --------------
 
