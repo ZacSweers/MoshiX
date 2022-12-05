@@ -91,7 +91,6 @@ class MoshiSealedSymbolProcessorProviderTest {
               .withSubtype(BaseType.TypeC.TypeCImpl::class.java, "c")
               .create(BaseType::class.java, emptySet(), moshi) as JsonAdapter<BaseType>
 
-
         public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 
         public override fun toJson(writer: JsonWriter, value_: BaseType?): Unit {
@@ -468,19 +467,20 @@ class MoshiSealedSymbolProcessorProviderTest {
       public class BaseTypeJsonAdapter(
         moshi: Moshi,
       ) : JsonAdapter<BaseType>() {
-        private val moshi_: Moshi = moshi.newBuilder()
-                .addAdapter<BaseType.TypeA>(ObjectJsonAdapter(BaseType.TypeA))
-            .addAdapter<BaseType.TypeB>(ObjectJsonAdapter(BaseType.TypeB))
-            .build()
+        private val runtimeAdapter: JsonAdapter<BaseType>
 
-        @Suppress("UNCHECKED_CAST")
-        @OptIn(ExperimentalStdlibApi::class)
-        private val runtimeAdapter: JsonAdapter<BaseType> =
-            PolymorphicJsonAdapterFactory.of(BaseType::class.java, "type")
-              .withSubtype(BaseType.TypeA::class.java, "a")
-              .withSubtype(BaseType.TypeB::class.java, "b")
-              .create(BaseType::class.java, emptySet(), moshi_) as JsonAdapter<BaseType>
-
+        init {
+          val moshi_ = moshi.newBuilder()
+                  .addAdapter<BaseType.TypeA>(ObjectJsonAdapter(BaseType.TypeA))
+              .addAdapter<BaseType.TypeB>(ObjectJsonAdapter(BaseType.TypeB))
+              .build()
+          @Suppress("UNCHECKED_CAST")
+          @OptIn(ExperimentalStdlibApi::class)
+          runtimeAdapter = PolymorphicJsonAdapterFactory.of(BaseType::class.java, "type")
+                .withSubtype(BaseType.TypeA::class.java, "a")
+                .withSubtype(BaseType.TypeB::class.java, "b")
+                .create(BaseType::class.java, emptySet(), moshi_) as JsonAdapter<BaseType>
+        }
 
         public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 
@@ -556,7 +556,6 @@ class MoshiSealedSymbolProcessorProviderTest {
             PolymorphicJsonAdapterFactory.of(BaseType::class.java, "type")
               .withSubtype(SubType::class.java, "a")
               .create(BaseType::class.java, emptySet(), moshi) as JsonAdapter<BaseType>
-
 
         public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 

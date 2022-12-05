@@ -78,29 +78,25 @@ internal fun createType(
 
   generatedAnnotation?.let { classBuilder.addAnnotation(it) }
 
-  val moshiArg =
-    if (objectAdapters.isEmpty()) {
-      CodeBlock.of("%N", moshiParam)
-    } else {
-      val moshiProp =
-        PropertySpec.builder(allocator.newName("moshi"), Moshi::class)
-          .addModifiers(KModifier.PRIVATE)
-          .initializer(
-            CodeBlock.builder()
-              .add("%N.newBuilder()\n", moshiParam)
-              .apply { add("%L\n", objectAdapters.joinToCode("\n", prefix = "    ")) }
-              .add(".build()")
-              .build()
-          )
-          .build()
-      classBuilder.addProperty(moshiProp)
-      CodeBlock.of("%N", moshiProp)
-    }
+  var intermediateMoshiInit: CodeBlock? = null
+  var moshiArg = CodeBlock.of("%N", moshiParam)
+  if (objectAdapters.isEmpty()) {
+    CodeBlock.of("%N", moshiParam)
+  } else {
+    val moshiPropName = allocator.newName("moshi")
+    moshiArg = CodeBlock.of("%L", moshiPropName)
+    intermediateMoshiInit =
+      CodeBlock.builder()
+        .add("%N.newBuilder()\n", moshiParam)
+        .apply { add("%L\n", objectAdapters.joinToCode("\n", prefix = "    ")) }
+        .add(".build()")
+        .build()
+  }
 
   val runtimeAdapterInitializer =
     CodeBlock.builder()
       .add(
-        "%T.of(%T::class.java, %S)«\n",
+        "%T.of(%T::class.java, %S)\n",
         PolymorphicJsonAdapterFactory::class,
         targetType,
         labelKey
@@ -132,7 +128,7 @@ internal fun createType(
 
   finalFallbackStrategy?.let { runtimeAdapterInitializer.add("  %L\n", it.statement(moshiArg)) }
   runtimeAdapterInitializer.add(
-    "  .create(%T::class.java, %M(), %L)·as·%T\n»",
+    "  .create(%T::class.java, %M(), %L)·as·%T",
     targetType,
     MemberName("kotlin.collections", "emptySet"),
     moshiArg,
@@ -141,27 +137,42 @@ internal fun createType(
 
   val runtimeAdapterProperty =
     PropertySpec.builder(allocator.newName("runtimeAdapter"), jsonAdapterType, KModifier.PRIVATE)
-      .addAnnotation(
-        AnnotationSpec.builder(Suppress::class).addMember("%S", "UNCHECKED_CAST").build()
-      )
       .apply {
-        if (objectAdapters.isNotEmpty()) {
-          addAnnotation(
-            AnnotationSpec.builder(ClassName("kotlin", "OptIn"))
-              .addMember("%T::class", ClassName("kotlin", "ExperimentalStdlibApi"))
-              .build()
-          )
+        if (intermediateMoshiInit == null) {
+          // Initialize inline
+          addAnnotation(suppressUncheckedCastAnnotation())
+          if (objectAdapters.isNotEmpty()) {
+            addAnnotation(optInExperimentalApiAnnotation())
+          }
+          initializer(runtimeAdapterInitializer.build())
         }
       }
-      .initializer(runtimeAdapterInitializer.build())
       .build()
+
+  // Must add this first!
+  classBuilder.addProperty(runtimeAdapterProperty)
+
+  if (intermediateMoshiInit != null) {
+    // Need to do a custom init block!
+    classBuilder.addInitializerBlock(
+      CodeBlock.builder()
+        .addStatement("val·%L·=·%L", moshiArg, intermediateMoshiInit)
+        .addStatement("%L", suppressUncheckedCastAnnotation())
+        .apply {
+          if (objectAdapters.isNotEmpty()) {
+            addStatement("%L", optInExperimentalApiAnnotation())
+          }
+        }
+        .addStatement("%N·=·%L", runtimeAdapterProperty, runtimeAdapterInitializer.build())
+        .build()
+    )
+  }
 
   val nullableTargetType = targetType.copy(nullable = true)
   val readerParam = ParameterSpec(allocator.newName("reader"), JsonReader::class.asClassName())
   val writerParam = ParameterSpec(allocator.newName("writer"), JsonWriter::class.asClassName())
   val valueParam = ParameterSpec(allocator.newName("value"), nullableTargetType)
   classBuilder
-    .addProperty(runtimeAdapterProperty)
     .addFunction(
       FunSpec.builder("fromJson")
         .addModifiers(KModifier.OVERRIDE)
@@ -201,3 +212,11 @@ internal fun createType(
 
   return PreparedAdapter(fileSpec, proguardConfig)
 }
+
+private fun suppressUncheckedCastAnnotation(): AnnotationSpec =
+  AnnotationSpec.builder(Suppress::class).addMember("%S", "UNCHECKED_CAST").build()
+
+private fun optInExperimentalApiAnnotation(): AnnotationSpec =
+  AnnotationSpec.builder(ClassName("kotlin", "OptIn"))
+    .addMember("%T::class", ClassName("kotlin", "ExperimentalStdlibApi"))
+    .build()
