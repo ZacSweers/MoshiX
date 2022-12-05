@@ -251,7 +251,7 @@ class MoshiSealedSymbolProcessorProviderTest {
       import com.squareup.moshi.JsonWriter
       import com.squareup.moshi.JsonAdapter
 
-      class BaseTypeFallback : JsonAdapter<String> {
+      class BaseTypeFallback : JsonAdapter<String>() {
         override fun fromJson(reader: JsonReader): String? {
           return null
         }
@@ -319,7 +319,7 @@ class MoshiSealedSymbolProcessorProviderTest {
       import com.squareup.moshi.JsonWriter
       import com.squareup.moshi.JsonAdapter
 
-      class BaseTypeFallback : JsonAdapter<String> {
+      class BaseTypeFallback : JsonAdapter<String>() {
         override fun fromJson(reader: JsonReader): String? {
           return null
         }
@@ -362,7 +362,7 @@ class MoshiSealedSymbolProcessorProviderTest {
       import com.squareup.moshi.JsonWriter
       import com.squareup.moshi.JsonAdapter
 
-      class BaseTypeFallback private constructor() : JsonAdapter<String> {
+      class BaseTypeFallback private constructor() : JsonAdapter<String>() {
         override fun fromJson(reader: JsonReader): String? {
           return null
         }
