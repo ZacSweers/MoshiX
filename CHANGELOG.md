@@ -24,14 +24,14 @@ sealed class Frog {
   @JsonClass(generateAdapter = true)
   @TypeLabel("poisonous")
   data class PoisonousFrog(...)
-  
+
   class FrogFallbackJsonAdapter(moshi: Moshi) : JsonAdapter<Frog>() {
     private val delegate = moshi.adapter<OriginalFrog>()
     override fun fromJson(reader: JsonReader): Frog? {
       // Default to original frog
       return delegate.fromJson(reader)
     }
-    
+
     //...
   }
 }
