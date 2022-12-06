@@ -24,11 +24,7 @@ plugins {
 moshi { enableSealed.set(true) }
 
 tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
-    @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs +=
-      listOf("-opt-in=kotlin.RequiresOptIn", "-opt-in=kotlin.ExperimentalStdlibApi")
-  }
+  compilerOptions { freeCompilerArgs.addAll("-opt-in=kotlin.ExperimentalStdlibApi") }
 }
 
 dependencies {
