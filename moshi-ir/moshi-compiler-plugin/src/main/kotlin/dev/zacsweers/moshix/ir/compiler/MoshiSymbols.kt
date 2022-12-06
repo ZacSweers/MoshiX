@@ -16,60 +16,41 @@
 package dev.zacsweers.moshix.ir.compiler
 
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.backend.common.ir.addExtensionReceiver
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrBuiltIns
-import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
-import org.jetbrains.kotlin.ir.builders.declarations.addGetter
 import org.jetbrains.kotlin.ir.builders.declarations.addTypeParameter
 import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
-import org.jetbrains.kotlin.ir.builders.declarations.buildProperty
-import org.jetbrains.kotlin.ir.builders.irGet
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
-import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrPackageFragment
-import org.jetbrains.kotlin.ir.declarations.IrProperty
-import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
-import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
-import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.impl.IrClassReferenceImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
-import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
-import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
-import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.types.IrTypeArgument
-import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.classifierOrNull
-import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.makeNullable
-import org.jetbrains.kotlin.ir.types.starProjectedType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.createImplicitParameterDeclarationWithWrappedDescriptor
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
+import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 internal class MoshiSymbols(
-  private val irBuiltIns: IrBuiltIns,
-  private val moduleFragment: IrModuleFragment,
-  val pluginContext: IrPluginContext
-) {
-  private val irFactory: IrFactory = pluginContext.irFactory
-
-  private val javaLang: IrPackageFragment by lazy { createPackage("java.lang") }
-  private val kotlinJvm: IrPackageFragment by lazy { createPackage("kotlin.jvm") }
+  irBuiltIns: IrBuiltIns,
+  moduleFragment: IrModuleFragment,
+  pluginContext: IrPluginContext
+) : BaseSymbols(irBuiltIns, moduleFragment, pluginContext) {
   private val moshiPackage: IrPackageFragment by lazy { createPackage("com.squareup.moshi") }
+  private val moshiInternalPackage: IrPackageFragment by lazy {
+    createPackage("com.squareup.moshi.internal")
+  }
   private val javaReflectPackage: IrPackageFragment by lazy { createPackage("java.lang.reflect") }
 
   val type: IrClassSymbol by lazy {
@@ -111,10 +92,28 @@ internal class MoshiSymbols(
   }
 
   val jsonReaderOptionsOf by lazy {
-    pluginContext
-      .referenceClass(FqName("com.squareup.moshi.JsonReader.Options"))!!
+    // TODO https://youtrack.jetbrains.com/issue/KT-55269
+    //    pluginContext
+    //      .referenceClass(ClassId.fromString("com/squareup/moshi/JsonReader.Options"))!!
+    //      .functions
+    //      .single { it.owner.name.asString() == "of" }
+    createClass(jsonReader.owner, "Options", ClassKind.CLASS, Modality.FINAL) {
+        // public static Options of(String... strings)
+        addFunction(
+            name = Name.identifier("of").identifier,
+            returnType = defaultType,
+            isStatic = true,
+          )
+          .apply {
+            addValueParameter {
+              name = Name.identifier("strings")
+              type = irBuiltIns.arrayClass.typeWith(irBuiltIns.stringType)
+              varargElementType = irBuiltIns.stringType
+            }
+          }
+      }
       .functions
-      .single { it.owner.name.asString() == "of" }
+      .single()
   }
 
   val jsonWriter: IrClassSymbol by lazy {
@@ -139,7 +138,7 @@ internal class MoshiSymbols(
   }
 
   val moshiBuilder by lazy {
-    pluginContext.referenceClass(FqName("com.squareup.moshi.Moshi.Builder"))!!
+    pluginContext.referenceClass(ClassId.fromString("com/squareup/moshi/Moshi.Builder"))!!
   }
 
   val moshiBuilderBuild by lazy { moshiBuilder.getSimpleFunction("build")!! }
@@ -185,7 +184,7 @@ internal class MoshiSymbols(
 
   val jsonAdapterFactoryCreate by lazy {
     pluginContext
-      .referenceClass(FqName("com.squareup.moshi.JsonAdapter.Factory"))!!
+      .referenceClass(ClassId.fromString("com/squareup/moshi/JsonAdapter.Factory"))!!
       .getSimpleFunction("create")!!
   }
 
@@ -220,11 +219,13 @@ internal class MoshiSymbols(
   }
 
   val addAdapter by lazy {
-    pluginContext.referenceFunctions(FqName("com.squareup.moshi.addAdapter")).first()
+    pluginContext
+      .referenceFunctions(CallableId(FqName("com.squareup.moshi"), Name.identifier("addAdapter")))
+      .first()
   }
 
   val jsonDataException: IrClassSymbol by lazy {
-    pluginContext.referenceClass(FqName("com.squareup.moshi.JsonDataException"))!!
+    pluginContext.referenceClass(ClassId.fromString("com/squareup/moshi/JsonDataException"))!!
   }
 
   val jsonDataExceptionStringConstructor: IrFunctionSymbol by lazy {
@@ -234,12 +235,41 @@ internal class MoshiSymbols(
     }
   }
 
-  // TODO why doesn't creating an anonymous irclass work here? Breaks bytecode somewhere
   val moshiUtil: IrClassSymbol by lazy {
-    pluginContext.referenceClass(FqName("com.squareup.moshi.internal.Util"))!!
+    // TODO https://youtrack.jetbrains.com/issue/KT-55269
+    //    pluginContext.referenceClass(ClassId.fromString("com/squareup/moshi/internal/Util"))!!
+    createClass(moshiInternalPackage, "Util", ClassKind.CLASS, Modality.FINAL) {
+      // public static JsonDataException missingProperty(String propertyName, String jsonName,
+      // JsonReader reader)
+      addFunction(
+          name = Name.identifier("missingProperty").identifier,
+          returnType = jsonDataException.defaultType,
+          isStatic = true,
+        )
+        .apply {
+          addValueParameter("propertyName", irBuiltIns.stringType)
+          addValueParameter("jsonName", irBuiltIns.stringType)
+          addValueParameter("reader", jsonReader.defaultType)
+        }
+
+      // public static JsonDataException unexpectedNull(String propertyName, String jsonName,
+      // JsonReader reader)
+      addFunction(
+          name = Name.identifier("unexpectedNull").identifier,
+          returnType = jsonDataException.defaultType,
+          isStatic = true,
+        )
+        .apply {
+          addValueParameter("propertyName", irBuiltIns.stringType)
+          addValueParameter("jsonName", irBuiltIns.stringType)
+          addValueParameter("reader", jsonReader.defaultType)
+        }
+    }
   }
 
-  val moshiTypes by lazy { pluginContext.referenceClass(FqName("com.squareup.moshi.Types"))!! }
+  val moshiTypes by lazy {
+    pluginContext.referenceClass(ClassId.fromString("com/squareup/moshi/Types"))!!
+  }
 
   val moshiTypesArrayOf by lazy { moshiTypes.getSimpleFunction("arrayOf")!! }
 
@@ -254,151 +284,4 @@ internal class MoshiSymbols(
   val moshiTypesSubtypeOf by lazy { moshiTypes.getSimpleFunction("subtypeOf")!! }
 
   val moshiTypesSuperTypeOf by lazy { moshiTypes.getSimpleFunction("supertypeOf")!! }
-
-  val emptySet by lazy {
-    pluginContext.referenceFunctions(FqName("kotlin.collections.emptySet")).first()
-  }
-
-  /*
-   * There are two setOf() functions with one arg - one is the vararg and the other is a shorthand for
-   * Collections.singleton(element). It's important we pick the right one, otherwise we can accidentally send a
-   * vararg array into the singleton() function.
-   */
-
-  val setOfVararg by lazy {
-    pluginContext.referenceFunctions(FqName("kotlin.collections.setOf")).first {
-      it.owner.valueParameters.size == 1 && it.owner.valueParameters[0].varargElementType != null
-    }
-  }
-
-  val setOfSingleton by lazy {
-    pluginContext.referenceFunctions(FqName("kotlin.collections.setOf")).first {
-      it.owner.valueParameters.size == 1 && it.owner.valueParameters[0].varargElementType == null
-    }
-  }
-
-  val setPlus by lazy {
-    pluginContext.referenceFunctions(FqName("kotlin.collections.plus")).single {
-      val owner = it.owner
-      owner.extensionReceiverParameter?.type?.classFqName == FqName("kotlin.collections.Set") &&
-        owner.valueParameters.size == 1 &&
-        owner.valueParameters[0].type.classifierOrNull is IrTypeParameterSymbol
-    }
-  }
-
-  val arrayGet by lazy {
-    pluginContext.irBuiltIns.arrayClass.owner.declarations
-      .filterIsInstance<IrSimpleFunction>()
-      .single { it.name.asString() == "get" }
-  }
-
-  val arraySizeGetter by lazy {
-    pluginContext.irBuiltIns.arrayClass.owner.declarations
-      .filterIsInstance<IrProperty>()
-      .single { it.name.asString() == "size" }
-      .getter!!
-  }
-
-  val iterableJoinToString by lazy {
-    pluginContext.referenceFunctions(FqName("kotlin.collections.joinToString")).single {
-      it.owner.extensionReceiverParameter?.type?.classFqName ==
-        FqName("kotlin.collections.Iterable")
-    }
-  }
-
-  val javaLangClass: IrClassSymbol by lazy {
-    createClass(javaLang, "Class", ClassKind.CLASS, Modality.FINAL)
-  }
-
-  val kotlinKClassJava: IrPropertySymbol =
-    irFactory
-      .buildProperty { name = Name.identifier("java") }
-      .apply {
-        parent = kotlinJvm
-        addGetter().apply {
-          addExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
-          returnType = javaLangClass.defaultType
-        }
-      }
-      .symbol
-
-  val kotlinKClassJavaObjectType: IrPropertySymbol =
-    irFactory
-      .buildProperty { name = Name.identifier("javaObjectType") }
-      .apply {
-        parent = kotlinJvm
-        addGetter().apply {
-          addExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
-          returnType = javaLangClass.defaultType
-        }
-      }
-      .symbol
-
-  private fun createPackage(packageName: String): IrPackageFragment =
-    IrExternalPackageFragmentImpl.createEmptyExternalPackageFragment(
-      moduleFragment.descriptor,
-      FqName(packageName)
-    )
-
-  private fun createClass(
-    irParent: IrDeclarationParent,
-    shortName: String,
-    classKind: ClassKind,
-    classModality: Modality,
-    isValueClass: Boolean = false
-  ): IrClassSymbol =
-    irFactory
-      .buildClass {
-        name = Name.identifier(shortName)
-        kind = classKind
-        modality = classModality
-        isValue = isValueClass
-      }
-      .apply {
-        parent = irParent
-        createImplicitParameterDeclarationWithWrappedDescriptor()
-      }
-      .symbol
-
-  fun irType(
-    qualifiedName: String,
-    nullable: Boolean = false,
-    arguments: List<IrTypeArgument> = emptyList()
-  ): IrType =
-    pluginContext
-      .referenceClass(FqName(qualifiedName))!!
-      .createType(hasQuestionMark = nullable, arguments = arguments)
-
-  private fun IrBuilderWithScope.kClassReference(classType: IrType) =
-    IrClassReferenceImpl(
-      startOffset,
-      endOffset,
-      context.irBuiltIns.kClassClass.starProjectedType,
-      context.irBuiltIns.kClassClass,
-      classType
-    )
-
-  private fun IrBuilderWithScope.kClassToJavaClass(kClassReference: IrExpression) =
-    irGet(javaLangClass.starProjectedType, null, kotlinKClassJava.owner.getter!!.symbol).apply {
-      extensionReceiver = kClassReference
-    }
-
-  private fun IrBuilderWithScope.kClassToJavaObjectClass(kClassReference: IrExpression) =
-    irGet(javaLangClass.starProjectedType, null, kotlinKClassJavaObjectType.owner.getter!!.symbol)
-      .apply { extensionReceiver = kClassReference }
-
-  // Produce a static reference to the java class of the given type.
-  fun javaClassReference(
-    irBuilder: IrBuilderWithScope,
-    classType: IrType,
-    forceObjectType: Boolean = false
-  ) =
-    with(irBuilder) {
-      val kClassReference = kClassReference(classType)
-      if (forceObjectType) {
-        kClassToJavaObjectClass(kClassReference)
-      } else {
-        kClassToJavaClass(kClassReference)
-      }
-    }
 }
