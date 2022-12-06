@@ -26,9 +26,11 @@ plugins {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
-    @Suppress("SuspiciousCollectionReassignment")
-    this.freeCompilerArgs += "-opt-in=com.squareup.anvil.annotations.ExperimentalAnvilApi"
+  compilerOptions {
+    freeCompilerArgs.addAll(
+      "-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi",
+      "-opt-in=com.squareup.anvil.annotations.ExperimentalAnvilApi",
+    )
   }
 }
 
