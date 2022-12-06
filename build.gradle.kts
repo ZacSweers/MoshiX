@@ -17,6 +17,7 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import java.net.URL
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -83,14 +84,12 @@ subprojects {
   }
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
     tasks.withType<KotlinCompile>().configureEach {
-      kotlinOptions {
-        jvmTarget = libs.versions.jvmTarget.get()
-        @Suppress("SuspiciousCollectionReassignment")
-        freeCompilerArgs +=
-          listOf("-Xjsr305=strict", "-progressive", "-opt-in=kotlin.RequiresOptIn")
+      compilerOptions {
+        jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get()))
+        freeCompilerArgs.addAll("-Xjsr305=strict", "-progressive")
         // TODO disabled because Gradle's Kotlin handling is silly
         //  https://github.com/gradle/gradle/issues/16779
-        //        allWarningsAsErrors = true
+        //  allWarningsAsErrors = true
       }
     }
     if (
@@ -116,9 +115,9 @@ subprojects {
   }
   // configuration required to produce unique META-INF/*.kotlin_module file names
   tasks.withType<KotlinCompile> {
-    kotlinOptions {
+    compilerOptions {
       if (project.hasProperty("POM_ARTIFACT_ID")) {
-        moduleName = project.property("POM_ARTIFACT_ID") as String
+        moduleName.set(project.property("POM_ARTIFACT_ID") as String)
       }
     }
   }
