@@ -21,7 +21,6 @@ import java.util.UUID
  * Assigns Kotlin identifier names to avoid collisions, keywords, and invalid characters. To use,
  * first create an instance and allocate all of the names that you need. Typically this is a mix of
  * user-supplied names and constants:
- *
  * ```kotlin
  * val nameAllocator = NameAllocator()
  * for (property in properties) {
@@ -36,7 +35,6 @@ import java.util.UUID
  * constant string builder.
  *
  * Once we've allocated names we can use them when generating code:
- *
  * ```kotlin
  * val builder = FunSpec.builder("toString")
  *     .addModifiers(KModifier.OVERRIDE)
@@ -55,7 +53,6 @@ import java.util.UUID
  *
  * The above code generates unique names if presented with conflicts. Given user-supplied properties
  * with names `ab` and `sb` this generates the following:
- *
  * ```kotlin
  * override fun toString(): kotlin.String {
  *   val sb_ = java.lang.StringBuilder()

@@ -39,16 +39,7 @@ sealed class Frog {
 
 #### **New:** Experimental support for the new K2 compiler in moshi-ir.
 
-Note this comes with several caveats:
-- There is no FIR plugin in moshi-ir itself (not needed). This just marks itself as compatible with the new compiler.
-- This only works if proguard rule generation is disabled, as there is no support in FIR currently for generating files.
-- K2 compiler itself is extremely experimental.
-
-In short, this is only really to unblock anyone doing their own testing of K2 and don't want this
-plugin to disable it. If you see any issues, please file a bug here and disable K2 in your project
-in the meantime.
-
-Details on K2 and instructions for enabling it can be found here: https://kotlinlang.org/docs/whatsnew17.html#new-kotlin-k2-compiler-for-the-jvm-in-alpha
+**Edit:** this isn't usable in this release, don't try to use it!
 
 #### Misc
 

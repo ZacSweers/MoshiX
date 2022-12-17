@@ -67,11 +67,13 @@ public annotation class TrackUnknownKeys {
 
   /**
    * @param shouldTrack a function to compute if a given class and annotation set should be tracked.
-   * Defaults to
+   *   Defaults to
+   *
    * ```
    *                    checking for the [TrackUnknownKeys] annotation.
    * @param tracker
    * ```
+   *
    * a callback function for tracking unknown names for a given class.
    */
   public class Factory(
