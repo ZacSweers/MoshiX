@@ -22,27 +22,88 @@ import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
-internal val KEY_ENABLED = CompilerConfigurationKey<Boolean>("enabled")
-internal val KEY_DEBUG = CompilerConfigurationKey<Boolean>("debug")
-internal val KEY_GENERATED_ANNOTATION = CompilerConfigurationKey<String>("generatedAnnotation")
-internal val KEY_ENABLE_SEALED = CompilerConfigurationKey<Boolean>("enableSealed")
+internal val KEY_ENABLED =
+  CompilerConfigurationKey<Boolean>("Enable/disable MoshiX's plugins on the given compilation")
+internal val KEY_DEBUG =
+  CompilerConfigurationKey<Boolean>("Enable/disable debug logging on the given compilation")
+internal val KEY_GENERATED_ANNOTATION =
+  CompilerConfigurationKey<String>(
+    "The FQCN to a generated (i.e. javax/annotation/processing/Generated) annotation to include on generated code"
+  )
+internal val KEY_ENABLE_SEALED =
+  CompilerConfigurationKey<Boolean>("Enable/disable moshi-sealed support in code generation")
 internal val KEY_GENERATE_PROGUARD_RULES =
-  CompilerConfigurationKey<Boolean>("generateProguardRules")
-internal val KEY_RESOURCES_OUTPUT_DIR = CompilerConfigurationKey<String>("resourcesOutputDir")
+  CompilerConfigurationKey<Boolean>(
+    "Enable/disable proguard rule generation in code gen. Implemented as an AnalysisHandlerExtension"
+  )
+internal val KEY_RESOURCES_OUTPUT_DIR =
+  CompilerConfigurationKey<String>(
+    "The output directory for generated proguard rules, only applicable if generateProguardRules is enabled"
+  )
 
 @AutoService(CommandLineProcessor::class)
 public class MoshiCommandLineProcessor : CommandLineProcessor {
+  internal companion object {
+    val OPTION_ENABLED =
+      CliOption(
+        optionName = "enabled",
+        valueDescription = "<true | false>",
+        description = KEY_ENABLED.toString(),
+        required = true,
+        allowMultipleOccurrences = false
+      )
+    val OPTION_DEBUG =
+      CliOption(
+        optionName = "debug",
+        valueDescription = "<true | false>",
+        description = KEY_DEBUG.toString(),
+        required = false,
+        allowMultipleOccurrences = false
+      )
+    val OPTION_ENABLE_SEALED =
+      CliOption(
+        optionName = "enableSealed",
+        valueDescription = "<true | false>",
+        description = KEY_GENERATED_ANNOTATION.toString(),
+        required = false,
+        allowMultipleOccurrences = false
+      )
+    val OPTION_GENERATED_ANNOTATION =
+      CliOption(
+        optionName = "generatedAnnotation",
+        valueDescription = "String",
+        description = KEY_ENABLE_SEALED.toString(),
+        required = false,
+        allowMultipleOccurrences = false
+      )
+    val OPTION_GENERATE_PROGUARD_RULES =
+      CliOption(
+        optionName = "generateProguardRules",
+        valueDescription = "<true | false>",
+        description = KEY_GENERATE_PROGUARD_RULES.toString(),
+        required = false,
+        allowMultipleOccurrences = false
+      )
+    val OPTION_RESOURCES_OUTPUT_DIR =
+      CliOption(
+        optionName = "resourcesOutputDir",
+        valueDescription = "String",
+        description = KEY_RESOURCES_OUTPUT_DIR.toString(),
+        required = false,
+        allowMultipleOccurrences = false
+      )
+  }
 
-  override val pluginId: String = "moshi-compiler-plugin"
+  override val pluginId: String = "dev.zacsweers.moshix.compiler"
 
   override val pluginOptions: Collection<AbstractCliOption> =
     listOf(
-      CliOption("enabled", "<true | false>", "", required = true),
-      CliOption("debug", "<true | false>", "", required = false),
-      CliOption("enableSealed", "<true | false>", "", required = false),
-      CliOption("generatedAnnotation", "String", "", required = false),
-      CliOption("generateProguardRules", "<true | false>", "", required = false),
-      CliOption("resourcesOutputDir", "String", "", required = false),
+      OPTION_DEBUG,
+      OPTION_ENABLED,
+      OPTION_ENABLE_SEALED,
+      OPTION_RESOURCES_OUTPUT_DIR,
+      OPTION_GENERATED_ANNOTATION,
+      OPTION_GENERATE_PROGUARD_RULES
     )
 
   override fun processOption(
