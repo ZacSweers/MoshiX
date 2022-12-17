@@ -71,7 +71,7 @@ import kotlin.reflect.KClass
  *
  * @property adapter Either a [JsonAdapter] or [JsonAdapter.Factory].
  * @property nullSafe Set to false to be able to handle null values within the adapter, default
- * value is true.
+ *   value is true.
  */
 @JsonQualifier
 @Retention(RUNTIME)
