@@ -47,7 +47,7 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     target.extensions.create("moshi", MoshiPluginExtension::class.java)
   }
 
-  override fun getCompilerPluginId(): String = "moshi-compiler-plugin"
+  override fun getCompilerPluginId(): String = "dev.zacsweers.moshix.compiler"
 
   override fun getPluginArtifact(): SubpluginArtifact =
     SubpluginArtifact(
