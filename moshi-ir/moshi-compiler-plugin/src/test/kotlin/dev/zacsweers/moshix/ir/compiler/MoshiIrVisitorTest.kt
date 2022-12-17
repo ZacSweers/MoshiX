@@ -23,6 +23,7 @@ import com.tschuchort.compiletesting.PluginOption
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import java.io.File
+import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Assume.assumeFalse
@@ -1133,13 +1134,23 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       val processor = MoshiCommandLineProcessor()
       commandLineProcessors = listOf(processor)
       pluginOptions = buildList {
-        add(processor.option(KEY_ENABLED, "true"))
-        add(processor.option(KEY_DEBUG, "false")) // Enable when needed for extra debugging
-        add(processor.option(KEY_GENERATE_PROGUARD_RULES, generateProguardRules.toString()))
-        add(processor.option(KEY_RESOURCES_OUTPUT_DIR, resourcesDir))
-        add(processor.option(KEY_ENABLE_SEALED, "true"))
+        add(processor.option(MoshiCommandLineProcessor.OPTION_ENABLED, "true"))
+        add(
+          processor.option(MoshiCommandLineProcessor.OPTION_DEBUG, "false")
+        ) // Enable when needed for extra debugging
+        add(
+          processor.option(
+            MoshiCommandLineProcessor.OPTION_GENERATE_PROGUARD_RULES,
+            generateProguardRules.toString()
+          )
+        )
+        add(processor.option(MoshiCommandLineProcessor.OPTION_RESOURCES_OUTPUT_DIR, resourcesDir))
+        add(processor.option(MoshiCommandLineProcessor.OPTION_ENABLE_SEALED, "true"))
         if (generatedAnnotation != null) {
-          processor.option(KEY_GENERATED_ANNOTATION, generatedAnnotation)
+          processor.option(
+            MoshiCommandLineProcessor.OPTION_GENERATED_ANNOTATION,
+            generatedAnnotation
+          )
         }
       }
       inheritClassPath = true
@@ -1151,8 +1162,8 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
     }
   }
 
-  private fun CommandLineProcessor.option(key: Any, value: Any?): PluginOption {
-    return PluginOption(pluginId, key.toString(), value.toString())
+  private fun CommandLineProcessor.option(key: CliOption, value: Any?): PluginOption {
+    return PluginOption(pluginId, key.optionName, value.toString())
   }
 
   private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {
