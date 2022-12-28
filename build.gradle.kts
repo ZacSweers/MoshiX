@@ -113,11 +113,9 @@ subprojects {
       // Can't do automatic release due to publishing both a plugin and regular artifacts
       publishToMavenCentral()
     }
-  }
-  // configuration required to produce unique META-INF/*.kotlin_module file names
-  tasks.withType<KotlinCompile> {
-    kotlinOptions {
-      if (project.hasProperty("POM_ARTIFACT_ID")) {
+    // configuration required to produce unique META-INF/*.kotlin_module file names
+    tasks.withType<KotlinCompile>().configureEach {
+      kotlinOptions {
         moduleName = project.property("POM_ARTIFACT_ID") as String
       }
     }
