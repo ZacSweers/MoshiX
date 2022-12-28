@@ -115,9 +115,7 @@ subprojects {
     }
     // configuration required to produce unique META-INF/*.kotlin_module file names
     tasks.withType<KotlinCompile>().configureEach {
-      kotlinOptions {
-        moduleName = project.property("POM_ARTIFACT_ID") as String
-      }
+      kotlinOptions { moduleName = project.property("POM_ARTIFACT_ID") as String }
     }
   }
 }
