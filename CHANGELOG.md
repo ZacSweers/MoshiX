@@ -1,30 +1,6 @@
 Changelog
 =========
 
-Version 0.21.0
---------------
-
-_2022-12-28_
-
-#### **New:** Update to Kotlin `1.8.0`.
-- For moshi-ir, this release is only compatible with Kotlin 1.8 or later.
-- Migrate the IR and FIR plugins to new `CompilerPluginRegistrar` entrypoint API.
-
-#### **New:** Experimental support for the new K2 compiler in moshi-ir.
-
-Note this comes with several caveats:
-- There is no FIR plugin in moshi-ir itself (not needed). This just marks itself as compatible with the new compiler and avoids using incompatible IR APIs.
-- This only works if proguard rule generation is disabled, as there is no support in FIR currently for generating files.
-- K2 compiler itself is extremely experimental.
-
-In short, this is only really to unblock anyone doing their own testing of K2 and don't want this
-plugin to disable it. If you see any issues, please file a bug here and disable K2 in your project
-in the meantime.
-
-#### Misc
-- Update JVM target to `11`.
-- Update Anvil `compiler-utils` to `2.4.3`.
-
 Version 0.20.0
 --------------
 
