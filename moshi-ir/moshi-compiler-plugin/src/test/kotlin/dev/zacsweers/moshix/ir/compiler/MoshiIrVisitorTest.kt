@@ -488,7 +488,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
   @Test
   fun nonFieldApplicableQualifier() {
-    assumeFalse(useK2) // TODO uses referenceClass
     val result =
       compile(
         kotlin(
@@ -548,7 +547,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
   @Test
   fun `TypeAliases with the same backing type should share the same adapter`() {
-    assumeFalse(useK2) // TODO uses referenceClass
     val result =
       compile(
         kotlin(
@@ -833,7 +831,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
   @Test
   fun `Disabled proguard rules gen should generate no rules`() {
-    assumeFalse(useK2) // TODO uses referenceClass
     val compilation =
       prepareCompilation(
         null,
@@ -1012,7 +1009,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
   @Test
   fun defaultObjectAndFallbackAdapter() {
-    assumeFalse(useK2)
     val source =
       kotlin(
         "BaseType.kt",
@@ -1056,7 +1052,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
   @Test
   fun invisibleFallbackAdapterConstructor() {
-    assumeFalse(useK2)
     val source =
       kotlin(
         "BaseType.kt",
@@ -1097,7 +1092,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
   @Test
   fun invalidConstructorParam() {
-    assumeFalse(useK2)
     val source =
       kotlin(
         "BaseType.kt",
@@ -1130,7 +1124,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
   ): KotlinCompilation {
     return KotlinCompilation().apply {
       workingDir = compilationDir
-      compilerPlugins = listOf(MoshiComponentRegistrar())
+      compilerPluginRegistrars = listOf(MoshiComponentRegistrar())
       val processor = MoshiCommandLineProcessor()
       commandLineProcessors = listOf(processor)
       pluginOptions = buildList {

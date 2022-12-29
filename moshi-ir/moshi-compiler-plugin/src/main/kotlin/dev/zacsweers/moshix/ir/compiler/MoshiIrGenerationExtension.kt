@@ -20,19 +20,19 @@ import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
-import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.ClassId
 
 internal class MoshiIrGenerationExtension(
   private val messageCollector: MessageCollector,
-  private val generatedAnnotationName: FqName?,
+  private val generatedAnnotationName: ClassId?,
   private val enableSealed: Boolean,
   private val debug: Boolean
 ) : IrGenerationExtension {
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
     val generatedAnnotation =
-      generatedAnnotationName?.let { fqName ->
-        pluginContext.referenceClass(fqName).also {
+      generatedAnnotationName?.let { name ->
+        pluginContext.referenceClass(name).also {
           if (it == null) {
             messageCollector.error { "Unknown generated annotation $generatedAnnotationName" }
             return

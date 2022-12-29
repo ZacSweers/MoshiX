@@ -56,7 +56,7 @@ internal class MoshiIrVisitor(
     MoshiSymbols(pluginContext.irBuiltIns, moduleFragment, pluginContext)
   }
 
-  private val moshiSealedSymbols by lazy { MoshiSealedSymbols(pluginContext) }
+  private val moshiSealedSymbols by lazy { MoshiSealedSymbols(moshiSymbols) }
 
   private fun adapterGenerator(
     originalType: IrClass,

@@ -22,22 +22,18 @@ import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.com.intellij.mock.MockProject
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
 
-@AutoService(ComponentRegistrar::class)
-public class MoshiComponentRegistrar : ComponentRegistrar {
+@AutoService(CompilerPluginRegistrar::class)
+public class MoshiComponentRegistrar : CompilerPluginRegistrar() {
 
   override val supportsK2: Boolean = true
 
-  override fun registerProjectComponents(
-    project: MockProject,
-    configuration: CompilerConfiguration
-  ) {
+  override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
     if (configuration[KEY_ENABLED] == false) return
     val debug = configuration[KEY_DEBUG] ?: false
     val enableSealed = configuration[KEY_ENABLE_SEALED] ?: false
@@ -45,7 +41,7 @@ public class MoshiComponentRegistrar : ComponentRegistrar {
 
     val messageCollector =
       configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-    val fqGeneratedAnnotation = configuration[KEY_GENERATED_ANNOTATION]?.let(::FqName)
+    val fqGeneratedAnnotation = configuration[KEY_GENERATED_ANNOTATION]?.let(ClassId::fromString)
 
     if (generateProguardRules) {
       if (configuration.getBoolean(CommonConfigurationKeys.USE_FIR)) {
@@ -59,7 +55,6 @@ public class MoshiComponentRegistrar : ComponentRegistrar {
         configuration.get(KEY_RESOURCES_OUTPUT_DIR)?.let(::File)
           ?: error("No resources dir provided for proguard rule generation")
       AnalysisHandlerExtension.registerExtension(
-        project,
         ProguardRuleGenerationExtension(
           messageCollector = messageCollector,
           resourcesDir = resourceOutputDir,
@@ -70,7 +65,6 @@ public class MoshiComponentRegistrar : ComponentRegistrar {
     }
 
     IrGenerationExtension.registerExtension(
-      project,
       MoshiIrGenerationExtension(messageCollector, fqGeneratedAnnotation, enableSealed, debug)
     )
   }

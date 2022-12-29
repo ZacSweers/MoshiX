@@ -16,6 +16,8 @@
 
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   alias(libs.plugins.kotlinJvm)
@@ -42,13 +44,11 @@ val copyVersionTemplatesProvider =
   }
 // endregion
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+tasks.withType<KotlinCompile>().configureEach {
   dependsOn(copyVersionTemplatesProvider)
-  kotlinOptions {
-    @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs +=
-      listOf("-opt-in=kotlin.RequiresOptIn", "-opt-in=kotlin.ExperimentalStdlibApi")
-    jvmTarget = "1.8"
+  compilerOptions {
+    freeCompilerArgs.addAll("-opt-in=kotlin.ExperimentalStdlibApi")
+    jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get()))
   }
 }
 

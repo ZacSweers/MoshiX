@@ -23,10 +23,7 @@ plugins {
 }
 
 tasks.named<KotlinCompile>("compileTestKotlin") {
-  kotlinOptions {
-    @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-opt-in=kotlin.ExperimentalStdlibApi"
-  }
+  compilerOptions { freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi") }
 }
 
 dependencies {

@@ -56,12 +56,13 @@ import org.jetbrains.kotlin.ir.interpreter.hasAnnotation
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.defaultType
+import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.types.typeWith
+import org.jetbrains.kotlin.ir.util.classId
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
@@ -70,6 +71,7 @@ import org.jetbrains.kotlin.ir.util.getSimpleFunction
 import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.util.packageFqName
 import org.jetbrains.kotlin.ir.util.primaryConstructor
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
@@ -88,7 +90,7 @@ private constructor(
       if (target.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.NestedSealed"))) {
         target.superTypes.firstNotNullOfOrNull { supertype ->
           pluginContext
-            .referenceClass(supertype.classFqName!!)!!
+            .referenceClass(supertype.getClass()!!.classId!!)!!
             .owner
             .getAnnotation(FqName("com.squareup.moshi.JsonClass"))
             ?.labelKey()
@@ -388,7 +390,7 @@ private constructor(
     adapterCls.thisReceiver = adapterReceiver
     val jsonAdapterType =
       pluginContext
-        .irType("com.squareup.moshi.JsonAdapter")
+        .irType(ClassId.fromString("com/squareup/moshi/JsonAdapter"))
         .classifierOrFail
         .typeWith(targetType.defaultType)
     adapterCls.superTypes = listOf(jsonAdapterType)

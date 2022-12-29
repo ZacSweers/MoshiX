@@ -53,6 +53,7 @@ import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.types.Variance
 
@@ -172,7 +173,7 @@ private fun IrBuilderWithScope.addAnnotationsParam(
     val argumentExpression =
       if (jsonQualifiers.isEmpty()) {
         irCall(moshiSymbols.emptySet).apply {
-          putTypeArgument(0, pluginContext.irType("kotlin.Annotation"))
+          putTypeArgument(0, pluginContext.irType(ClassId.fromString("kotlin/Annotation")))
         }
       } else {
         val callee: IrFunctionSymbol

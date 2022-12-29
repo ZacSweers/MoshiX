@@ -98,6 +98,7 @@ import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getPropertyGetter
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
 import org.jetbrains.kotlin.ir.util.packageFqName
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.util.OperatorNameConventions
@@ -126,10 +127,10 @@ internal class MoshiAdapterGenerator(
   private val adapterName = "${simpleNames.joinToString(separator = "_")}JsonAdapter"
 
   private fun irType(
-    qualifiedName: String,
+    classId: ClassId,
     nullable: Boolean = false,
     arguments: List<IrTypeArgument> = emptyList()
-  ) = pluginContext.irType(qualifiedName, nullable, arguments)
+  ) = pluginContext.irType(classId, nullable, arguments)
 
   override fun prepare(): PreparedAdapter {
     val reservedSimpleNames = mutableSetOf<String>()
@@ -181,7 +182,11 @@ internal class MoshiAdapterGenerator(
       }
     adapterCls.thisReceiver = adapterReceiver
     adapterCls.superTypes =
-      listOf(irType("com.squareup.moshi.JsonAdapter").classifierOrFail.typeWith(target.irType))
+      listOf(
+        irType(ClassId.fromString("com/squareup/moshi/JsonAdapter"))
+          .classifierOrFail
+          .typeWith(target.irType)
+      )
 
     val ctor = adapterCls.generateConstructor(isGeneric)
     val optionsField = adapterCls.generateOptionsField()
@@ -217,12 +222,15 @@ internal class MoshiAdapterGenerator(
         .apply {
           addValueParameter {
             name = Name.identifier("moshi")
-            type = irType("com.squareup.moshi.Moshi")
+            type = irType(ClassId.fromString("com/squareup/moshi/Moshi"))
           }
           if (isGeneric) {
             addValueParameter {
               name = Name.identifier("types")
-              type = pluginContext.irBuiltIns.arrayClass.typeWith(irType("java.lang.reflect.Type"))
+              type =
+                pluginContext.irBuiltIns.arrayClass.typeWith(
+                  irType(ClassId.fromString("java/lang/reflect/Type"))
+                )
             }
           }
         }
@@ -284,7 +292,7 @@ internal class MoshiAdapterGenerator(
   private fun IrClass.generateOptionsField(): IrField {
     return addField {
         name = Name.identifier("options")
-        type = irType("com.squareup.moshi.JsonReader.Options")
+        type = irType(ClassId.fromString("com/squareup/moshi/JsonReader.Options"))
         visibility = DescriptorVisibilities.PRIVATE
         isFinal = true
       }
@@ -329,7 +337,7 @@ internal class MoshiAdapterGenerator(
                 irCall(
                     // TODO why can't I use kotlin.NullPointerException here?
                     pluginContext
-                      .referenceClass(FqName("kotlin.KotlinNullPointerException"))!!
+                      .referenceClass(ClassId.fromString("kotlin/KotlinNullPointerException"))!!
                       .constructors
                       .first { it.owner.valueParameters.size == 1 }
                   )
@@ -395,7 +403,7 @@ internal class MoshiAdapterGenerator(
       .apply {
         val readerParam = addValueParameter {
           name = Name.identifier("reader")
-          type = irType("com.squareup.moshi.JsonReader")
+          type = irType(ClassId.fromString("com/squareup/moshi/JsonReader"))
         }
         body =
           DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
@@ -536,7 +544,7 @@ internal class MoshiAdapterGenerator(
                       }
                       addValueParameter(
                         "marker",
-                        irType("kotlin.jvm.internal.DefaultConstructorMarker")
+                        irType(ClassId.fromString("kotlin/jvm/internal/DefaultConstructorMarker"))
                       )
                     }
                     .symbol
