@@ -37,7 +37,7 @@ sealed class Frog {
 }
 ```
 
-#### **New:** Experimental support for the new K2 compiler in moshi-ir.
+#### ~**New:** Experimental support for the new K2 compiler in moshi-ir.~
 
 **Edit:** this isn't usable in this release, don't try to use it!
 
