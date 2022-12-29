@@ -77,10 +77,13 @@ spotless {
 
 subprojects {
   pluginManager.withPlugin("java") {
+    // javaReleaseVersion can be set to override the global version
+    val jvmTargetProvider =
+      provider<String> { findProperty("moshix.javaReleaseVersion") as? String? }
+        .orElse(libs.versions.jvmTarget)
+        .map(String::toInt)
     configure<JavaPluginExtension> { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
-    project.tasks.withType<JavaCompile>().configureEach {
-      options.release.set(libs.versions.jvmTarget.map(String::toInt))
-    }
+    project.tasks.withType<JavaCompile>().configureEach { options.release.set(jvmTargetProvider) }
   }
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
     tasks.withType<KotlinCompile>().configureEach {
