@@ -76,16 +76,16 @@ spotless {
 }
 
 subprojects {
-  val releaseVersion = project.findProperty("moshix.javaReleaseVersion")?.toString() ?: "8"
-  val release = releaseVersion.toInt()
   pluginManager.withPlugin("java") {
     configure<JavaPluginExtension> { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
-    project.tasks.withType<JavaCompile>().configureEach { options.release.set(release) }
+    project.tasks.withType<JavaCompile>().configureEach {
+      options.release.set(libs.versions.jvmTarget.map(String::toInt))
+    }
   }
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
     tasks.withType<KotlinCompile>().configureEach {
       compilerOptions {
-        jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get()))
+        jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
         freeCompilerArgs.addAll("-Xjsr305=strict", "-progressive")
         // TODO disabled because Gradle's Kotlin handling is silly
         //  https://github.com/gradle/gradle/issues/16779

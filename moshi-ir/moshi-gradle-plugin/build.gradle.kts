@@ -29,7 +29,9 @@ plugins {
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
 
-tasks.withType<JavaCompile>().configureEach { options.release.set(8) }
+tasks.withType<JavaCompile>().configureEach {
+  options.release.set(libs.versions.jvmTarget.map(String::toInt))
+}
 
 // region Version.kt template for setting the project version in the build
 sourceSets { main { java.srcDir("$buildDir/generated/sources/version-templates/kotlin/main") } }
@@ -48,7 +50,7 @@ tasks.withType<KotlinCompile>().configureEach {
   dependsOn(copyVersionTemplatesProvider)
   compilerOptions {
     freeCompilerArgs.addAll("-opt-in=kotlin.ExperimentalStdlibApi")
-    jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get()))
+    jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
   }
 }
 
