@@ -33,7 +33,7 @@ dokka = { id = "org.jetbrains.dokka", version = "1.7.20" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.12.1" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.23.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.23.1" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.21.0" } # Always replaced by the local plugin
 spotless = { id = "com.diffplug.spotless", version = "6.12.0" }
