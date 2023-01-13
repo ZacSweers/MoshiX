@@ -41,7 +41,7 @@ spotless = { id = "com.diffplug.spotless", version = "6.12.1" }
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 
-anvilUtils = "com.squareup.anvil:compiler-utils:2.4.3"
+anvilUtils = "com.squareup.anvil:compiler-utils:2.4.4"
 
 autoCommon = { module = "com.google.auto:auto-common", version = "1.2.1" }
 
