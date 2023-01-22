@@ -31,8 +31,8 @@ import java.lang.reflect.Type
 import kotlinx.metadata.ClassName
 import kotlinx.metadata.Flag
 import kotlinx.metadata.KmClass
-import kotlinx.metadata.jvm.KotlinClassHeader
 import kotlinx.metadata.jvm.KotlinClassMetadata
+import kotlinx.metadata.jvm.Metadata
 
 /** Classes annotated with this are eligible for this adapter. */
 private val KOTLIN_METADATA = Metadata::class.java
@@ -153,10 +153,10 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
   }
 }
 
-private fun Class<*>.header(): KotlinClassHeader? {
+private fun Class<*>.header(): Metadata? {
   val metadata = getAnnotation(KOTLIN_METADATA) ?: return null
   return with(metadata) {
-    KotlinClassHeader(
+    Metadata(
       kind = kind,
       metadataVersion = metadataVersion,
       data1 = data1,
@@ -168,7 +168,7 @@ private fun Class<*>.header(): KotlinClassHeader? {
   }
 }
 
-private fun KotlinClassHeader.toKmClass(): KmClass? {
+private fun Metadata.toKmClass(): KmClass? {
   val classMetadata = KotlinClassMetadata.read(this)
   if (classMetadata !is KotlinClassMetadata.Class) {
     return null

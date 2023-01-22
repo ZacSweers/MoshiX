@@ -37,8 +37,8 @@ import kotlinx.metadata.KmType
 import kotlinx.metadata.KmTypeProjection
 import kotlinx.metadata.jvm.JvmFieldSignature
 import kotlinx.metadata.jvm.JvmMethodSignature
-import kotlinx.metadata.jvm.KotlinClassHeader
 import kotlinx.metadata.jvm.KotlinClassMetadata
+import kotlinx.metadata.jvm.Metadata
 import kotlinx.metadata.jvm.fieldSignature
 import kotlinx.metadata.jvm.getterSignature
 import kotlinx.metadata.jvm.setterSignature
@@ -376,10 +376,10 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
   }
 }
 
-private fun Class<*>.header(): KotlinClassHeader? {
+private fun Class<*>.header(): Metadata? {
   val metadata = getAnnotation(KOTLIN_METADATA) ?: return null
   return with(metadata) {
-    KotlinClassHeader(
+    Metadata(
       kind = kind,
       metadataVersion = metadataVersion,
       data1 = data1,
@@ -391,7 +391,7 @@ private fun Class<*>.header(): KotlinClassHeader? {
   }
 }
 
-private fun KotlinClassHeader.toKmClass(): KmClass? {
+private fun Metadata.toKmClass(): KmClass? {
   val classMetadata = KotlinClassMetadata.read(this)
   if (classMetadata !is KotlinClassMetadata.Class) {
     return null
