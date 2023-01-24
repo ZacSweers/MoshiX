@@ -16,7 +16,7 @@
 agp = "7.4.0"
 autoService = "1.0.1"
 gjf = "1.13.0"
-incap = "0.3"
+incap = "1.0.0"
 javaRelease = "8"
 jvmTarget = "11"
 kotlin = "1.8.0"
