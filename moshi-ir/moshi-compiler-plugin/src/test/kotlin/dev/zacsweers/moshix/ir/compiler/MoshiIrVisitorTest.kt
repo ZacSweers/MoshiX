@@ -1152,7 +1152,9 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       verbose = false
       jvmTarget = JvmTarget.fromString(System.getProperty("moshix.jvmTarget"))!!.description
       supportsK2 = true
-      this.useK2 = this@MoshiIrVisitorTest.useK2
+      if (this@MoshiIrVisitorTest.useK2) {
+        languageVersion = "2.0"
+      }
     }
   }
 
