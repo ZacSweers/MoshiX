@@ -3,7 +3,7 @@ Moshi-sealed
 
 Reflective and code gen implementations for serializing Kotlin sealed classes via Moshi polymorphic adapters.
 
-Simple annotated a sealed class with `@JsonClass` with a `generator` value of `sealed:{typeLabel}`.
+Simply annotate a sealed class with `@JsonClass` with a `generator` value of `sealed:{typeLabel}`.
  `{typeLabel}` is the value of the type label that should be used for a Moshi 
  `PolymorphicJsonAdapterFactory`. Annotate subtypes with `@TypeLabel` to indicate their type label 
  value. One `object` can be used as an unknown default value via `@DefaultObject`, or the sealed 
