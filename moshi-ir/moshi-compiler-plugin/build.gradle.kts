@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -65,13 +64,9 @@ dependencies {
   testImplementation(project(":moshi-sealed:runtime"))
 }
 
-val relocateShadowJar =
-  tasks.register<ConfigureShadowRelocation>("relocateShadowJar") { target = tasks.shadowJar.get() }
-
 val shadowJar =
   tasks.shadowJar.apply {
     configure {
-      dependsOn(relocateShadowJar)
       archiveClassifier.set("")
       configurations = listOf(shade)
       val shadedPrefix = "dev.zacsweers.moshix.ir.compiler.anvil"
