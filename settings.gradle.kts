@@ -83,5 +83,3 @@ includeBuild("moshi-ir/moshi-gradle-plugin") {
     substitute(module("dev.zacsweers.moshix:moshi-gradle-plugin")).using(project(":"))
   }
 }
-
-enableFeaturePreview("VERSION_CATALOGS")
