@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ '17' ]
+        java: [ '19' ]
         kotlin: [ '1.8.20-RC' ]
         ksp_enabled: [ true, false ]
       fail-fast: false
@@ -38,4 +38,4 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
         run: ./publish.sh --snapshot
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java == '17' && !matrix.ksp_enabled
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java == '19' && !matrix.ksp_enabled
