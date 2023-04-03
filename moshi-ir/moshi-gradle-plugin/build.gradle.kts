@@ -54,6 +54,10 @@ tasks.withType<KotlinCompile>().configureEach {
   }
 }
 
+tasks.jar.configure {
+  dependsOn(copyVersionTemplatesProvider)
+}
+
 gradlePlugin {
   plugins {
     create("moshiPlugin") {
