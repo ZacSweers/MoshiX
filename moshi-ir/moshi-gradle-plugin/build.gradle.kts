@@ -58,6 +58,10 @@ tasks.jar.configure {
   dependsOn(copyVersionTemplatesProvider)
 }
 
+tasks.named("sourcesJar") {
+  dependsOn(copyVersionTemplatesProvider)
+}
+
 gradlePlugin {
   plugins {
     create("moshiPlugin") {
