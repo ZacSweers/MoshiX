@@ -1,6 +1,16 @@
 Changelog
 =========
 
+Version 0.22.0
+--------------
+
+_2023-04-03_
+
+- Update to Kotlin `1.8.20`. Kotlin 1.8.20 or later is required for `moshi-ir`.
+- Update to KSP `1.8.20-1.0.10`.
+- Update kotlinx-metadata-jvm to `0.6.0`.
+- **Fix**: Don't use experimental-gated addAdapter with generated object adapters.
+
 Version 0.21.0
 --------------
 
