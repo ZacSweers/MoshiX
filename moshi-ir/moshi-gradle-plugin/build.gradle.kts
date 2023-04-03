@@ -54,9 +54,7 @@ tasks.withType<KotlinCompile>().configureEach {
   }
 }
 
-tasks.named("sourcesJar") {
-  dependsOn(copyVersionTemplatesProvider)
-}
+tasks.matching { it.name == "sourcesJar" }.configureEach { dependsOn(copyVersionTemplatesProvider) }
 
 gradlePlugin {
   plugins {
