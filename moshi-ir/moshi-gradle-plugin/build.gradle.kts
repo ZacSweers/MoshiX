@@ -54,10 +54,6 @@ tasks.withType<KotlinCompile>().configureEach {
   }
 }
 
-tasks.jar.configure {
-  dependsOn(copyVersionTemplatesProvider)
-}
-
 tasks.named("sourcesJar") {
   dependsOn(copyVersionTemplatesProvider)
 }
