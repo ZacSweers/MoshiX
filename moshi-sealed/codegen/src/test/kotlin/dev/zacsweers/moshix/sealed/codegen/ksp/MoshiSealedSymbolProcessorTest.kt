@@ -454,7 +454,6 @@ class MoshiSealedSymbolProcessorProviderTest {
       import com.squareup.moshi.JsonWriter
       import com.squareup.moshi.Moshi
       import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
-      import com.squareup.moshi.addAdapter
       import dev.zacsweers.moshix.`sealed`.runtime.`internal`.ObjectJsonAdapter
       import kotlin.ExperimentalStdlibApi
       import kotlin.OptIn
@@ -471,8 +470,8 @@ class MoshiSealedSymbolProcessorProviderTest {
 
         init {
           val moshi_ = moshi.newBuilder()
-                  .addAdapter<BaseType.TypeA>(ObjectJsonAdapter(BaseType.TypeA))
-              .addAdapter<BaseType.TypeB>(ObjectJsonAdapter(BaseType.TypeB))
+                  .add(BaseType.TypeA::class.java, ObjectJsonAdapter(BaseType.TypeA))
+              .add(BaseType.TypeB::class.java, ObjectJsonAdapter(BaseType.TypeB))
               .build()
           @Suppress("UNCHECKED_CAST")
           @OptIn(ExperimentalStdlibApi::class)

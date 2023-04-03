@@ -35,7 +35,6 @@ import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.ksp.addOriginatingKSFile
@@ -469,8 +468,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     if (subtype.classKind == OBJECT) {
       objectAdapters.add(
         CodeBlock.of(
-          ".%1M<%2T>(%3T(%2T))",
-          MemberName("com.squareup.moshi", "addAdapter"),
+          ".add(%1T::class.java,·%2T(%1T))",
           className,
           ObjectJsonAdapter::class.asClassName()
         )
