@@ -112,8 +112,7 @@ subprojects {
       }
     }
     configure<MavenPublishBaseExtension> {
-      // Can't do automatic release due to publishing both a plugin and regular artifacts
-      publishToMavenCentral()
+      publishToMavenCentral(automaticRelease = true)
     }
 
     // configuration required to produce unique META-INF/*.kotlin_module file names

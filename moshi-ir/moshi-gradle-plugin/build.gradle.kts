@@ -71,8 +71,7 @@ tasks.named<DokkaTask>("dokkaHtml") {
 }
 
 configure<MavenPublishBaseExtension> {
-  // Can't do automatic release due to publishing both a plugin and regular artifacts
-  publishToMavenCentral()
+  publishToMavenCentral(automaticRelease = true)
 }
 
 spotless {
