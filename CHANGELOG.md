@@ -1,6 +1,20 @@
 Changelog
 =========
 
+Version 0.22.1
+--------------
+
+_2023-04-16_
+
+**moshi-sealed**
+Keep signatures for typed annotated with `@NestedSealed`. This ensures that the annotation, itself isn't stripped from the use on the class.
+
+This is done via this keep rule in moshi-sealed-runtime's embedded proguard rules, which should still allow strinking/optimization of the class itself.
+
+```proguard
+-keepnames @dev.zacsweers.moshix.sealed.annotations.NestedSealed class **
+```
+
 Version 0.22.0
 --------------
 
