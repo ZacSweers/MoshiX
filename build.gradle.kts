@@ -111,9 +111,7 @@ subprojects {
         externalDocumentationLink { url.set(URL("https://square.github.io/moshi/1.x/moshi/")) }
       }
     }
-    configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(automaticRelease = true)
-    }
+    configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = true) }
 
     // configuration required to produce unique META-INF/*.kotlin_module file names
     tasks.withType<KotlinCompile>().configureEach {

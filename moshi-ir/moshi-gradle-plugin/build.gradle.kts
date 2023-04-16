@@ -70,9 +70,7 @@ tasks.named<DokkaTask>("dokkaHtml") {
   dokkaSourceSets.configureEach { skipDeprecated.set(true) }
 }
 
-configure<MavenPublishBaseExtension> {
-  publishToMavenCentral(automaticRelease = true)
-}
+configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = true) }
 
 spotless {
   format("misc") {
