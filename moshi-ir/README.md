@@ -28,7 +28,6 @@ extension.
 The Gradle plugin is published to Maven Central, so ensure you have `mavenCentral()` visible to your buildscript 
 classpath.
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-gradle-plugin.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-runtime)
 ```gradle
 plugins {
   kotlin("jvm")

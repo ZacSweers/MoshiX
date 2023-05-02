@@ -143,7 +143,6 @@ lives.
 
 `@TypeLabel` and default indicator annotations are available in the `moshi-sealed-runtime` artifact.
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-runtime.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-runtime)
 ```gradle
 implementation "dev.zacsweers.moshix:moshi-sealed-runtime:{version}"
 ```
@@ -152,7 +151,6 @@ implementation "dev.zacsweers.moshix:moshi-sealed-runtime:{version}"
 
 Code gen works via [KSP](https://github.com/google/ksp) and only requires adding the KSP configuration dependency:
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-codegen.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-codegen)
 ```kotlin
 dependencies {
   ksp("dev.zacsweers.moshix:moshi-sealed-codegen:<version>")
@@ -184,7 +182,6 @@ val moshi = Moshi.Builder()
 
 Gradle dependency:
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-reflect)
 ```gradle
 implementation "dev.zacsweers.moshix:moshi-sealed-reflect:{version}"
 ```
@@ -204,7 +201,6 @@ val moshi = Moshi.Builder()
 
 Gradle dependency:
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-metadata-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-metadata-reflect)
 ```gradle
 implementation "dev.zacsweers.moshix:moshi-sealed-metadata-reflect:{version}"
 ```
@@ -237,7 +233,6 @@ sealed interface MessageInterface
 
 Gradle dependency:
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-java-sealed-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-java-sealed-reflect)
 ```gradle
 implementation "dev.zacsweers.moshix:moshi-sealed-java-sealed-reflect:{version}"
 ```

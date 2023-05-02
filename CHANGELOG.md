@@ -366,7 +366,6 @@ extension.
 The Gradle plugin is published to Maven Central, so ensure you have `mavenCentral()` visible to your buildscript
 classpath.
 
-[![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-gradle-plugin.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-gradle-plugin)
 ```gradle
 plugins {
   kotlin("jvm")
@@ -610,7 +609,6 @@ specified._
 * **New:** `moshi-sealed-metadata-reflect` artifact with a `kotlinx-metadata`-based implementation, allowing
   reflective use without `kotlin-reflect`.
 
-  [![Maven Central](https://img.shields.io/maven-central/v/dev.zacsweers.moshix/moshi-sealed-metadata-reflect.svg)](https://mvnrepository.com/artifact/dev.zacsweers.moshix/moshi-sealed-metadata-reflect)
   ```gradle
   implementation "dev.zacsweers.moshix:moshi-sealed-metadata-reflect:{version}"
   ```
