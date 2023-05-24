@@ -635,6 +635,7 @@ class GeneratedAdaptersTest {
     var c: Int by delegate(-1)
 
     @JvmName("getBPublic") fun getB() = b
+
     @JvmName("setBPublic")
     fun setB(b: Int) {
       this.b = b
@@ -1195,6 +1196,7 @@ class GeneratedAdaptersTest {
     fun toJson(@Uppercase(inFrench = true) s: String): String {
       return s.uppercase(Locale.US)
     }
+
     @FromJson
     @Uppercase(inFrench = true)
     fun fromJson(s: String): String {

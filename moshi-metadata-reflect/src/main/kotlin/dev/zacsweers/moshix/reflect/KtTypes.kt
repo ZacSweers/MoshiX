@@ -98,8 +98,10 @@ internal data class KtParameter(
 ) {
   val name
     get() = km.name
+
   val declaresDefaultValue
     get() = Flag.ValueParameter.DECLARES_DEFAULT_VALUE(km.flags)
+
   val isNullable
     get() = km.type.isNullable
 }

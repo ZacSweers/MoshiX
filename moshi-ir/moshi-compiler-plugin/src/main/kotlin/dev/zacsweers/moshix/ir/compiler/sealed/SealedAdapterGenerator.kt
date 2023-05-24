@@ -641,6 +641,7 @@ private constructor(
 
 private sealed class Subtype(val className: IrClass) {
   class ObjectType(className: IrClass) : Subtype(className)
+
   class ClassType(className: IrClass, val labels: List<String>) : Subtype(className)
 }
 

@@ -43,6 +43,7 @@ import dev.zacsweers.moshix.sealed.codegen.ksp.Subtype.ObjectType
 
 internal sealed class Subtype(val className: TypeName) {
   class ObjectType(className: TypeName) : Subtype(className)
+
   class ClassType(className: TypeName, val labels: List<String>) : Subtype(className)
 }
 

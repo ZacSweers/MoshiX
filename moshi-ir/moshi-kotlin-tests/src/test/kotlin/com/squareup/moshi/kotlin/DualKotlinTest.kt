@@ -350,8 +350,11 @@ class DualKotlinTest {
 
   @JsonClass(generateAdapter = true)
   class TextAssetMetaData(val text: String) : AssetMetaData<TextAsset>()
+
   class TextAsset : Asset<TextAsset>()
+
   abstract class Asset<A : Asset<A>>
+
   abstract class AssetMetaData<A : Asset<A>>
 
   // Regression test for https://github.com/ZacSweers/MoshiX/issues/125

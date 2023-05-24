@@ -145,8 +145,11 @@ internal class IrSourcePrinterVisitor(
   private fun IrElement.print() {
     accept(this@IrSourcePrinterVisitor, null)
   }
+
   private fun print(obj: Any?) = printer.print(obj)
+
   private fun println(obj: Any?) = printer.println(obj)
+
   private fun println() = printer.println()
 
   fun printType(type: IrType) = type.renderSrc()
@@ -876,6 +879,7 @@ internal class IrSourcePrinterVisitor(
     print(".")
     print(owner.name)
   }
+
   override fun visitSetField(expression: IrSetField) {
     expression.receiver?.print()
     print(".")
@@ -949,6 +953,7 @@ internal class IrSourcePrinterVisitor(
   }
 
   private var printIntsAsBinary = false
+
   fun <T> withIntsAsBinaryLiterals(block: () -> T): T {
     val prev = printIntsAsBinary
     try {

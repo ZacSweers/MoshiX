@@ -190,6 +190,7 @@ class MessageTest {
 
       class Adapter : JsonAdapter<CustomDifferentType>() {
         private val delegate = ObjectJsonAdapter<CustomDifferentType>(SingletonInstance)
+
         override fun fromJson(reader: JsonReader): CustomDifferentType {
           return delegate.fromJson(reader)
         }

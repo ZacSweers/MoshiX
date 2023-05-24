@@ -30,10 +30,13 @@ internal data class TargetProperty(
 ) {
   val name: String
     get() = property.name.identifier
+
   val type: IrType
     get() = parameter?.type ?: property.type
+
   val parameterIndex: Int
     get() = parameter?.index ?: -1
+
   val hasDefault: Boolean
     get() = parameter?.hasDefault ?: true
 
