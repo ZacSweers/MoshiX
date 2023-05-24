@@ -484,6 +484,7 @@ class KotlinJsonAdapterTest {
 
   internal class ExtendsPlatformClassWithProtectedField(var a: Int) : ByteArrayOutputStream(2) {
     fun buf() = buf
+
     fun count() = count
   }
 
@@ -517,6 +518,7 @@ class KotlinJsonAdapterTest {
 
   class PrivateConstructorParameters(private var a: Int, private var b: Int) {
     fun a() = a
+
     fun b() = b
   }
 
@@ -535,7 +537,9 @@ class KotlinJsonAdapterTest {
 
   class PrivateConstructor private constructor(var a: Int, var b: Int) {
     fun a() = a
+
     fun b() = b
+
     companion object {
       fun newInstance(a: Int, b: Int) = PrivateConstructor(a, b)
     }
@@ -1073,6 +1077,7 @@ class KotlinJsonAdapterTest {
     fun toJson(@Uppercase s: String): String {
       return s.uppercase(Locale.US)
     }
+
     @FromJson
     @Uppercase
     fun fromJson(s: String): String {

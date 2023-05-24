@@ -32,7 +32,9 @@ import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 @JsonClass(generateAdapter = true, generator = "sealed:type")
 sealed class Type(val type: String) {
   @TypeLabel("void") object VoidType : Type("void")
+
   @TypeLabel("boolean") object BooleanType : Type("boolean")
+
   @TypeLabel("int") object IntType : Type("int")
 
   override fun toString() = type
