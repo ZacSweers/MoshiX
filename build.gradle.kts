@@ -21,6 +21,13 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+buildscript {
+  dependencies {
+    // Force latest metadata for Kotlin binary compatibility check
+    classpath(libs.kotlin.metadata)
+  }
+}
+
 plugins {
   alias(libs.plugins.kotlinJvm) apply false
   alias(libs.plugins.ksp) apply false
