@@ -741,7 +741,7 @@ class KotlinJsonAdapterTest {
       assertThat(e)
         .hasMessageThat()
         .contains(
-          "Cannot serialize local class or object expression " +
+          "Cannot serialize local class " +
             "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$localClassesNotSupported\$LocalClass"
         )
     }
@@ -779,17 +779,10 @@ class KotlinJsonAdapterTest {
       fail()
     } catch (e: IllegalArgumentException) {
       // anonymous/local classes are slightly different in bytecode across JVM versions
-      val javaVersion = System.getProperty("java.version")
-      val type =
-        if (javaVersion.startsWith("1.8")) {
-          "local class or object expression"
-        } else {
-          "anonymous class"
-        }
       assertThat(e)
         .hasMessageThat()
         .contains(
-          "Cannot serialize $type " +
+          "Cannot serialize anonymous class " +
             "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$anonymousClassesNotSupported" +
             "\$expression$1"
         )
