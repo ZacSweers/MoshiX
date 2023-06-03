@@ -122,6 +122,7 @@ class KotlinJsonAdapterTest {
     assertThat(decoded.b).isEqualTo(5)
   }
 
+  @Suppress("CanBePrimaryConstructorProperty")
   class ImmutableProperties(a: Int, b: Int) {
     val a = a
     val b = b
@@ -1310,6 +1311,7 @@ class KotlinJsonAdapterTest {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val adapter = moshi.adapter(type)
 
+    @Suppress("DEPRECATION")
     Assertions.assertThat(adapter.fromJson(json)).isEqualToComparingFieldByFieldRecursively(value)
     assertThat(adapter.toJson(value)).isEqualTo(json)
   }
