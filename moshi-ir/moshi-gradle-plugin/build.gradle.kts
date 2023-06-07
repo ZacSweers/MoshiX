@@ -17,6 +17,7 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -51,6 +52,10 @@ tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
     freeCompilerArgs.addAll("-opt-in=kotlin.ExperimentalStdlibApi")
     jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
+
+    // Enforce lower target Kotlin version for Gradle compat
+    languageVersion.set(KotlinVersion.KOTLIN_1_8)
+    apiVersion.set(KotlinVersion.KOTLIN_1_8)
   }
 }
 
