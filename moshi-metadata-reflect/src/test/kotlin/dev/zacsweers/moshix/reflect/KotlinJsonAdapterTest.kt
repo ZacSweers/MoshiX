@@ -122,6 +122,7 @@ class KotlinJsonAdapterTest {
     assertThat(decoded.b).isEqualTo(5)
   }
 
+  @Suppress("CanBePrimaryConstructorProperty")
   class ImmutableProperties(a: Int, b: Int) {
     val a = a
     val b = b
@@ -741,7 +742,7 @@ class KotlinJsonAdapterTest {
       assertThat(e)
         .hasMessageThat()
         .contains(
-          "Cannot serialize local class or object expression " +
+          "Cannot serialize local class " +
             "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$localClassesNotSupported\$LocalClass"
         )
     }
@@ -779,17 +780,10 @@ class KotlinJsonAdapterTest {
       fail()
     } catch (e: IllegalArgumentException) {
       // anonymous/local classes are slightly different in bytecode across JVM versions
-      val javaVersion = System.getProperty("java.version")
-      val type =
-        if (javaVersion.startsWith("1.8")) {
-          "local class or object expression"
-        } else {
-          "anonymous class"
-        }
       assertThat(e)
         .hasMessageThat()
         .contains(
-          "Cannot serialize $type " +
+          "Cannot serialize anonymous class " +
             "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$anonymousClassesNotSupported" +
             "\$expression$1"
         )
@@ -1317,6 +1311,7 @@ class KotlinJsonAdapterTest {
     val moshi = Moshi.Builder().add(MetadataKotlinJsonAdapterFactory()).build()
     val adapter = moshi.adapter(type)
 
+    @Suppress("DEPRECATION")
     Assertions.assertThat(adapter.fromJson(json)).isEqualToComparingFieldByFieldRecursively(value)
     assertThat(adapter.toJson(value)).isEqualTo(json)
   }
