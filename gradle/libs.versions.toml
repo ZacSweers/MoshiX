@@ -49,7 +49,7 @@ autoService = { module = "com.google.auto.service:auto-service-annotations", ver
 autoService-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version = "1.0.0" }
 autoService-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
 
-guava = { module = "com.google.guava:guava", version = "32.0.0-jre" }
+guava = { module = "com.google.guava:guava", version = "32.0.1-jre" }
 
 incap = { module = "net.ltgt.gradle.incap:incap", version.ref = "incap" }
 incap-processor = { module = "net.ltgt.gradle.incap:incap-processor", version.ref = "incap" }
