@@ -84,6 +84,6 @@ retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.re
 
 # Test libs
 junit = { module = "junit:junit", version = "4.13.2" }
-truth = { module = "com.google.truth:truth", version = "1.1.4" }
+truth = { module = "com.google.truth:truth", version = "1.1.5" }
 kotlinCompileTesting = { module = "dev.zacsweers.kctfork:core", version.ref = "kotlinCompileTesting" }
 kotlinCompileTesting-ksp = { module = "dev.zacsweers.kctfork:ksp", version.ref ="kotlinCompileTesting" }
