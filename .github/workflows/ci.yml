@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ '19' ]
-        kotlin: [ '1.9.0-Beta' ]
+        java: [ '20' ]
+        kotlin: [ '1.9.0-RC' ]
         ksp_enabled: [ true, false ]
         k2_enabled: [ true, false ]
       fail-fast: false
@@ -49,11 +49,11 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '19'
+          java-version: '20'
 
       - name: Publish
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
         run: ./publish.sh --snapshot
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java == '19' && !matrix.ksp_enabled
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java == '20' && !matrix.ksp_enabled
