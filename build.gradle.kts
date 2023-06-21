@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import java.net.URI
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.net.URI
 
 buildscript {
   dependencies {
@@ -90,7 +90,9 @@ subprojects {
       provider<String> { findProperty("moshix.javaReleaseVersion") as? String? }
         .orElse(libs.versions.jvmTarget)
         .map(String::toInt)
-    configure<JavaPluginExtension> { toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) } }
+    configure<JavaPluginExtension> {
+      toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) }
+    }
     project.tasks.withType<JavaCompile>().configureEach { options.release.set(jvmTargetProvider) }
   }
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
@@ -115,8 +117,12 @@ subprojects {
       outputDirectory.set(rootProject.rootDir.resolve("docs/0.x"))
       dokkaSourceSets.configureEach {
         skipDeprecated.set(true)
-        externalDocumentationLink { url.set(URI("https://square.github.io/okio/2.x/okio/").toURL()) }
-        externalDocumentationLink { url.set(URI("https://square.github.io/moshi/1.x/moshi/").toURL()) }
+        externalDocumentationLink {
+          url.set(URI("https://square.github.io/okio/2.x/okio/").toURL())
+        }
+        externalDocumentationLink {
+          url.set(URI("https://square.github.io/moshi/1.x/moshi/").toURL())
+        }
       }
     }
     configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = true) }
