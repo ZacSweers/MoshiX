@@ -214,9 +214,9 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
       // Fall back to a reflective adapter when the generated adapter is not found.
     }
 
-    require(!rawType.isLocalClass) {
-      "Cannot serialize local class or object expression ${rawType.name}"
-    }
+    require(!rawType.isLocalClass) { "Cannot serialize local class ${rawType.name}" }
+
+    require(!rawType.isAnonymousClass) { "Cannot serialize anonymous class ${rawType.name}" }
 
     val kmClass = rawType.header()?.toKmClass() ?: return null
 

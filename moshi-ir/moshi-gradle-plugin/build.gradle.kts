@@ -28,7 +28,7 @@ plugins {
   alias(libs.plugins.spotless)
 }
 
-java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
+java { toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) } }
 
 tasks.withType<JavaCompile>().configureEach {
   options.release.set(libs.versions.jvmTarget.map(String::toInt))

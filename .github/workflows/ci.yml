@@ -4,13 +4,14 @@ on: [ push, pull_request ]
 
 jobs:
   build:
-    name: 'JDK ${{ matrix.java }} - KSP ${{ matrix.ksp_enabled }} - Kotlin ${{ matrix.kotlin }}'
+    name: 'JDK ${{ matrix.java }} - KSP ${{ matrix.ksp_enabled }} - Kotlin ${{ matrix.kotlin }} - K2 ${{ matrix.k2_enabled }}'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ '19' ]
-        kotlin: [ '1.8.21' ]
+        java: [ '20' ]
+        kotlin: [ '1.9.0' ]
         ksp_enabled: [ true, false ]
+        k2_enabled: [ true, false ]
       fail-fast: false
 
     env:
@@ -31,11 +32,28 @@ jobs:
           java-version: ${{ matrix.java }}
 
       - name: Build project
-        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} --stacktrace
+        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} -Pkotlin.experimental.tryK2=${{ matrix.k2_enabled }} --stacktrace
 
-      - name: Upload snapshot (main only)
+  publish-snapshot:
+    needs: 'build'
+    name: 'Publish snapshot (main only)'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Install JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '20'
+
+      - name: Publish
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
         run: ./publish.sh --snapshot
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java == '19' && !matrix.ksp_enabled
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java == '20' && !matrix.ksp_enabled

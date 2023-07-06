@@ -72,7 +72,8 @@ internal class ProguardRuleGenerationExtension(
       project.extensionArea.registerExtensionPoint(
         PsiTreeChangeListener.EP.name,
         PsiTreeChangeAdapter::class.java.canonicalName,
-        ExtensionPoint.Kind.INTERFACE
+        ExtensionPoint.Kind.INTERFACE,
+        false
       )
       generator = ProguardRuleGenerator(resourcesDir)
       initialized = true
@@ -91,7 +92,7 @@ internal class ProguardRuleGenerationExtension(
       val isMoshiSealed = (enableSealed && generatorKey.startsWith("sealed:"))
       if (generatorKey.isEmpty() || isMoshiSealed) {
         val targetType = psiClass.asClassName()
-        val hasGenerics = !psiClass.typeParameters.isNullOrEmpty()
+        val hasGenerics = psiClass.typeParameters.isNotEmpty()
         val adapterName = "${targetType.simpleNames.joinToString(separator = "_")}JsonAdapter"
         val adapterConstructorParams =
           when (hasGenerics) {
