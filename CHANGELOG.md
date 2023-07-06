@@ -1,6 +1,17 @@
 Changelog
 =========
 
+Version 0.23.0
+--------------
+
+_2023-07-06_
+
+- Update to Kotlin `1.9.0`. The moshi-ir plugin now requires `1.9.0`.
+- Update `kotlinx-metadata` to `0.6.2`.
+- Update shaded Anvil utils to `2.4.6`.
+- Update Moshi to `1.15.0`.
+- Update KSP to `1.9.0-1.0.11`.
+
 Version 0.22.1
 --------------
 
