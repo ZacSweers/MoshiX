@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         java: [ '20' ]
-        kotlin: [ '1.9.0-RC' ]
+        kotlin: [ '1.9.0' ]
         ksp_enabled: [ true, false ]
         k2_enabled: [ true, false ]
       fail-fast: false
