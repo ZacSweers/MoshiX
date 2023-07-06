@@ -38,8 +38,6 @@ plugins {
 }
 
 apiValidation {
-  // https://github.com/Kotlin/binary-compatibility-validator/issues/139
-  validationDisabled = findProperty("kotlin.experimental.tryK2") == "true"
   ignoredProjects +=
     listOf(
       /* :moshi-ir: */
