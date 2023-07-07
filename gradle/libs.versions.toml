@@ -35,7 +35,7 @@ kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.25.3" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
-moshix = { id = "dev.zacsweers.moshix", version = "0.22.1" } # Always replaced by the local plugin
+moshix = { id = "dev.zacsweers.moshix", version = "0.23.0" } # Always replaced by the local plugin
 spotless = { id = "com.diffplug.spotless", version = "6.19.0" }
 
 [libraries]
