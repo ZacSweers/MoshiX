@@ -10,11 +10,6 @@ Extensions for [Moshi](https://github.com/square/moshi)
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository][snap].
 
-### Local development
-
-This project requires JDK 20 as a minimum due to tooling compatibility requirements to build against newer JDK
-APIs.
-
 License
 --------
 
