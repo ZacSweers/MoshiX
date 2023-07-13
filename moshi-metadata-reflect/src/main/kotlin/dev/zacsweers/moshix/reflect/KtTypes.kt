@@ -20,7 +20,6 @@ import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Type
-import kotlinx.metadata.Flag
 import kotlinx.metadata.KmClass
 import kotlinx.metadata.KmClassifier
 import kotlinx.metadata.KmClassifier.TypeAlias
@@ -29,11 +28,11 @@ import kotlinx.metadata.KmConstructor
 import kotlinx.metadata.KmProperty
 import kotlinx.metadata.KmType
 import kotlinx.metadata.KmValueParameter
-import kotlinx.metadata.isLocal
+import kotlinx.metadata.declaresDefaultValue
+import kotlinx.metadata.isLocalClassName
+import kotlinx.metadata.isNullable
+import kotlinx.metadata.isSecondary
 import kotlinx.metadata.jvm.signature
-
-internal val KmType.isNullable: Boolean
-  get() = Flag.Type.IS_NULLABLE(flags)
 
 private fun defaultPrimitiveValue(type: Type): Any? =
   if (type is Class<*> && type.isPrimitive) {
@@ -84,7 +83,7 @@ internal val KmType.canonicalName: String
  * Local classes are prefixed with ".", but for Moshi's use case we don't deal with those.
  */
 private fun createClassName(kotlinMetadataName: String): String {
-  require(!kotlinMetadataName.isLocal) {
+  require(!kotlinMetadataName.isLocalClassName()) {
     "Local/anonymous classes are not supported: $kotlinMetadataName"
   }
   return kotlinMetadataName.replace("/", ".")
@@ -100,7 +99,7 @@ internal data class KtParameter(
     get() = km.name
 
   val declaresDefaultValue
-    get() = Flag.ValueParameter.DECLARES_DEFAULT_VALUE(km.flags)
+    get() = km.declaresDefaultValue
 
   val isNullable
     get() = km.type.isNullable
@@ -123,7 +122,6 @@ internal data class KtConstructor(
     val masks = ArrayList<Int>(1)
     var index = 0
 
-    @Suppress("UseWithIndex")
     for (parameter in parameters) {
       if (index != 0 && index % Integer.SIZE == 0) {
         masks += mask
@@ -166,9 +164,8 @@ internal data class KtConstructor(
 
   companion object {
     fun primary(rawType: Class<*>, kmClass: KmClass): KtConstructor? {
-      val kmConstructor =
-        kmClass.constructors.find { !Flag.Constructor.IS_SECONDARY(it.flags) } ?: return null
-      val kmConstructorSignature = kmConstructor.signature?.asString() ?: return null
+      val kmConstructor = kmClass.constructors.find { !it.isSecondary } ?: return null
+      val kmConstructorSignature = kmConstructor.signature?.toString() ?: return null
       val constructorsBySignature =
         rawType.declaredConstructors.associateBy { it.jvmMethodSignature }
       val jvmConstructor = constructorsBySignature[kmConstructorSignature] ?: return null

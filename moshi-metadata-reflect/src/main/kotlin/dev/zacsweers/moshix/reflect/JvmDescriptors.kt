@@ -31,6 +31,7 @@ private val PRIMITIVE_CLASS_TO_DESC =
     Void::class.javaPrimitiveType to 'V'
   )
 
+@Suppress("RecursivePropertyAccessor")
 internal val Class<*>.descriptor: String
   get() {
     return when {
@@ -125,15 +126,15 @@ private fun readType(counter: Counter, desc: String): Class<*> {
 internal fun JvmMethodSignature.decodeParameterTypes(): List<Class<*>> {
   val classList = mutableListOf<Class<*>>()
   val counter = Counter(0)
-  while (counter.index < desc.length) {
-    when (desc[counter.index]) {
+  while (counter.index < descriptor.length) {
+    when (descriptor[counter.index]) {
       '(' -> {
         counter.index++
         continue
       }
       ')' -> break
     }
-    classList += readType(counter, desc)
+    classList += readType(counter, descriptor)
   }
   return classList
 }
