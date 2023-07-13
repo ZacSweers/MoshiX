@@ -29,12 +29,17 @@ import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.lang.reflect.Type
-import kotlinx.metadata.Flag
+import kotlinx.metadata.ClassKind
 import kotlinx.metadata.KmClass
 import kotlinx.metadata.KmFlexibleTypeUpperBound
 import kotlinx.metadata.KmProperty
 import kotlinx.metadata.KmType
 import kotlinx.metadata.KmTypeProjection
+import kotlinx.metadata.Modality
+import kotlinx.metadata.Visibility
+import kotlinx.metadata.isInner
+import kotlinx.metadata.isNullable
+import kotlinx.metadata.isVar
 import kotlinx.metadata.jvm.JvmFieldSignature
 import kotlinx.metadata.jvm.JvmMethodSignature
 import kotlinx.metadata.jvm.KotlinClassMetadata
@@ -43,6 +48,9 @@ import kotlinx.metadata.jvm.fieldSignature
 import kotlinx.metadata.jvm.getterSignature
 import kotlinx.metadata.jvm.setterSignature
 import kotlinx.metadata.jvm.syntheticMethodForAnnotations
+import kotlinx.metadata.kind
+import kotlinx.metadata.modality
+import kotlinx.metadata.visibility
 
 /** Classes annotated with this are eligible for this adapter. */
 private val KOTLIN_METADATA = Metadata::class.java
@@ -220,15 +228,17 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
 
     val kmClass = rawType.header()?.toKmClass() ?: return null
 
-    require(!Flag.IS_ABSTRACT(kmClass.flags)) { "Cannot serialize abstract class ${rawType.name}" }
-    require(!Flag.Class.IS_INNER(kmClass.flags)) { "Cannot serialize inner class ${rawType.name}" }
-    require(!Flag.Class.IS_OBJECT(kmClass.flags)) {
+    require(kmClass.modality != Modality.ABSTRACT) {
+      "Cannot serialize abstract class ${rawType.name}"
+    }
+    require(!kmClass.isInner) { "Cannot serialize inner class ${rawType.name}" }
+    require(kmClass.kind != ClassKind.OBJECT) {
       "Cannot serialize object declaration ${rawType.name}"
     }
-    require(!Flag.Class.IS_COMPANION_OBJECT(kmClass.flags)) {
+    require(kmClass.kind != ClassKind.COMPANION_OBJECT) {
       "Cannot serialize companion object declaration ${rawType.name}"
     }
-    require(!Flag.IS_SEALED(kmClass.flags)) {
+    require(kmClass.modality != Modality.SEALED) {
       "Cannot reflectively serialize sealed class ${rawType.name}. Please register an adapter."
     }
 
@@ -240,8 +250,10 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
         generateSequence(rawType) { it.superclass }
           .mapNotNull { it.header()?.toKmClass() }
           .flatMap { it.properties.asSequence() }
-          .filterNot { Flag.IS_PRIVATE(it.flags) || Flag.IS_PRIVATE_TO_THIS(it.flags) }
-          .filter { Flag.Property.IS_VAR(it.flags) }
+          .filterNot {
+            it.visibility == Visibility.PRIVATE || it.visibility == Visibility.PRIVATE_TO_THIS
+          }
+          .filter { it.isVar }
 
     val signatureSearcher = JvmSignatureSearcher(rawType)
     val bindingsByName = LinkedHashMap<String, KotlinJsonAdapter.Binding<Any, Any?>>()
@@ -257,7 +269,7 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
         }
       }
 
-      if (!Flag.Property.IS_VAR(property.flags) && ktParameter == null) continue
+      if (!property.isVar && ktParameter == null) continue
 
       val getterMethod = signatureSearcher.getter(property)
       val setterMethod = signatureSearcher.setter(property)
@@ -326,6 +338,7 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
       this != null && other != null -> {
         // Note we don't check abbreviatedType because typealiases and their backing types are equal
         // for our purposes.
+        @Suppress("DEPRECATION")
         arguments valueEquals other.arguments &&
           classifier == other.classifier &&
           flags == other.flags &&
@@ -397,7 +410,7 @@ private fun Metadata.toKmClass(): KmClass? {
     return null
   }
 
-  return classMetadata.toKmClass()
+  return classMetadata.kmClass
 }
 
 private class JvmSignatureSearcher(private val clazz: Class<*>) {
