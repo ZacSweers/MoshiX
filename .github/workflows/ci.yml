@@ -56,4 +56,4 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
         run: ./publish.sh --snapshot
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.java == '20' && !matrix.ksp_enabled
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
