@@ -32,6 +32,10 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       target.extensions.configure(KspExtension::class.java) {
         // Enable core moshi proguard rule gen
         it.arg("moshi.generateCoreMoshiProguardRules", "true")
+        // Disable moshi's KSP codegen, we're doing it ourselves
+        it.excludeProcessor(
+          "com.squareup.moshi.kotlin.codegen.ksp.JsonClassSymbolProcessorProvider"
+        )
       }
     }
   }
