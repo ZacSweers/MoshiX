@@ -17,21 +17,24 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
   override fun apply(target: Project) {
-    target.extensions.create("moshi", MoshiPluginExtension::class.java)
-    if (target.findProperty("moshix.generateProguardRules")?.toString()?.toBoolean() != false) {
-      try {
-        target.pluginManager.apply("com.google.devtools.ksp")
-      } catch (e: Exception) {
-        // KSP not on the classpath, ask them to add it
-        error(
-          "MoshiX proguard rule generation requires KSP to be applied to the project. " +
-            "Please apply the KSP Gradle plugin ('com.google.devtools.ksp') to your buildscript and try again."
-        )
-      }
-      target.dependencies.add("ksp", "dev.zacsweers.moshix:moshi-proguard-rule-gen:$VERSION")
-      target.extensions.configure(KspExtension::class.java) {
-        // Enable core moshi proguard rule gen
-        it.arg("moshi.generateCoreMoshiProguardRules", "true")
+    val extension = target.extensions.create("moshi", MoshiPluginExtension::class.java)
+
+    target.afterEvaluate {
+      if (extension.generateProguardRules.getOrElse(true)) {
+        try {
+          target.pluginManager.apply("com.google.devtools.ksp")
+        } catch (e: Exception) {
+          // KSP not on the classpath, ask them to add it
+          error(
+            "MoshiX proguard rule generation requires KSP to be applied to the project. " +
+              "Please apply the KSP Gradle plugin ('com.google.devtools.ksp') to your buildscript and try again."
+          )
+        }
+        target.dependencies.add("ksp", "dev.zacsweers.moshix:moshi-proguard-rule-gen:$VERSION")
+        target.extensions.configure(KspExtension::class.java) {
+          // Enable core moshi proguard rule gen
+          it.arg("moshi.generateCoreMoshiProguardRules", "true")
+        }
       }
     }
   }
@@ -52,7 +55,6 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
   ): Provider<List<SubpluginOption>> {
     val project = kotlinCompilation.target.project
     val extension = project.extensions.getByType(MoshiPluginExtension::class.java)
-
     val generatedAnnotation = extension.generatedAnnotation.orNull
 
     // Minimum Moshi version

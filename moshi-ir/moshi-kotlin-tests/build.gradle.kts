@@ -21,7 +21,10 @@ plugins {
   alias(libs.plugins.moshix)
 }
 
-moshi { enableSealed.set(true) }
+moshi {
+  enableSealed.set(true)
+  generateProguardRules.set(false)
+}
 
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions { freeCompilerArgs.addAll("-opt-in=kotlin.ExperimentalStdlibApi") }
