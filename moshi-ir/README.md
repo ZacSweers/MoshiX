@@ -28,15 +28,27 @@ extension.
 The Gradle plugin is published to Maven Central, so ensure you have `mavenCentral()` visible to your buildscript 
 classpath.
 
+MoshiX generates proguard rules for generated adapters as well, so the KSP plugin must also be on your project's buildscript classpath
+
 ```gradle
 plugins {
   kotlin("jvm")
   id("dev.zacsweers.moshix") version "x.y.z"
+  id("com.google.devtools.ksp") version "x.y.z"
 }
 
 moshi {
   // Opt-in to enable moshi-sealed, disabled by default.
   enableSealed.set(true)
+}
+```
+
+If you don't want/need proguard rule gen, you can remove KSP and disable it in the `moshi` extension.
+
+```kotlin
+moshi {
+  // Opt-out of proguard rule gen
+  generateProguardRules.set(false)
 }
 ```
 

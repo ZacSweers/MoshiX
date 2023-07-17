@@ -4,7 +4,6 @@ package dev.zacsweers.moshix.ir.gradle
 
 import com.google.devtools.ksp.gradle.KspExtension
 import dev.zacsweers.moshi.ir.gradle.VERSION
-import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
@@ -17,16 +16,6 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
 class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
-  companion object {
-    @JvmStatic
-    fun getMoshiXOutputDir(project: Project, sourceSetName: String) =
-      File(project.project.buildDir, "generated/moshix/$sourceSetName")
-
-    @JvmStatic
-    fun getMoshiXResourceOutputDir(project: Project, sourceSetName: String) =
-      File(getMoshiXOutputDir(project, sourceSetName), "resources")
-  }
-
   override fun apply(target: Project) {
     val extension = target.extensions.create("moshi", MoshiPluginExtension::class.java)
 
@@ -34,19 +23,17 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       if (extension.generateProguardRules.getOrElse(true)) {
         try {
           target.pluginManager.apply("com.google.devtools.ksp")
-          target.dependencies.apply {
-            add("ksp", "dev.zacsweers.moshix:moshi-proguard-rule-gen:$VERSION")
-          }
-          target.extensions.configure(KspExtension::class.java) {
-            // Enable core moshi proguard rule gen
-            it.arg("moshi.generateCoreMoshiProguardRules", "true")
-          }
         } catch (e: Exception) {
           // KSP not on the classpath, ask them to add it
           error(
             "MoshiX proguard rule generation requires KSP to be applied to the project. " +
               "Please apply the KSP Gradle plugin ('com.google.devtools.ksp') to your buildscript and try again."
           )
+        }
+        target.dependencies.add("ksp", "dev.zacsweers.moshix:moshi-proguard-rule-gen:$VERSION")
+        target.extensions.configure(KspExtension::class.java) {
+          // Enable core moshi proguard rule gen
+          it.arg("moshi.generateCoreMoshiProguardRules", "true")
         }
       }
     }
