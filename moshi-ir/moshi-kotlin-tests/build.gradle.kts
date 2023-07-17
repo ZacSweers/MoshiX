@@ -23,9 +23,7 @@ plugins {
 
 moshi {
   enableSealed.set(true)
-  if (findProperty("kotlin.experimental.tryK2") == "true") {
-    generateProguardRules.set(false)
-  }
+  generateProguardRules.set(false)
 }
 
 tasks.withType<KotlinCompile>().configureEach {

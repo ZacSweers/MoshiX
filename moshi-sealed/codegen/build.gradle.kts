@@ -48,6 +48,7 @@ tasks.withType<KotlinCompile>().configureEach {
 
 dependencies {
   implementation(libs.autoService)
+  implementation(project(":moshi-proguard-rule-gen"))
   ksp(libs.autoService.ksp)
   // For access to MessageCollectorBasedKSPLogger
   compileOnly(libs.ksp)

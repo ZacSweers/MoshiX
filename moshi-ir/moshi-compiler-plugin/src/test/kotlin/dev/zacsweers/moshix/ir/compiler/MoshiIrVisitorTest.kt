@@ -27,7 +27,6 @@ import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -398,7 +397,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
     val result =
       prepareCompilation(
           "javax.annotation.GeneratedBlerg",
-          true,
           kotlin(
             "source.kt",
             """
@@ -581,7 +579,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
     val compilation =
       prepareCompilation(
         generatedAnnotation = null,
-        generateProguardRules = true,
         kotlin(
           "source.kt",
           """
@@ -834,7 +831,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
     val compilation =
       prepareCompilation(
         null,
-        generateProguardRules = false,
         kotlin(
           "source.kt",
           """
@@ -850,93 +846,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
     assertThat(result.exitCode).isEqualTo(OK)
 
     assertThat(resourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()).isEmpty()
-  }
-
-  @Test
-  fun `Enabling proguard rule gen with K2 should error`() {
-    assumeTrue(useK2)
-    val compilation =
-      prepareCompilation(
-        null,
-        generateProguardRules = true,
-        kotlin(
-          "source.kt",
-          """
-          package testPackage
-          import com.squareup.moshi.JsonClass
-
-          @JsonClass(generateAdapter = true)
-          data class Example(val firstName: String)
-          """
-        )
-      )
-    val result = compilation.compile()
-    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
-
-    assertThat(result.messages)
-      .contains(
-        "moshi-ir's proguard rule generation currently doesn't support the experimental K2 compiler"
-      )
-  }
-
-  @Test
-  fun sealedProguardGenSmokeTest() {
-    assumeFalse(useK2)
-    val source =
-      kotlin(
-        "BaseType.kt",
-        """
-      package test
-      import com.squareup.moshi.JsonClass
-      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
-      import dev.zacsweers.moshix.sealed.annotations.NestedSealed
-
-      @JsonClass(generateAdapter = true, generator = "sealed:type")
-      sealed class BaseType {
-        @TypeLabel("a", ["aa"])
-        class TypeA : BaseType()
-        @TypeLabel("b")
-        class TypeB : BaseType()
-        @NestedSealed
-        sealed class TypeC : BaseType() {
-          @TypeLabel("c")
-          class TypeCImpl : TypeC()
-        }
-      }
-    """
-      )
-
-    val compilation = prepareCompilation(null, generateProguardRules = true, source)
-    val result = compilation.compile()
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
-
-    val generatedSourcesDir = resourcesDir.resolve("META-INF/proguard")
-    val proguardFiles = generatedSourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()
-    check(proguardFiles.isNotEmpty())
-    proguardFiles.forEach { generatedFile ->
-      when (generatedFile.nameWithoutExtension) {
-        "moshi-test.BaseType" ->
-          assertThat(generatedFile.readText())
-            .contains(
-              """
-                -if class test.BaseType
-                -keepnames class test.BaseType
-                -if class test.BaseType
-                -keep class test.BaseTypeJsonAdapter {
-                    public <init>(com.squareup.moshi.Moshi);
-                }
-
-                # Conditionally keep this adapter for every possible nested subtype that uses it.
-                -if class test.BaseType.TypeC
-                -keep class test.BaseTypeJsonAdapter {
-                    public <init>(com.squareup.moshi.Moshi);
-                }
-              """
-                .trimIndent()
-            )
-        else -> error("Unrecognized proguard file: $generatedFile")
-      }
-    }
   }
 
   @Test
@@ -1119,7 +1028,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
   private fun prepareCompilation(
     generatedAnnotation: String? = null,
-    generateProguardRules: Boolean = false,
     vararg sourceFiles: SourceFile
   ): KotlinCompilation {
     return KotlinCompilation().apply {
@@ -1129,16 +1037,8 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       commandLineProcessors = listOf(processor)
       pluginOptions = buildList {
         add(processor.option(MoshiCommandLineProcessor.OPTION_ENABLED, "true"))
-        add(
-          processor.option(MoshiCommandLineProcessor.OPTION_DEBUG, "false")
-        ) // Enable when needed for extra debugging
-        add(
-          processor.option(
-            MoshiCommandLineProcessor.OPTION_GENERATE_PROGUARD_RULES,
-            generateProguardRules.toString()
-          )
-        )
-        add(processor.option(MoshiCommandLineProcessor.OPTION_RESOURCES_OUTPUT_DIR, resourcesDir))
+        // Enable when needed for extra debugging
+        add(processor.option(MoshiCommandLineProcessor.OPTION_DEBUG, "false"))
         add(processor.option(MoshiCommandLineProcessor.OPTION_ENABLE_SEALED, "true"))
         if (generatedAnnotation != null) {
           processor.option(
@@ -1165,6 +1065,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
   }
 
   private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {
-    return prepareCompilation(null, false, *sourceFiles).compile()
+    return prepareCompilation(null, *sourceFiles).compile()
   }
 }

@@ -20,10 +20,8 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
-import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
-import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import java.io.File
 import org.junit.Test
 
@@ -100,64 +98,6 @@ class MoshiSealedSymbolProcessorProviderTest {
       """
           .trimIndent()
       )
-
-    val proguardFiles = generatedSourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()
-    check(proguardFiles.isNotEmpty())
-    proguardFiles.forEach { generatedFile ->
-      when (generatedFile.nameWithoutExtension) {
-        "moshi-sealed-test.BaseType" ->
-          assertThat(generatedFile.readText())
-            .contains(
-              """
-                -if class test.BaseType
-                -keepnames class test.BaseType
-                # Conditionally keep this adapter for every possible nested subtype that uses it.
-                -if class test.BaseType
-                -keep class test.BaseTypeJsonAdapter {
-                    public <init>(com.squareup.moshi.Moshi);
-                }
-                -if class test.BaseType${'$'}TypeC
-                -keep class test.BaseTypeJsonAdapter {
-                    public <init>(com.squareup.moshi.Moshi);
-                }
-              """
-                .trimIndent()
-            )
-        else -> error("Unrecognized proguard file: $generatedFile")
-      }
-    }
-  }
-
-  @Test
-  fun disableProguardGeneration() {
-    val source =
-      kotlin(
-        "BaseType.kt",
-        """
-      package test
-      import com.squareup.moshi.JsonClass
-      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
-
-      @JsonClass(generateAdapter = true, generator = "sealed:type")
-      sealed class BaseType {
-        @TypeLabel("a", ["aa"])
-        class TypeA : BaseType()
-        @TypeLabel("b")
-        class TypeB : BaseType()
-      }
-    """
-      )
-
-    val compilation =
-      KotlinCompilation().apply {
-        sources = listOf(source)
-        inheritClassPath = true
-        symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
-        kspArgs[OPTION_GENERATE_PROGUARD_RULES] = "false"
-      }
-    val result = compilation.compile()
-    assertThat(result.exitCode).isEqualTo(ExitCode.OK)
-    assertThat(result.generatedFiles.filter { it.extension == "pro" }).isEmpty()
   }
 
   @Test
