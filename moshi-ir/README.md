@@ -43,14 +43,7 @@ moshi {
 }
 ```
 
-If you don't want/need proguard rule gen, you can remove KSP and disable it in the `moshi` extension.
-
-```kotlin
-moshi {
-  // Opt-out of proguard rule gen
-  generateProguardRules.set(false)
-}
-```
+If you don't want/need proguard rule gen, you can remove KSP and disable it via the `moshix.generateProguardRules` boolean gradle property.
 
 Snapshots of the development version are available in [Sonatype's snapshots repository][snapshots].
 
