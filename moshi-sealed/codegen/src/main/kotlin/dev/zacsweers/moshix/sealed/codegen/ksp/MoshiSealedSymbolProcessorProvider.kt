@@ -18,8 +18,6 @@ package dev.zacsweers.moshix.sealed.codegen.ksp
 import com.google.auto.service.AutoService
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.isVisibleFrom
-import com.google.devtools.ksp.processing.CodeGenerator
-import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
@@ -42,9 +40,7 @@ import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
-import dev.zacsweers.moshix.sealed.codegen.ProguardConfig
 import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATED
-import dev.zacsweers.moshix.sealed.codegen.ksp.MoshiSealedSymbolProcessorProvider.Companion.OPTION_GENERATE_PROGUARD_RULES
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 
 @AutoService(SymbolProcessorProvider::class)
@@ -62,13 +58,6 @@ public class MoshiSealedSymbolProcessorProvider : SymbolProcessorProvider {
      * We reuse Moshi's option for convenience so you don't have to declare multiple options.
      */
     public const val OPTION_GENERATED: String = "moshi.generated"
-
-    /**
-     * This boolean processing option can control proguard rule generation. Normally, this is not
-     * recommended unless end-users build their own JsonAdapter look-up tool. This is enabled by
-     * default.
-     */
-    public const val OPTION_GENERATE_PROGUARD_RULES: String = "moshi.generateProguardRules"
   }
 
   override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
@@ -122,8 +111,6 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
       }
     }
-  private val generateProguardConfig =
-    environment.options[OPTION_GENERATE_PROGUARD_RULES]?.toBooleanStrictOrNull() ?: true
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val generatedAnnotation =
@@ -262,7 +249,6 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     val objectAdapters = mutableListOf<CodeBlock>()
     val seenLabels = mutableMapOf<String, ClassName>()
     val originatingKSFiles = mutableSetOf<KSFile>()
-    val nestedSealedClassNames = mutableSetOf<ClassName>()
     type.containingFile?.let(originatingKSFiles::add)
     val sealedSubtypes =
       type.getSealedSubclasses().flatMapTo(LinkedHashSet()) { subtype ->
@@ -292,7 +278,6 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
             seenLabels = seenLabels,
             objectAdapters = objectAdapters,
             originatingKSFiles = originatingKSFiles,
-            nestedSealedClassNames = nestedSealedClassNames,
             className = className
           )
         }
@@ -304,10 +289,8 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         labelKey = labelKey,
         fallbackStrategy = fallbackStrategy,
         generatedAnnotation = generatedAnnotation,
-        nestedSealedClassNames = nestedSealedClassNames,
         subtypes = sealedSubtypes,
         objectAdapters = objectAdapters,
-        generateProguardConfig = generateProguardConfig,
         errorLogger = { message -> logger.error(message, type) }
       ) {
         addAnnotation(COMMON_SUPPRESS)
@@ -315,10 +298,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
           addOriginatingKSFile(file)
         }
       }
-      ?.let { (spec, proguardConfig) ->
-        spec.writeTo(codeGenerator, aggregating = true)
-        proguardConfig?.writeTo(codeGenerator, type.containingFile)
-      }
+      ?.writeTo(codeGenerator, aggregating = true)
   }
 
   private fun walkTypeLabels(
@@ -329,7 +309,6 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     seenLabels: MutableMap<String, ClassName>,
     objectAdapters: MutableList<CodeBlock>,
     originatingKSFiles: MutableSet<KSFile>,
-    nestedSealedClassNames: MutableSet<ClassName>,
     className: ClassName = subtype.toClassName(),
   ): Sequence<Subtype> {
     subtype.containingFile?.let(originatingKSFiles::add)
@@ -362,10 +341,6 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
           )
         return classType?.let { sequenceOf(it) } ?: emptySequence()
       } else {
-        // Note this is an intermediate nested sealed type
-        if (subtype.hasAnnotation(symbols.nestedSealed)) {
-          nestedSealedClassNames += className
-        }
         // Add the file as an originating element as it's indirectly participating in adapter
         // generation
         originatingKSFiles += subtype.containingFile!!
@@ -379,7 +354,6 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
             seenLabels = seenLabels,
             objectAdapters = objectAdapters,
             originatingKSFiles = originatingKSFiles,
-            nestedSealedClassNames = nestedSealedClassNames,
           )
         }
       }
@@ -482,7 +456,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
 internal sealed interface FallbackStrategy {
   fun statement(moshiParam: CodeBlock): CodeBlock
 
-  object Null : FallbackStrategy {
+  data object Null : FallbackStrategy {
     override fun statement(moshiParam: CodeBlock) = CodeBlock.of(".withDefaultValue(null)")
   }
 
@@ -508,17 +482,4 @@ internal sealed interface FallbackStrategy {
   class DefaultObject(val className: TypeName) : FallbackStrategy {
     override fun statement(moshiParam: CodeBlock) = CodeBlock.of(".withDefaultValue(%T)", className)
   }
-}
-
-/** Writes this to `filer`. */
-internal fun ProguardConfig.writeTo(codeGenerator: CodeGenerator, originatingKSFile: KSFile?) {
-  codeGenerator
-    .createNewFile(
-      Dependencies(false, sources = originatingKSFile?.let { arrayOf(it) } ?: emptyArray()),
-      packageName = "",
-      fileName = outputFile,
-      extensionName = "",
-    )
-    .bufferedWriter()
-    .use(::writeTo)
 }

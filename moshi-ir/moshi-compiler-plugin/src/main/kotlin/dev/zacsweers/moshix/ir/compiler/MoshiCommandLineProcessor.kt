@@ -32,14 +32,6 @@ internal val KEY_GENERATED_ANNOTATION =
   )
 internal val KEY_ENABLE_SEALED =
   CompilerConfigurationKey<Boolean>("Enable/disable moshi-sealed support in code generation")
-internal val KEY_GENERATE_PROGUARD_RULES =
-  CompilerConfigurationKey<Boolean>(
-    "Enable/disable proguard rule generation in code gen. Implemented as an AnalysisHandlerExtension"
-  )
-internal val KEY_RESOURCES_OUTPUT_DIR =
-  CompilerConfigurationKey<String>(
-    "The output directory for generated proguard rules, only applicable if generateProguardRules is enabled"
-  )
 
 @AutoService(CommandLineProcessor::class)
 public class MoshiCommandLineProcessor : CommandLineProcessor {
@@ -76,22 +68,6 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
         required = false,
         allowMultipleOccurrences = false
       )
-    val OPTION_GENERATE_PROGUARD_RULES =
-      CliOption(
-        optionName = "generateProguardRules",
-        valueDescription = "<true | false>",
-        description = KEY_GENERATE_PROGUARD_RULES.toString(),
-        required = false,
-        allowMultipleOccurrences = false
-      )
-    val OPTION_RESOURCES_OUTPUT_DIR =
-      CliOption(
-        optionName = "resourcesOutputDir",
-        valueDescription = "String",
-        description = KEY_RESOURCES_OUTPUT_DIR.toString(),
-        required = false,
-        allowMultipleOccurrences = false
-      )
   }
 
   override val pluginId: String = "dev.zacsweers.moshix.compiler"
@@ -101,9 +77,7 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
       OPTION_DEBUG,
       OPTION_ENABLED,
       OPTION_ENABLE_SEALED,
-      OPTION_RESOURCES_OUTPUT_DIR,
       OPTION_GENERATED_ANNOTATION,
-      OPTION_GENERATE_PROGUARD_RULES
     )
 
   override fun processOption(
@@ -116,8 +90,6 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
       "debug" -> configuration.put(KEY_DEBUG, value.toBoolean())
       "enableSealed" -> configuration.put(KEY_ENABLE_SEALED, value.toBoolean())
       "generatedAnnotation" -> configuration.put(KEY_GENERATED_ANNOTATION, value)
-      "generateProguardRules" -> configuration.put(KEY_GENERATE_PROGUARD_RULES, value.toBoolean())
-      "resourcesOutputDir" -> configuration.put(KEY_RESOURCES_OUTPUT_DIR, value)
       else -> error("Unknown plugin option: ${option.optionName}")
     }
 }

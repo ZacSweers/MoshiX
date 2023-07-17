@@ -97,5 +97,6 @@ spotless {
 dependencies {
   compileOnly(libs.kotlin.gradlePlugin)
   compileOnly(libs.kotlin.gradlePlugin.api)
+  compileOnly(libs.ksp.gradlePlugin)
   compileOnly(libs.agp)
 }
