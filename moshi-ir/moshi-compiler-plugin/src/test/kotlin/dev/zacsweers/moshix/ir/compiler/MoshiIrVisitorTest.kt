@@ -16,6 +16,7 @@
 package dev.zacsweers.moshix.ir.compiler
 
 import com.google.common.truth.Truth.assertThat
+import com.tschuchort.compiletesting.CompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode.COMPILATION_ERROR
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode.OK
@@ -1064,7 +1065,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
     return PluginOption(pluginId, key.optionName, value.toString())
   }
 
-  private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {
+  private fun compile(vararg sourceFiles: SourceFile): CompilationResult {
     return prepareCompilation(null, *sourceFiles).compile()
   }
 }
