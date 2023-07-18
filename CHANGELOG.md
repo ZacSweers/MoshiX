@@ -1,8 +1,33 @@
 Changelog
 =========
 
-Version 0.23.0
---------------
+0.24.0-RC
+---------
+
+_2023-07-18_
+
+**New: Move proguard rule generation to a standalone KSP processor.**
+
+This is necessary in order to support both K2 and avoid incremental compilation issues in Kotlin 1.9.x.
+
+For moshi-sealed KSP users, there should be no changes necessary.
+
+For moshi-ir users, you must now apply the KSP gradle plugin as well as the moshix plugin. MoshiX's gradle plugin does _not_ directly declare a transitive dependency on the KSP plugin to avoid Gradle classloader conflicts.
+
+```diff
+plugins {
+  // Other plugins
+  id("dev.zacsweers.moshix") version "x.y.z"
++  id("com.google.devtools.ksp") version "x.y.z"
+}
+```
+
+If you don't want this or don't need proguard rule generation, you can opt out by setting the `moshix.generateProguardRules` gradle property to `false`.
+
+This first release is an RC release to ensure there are no issues with the new standalone processor. If you encounter any issues, please file them!
+
+0.23.0
+------
 
 _2023-07-06_
 
@@ -12,8 +37,8 @@ _2023-07-06_
 - Update Moshi to `1.15.0`.
 - Update KSP to `1.9.0-1.0.11`.
 
-Version 0.22.1
---------------
+0.22.1
+------
 
 _2023-04-16_
 
@@ -26,8 +51,8 @@ This is done via this keep rule in moshi-sealed-runtime's embedded proguard rule
 -keepnames @dev.zacsweers.moshix.sealed.annotations.NestedSealed class **
 ```
 
-Version 0.22.0
---------------
+0.22.0
+------
 
 _2023-04-03_
 
@@ -36,8 +61,8 @@ _2023-04-03_
 - Update kotlinx-metadata-jvm to `0.6.0`.
 - **Fix**: Don't use experimental-gated addAdapter with generated object adapters.
 
-Version 0.21.0
---------------
+0.21.0
+------
 
 _2022-12-28_
 
@@ -60,8 +85,8 @@ in the meantime.
 - Update JVM target to `11`.
 - Update Anvil `compiler-utils` to `2.4.3`.
 
-Version 0.20.0
---------------
+0.20.0
+------
 
 _2022-12-04_
 
@@ -111,8 +136,8 @@ sealed class Frog {
 * Update to Kotlin `1.7.22`.
 * Update to KSP `1.7.22-1.0.8`.
 
-Version 0.19.0
---------------
+0.19.0
+------
 
 _2022-09-29_
 
@@ -121,15 +146,15 @@ _2022-09-29_
 
 Note this release requires Kotlin 1.7.20 or newer.
 
-Version 0.18.3
---------------
+0.18.3
+------
 
 _2022-07-01_
 
 * **Fix:** Support `@Json.ignore` in `MetadataKotlinJsonAdapterFactory`.
 
-Version 0.18.2
---------------
+0.18.2
+------
 
 _2022-06-29_
 
@@ -138,8 +163,8 @@ _2022-06-29_
 * Update KotlinPoet to 1.12.0.
 * Update kotlinx-metadata to 0.5.0.
 
-Version 0.18.1
---------------
+0.18.1
+------
 
 _2022-06-11_
 
@@ -147,8 +172,8 @@ Add a missing proguard rule for `@AdaptedBy` annotations to ensure they're kept 
 them. Unfortunately there doesn't appear to be a more granular way preserve these annotations without
 also keeping the whole class.
 
-Version 0.18.0
---------------
+0.18.0
+------
 
 _2022-06-10_
 
@@ -156,8 +181,8 @@ _2022-06-10_
 * Remove remaining use of deprecated descriptor APIs in IR.
 * Update to KSP 1.7.0-1.0.6
 
-Version 0.17.2
---------------
+0.17.2
+------
 
 _2022-05-27_
 
@@ -173,15 +198,15 @@ kotlinpoet 1.11.0
 kotlinx-metadata 0.4.2
 ```
 
-Version 0.17.1
---------------
+0.17.1
+------
 
 _2022-03-09_
 
 **Fix:** Fix support for nested sealed types that don't use `@JsonClass`.
 
-Version 0.17.0
---------------
+0.17.0
+------
 
 _2022-02-16_
 
@@ -246,8 +271,8 @@ With Kotlin 1.5.0, sealed types could now exist across multiple files. `moshi-se
 single files when reporting originating elements, and now properly reports all files if sealed types are spread
 across multiple files.
 
-Version 0.16.7
---------------
+0.16.7
+------
 
 _2022-02-01_
 
@@ -255,8 +280,8 @@ _2022-02-01_
 
 * **Fix:** Use `FilesSubpluginOption` to fix build cache relocatability when generating proguard rules.
 
-Version 0.16.6
---------------
+0.16.6
+------
 
 _2022-01-27_
 
@@ -269,8 +294,8 @@ _2022-01-27_
   class Foo<T>(val value: List<T>)
   ```
 
-Version 0.16.5
---------------
+0.16.5
+------
 
 _2022-01-20_
 
@@ -279,8 +304,8 @@ _2022-01-20_
   appears to cause some issues if `kotlin-reflect` is on the classpath. This should improve runtime performance as a
   result.
 
-Version 0.16.4
---------------
+0.16.4
+------
 
 _2022-01-13_
 
@@ -291,8 +316,8 @@ _2022-01-13_
 
 Thanks to [@gpeal](https://github.com/gpeal) for contributing to this release!
 
-Version 0.16.3
---------------
+0.16.3
+------
 
 _2022-01-11_
 
@@ -300,16 +325,16 @@ _2022-01-11_
   original class's parameters. Resolves [this issue](https://issuetracker.google.com/issues/213578515) (that was
   originally believed to be a Compose issue).
 
-Version 0.16.2
---------------
+0.16.2
+------
 
 _2022-01-06_
 
 * **Fix:** Pass `generateProguardRules` Gradle plugin option correctly.
 * **Fix:** Best-effort avoid synchronization race with IntelliJ openapi when registering proguard rule gen extension
 
-Version 0.16.1
---------------
+0.16.1
+------
 
 _2022-01-06_
 
@@ -330,8 +355,8 @@ _2022-01-06_
   }
   ```
 
-Version 0.16.0
---------------
+0.16.0
+------
 
 _2021-12-24_
 
@@ -394,8 +419,8 @@ moshi {
 - Update to Kotlin `1.6.10`
 - Update to KSP `1.6.10-1.0.2`
 
-Version 0.15.0
---------------
+0.15.0
+------
 
 _2021-12-10_
 
@@ -405,8 +430,8 @@ _2021-12-10_
 * Update to Kotlin `1.6.0`
 * Update to KotlinPoet `1.10.2`
 
-Version 0.14.1
---------------
+0.14.1
+------
 
 _2021-09-21_
 
@@ -418,8 +443,8 @@ _2021-09-21_
 * Update Kotlin to `1.5.31`
 * Update KotlinPoet to `1.10.1`
 
-Version 0.14.0
---------------
+0.14.0
+------
 
 _2021-09-07_
 
@@ -428,8 +453,8 @@ _2021-09-07_
   `ksp`.
 * `moshi-ksp` is now _soft-deprecated_ and will be fully deprecated once Moshi's next release is out with formal support.
 
-Version 0.13.0
---------------
+0.13.0
+------
 
 _2021-08-27_
 
@@ -443,8 +468,8 @@ _2021-08-27_
 
 Special thanks to [@yigit](https://github.com/yigit) for contributing to this release!
 
-Version 0.12.2
---------------
+0.12.2
+------
 
 _2021-08-20_
 
@@ -452,8 +477,8 @@ _2021-08-20_
 * **Fix:** `RecordsJsonAdapterFactory` now supports non-public constructors (i.e. package or file-private).
 * **Fix:** Crash in `moshi-ksp` when dealing with generic typealias properties.
 
-Version 0.12.1
---------------
+0.12.1
+------
 
 _2021-08-19_
 
@@ -465,8 +490,8 @@ _2021-08-19_
 
 Thanks to [@gabrielittner](https://github.com/gabrielittner) for contributing to this release!
 
-Version 0.12.0
---------------
+0.12.0
+------
 
 _2021-07-15_
 
@@ -483,23 +508,23 @@ _2021-07-15_
 Thanks to [@SeongUgJung](https://github.com/SeongUgJung) and [@slmlt](https://github.com/slmlt) for contributing to this
 release!
 
-Version 0.11.2
---------------
+0.11.2
+------
 
 _2021-05-31_
 
 * `moshi-ksp` - Fix a bug where supertypes compiled outside the current compilation weren't recognized as Kotlin types.
 
-Version 0.11.1
---------------
+0.11.1
+------
 
 _2021-05-27_
 
 * Update to KSP `1.5.10-1.0.0-beta01`
 * Update to Kotlin `1.5.10`
 
-Version 0.11.0
---------------
+0.11.0
+------
 
 _2021-05-14_
 
@@ -558,8 +583,8 @@ public static void main(String[] args) {
 
 _Thanks to the following contributors for contributing to this release! [@remcomokveld](https://github.com/remcomokveld), [@martinbonnin](https://github.com/martinbonnin), and [@eneim](https://github.com/eneim)_
 
-Version 0.10.0
--------------
+0.10.0
+-----
 
 _2021-04-09_
 
@@ -568,8 +593,8 @@ _2021-04-09_
 * Update Kotlin to `1.4.32`.
 * Update Moshi to `1.12.0`.
 
-Version 0.9.2
--------------
+0.9.2
+-----
 
 _2021-03-01_
 
@@ -590,8 +615,8 @@ _2021-03-01_
   Kotlin 1.5, but they do appear to Just Work™️ since Kotlin reuses the same sealed APIs under the hood.
 * Support Kotlin 1.5's upcoming sealed interfaces in KSP.
 
-Version 0.9.1
--------------
+0.9.1
+-----
 
 _2021-02-15_
 
@@ -671,13 +696,13 @@ specified._
 _Special thanks to [@efemoney](https://github.com/efemoney) and [@plnice](https://github.com/plnice) for
 contributing to this release!_
 
-Version 0.9.0
--------------
+0.9.0
+-----
 
 This version had a bug in releasing, please ignore.
 
-Version 0.8.0
--------------------
+0.8.0
+-----------
 
 _2021-01-27_
 
@@ -740,15 +765,15 @@ _2021-01-27_
   }
   ```
 
-Version 0.7.1
--------------
+0.7.1
+-----
 
 _2021-01-11_
 
 * Update to KSP `1.4.20-dev-experimental-20210111`.
 
-Version 0.7.0
--------------
+0.7.0
+-----
 
 _2020-12-26_
 
@@ -762,15 +787,15 @@ https://github.com/google/ksp/releases/tag/1.4.20-dev-experimental-20201222
 * KSP `1.4.20-dev-experimental-20201222`
 * Kotlin `1.4.20`
 
-Version 0.6.1
--------------
+0.6.1
+-----
 
 _2020-11-12_
 
 `moshi-ksp` and `moshi-sealed-ksp` are now built against KSP version `1.4.10-dev-experimental-20201110`.
 
-Version 0.6.0
--------------
+0.6.0
+-----
 
 _2020-10-30_
 
@@ -793,8 +818,8 @@ sealed class Message {
 is technically a breaking change, but should be pretty low impact since most people wouldn't be
 defining this parameter name or reading the property directly.
 
-Version 0.5.0
--------------
+0.5.0
+-----
 
 _2020-10-25_
 
@@ -816,8 +841,8 @@ on the fly, matching Moshi's new behavior introduced in 1.10.0.
 
 Thanks to [@plnice](https://github.com/plnice) for contributing to this release.
 
-Version 0.4.0
--------------
+0.4.0
+-----
 
 _2020-10-12_
 
@@ -891,8 +916,8 @@ data class FunctionSpec(
 `moshi-sealed-runtime` artifact. Please update your coordinates accordingly, and don't use `compileOnly`
 anymore.
 
-Version 0.3.2
--------------
+0.3.2
+-----
 
 _2020-10-01_
 
@@ -902,16 +927,16 @@ Fixes two issues with `moshi-ksp`:
 
 Special thanks to [@JvmName](https://github.com/JvmName) for reporting and helping debug this!
 
-Version 0.3.1
--------------
+0.3.1
+-----
 
 _2020-09-30_
 
 `moshi-ksp` now fully supports nullable generic types, which means it is now at feature parity with
 Moshi's annotation-processor-based code gen 🥳
 
-Version 0.3.0
--------------
+0.3.0
+-----
 
 _2020-09-27_
 
@@ -927,8 +952,8 @@ This project is now **MoshiX** and contains multiple Moshi extensions.
 Some of these will eventually move to Moshi directly. This project going forward is a focused set of extensions that
 either don't belong in Moshi directly or can be a non-API-stable testing ground for early adopters.
 
-Version 0.2.0
--------------
+0.2.0
+-----
 
 _2020-04-26_
 
@@ -936,8 +961,8 @@ _2020-04-26_
 * Update to Kotlin 1.3.72
 * Update to KotlinPoet 1.5.0
 
-Version 0.1.0
--------------
+0.1.0
+-----
 
 _2019-10-29_
 
