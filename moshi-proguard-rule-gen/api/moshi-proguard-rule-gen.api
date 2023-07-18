@@ -1,0 +1,12 @@
+public final class dev/zacsweers/moshix/proguardgen/MoshiProguardGenSymbolProcessor : com/google/devtools/ksp/processing/SymbolProcessor {
+	public static final field OPTION_GENERATE_MOSHI_CORE_PROGUARD_RULES Ljava/lang/String;
+	public static final field OPTION_GENERATE_PROGUARD_RULES Ljava/lang/String;
+	public fun <init> (Lcom/google/devtools/ksp/processing/SymbolProcessorEnvironment;)V
+	public fun process (Lcom/google/devtools/ksp/processing/Resolver;)Ljava/util/List;
+}
+
+public final class dev/zacsweers/moshix/proguardgen/MoshiProguardGenSymbolProcessor$Provider : com/google/devtools/ksp/processing/SymbolProcessorProvider {
+	public fun <init> ()V
+	public fun create (Lcom/google/devtools/ksp/processing/SymbolProcessorEnvironment;)Lcom/google/devtools/ksp/processing/SymbolProcessor;
+}
+

@@ -28,11 +28,14 @@ import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import dev.zacsweers.moshix.sealed.runtime.internal.Util.fallbackAdapter
 import java.lang.reflect.Type
+import kotlinx.metadata.ClassKind
 import kotlinx.metadata.ClassName
-import kotlinx.metadata.Flag
 import kotlinx.metadata.KmClass
+import kotlinx.metadata.Modality
 import kotlinx.metadata.jvm.KotlinClassMetadata
 import kotlinx.metadata.jvm.Metadata
+import kotlinx.metadata.kind
+import kotlinx.metadata.modality
 
 /** Classes annotated with this are eligible for this adapter. */
 private val KOTLIN_METADATA = Metadata::class.java
@@ -51,7 +54,7 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       val labelKey = jsonClass.labelKey() ?: return null
       val kmClass = checkNotNull(rawType.header()?.toKmClass())
 
-      if (!Flag.IS_SEALED(kmClass.flags)) {
+      if (kmClass.modality != Modality.SEALED) {
         return null
       }
 
@@ -90,7 +93,7 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
       for (sealedSubclassName in kmClass.sealedSubclasses) {
         val sealedSubclass = sealedSubclassName.toJavaClass()
         val kmSealedSubclass = checkNotNull(sealedSubclass.header()?.toKmClass())
-        val isObject = Flag.Class.IS_OBJECT(kmSealedSubclass.flags)
+        val isObject = kmSealedSubclass.kind == ClassKind.OBJECT
 
         val isAnnotatedDefaultObject = sealedSubclass.isAnnotationPresent(DefaultObject::class.java)
         if (isAnnotatedDefaultObject) {
@@ -173,7 +176,7 @@ private fun Metadata.toKmClass(): KmClass? {
   if (classMetadata !is KotlinClassMetadata.Class) {
     return null
   }
-  return classMetadata.toKmClass()
+  return classMetadata.kmClass
 }
 
 private fun JsonClass.labelKey(): String? =
@@ -202,7 +205,7 @@ private fun walkTypeLabels(
   val subtypeKmClass =
     subtype.header()?.toKmClass()
       ?: error("Cannot decode Metadata for $subtype. Is it not a Kotlin class?")
-  if (Flag.IS_SEALED(subtypeKmClass.flags)) {
+  if (subtypeKmClass.modality == Modality.SEALED) {
     val jsonClass = subtype.getAnnotation(JsonClass::class.java)
     if (jsonClass != null && jsonClass.generator.startsWith("sealed:")) {
       val sealedTypeDiscriminator = jsonClass.generator.removePrefix("sealed:")
@@ -230,7 +233,7 @@ private fun walkTypeLabels(
       subtypeKmClass,
       labels,
       objectSubtypes,
-      skipJsonClassCheck = Flag.Class.IS_OBJECT(subtypeKmClass.flags)
+      skipJsonClassCheck = subtypeKmClass.kind == ClassKind.OBJECT
     )
   }
 }
@@ -257,7 +260,7 @@ private fun addLabelKeyForType(
       error("Duplicate alternate label '$alternate' defined for $sealedSubclass and $prev.")
     }
   }
-  if (Flag.Class.IS_OBJECT(subtypeKmClass.flags)) {
+  if (subtypeKmClass.kind == ClassKind.OBJECT) {
     objectSubtypes[sealedSubclass] = sealedSubclass.objectInstance()
   }
   check(
