@@ -16,6 +16,7 @@
 package dev.zacsweers.moshix.sealed.codegen.ksp
 
 import com.google.common.truth.Truth.assertThat
+import com.tschuchort.compiletesting.CompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
@@ -518,7 +519,7 @@ class MoshiSealedSymbolProcessorProviderTest {
 
   private fun compile(
     vararg sourceFiles: SourceFile,
-  ): KotlinCompilation.Result {
+  ): CompilationResult {
     return prepareCompilation(*sourceFiles).compile()
   }
 }
