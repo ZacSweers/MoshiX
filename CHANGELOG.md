@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.24.0-RC2
+----------
+
+_2023-07-20_
+
+- **Fix:** Write generated proguard rules to the correct resources path.
+
 0.24.0-RC
 ---------
 
