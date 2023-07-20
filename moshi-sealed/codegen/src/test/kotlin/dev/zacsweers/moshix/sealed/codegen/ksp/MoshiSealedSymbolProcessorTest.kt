@@ -73,7 +73,6 @@ class MoshiSealedSymbolProcessorProviderTest {
       import com.squareup.moshi.Moshi
       import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
       import kotlin.Suppress
-      import kotlin.Unit
       import kotlin.collections.emptySet
 
       @Suppress("DEPRECATION", "unused", "ClassName", "REDUNDANT_PROJECTION", "RedundantExplicitType",
@@ -90,9 +89,9 @@ class MoshiSealedSymbolProcessorProviderTest {
               .withSubtype(BaseType.TypeC.TypeCImpl::class.java, "c")
               .create(BaseType::class.java, emptySet(), moshi) as JsonAdapter<BaseType>
 
-        public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
+        override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 
-        public override fun toJson(writer: JsonWriter, value_: BaseType?): Unit {
+        override fun toJson(writer: JsonWriter, value_: BaseType?) {
           runtimeAdapter.toJson(writer, value_)
         }
       }
@@ -399,7 +398,6 @@ class MoshiSealedSymbolProcessorProviderTest {
       import kotlin.ExperimentalStdlibApi
       import kotlin.OptIn
       import kotlin.Suppress
-      import kotlin.Unit
       import kotlin.collections.emptySet
 
       @Suppress("DEPRECATION", "unused", "ClassName", "REDUNDANT_PROJECTION", "RedundantExplicitType",
@@ -422,9 +420,9 @@ class MoshiSealedSymbolProcessorProviderTest {
                 .create(BaseType::class.java, emptySet(), moshi_) as JsonAdapter<BaseType>
         }
 
-        public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
+        override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 
-        public override fun toJson(writer: JsonWriter, value_: BaseType?): Unit {
+        override fun toJson(writer: JsonWriter, value_: BaseType?) {
           runtimeAdapter.toJson(writer, value_)
         }
       }
@@ -483,7 +481,6 @@ class MoshiSealedSymbolProcessorProviderTest {
       import com.squareup.moshi.Moshi
       import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
       import kotlin.Suppress
-      import kotlin.Unit
       import kotlin.collections.emptySet
 
       @Suppress("DEPRECATION", "unused", "ClassName", "REDUNDANT_PROJECTION", "RedundantExplicitType",
@@ -497,9 +494,9 @@ class MoshiSealedSymbolProcessorProviderTest {
               .withSubtype(SubType::class.java, "a")
               .create(BaseType::class.java, emptySet(), moshi) as JsonAdapter<BaseType>
 
-        public override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
+        override fun fromJson(reader: JsonReader): BaseType? = runtimeAdapter.fromJson(reader)
 
-        public override fun toJson(writer: JsonWriter, value_: BaseType?): Unit {
+        override fun toJson(writer: JsonWriter, value_: BaseType?) {
           runtimeAdapter.toJson(writer, value_)
         }
       }
