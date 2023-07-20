@@ -25,6 +25,7 @@ import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.symbolProcessorProviders
 import dev.zacsweers.moshix.proguardgen.MoshiProguardGenSymbolProcessor.Companion.OPTION_GENERATE_MOSHI_CORE_PROGUARD_RULES
 import dev.zacsweers.moshix.proguardgen.MoshiProguardGenSymbolProcessor.Companion.OPTION_GENERATE_PROGUARD_RULES
+import java.io.File
 import org.junit.Test
 
 class MoshiSealedSymbolProcessorProviderTest {
@@ -61,18 +62,19 @@ class MoshiSealedSymbolProcessorProviderTest {
     val generatedSourcesDir = compilation.kspSourcesDir
     val proguardFiles = generatedSourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()
     check(proguardFiles.isNotEmpty())
-    proguardFiles.forEach { generatedFile ->
+    for (generatedFile in proguardFiles) {
+      generatedFile.assertInCorrectPath()
       when (generatedFile.nameWithoutExtension) {
         "moshi-test.BaseType" ->
           assertThat(generatedFile.readText())
             .contains(
               """
-                # Conditionally keep this adapter for every possible nested subtype that uses it.
-                -if class test.BaseType.TypeC
-                -keep class test.BaseTypeJsonAdapter {
-                    public <init>(com.squareup.moshi.Moshi);
-                }
-              """
+                  # Conditionally keep this adapter for every possible nested subtype that uses it.
+                  -if class test.BaseType.TypeC
+                  -keep class test.BaseTypeJsonAdapter {
+                      public <init>(com.squareup.moshi.Moshi);
+                  }
+                """
                 .trimIndent()
             )
         else -> error("Unrecognized proguard file: $generatedFile")
@@ -139,26 +141,27 @@ class MoshiSealedSymbolProcessorProviderTest {
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
     val generatedSourcesDir = compilation.kspSourcesDir
     val proguardFiles = generatedSourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()
-    check(proguardFiles.isNotEmpty())
-    proguardFiles.forEach { generatedFile ->
+    check(proguardFiles.isNotEmpty()) { "No generated proguard files found" }
+    for (generatedFile in proguardFiles) {
+      generatedFile.assertInCorrectPath()
       when (generatedFile.nameWithoutExtension) {
         "moshi-test.BaseType" ->
           assertThat(generatedFile.readText())
             .contains(
               """
-                -if class test.BaseType
-                -keepnames class test.BaseType
-                -if class test.BaseType
-                -keep class test.BaseTypeJsonAdapter {
-                    public <init>(com.squareup.moshi.Moshi);
-                }
+                  -if class test.BaseType
+                  -keepnames class test.BaseType
+                  -if class test.BaseType
+                  -keep class test.BaseTypeJsonAdapter {
+                      public <init>(com.squareup.moshi.Moshi);
+                  }
 
-                # Conditionally keep this adapter for every possible nested subtype that uses it.
-                -if class test.BaseType.TypeC
-                -keep class test.BaseTypeJsonAdapter {
-                    public <init>(com.squareup.moshi.Moshi);
-                }
-              """
+                  # Conditionally keep this adapter for every possible nested subtype that uses it.
+                  -if class test.BaseType.TypeC
+                  -keep class test.BaseTypeJsonAdapter {
+                      public <init>(com.squareup.moshi.Moshi);
+                  }
+                """
                 .trimIndent()
             )
         else -> error("Unrecognized proguard file: $generatedFile")
@@ -176,4 +179,10 @@ class MoshiSealedSymbolProcessorProviderTest {
       symbolProcessorProviders = listOf(MoshiProguardGenSymbolProcessor.Provider())
       block()
     }
+
+  private fun File.assertInCorrectPath() {
+    // Ensure the proguard file is in the right place
+    // https://github.com/ZacSweers/MoshiX/issues/461
+    check(absolutePath.contains("META-INF/proguard/"))
+  }
 }

@@ -100,8 +100,11 @@ public class MoshiProguardGenSymbolProcessor(
               targetConstructorHasDefaults = false,
               targetConstructorParams = emptyList()
             )
-          val fileName = "moshi-${targetType.canonicalName}.pro"
-          environment.logger.info("MOSHI: Writing rules for $fileName: $config", clazz)
+          environment.logger.info(
+            "MOSHI: Writing proguard rules for ${targetType.canonicalName}: $config",
+            clazz
+          )
+          val fileName = config.outputFilePathWithoutExtension(targetType.canonicalName)
           environment.codeGenerator
             .createNewFile(
               Dependencies(
@@ -110,7 +113,7 @@ public class MoshiProguardGenSymbolProcessor(
               ),
               packageName = "",
               fileName = fileName,
-              extensionName = "",
+              extensionName = "pro",
             )
             .bufferedWriter()
             .use { writer ->
