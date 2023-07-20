@@ -1,17 +1,12 @@
 #!/bin/bash
 
-if [[ "$1" = "--snapshot" ]]; then snapshot=true; fi
 if [[ "$1" = "--local" ]]; then local=true; fi
 
 if ! [[ ${local} ]]; then
-  ./gradlew -p moshi-ir/moshi-gradle-plugin publish -x dokkaHtml
-  if ! [[ ${snapshot} ]]; then
-    ./gradlew closeAndReleaseRepository
-  fi
+  cd moshi-ir/moshi-gradle-plugin publish
   ./gradlew publish -x dokkaHtml
-  if ! [[ ${snapshot} ]]; then
-    ./gradlew closeAndReleaseRepository
-  fi
+  cd ..
+  ./gradlew publish -x dokkaHtml
 else
   ./gradlew -p moshi-ir/moshi-gradle-plugin publishToMavenLocal -x dokkaHtml
   ./gradlew publishToMavenLocal -x dokkaHtml
