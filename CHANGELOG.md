@@ -1,6 +1,34 @@
 Changelog
 =========
 
+0.24.0
+------
+
+_2023-07-22_
+
+**New: Move proguard rule generation to a standalone KSP processor.**
+
+This is necessary in order to support both K2 and avoid incremental compilation issues in Kotlin 1.9.x.
+
+For moshi-sealed KSP users, there should be no changes necessary.
+
+For moshi-ir users, you must now apply the KSP gradle plugin as well as the moshix plugin. MoshiX's gradle plugin does _not_ directly declare a transitive dependency on the KSP plugin to avoid Gradle classloader conflicts.
+
+```diff
+plugins {
+  // Other plugins
+  id("dev.zacsweers.moshix") version "x.y.z"
++  id("com.google.devtools.ksp") version "x.y.z"
+}
+```
+
+If you don't want this or don't need proguard rule generation, you can opt out by setting the `moshix.generateProguardRules` gradle property to `false`.
+
+- Update KSP to `1.9.0-1.0.12`.
+- Update KotlinPoet to `1.14.2`.
+- Update to kotlinx-metadata `0.7.0`.
+- Update to Guava `32.1.1-jre`.
+
 0.24.0-RC2
 ----------
 
