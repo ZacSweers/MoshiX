@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -21,14 +20,12 @@ plugins {
   alias(libs.plugins.dokka)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.ksp)
-  alias(libs.plugins.mavenShadow)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
     freeCompilerArgs.addAll(
-      "-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi",
-      "-opt-in=com.squareup.anvil.annotations.ExperimentalAnvilApi",
+      "-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi"
     )
   }
 }
@@ -37,10 +34,6 @@ tasks.withType<Test>().configureEach {
   systemProperty("moshix.jvmTarget", libs.versions.jvmTarget.get())
 }
 
-val shade: Configuration = configurations.maybeCreate("compileShaded")
-
-configurations.getByName("compileOnly").extendsFrom(shade)
-
 dependencies {
   //  compileOnly(kotlin("compiler"))
   compileOnly(libs.kotlin.compilerEmbeddable)
@@ -48,40 +41,12 @@ dependencies {
   implementation(libs.moshi)
   implementation(libs.kotlinpoet)
   implementation(libs.moshi.kotlinCodegen)
-  shade(libs.anvilUtils) {
-    exclude(group = "org.jetbrains.kotlin")
-    exclude(group = "com.squareup", module = "kotlinpoet")
-  }
   ksp(libs.autoService.ksp)
 
-  testImplementation(libs.anvilUtils) // Included in tests due to shading
   testImplementation(libs.kotlin.reflect)
-  //  testImplementation(kotlin("compiler"))
   testImplementation(libs.kotlin.compilerEmbeddable)
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.junit)
   testImplementation(libs.truth)
   testImplementation(project(":moshi-sealed:runtime"))
-}
-
-val shadowJar =
-  tasks.shadowJar.apply {
-    configure {
-      archiveClassifier.set("")
-      configurations = listOf(shade)
-      val shadedPrefix = "dev.zacsweers.moshix.ir.compiler.anvil"
-      relocate("com.squareup.anvil.compiler.internal", "$shadedPrefix.compiler.internal")
-      relocate(
-        "com.squareup.anvil.compiler.internal.reference",
-        "$shadedPrefix.compiler.internal.reference"
-      )
-      relocate("com.squareup.anvil.compiler.api", "$shadedPrefix.compiler.api")
-      relocate("com.squareup.anvil.annotations", "$shadedPrefix.annotations")
-      relocate("com.squareup.anvil.annotations.compat", "$shadedPrefix.annotations.compat")
-    }
-  }
-
-artifacts {
-  runtimeOnly(shadowJar)
-  archives(shadowJar)
 }
