@@ -1,0 +1,14 @@
+public final class dev/zacsweers/moshix/immutable/adapters/ImmutableFactoriesMoshiBuilderKtxKt {
+	public static final fun addKotlinXImmutableAdapters (Lcom/squareup/moshi/Moshi$Builder;)Lcom/squareup/moshi/Moshi$Builder;
+}
+
+public final class dev/zacsweers/moshix/immutable/adapters/PersistentListJsonAdapterFactory : com/squareup/moshi/JsonAdapter$Factory {
+	public static final field INSTANCE Ldev/zacsweers/moshix/immutable/adapters/PersistentListJsonAdapterFactory;
+	public fun create (Ljava/lang/reflect/Type;Ljava/util/Set;Lcom/squareup/moshi/Moshi;)Lcom/squareup/moshi/JsonAdapter;
+}
+
+public final class dev/zacsweers/moshix/immutable/adapters/PersistentMapJsonAdapterFactory : com/squareup/moshi/JsonAdapter$Factory {
+	public static final field INSTANCE Ldev/zacsweers/moshix/immutable/adapters/PersistentMapJsonAdapterFactory;
+	public fun create (Ljava/lang/reflect/Type;Ljava/util/Set;Lcom/squareup/moshi/Moshi;)Lcom/squareup/moshi/JsonAdapter;
+}
+

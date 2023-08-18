@@ -22,6 +22,7 @@ jvmTarget = "11"
 kotlin = "1.9.0"
 kotlinCompileTesting = "0.3.2"
 kotlinpoet = "1.14.2"
+kotlinxCollectionsImmutable = "0.3.5"
 ksp = "1.9.0-1.0.13"
 ktfmt = "0.44"
 moshi = "1.15.0"
@@ -61,6 +62,8 @@ kotlin-gradlePlugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-metadata = { module = "com.squareup:kotlinpoet-metadata", version.ref = "kotlinpoet" }
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
+
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 
 ksp = { module = "com.google.devtools.ksp:symbol-processing", version.ref = "ksp" }
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
