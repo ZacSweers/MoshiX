@@ -66,6 +66,7 @@ rootProject.name = "moshix-root"
 
 include(
   ":moshi-adapters",
+  ":moshi-adapters-kotlinx-immutable",
   ":moshi-ir:moshi-compiler-plugin",
   ":moshi-ir:moshi-kotlin-tests",
   ":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module",
