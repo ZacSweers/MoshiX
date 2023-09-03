@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.24.2
+------
+
+_2023-09-03_
+
+- **Fix**: Use correct platform-specific configuration for applying KSP dependency in moshi-ir.
+- **Fix**: Don't enable moshi-ir/ksp on non-JVM/Android platforms until they're supported upstream.
+
 0.24.1
 ------
 
