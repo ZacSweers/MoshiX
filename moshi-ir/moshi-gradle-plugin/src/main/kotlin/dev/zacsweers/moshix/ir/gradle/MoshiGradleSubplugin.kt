@@ -4,17 +4,29 @@ package dev.zacsweers.moshix.ir.gradle
 
 import com.google.devtools.ksp.gradle.KspExtension
 import dev.zacsweers.moshi.ir.gradle.VERSION
+import java.util.Locale.US
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
 class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
+
+  private companion object {
+    val SUPPORTED_PLATFORMS =
+      setOf(
+        KotlinPlatformType.androidJvm,
+        KotlinPlatformType.jvm,
+      )
+  }
 
   override fun apply(target: Project) {
     target.extensions.create("moshi", MoshiPluginExtension::class.java)
@@ -28,7 +40,24 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
             "Please apply the KSP Gradle plugin ('com.google.devtools.ksp') to your buildscript and try again."
         )
       }
-      target.dependencies.add("ksp", "dev.zacsweers.moshix:moshi-proguard-rule-gen:$VERSION")
+      target.afterEvaluate { project ->
+        // Add the KSP dependency to the appropriate configurations
+        // In KMP, we only add to androidJvm/jvm targets
+        val kExtension = project.kotlinExtension
+        val configurationsToAdd =
+          if (kExtension is KotlinMultiplatformExtension) {
+            kExtension.targets
+              .filter { it.platformType in SUPPORTED_PLATFORMS }
+              .map {
+                "ksp${it.targetName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(US) else it.toString() }}"
+              }
+          } else {
+            listOf("ksp")
+          }
+        for (config in configurationsToAdd) {
+          target.dependencies.add(config, "dev.zacsweers.moshix:moshi-proguard-rule-gen:$VERSION")
+        }
+      }
       target.extensions.configure(KspExtension::class.java) {
         // Enable core moshi proguard rule gen
         it.arg("moshi.generateCoreMoshiProguardRules", "true")
@@ -55,6 +84,11 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     kotlinCompilation: KotlinCompilation<*>
   ): Provider<List<SubpluginOption>> {
     val project = kotlinCompilation.target.project
+
+    if (kotlinCompilation.platformType !in SUPPORTED_PLATFORMS) {
+      return project.provider { emptyList() }
+    }
+
     val extension = project.extensions.getByType(MoshiPluginExtension::class.java)
 
     val generatedAnnotation = extension.generatedAnnotation.orNull
