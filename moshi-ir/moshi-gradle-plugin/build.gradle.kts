@@ -35,7 +35,11 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 // region Version.kt template for setting the project version in the build
-sourceSets { main { java.srcDir("$buildDir/generated/sources/version-templates/kotlin/main") } }
+sourceSets {
+  main {
+    java.srcDir(layout.buildDirectory.file("generated/sources/version-templates/kotlin/main"))
+  }
+}
 
 val copyVersionTemplatesProvider =
   tasks.register<Copy>("copyVersionTemplates") {
