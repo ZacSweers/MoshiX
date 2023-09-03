@@ -1,6 +1,17 @@
 Changelog
 =========
 
+0.24.1
+------
+
+_2023-09-02_
+
+- **Fix**: Use correct name for each `KotlinCompilation`'s `implementation` configuration in KMP projects. Note that Moshi still only supports JVM/Android.
+- Update to Kotlin 1.9.10.
+- Update to KSP 1.9.10-1.0.13.
+- Compile against Gradle 8.3.
+- Remove shaded anvil-compiler-utils dependency from moshi-ir.
+
 0.24.0
 ------
 
