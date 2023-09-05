@@ -19,6 +19,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.moshix)
+  alias(libs.plugins.ksp)
 }
 
 moshi { enableSealed.set(true) }
