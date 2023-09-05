@@ -24,8 +24,24 @@ plugins {
 
 moshi { enableSealed.set(true) }
 
+val proguardRuleValidator =
+  tasks.register("validateProguardRules") {
+    doNotTrackState("This is a validation task that should always run")
+    doLast {
+      logger.lifecycle("Validating proguard rules")
+      val proguardRulesDir = project.file("build/generated/moshix/test/resources/META-INF/proguard")
+      check(proguardRulesDir.exists() && proguardRulesDir.listFiles()!!.isNotEmpty()) {
+        "No proguard rules found! Did you forget to apply the KSP Gradle plugin?"
+      }
+      logger.lifecycle("Proguard rules properly generated ✅")
+    }
+  }
+
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions { freeCompilerArgs.addAll("-opt-in=kotlin.ExperimentalStdlibApi") }
+  if (name == "compileTestKotlin") {
+    finalizedBy(proguardRuleValidator)
+  }
 }
 
 dependencies {
