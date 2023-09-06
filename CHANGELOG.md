@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.24.3
+------
+
+_2023-09-06_
+
+- **Fix**: Enable KSP proguard rule gen again in moshi-ir. We accidentally encountered a [bug](https://github.com/google/ksp/issues/1524) in KSP and work around it now.
+
 0.24.2
 ------
 
