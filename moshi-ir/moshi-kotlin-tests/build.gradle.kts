@@ -19,12 +19,29 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.moshix)
+  alias(libs.plugins.ksp)
 }
 
 moshi { enableSealed.set(true) }
 
+val proguardRuleValidator =
+  tasks.register("validateProguardRules") {
+    doNotTrackState("This is a validation task that should always run")
+    doLast {
+      logger.lifecycle("Validating proguard rules")
+      val proguardRulesDir = project.file("build/generated/ksp/test/resources/META-INF/proguard")
+      check(proguardRulesDir.exists() && proguardRulesDir.listFiles()!!.isNotEmpty()) {
+        "No proguard rules found! Did you forget to apply the KSP Gradle plugin?"
+      }
+      logger.lifecycle("Proguard rules properly generated ✅ ")
+    }
+  }
+
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions { freeCompilerArgs.addAll("-opt-in=kotlin.ExperimentalStdlibApi") }
+  if (name == "compileTestKotlin" && project.findProperty("kotlin.experimental.tryK2") != "true") {
+    finalizedBy(proguardRuleValidator)
+  }
 }
 
 dependencies {
@@ -43,5 +60,7 @@ configurations.configureEach {
       .using(project(":moshi-ir:moshi-compiler-plugin"))
     substitute(module("dev.zacsweers.moshix:moshi-sealed-runtime"))
       .using(project(":moshi-sealed:runtime"))
+    substitute(module("dev.zacsweers.moshix:moshi-proguard-rule-gen"))
+      .using(project(":moshi-proguard-rule-gen"))
   }
 }
