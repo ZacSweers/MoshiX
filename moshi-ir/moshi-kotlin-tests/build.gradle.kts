@@ -29,11 +29,11 @@ val proguardRuleValidator =
     doNotTrackState("This is a validation task that should always run")
     doLast {
       logger.lifecycle("Validating proguard rules")
-      val proguardRulesDir = project.file("build/generated/moshix/test/resources/META-INF/proguard")
+      val proguardRulesDir = project.file("build/generated/ksp/test/resources/META-INF/proguard")
       check(proguardRulesDir.exists() && proguardRulesDir.listFiles()!!.isNotEmpty()) {
         "No proguard rules found! Did you forget to apply the KSP Gradle plugin?"
       }
-      logger.lifecycle("Proguard rules properly generated ✅")
+      logger.lifecycle("Proguard rules properly generated ✅ ")
     }
   }
 

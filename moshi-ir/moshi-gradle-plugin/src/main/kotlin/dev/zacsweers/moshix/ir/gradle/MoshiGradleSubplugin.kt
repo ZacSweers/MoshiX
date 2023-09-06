@@ -62,8 +62,6 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       } else {
         addKspDep("ksp")
       }
-      // TODO remove once this is fixed: https://github.com/google/ksp/issues/1524
-      addKspDep("ksp")
       target.extensions.configure(KspExtension::class.java) {
         // Enable core moshi proguard rule gen
         it.arg("moshi.generateCoreMoshiProguardRules", "true")
