@@ -481,8 +481,7 @@ private constructor(
                     targetType = targetType.defaultType,
                     moshiParam = moshiParam
                   )
-                }
-                  ?: subtypesExpression
+                } ?: subtypesExpression
 
               // .create(Message::class.java, emptySet(), moshi) as JsonAdapter<Message>
               irExprBody(

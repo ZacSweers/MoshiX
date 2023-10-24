@@ -199,8 +199,9 @@ internal fun IrBuilderWithScope.defaultPrimitiveValue(
 internal val IrProperty.type: IrType
   get() =
     getter?.returnType
-      ?: setter?.valueParameters?.first()?.type ?: backingField?.type
-        ?: error("No type for property $name")
+      ?: setter?.valueParameters?.first()?.type
+      ?: backingField?.type
+      ?: error("No type for property $name")
 
 internal fun DescriptorVisibility.checkIsVisible() {
   if (this != DescriptorVisibilities.PUBLIC && this != DescriptorVisibilities.INTERNAL) {

@@ -64,8 +64,7 @@ public class MetadataMoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
         val parentLabelKey =
           supertypes.firstNotNullOfOrNull { supertype ->
             supertype.getAnnotation(JsonClass::class.java)?.labelKey()
-          }
-            ?: error("No JsonClass-annotated sealed supertype found for $rawType")
+          } ?: error("No JsonClass-annotated sealed supertype found for $rawType")
         check(parentLabelKey != labelKey) {
           "@NestedSealed-annotated subtype $rawType is inappropriately annotated with @JsonClass(generator = \"sealed:$labelKey\")."
         }
