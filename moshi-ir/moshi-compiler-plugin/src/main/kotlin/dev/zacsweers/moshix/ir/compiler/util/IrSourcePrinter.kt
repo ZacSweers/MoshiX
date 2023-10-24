@@ -919,7 +919,8 @@ internal class IrSourcePrinterVisitor(
     print(": ")
     val type =
       declaration.backingField?.type
-        ?: declaration.getter?.returnType ?: error("Couldn't find return type")
+        ?: declaration.getter?.returnType
+        ?: error("Couldn't find return type")
     print(type.renderSrc())
     declaration.backingField?.let { field ->
       field.initializer?.let { initializer ->

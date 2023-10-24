@@ -114,8 +114,7 @@ public annotation class AdaptedBy(val adapter: KClass<*>, val nullSafe: Boolean 
                 "value must be a JsonAdapter or JsonAdapter.Factory."
             )
           }
-        }
-          ?: return null
+        } ?: return null
 
       return if (adaptedBy.nullSafe) {
         adapter.nullSafe()

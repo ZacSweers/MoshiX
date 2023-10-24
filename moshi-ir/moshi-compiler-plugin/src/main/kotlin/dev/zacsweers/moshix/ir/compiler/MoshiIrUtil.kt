@@ -110,8 +110,7 @@ internal fun TargetProperty.generator(
     val qualifierRawType = jsonQualifier.type.classOrNull!!.owner
     val retentionValue =
       qualifierRawType.getAnnotation(FqName("kotlin.annotation.Retention"))?.getValueArgument(0)
-        as IrGetEnumValue?
-        ?: continue
+        as IrGetEnumValue? ?: continue
     // TODO what about java qualifiers types?
     val retention = retentionValue.symbol.owner.name.identifier
     // Check Java types since that covers both Java and Kotlin annotations.

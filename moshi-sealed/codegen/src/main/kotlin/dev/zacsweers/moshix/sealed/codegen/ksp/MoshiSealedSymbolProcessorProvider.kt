@@ -414,7 +414,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     val alternates =
       labelAnnotation.arguments.find { it.name?.getShortName() == "alternateLabels" }?.value
         as? List<String> // arrays are lists in KSP https://github.com/google/ksp/issues/135
-       ?: emptyList() // ksp ignores undefined args
+      ?: emptyList() // ksp ignores undefined args
 
     for (alternate in alternates) {
       seenLabels.put(alternate, className)?.let { prev ->

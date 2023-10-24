@@ -217,8 +217,9 @@ internal data class KtProperty(
 
   val javaType =
     jvmField?.genericType
-      ?: jvmGetter?.genericReturnType ?: jvmSetter?.genericReturnType
-        ?: error(
+      ?: jvmGetter?.genericReturnType
+      ?: jvmSetter?.genericReturnType
+      ?: error(
         "No type information available for property '${km.name}' with type '${km.returnType.canonicalName}'."
       )
 
