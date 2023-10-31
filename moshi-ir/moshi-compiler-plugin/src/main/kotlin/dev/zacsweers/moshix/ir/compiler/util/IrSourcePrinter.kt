@@ -1382,7 +1382,7 @@ internal class IrSourcePrinterVisitor(
       if (parent is IrDeclaration) {
         parent.renderDeclarationFqn(sb)
       } else if (parent is IrPackageFragment) {
-        sb.append(parent.fqName.toString())
+        sb.append(parent.packageFqName.toString())
       }
     } catch (e: UninitializedPropertyAccessException) {
       sb.append("<uninitialized parent>")
