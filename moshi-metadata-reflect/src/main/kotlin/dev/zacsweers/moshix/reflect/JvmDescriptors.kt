@@ -35,7 +35,8 @@ private val PRIMITIVE_CLASS_TO_DESC =
 internal val Class<*>.descriptor: String
   get() {
     return when {
-      isPrimitive -> PRIMITIVE_CLASS_TO_DESC[this]?.toString()
+      isPrimitive ->
+        PRIMITIVE_CLASS_TO_DESC[this]?.toString()
           ?: throw RuntimeException("Unrecognized primitive $this")
       isArray -> "[${componentType.descriptor}"
       else -> "L$name;".replace('.', '/')

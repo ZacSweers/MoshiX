@@ -58,8 +58,7 @@ public class MoshiSealedJsonAdapterFactory : JsonAdapter.Factory {
               (supertype.classifier as? KClass<*>)?.findAnnotation<JsonClass>()
                 ?: supertype.findAnnotation()
             nestedJsonClass?.labelKey()
-          }
-            ?: error("No JsonClass-annotated sealed supertype found for $rawTypeKotlin")
+          } ?: error("No JsonClass-annotated sealed supertype found for $rawTypeKotlin")
         check(parentLabelKey != labelKey) {
           "@NestedSealed-annotated subtype $rawType is inappropriately annotated with @JsonClass(generator = \"sealed:$labelKey\")."
         }
