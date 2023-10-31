@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.25.0
+------
+
+_2023-10-31_
+
+- Update to Kotlin `1.9.20`. moshi-ir now requires Kotlin `1.9.20`.
+- Update to KSP `1.9.20-1.0.13`.
+- Update to Guava `32.1.3-jre`.
+- Build against Gradle `8.4`.
+
 0.24.3
 ------
 
