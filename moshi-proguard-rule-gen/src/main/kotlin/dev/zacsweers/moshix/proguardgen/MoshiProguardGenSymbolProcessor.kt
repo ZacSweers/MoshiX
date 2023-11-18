@@ -3,7 +3,6 @@ package dev.zacsweers.moshix.proguardgen
 import com.google.auto.service.AutoService
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getAnnotationsByType
-import com.google.devtools.ksp.hasAnnotation
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
@@ -151,7 +150,12 @@ public class MoshiProguardGenSymbolProcessor(
   ) {
     if (isSealed) {
       if (!skipAnnotationCheck) {
-        if (hasAnnotation(NESTED_SEALED_FQ_NAME)) {
+        if (
+          annotations.any {
+            it.annotationType.resolve().declaration.qualifiedName?.asString() ==
+              NESTED_SEALED_FQ_NAME
+          }
+        ) {
           elements += toClassName()
         } else {
           return
