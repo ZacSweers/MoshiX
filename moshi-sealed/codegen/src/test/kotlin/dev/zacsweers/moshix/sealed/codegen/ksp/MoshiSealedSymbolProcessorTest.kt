@@ -512,6 +512,7 @@ class MoshiSealedSymbolProcessorProviderTest {
       sources = sourceFiles.toList()
       inheritClassPath = true
       symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
+      languageVersion = "1.9"
     }
 
   private fun compile(

@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.name.ClassId
 
 internal class MoshiIrGenerationExtension(
@@ -29,6 +30,7 @@ internal class MoshiIrGenerationExtension(
   private val debug: Boolean
 ) : IrGenerationExtension {
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
     val generatedAnnotation =
       generatedAnnotationName?.let { name ->

@@ -177,6 +177,7 @@ class MoshiSealedSymbolProcessorProviderTest {
       sources = sourceFiles.toList()
       inheritClassPath = true
       symbolProcessorProviders = listOf(MoshiProguardGenSymbolProcessor.Provider())
+      languageVersion = "1.9"
       block()
     }
 
