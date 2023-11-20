@@ -4,18 +4,16 @@ on: [ push, pull_request ]
 
 jobs:
   build:
-    name: 'JDK ${{ matrix.java }} - KSP ${{ matrix.ksp_enabled }} - Kotlin ${{ matrix.kotlin }} - K2 ${{ matrix.k2_enabled }}'
+    name: 'JDK ${{ matrix.java }} - KSP ${{ matrix.ksp_enabled }} - K2 ${{ matrix.k2_enabled }}'
     runs-on: ubuntu-latest
     strategy:
       matrix:
         java: [ '20' ]
-        kotlin: [ '1.9.20' ]
         ksp_enabled: [ true, false ]
         k2_enabled: [ true, false ]
       fail-fast: false
 
     env:
-      DEP_OVERRIDE_kotlin: ${{ matrix.kotlin }}
       DEP_OVERRIDE_java: ${{ matrix.java }}
 
     steps:
