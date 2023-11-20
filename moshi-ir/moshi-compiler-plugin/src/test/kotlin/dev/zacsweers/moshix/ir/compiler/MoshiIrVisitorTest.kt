@@ -1052,7 +1052,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       sources = sourceFiles.asList()
       verbose = false
       jvmTarget = JvmTarget.fromString(System.getProperty("moshix.jvmTarget"))!!.description
-      supportsK2 = true
       // Necessary for K2 testing, even if useK2 itself isn't part of this test!
       kotlincArguments += listOf("-Xskip-prerelease-check", "-Xallow-unstable-dependencies")
       if (this@MoshiIrVisitorTest.useK2) {
