@@ -30,7 +30,7 @@ retrofit = "2.9.0"
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version = "1.9.10" }
-kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.13.2" }
+kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.14.0" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.26.0" }
