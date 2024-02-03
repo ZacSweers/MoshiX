@@ -27,7 +27,7 @@ internal class MoshiIrGenerationExtension(
   private val messageCollector: MessageCollector,
   private val generatedAnnotationName: ClassId?,
   private val enableSealed: Boolean,
-  private val debug: Boolean
+  private val debug: Boolean,
 ) : IrGenerationExtension {
 
   @OptIn(UnsafeDuringIrConstructionAPI::class)
@@ -50,7 +50,7 @@ internal class MoshiIrGenerationExtension(
         generatedAnnotation,
         enableSealed,
         deferred,
-        debug
+        debug,
       )
     moduleFragment.transform(moshiTransformer, null)
     for ((file, adapters) in deferred.groupBy { it.irFile }) {

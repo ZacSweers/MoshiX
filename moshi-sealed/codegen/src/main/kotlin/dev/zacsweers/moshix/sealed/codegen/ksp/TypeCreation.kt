@@ -54,7 +54,7 @@ internal fun createType(
   subtypes: Set<Subtype>,
   objectAdapters: List<CodeBlock>,
   errorLogger: (String) -> Unit,
-  typeSpecHook: TypeSpec.Builder.() -> Unit
+  typeSpecHook: TypeSpec.Builder.() -> Unit,
 ): FileSpec? {
   var finalFallbackStrategy = fallbackStrategy
   val adapterName =
@@ -96,7 +96,7 @@ internal fun createType(
         "%T.of(%T::class.java, %S)\n",
         PolymorphicJsonAdapterFactory::class,
         targetType,
-        labelKey
+        labelKey,
       )
 
   for (subtype in subtypes) {
@@ -116,7 +116,7 @@ internal fun createType(
           runtimeAdapterInitializer.add(
             "  .withSubtype(%T::class.java, %S)\n",
             subtype.className,
-            label
+            label,
           )
         }
       }
@@ -129,7 +129,7 @@ internal fun createType(
     targetType,
     MemberName("kotlin.collections", "emptySet"),
     moshiArg,
-    jsonAdapterType
+    jsonAdapterType,
   )
 
   val runtimeAdapterProperty =

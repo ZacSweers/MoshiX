@@ -169,7 +169,7 @@ private constructor(
       fallbackStrategy =
         FallbackStrategy.FallbackAdapter(
           targetConstructor = constructor.symbol,
-          hasMoshiParam = hasMoshiParam
+          hasMoshiParam = hasMoshiParam,
         )
     } else if (useDefaultNull) {
       fallbackStrategy = FallbackStrategy.Null
@@ -217,7 +217,7 @@ private constructor(
         fallbackStrategy = fallbackStrategy,
         generatedAnnotation = null,
         subtypes = sealedSubtypes,
-        objectSubtypes = objectSubtypes
+        objectSubtypes = objectSubtypes,
       )
     }
   }
@@ -262,7 +262,7 @@ private constructor(
             subtype = it.owner,
             labelKey = labelKey,
             seenLabels = seenLabels,
-            objectSubtypes = objectSubtypes
+            objectSubtypes = objectSubtypes,
           )
         }
       }
@@ -271,7 +271,7 @@ private constructor(
         addLabelKeyForType(
           subtype = subtype,
           seenLabels = seenLabels,
-          objectSubtypes = objectSubtypes
+          objectSubtypes = objectSubtypes,
         )
       classType?.let { sequenceOf(it) } ?: emptySequence()
     }
@@ -281,7 +281,7 @@ private constructor(
     subtype: IrClass,
     seenLabels: MutableMap<String, IrClass>,
     objectSubtypes: MutableList<IrClass>,
-    skipJsonClassCheck: Boolean = false
+    skipJsonClassCheck: Boolean = false,
   ): Subtype? {
     // Regular subtype, read its label
     val labelAnnotation =
@@ -383,7 +383,7 @@ private constructor(
             classifier = adapterCls.symbol,
             hasQuestionMark = false,
             arguments = emptyList(),
-            annotations = emptyList()
+            annotations = emptyList(),
           )
         origin = IrDeclarationOrigin.INSTANCE_RECEIVER
       }
@@ -414,7 +414,7 @@ private constructor(
                   putTypeArgument(0, targetType.defaultType)
                   putValueArgument(
                     0,
-                    moshiSymbols.javaClassReference(this@run, targetType.defaultType)
+                    moshiSymbols.javaClassReference(this@run, targetType.defaultType),
                   )
                   putValueArgument(1, irString(labelKey))
                 }
@@ -435,7 +435,7 @@ private constructor(
                           0,
                           irCall(moshiSealedSymbols.objectJsonAdapterCtor).apply {
                             putValueArgument(0, irGetObject(subtype.symbol))
-                          }
+                          },
                         )
                       }
                     }
@@ -453,7 +453,7 @@ private constructor(
                       dispatchReceiver = nestedReceiver
                       putValueArgument(
                         0,
-                        moshiSymbols.javaClassReference(this@run, subtype.className.defaultType)
+                        moshiSymbols.javaClassReference(this@run, subtype.className.defaultType),
                       )
                       putValueArgument(1, irString(label))
                     }
@@ -479,7 +479,7 @@ private constructor(
                     moshiSealedSymbols = moshiSealedSymbols,
                     subtypesExpression = subtypesExpression,
                     targetType = targetType.defaultType,
-                    moshiParam = moshiParam
+                    moshiParam = moshiParam,
                   )
                 } ?: subtypesExpression
 
@@ -490,12 +490,12 @@ private constructor(
                     dispatchReceiver = possiblyWithDefaultExpression
                     putValueArgument(
                       0,
-                      moshiSymbols.javaClassReference(this@run, targetType.defaultType)
+                      moshiSymbols.javaClassReference(this@run, targetType.defaultType),
                     )
                     putValueArgument(1, irCall(moshiSymbols.emptySet))
                     putValueArgument(2, moshiAccess)
                   },
-                  jsonAdapterType
+                  jsonAdapterType,
                 )
               )
             }
@@ -506,7 +506,7 @@ private constructor(
     adapterCls.generateToStringFun(
       pluginContext,
       simpleNames.joinToString("."),
-      generatedName = "GeneratedSealedJsonAdapter"
+      generatedName = "GeneratedSealedJsonAdapter",
     )
 
     return PreparedAdapter(adapterCls)
@@ -517,7 +517,7 @@ private constructor(
         FqName("com.squareup.moshi.JsonAdapter"),
         Name.identifier("toJson").identifier,
         pluginContext.irBuiltIns.unitType,
-        modality = Modality.OPEN
+        modality = Modality.OPEN,
       ) { function ->
         function.valueParameters.size == 2 &&
           function.valueParameters[0].type.classifierOrFail == moshiSymbols.jsonWriter
@@ -588,10 +588,7 @@ private constructor(
     ctor.irConstructorBody(pluginContext) { statements ->
       statements += generateJsonAdapterSuperConstructorCall()
       statements +=
-        irInstanceInitializerCall(
-          context = pluginContext,
-          classSymbol = adapterCls.symbol,
-        )
+        irInstanceInitializerCall(context = pluginContext, classSymbol = adapterCls.symbol)
     }
 
     return ctor
@@ -603,7 +600,7 @@ private constructor(
       startOffset,
       endOffset,
       pluginContext.irBuiltIns.unitType,
-      moshiSymbols.jsonAdapter.constructors.single()
+      moshiSymbols.jsonAdapter.constructors.single(),
     )
   }
 
@@ -632,7 +629,7 @@ private constructor(
         moshiSymbols = moshiSymbols,
         moshiSealedSymbols = moshiSealedSymbols,
         target = target,
-        labelKey = labelKey
+        labelKey = labelKey,
       )
     }
   }

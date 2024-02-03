@@ -86,7 +86,7 @@ private val TargetProperty.isVisible: Boolean
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun TargetProperty.generator(
   originalType: IrClass,
-  errors: MutableList<(logger: MessageCollector) -> Unit>
+  errors: MutableList<(logger: MessageCollector) -> Unit>,
 ): PropertyGenerator? {
   if (jsonIgnore) {
     if (!hasDefault) {

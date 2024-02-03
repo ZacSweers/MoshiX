@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.25.1
+------
+
+_2023-11-27_
+
+- Update to Kotlin `1.9.21`.
+- Update to KSP `1.9.20-1.0.14`.
+- Update to KotlinPoet `1.15.1`.
+
 0.25.0
 ------
 

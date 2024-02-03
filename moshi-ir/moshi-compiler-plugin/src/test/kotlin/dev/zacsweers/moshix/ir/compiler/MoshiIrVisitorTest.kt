@@ -70,7 +70,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
           @JvmInline
           @JsonClass(generateAdapter = true)
           value class ValueClass(val i: Int = 0)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -96,7 +96,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
               fun newInstance(a: Int, b: Int) = PrivateConstructor(a, b)
             }
           }
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -115,7 +115,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           class PrivateConstructorParameter(private var a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -137,7 +137,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
             private var a: Int = -1
             private var b: Int = -1
           }
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -156,7 +156,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           interface Interface
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -176,7 +176,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true, generator="customGenerator")
           interface Interface
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(OK)
@@ -194,7 +194,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           abstract class AbstractClass(val a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -214,7 +214,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           sealed class SealedClass(val a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -236,7 +236,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
             @JsonClass(generateAdapter = true)
             inner class InnerClass(val a: Int)
           }
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -258,7 +258,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
           enum class KotlinEnum {
             A, B
           }
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -284,7 +284,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
             @JsonClass(generateAdapter = true)
             class LocalClass(val a: Int)
           }
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -304,7 +304,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           private class PrivateClass(val a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -326,7 +326,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
           object ObjectDeclaration {
             var a = 5
           }
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -346,7 +346,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           class RequiredTransientConstructorParameter(@Transient var a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -366,7 +366,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           class RequiredTransientConstructorParameter(@Json(ignore = true) var a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -385,7 +385,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           class NonPropertyConstructorParameter(a: Int, val b: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -406,8 +406,8 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           data class Foo(val a: Int)
-          """
-          )
+          """,
+          ),
         )
         .compile()
     assertThat(result.messages).contains("Invalid option value for TODO")
@@ -428,7 +428,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           class Class2(private var c: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -449,7 +449,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           class ExtendsPlatformClass(var a: Int) : Date()
-          """
+          """,
         )
       )
     assertThat(result.messages).contains("supertype java.util.Date is not a Kotlin type")
@@ -468,7 +468,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           class ExtendsJavaType(var b: Int) : JavaSuperclass()
-          """
+          """,
         ),
         SourceFile.java(
           "JavaSuperclass.java",
@@ -477,8 +477,8 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         public class JavaSuperclass {
           public int a = 1;
         }
-        """
-        )
+        """,
+        ),
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
@@ -507,7 +507,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           class ClassWithQualifier(@UpperCase val a: Int)
-          """
+          """,
         )
       )
     // We instantiate directly, no FIELD site target necessary
@@ -537,7 +537,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           class ClassWithQualifier(@UpperCase val a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
@@ -559,7 +559,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           data class Person(val firstName: FirstName, val lastName: LastName, val hairColor: String)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(OK)
@@ -691,8 +691,8 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
               val arg64: Long = 64,
               val arg65: Long = 65
           )
-          """
-        )
+          """,
+        ),
       )
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(OK)
@@ -840,8 +840,8 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
           @JsonClass(generateAdapter = true)
           data class Example(val firstName: String)
-          """
-        )
+          """,
+        ),
       )
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(OK)
@@ -880,7 +880,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         @TypeLabel("a")
         class TypeA : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -909,7 +909,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         @DefaultObject
         object TypeB : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -949,7 +949,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         @DefaultObject
         object TypeB : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -992,7 +992,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         @DefaultObject
         object TypeB : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -1018,7 +1018,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         @TypeLabel("a")
         class TypeA : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -1029,7 +1029,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
   private fun prepareCompilation(
     generatedAnnotation: String? = null,
-    vararg sourceFiles: SourceFile
+    vararg sourceFiles: SourceFile,
   ): KotlinCompilation {
     return KotlinCompilation().apply {
       workingDir = compilationDir
@@ -1044,7 +1044,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
         if (generatedAnnotation != null) {
           processor.option(
             MoshiCommandLineProcessor.OPTION_GENERATED_ANNOTATION,
-            generatedAnnotation
+            generatedAnnotation,
           )
         }
       }

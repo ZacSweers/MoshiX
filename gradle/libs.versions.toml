@@ -13,30 +13,30 @@
 # limitations under the License.
 
 [versions]
-agp = "8.1.1"
+agp = "8.2.2"
 autoService = "1.1.1"
-gjf = "1.13.0"
+gjf = "1.17.0"
 incap = "1.0.0"
-jdk = "20"
+jdk = "21"
 jvmTarget = "11"
-kotlin = "2.0.0-Beta1"
+kotlin = "2.0.0-Beta3"
 kotlinCompileTesting = "0.5.0-alpha01"
-kotlinpoet = "1.15.0"
-ksp = "2.0.0-Beta1-1.0.14"
-ktfmt = "0.46"
+kotlinpoet = "1.16.0"
+ksp = "2.0.0-Beta3-1.0.17"
+ktfmt = "0.47"
 moshi = "1.15.0"
 okhttp = "4.12.0"
 retrofit = "2.9.0"
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version = "1.9.10" }
-kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.13.2" }
+kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.14.0" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.25.3" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
-moshix = { id = "dev.zacsweers.moshix", version = "0.25.0" } # Always replaced by the local plugin
-spotless = { id = "com.diffplug.spotless", version = "6.22.0" }
+moshix = { id = "dev.zacsweers.moshix", version = "0.25.1" } # Always replaced by the local plugin
+spotless = { id = "com.diffplug.spotless", version = "6.25.0" }
 
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -47,13 +47,13 @@ autoService = { module = "com.google.auto.service:auto-service-annotations", ver
 autoService-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version = "1.1.0" }
 autoService-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
 
-guava = { module = "com.google.guava:guava", version = "32.1.3-jre" }
+guava = { module = "com.google.guava:guava", version = "33.0.0-jre" }
 
 incap = { module = "net.ltgt.gradle.incap:incap", version.ref = "incap" }
 incap-processor = { module = "net.ltgt.gradle.incap:incap-processor", version.ref = "incap" }
 
 kotlin-compilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
-kotlin-metadata = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", version = "0.7.0" }
+kotlin-metadata = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", version = "0.9.0" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradlePlugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
@@ -83,6 +83,6 @@ retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.re
 
 # Test libs
 junit = { module = "junit:junit", version = "4.13.2" }
-truth = { module = "com.google.truth:truth", version = "1.1.5" }
+truth = { module = "com.google.truth:truth", version = "1.4.0" }
 kotlinCompileTesting = { module = "dev.zacsweers.kctfork:core", version.ref = "kotlinCompileTesting" }
 kotlinCompileTesting-ksp = { module = "dev.zacsweers.kctfork:ksp", version.ref ="kotlinCompileTesting" }

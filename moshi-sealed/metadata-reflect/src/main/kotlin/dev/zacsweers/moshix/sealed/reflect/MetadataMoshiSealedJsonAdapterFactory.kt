@@ -165,13 +165,13 @@ private fun Class<*>.header(): Metadata? {
       data2 = data2,
       extraString = extraString,
       packageName = packageName,
-      extraInt = extraInt
+      extraInt = extraInt,
     )
   }
 }
 
 private fun Metadata.toKmClass(): KmClass? {
-  val classMetadata = KotlinClassMetadata.read(this)
+  val classMetadata = KotlinClassMetadata.readLenient(this)
   if (classMetadata !is KotlinClassMetadata.Class) {
     return null
   }
@@ -232,7 +232,7 @@ private fun walkTypeLabels(
       subtypeKmClass,
       labels,
       objectSubtypes,
-      skipJsonClassCheck = subtypeKmClass.kind == ClassKind.OBJECT
+      skipJsonClassCheck = subtypeKmClass.kind == ClassKind.OBJECT,
     )
   }
 }
@@ -242,7 +242,7 @@ private fun addLabelKeyForType(
   subtypeKmClass: KmClass,
   labels: MutableMap<String, Class<*>>,
   objectSubtypes: MutableMap<Class<*>, Any>,
-  skipJsonClassCheck: Boolean = false
+  skipJsonClassCheck: Boolean = false,
 ) {
   // Regular subtype, read its label
   val labelAnnotation =

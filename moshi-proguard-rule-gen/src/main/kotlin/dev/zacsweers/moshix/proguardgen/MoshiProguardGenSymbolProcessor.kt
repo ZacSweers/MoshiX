@@ -19,9 +19,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.codegen.api.InternalMoshiCodegenApi
 import com.squareup.moshi.kotlin.codegen.api.ProguardConfig
 
-public class MoshiProguardGenSymbolProcessor(
-  private val environment: SymbolProcessorEnvironment,
-) : SymbolProcessor {
+public class MoshiProguardGenSymbolProcessor(private val environment: SymbolProcessorEnvironment) :
+  SymbolProcessor {
 
   internal companion object {
 
@@ -97,18 +96,18 @@ public class MoshiProguardGenSymbolProcessor(
               adapterConstructorParams = adapterConstructorParams,
               // Not actually true but in our case we don't need the generated rules for htis
               targetConstructorHasDefaults = false,
-              targetConstructorParams = emptyList()
+              targetConstructorParams = emptyList(),
             )
           environment.logger.info(
             "MOSHI: Writing proguard rules for ${targetType.canonicalName}: $config",
-            clazz
+            clazz,
           )
           val fileName = config.outputFilePathWithoutExtension(targetType.canonicalName)
           environment.codeGenerator
             .createNewFile(
               Dependencies(
                 false,
-                sources = clazz.containingFile?.let { arrayOf(it) } ?: emptyArray()
+                sources = clazz.containingFile?.let { arrayOf(it) } ?: emptyArray(),
               ),
               packageName = "",
               fileName = fileName,
@@ -146,7 +145,7 @@ public class MoshiProguardGenSymbolProcessor(
 
   private fun KSClassDeclaration.walkSealedSubtypes(
     elements: MutableSet<ClassName>,
-    skipAnnotationCheck: Boolean
+    skipAnnotationCheck: Boolean,
   ) {
     if (isSealed) {
       if (!skipAnnotationCheck) {
