@@ -129,7 +129,7 @@ internal class MoshiAdapterGenerator(
   private fun irType(
     classId: ClassId,
     nullable: Boolean = false,
-    arguments: List<IrTypeArgument> = emptyList()
+    arguments: List<IrTypeArgument> = emptyList(),
   ) = pluginContext.irType(classId, nullable, arguments)
 
   override fun prepare(): PreparedAdapter {
@@ -176,7 +176,7 @@ internal class MoshiAdapterGenerator(
             classifier = adapterCls.symbol,
             hasQuestionMark = false,
             arguments = emptyList(),
-            annotations = emptyList()
+            annotations = emptyList(),
           )
         origin = IrDeclarationOrigin.INSTANCE_RECEIVER
       }
@@ -200,7 +200,7 @@ internal class MoshiAdapterGenerator(
           adapterCls,
           ctor.valueParameters[0],
           ctor.valueParameters.getOrNull(1),
-          uniqueAdapter.name
+          uniqueAdapter.name,
         )
     }
 
@@ -237,10 +237,7 @@ internal class MoshiAdapterGenerator(
     ctor.irConstructorBody(pluginContext) { statements ->
       statements += generateJsonAdapterSuperConstructorCall()
       statements +=
-        irInstanceInitializerCall(
-          context = pluginContext,
-          classSymbol = adapterCls.symbol,
-        )
+        irInstanceInitializerCall(context = pluginContext, classSymbol = adapterCls.symbol)
 
       // Size check for types array. Must be equal to the number of type parameters
       // require(types.size == 1) {
@@ -256,7 +253,7 @@ internal class MoshiAdapterGenerator(
                 irCall(moshiSymbols.arraySizeGetter).apply {
                   dispatchReceiver = irGet(ctor.valueParameters[1])
                 },
-                nameHint = "receivedSize"
+                nameHint = "receivedSize",
               )
             +irIfThen(
               condition = irNotEquals(irGet(receivedSize), irInt(expectedSize)),
@@ -277,10 +274,10 @@ internal class MoshiAdapterGenerator(
                         )
                         addArgument(irString("], but received "))
                         addArgument(irGet(receivedSize))
-                      }
+                      },
                     )
                   }
-                )
+                ),
             )
           }
       }
@@ -314,7 +311,7 @@ internal class MoshiAdapterGenerator(
         FqName("com.squareup.moshi.JsonAdapter"),
         Name.identifier("toJson").identifier,
         pluginContext.irBuiltIns.unitType,
-        modality = Modality.OPEN
+        modality = Modality.OPEN,
       ) { function ->
         function.valueParameters.size == 2 &&
           function.valueParameters[0].type.classifierOrFail == moshiSymbols.jsonWriter
@@ -344,10 +341,10 @@ internal class MoshiAdapterGenerator(
                   .apply {
                     putValueArgument(
                       0,
-                      irString("value was null! Wrap in .nullSafe() to write nullable values.")
+                      irString("value was null! Wrap in .nullSafe() to write nullable values."),
                     )
                   }
-              )
+              ),
             )
             // Cast it up to the actual type
             val castValue =
@@ -366,7 +363,7 @@ internal class MoshiAdapterGenerator(
                 dispatchReceiver =
                   irGetField(
                     irGet(dispatchReceiverParameter!!),
-                    adapterProperties.getValue(property.delegateKey)
+                    adapterProperties.getValue(property.delegateKey),
                   )
                 // writer
                 putValueArgument(0, irGet(writer))
@@ -375,7 +372,7 @@ internal class MoshiAdapterGenerator(
                   1,
                   irCall(target.irClass.getPropertyGetter(property.name)!!).apply {
                     dispatchReceiver = irGet(castValue)
-                  }
+                  },
                 )
               }
             }
@@ -389,7 +386,7 @@ internal class MoshiAdapterGenerator(
 
   private fun IrClass.generateFromJsonFun(
     adapterProperties: Map<DelegateKey, IrField>,
-    optionsField: IrField
+    optionsField: IrField,
   ): IrFunction {
     return addOverride(
         FqName("com.squareup.moshi.JsonAdapter"),
@@ -424,7 +421,7 @@ internal class MoshiAdapterGenerator(
                 "errors",
                 irType =
                   pluginContext.irBuiltIns.setClass.typeWith(pluginContext.irBuiltIns.stringType),
-                isMutable = true
+                isMutable = true,
               )
 
             val propertiesByIndex =
@@ -482,7 +479,7 @@ internal class MoshiAdapterGenerator(
               errors = errors,
               maskAllSetValues = maskAllSetValues,
               bitMasks = bitMasks,
-              components = components
+              components = components,
             )
             +irCall(moshiSymbols.jsonReader.getSimpleFunction("endObject")!!).apply {
               dispatchReceiver = irGet(readerParam)
@@ -498,11 +495,11 @@ internal class MoshiAdapterGenerator(
                   irAnd(
                     pluginContext,
                     irNot(irGet(localVars.getValue(property.localHasErrorName))),
-                    irEqualsNull(irGet(localVars.getValue(property.localName)))
+                    irEqualsNull(irGet(localVars.getValue(property.localName))),
                   )
                 +irIfThen(
                   condition = compositeCondition,
-                  thenPart = addError(errors, property, readerParam, "missingProperty")
+                  thenPart = addError(errors, property, readerParam, "missingProperty"),
                 )
               }
             }
@@ -513,7 +510,7 @@ internal class MoshiAdapterGenerator(
                 irNotEquals(
                   irCall(pluginContext.irBuiltIns.setClass.owner.getPropertyGetter("size")!!)
                     .apply { dispatchReceiver = irGet(errors) },
-                  irInt(0)
+                  irInt(0),
                 ),
               thenPart =
                 irThrow(
@@ -523,10 +520,10 @@ internal class MoshiAdapterGenerator(
                       irCall(moshiSymbols.iterableJoinToString).apply {
                         extensionReceiver = irGet(errors)
                         putValueArgument(0, irString("\n"))
-                      }
+                      },
                     )
                   }
-                )
+                ),
             )
 
             val standardConstructor = target.constructor.irConstructor.symbol
@@ -544,7 +541,7 @@ internal class MoshiAdapterGenerator(
                       }
                       addValueParameter(
                         "marker",
-                        irType(ClassId.fromString("kotlin/jvm/internal/DefaultConstructorMarker"))
+                        irType(ClassId.fromString("kotlin/jvm/internal/DefaultConstructorMarker")),
                       )
                     }
                     .symbol
@@ -563,7 +560,7 @@ internal class MoshiAdapterGenerator(
                     localVars,
                     components,
                     bitMasks,
-                    useDefaultsConstructor = true
+                    useDefaultsConstructor = true,
                   )
                 } else {
                   // Happy path - all parameters with defaults are set
@@ -572,10 +569,7 @@ internal class MoshiAdapterGenerator(
                       .withIndex()
                       .asSequence()
                       .map { (index, maskName) ->
-                        irEquals(
-                          irGet(maskName),
-                          irInt(maskAllSetValues[index]),
-                        )
+                        irEquals(irGet(maskName), irInt(maskAllSetValues[index]))
                       }
                       .joinToIrAnd(this, pluginContext)
 
@@ -589,7 +583,7 @@ internal class MoshiAdapterGenerator(
                         localVars,
                         components,
                         bitMasks,
-                        useDefaultsConstructor = false
+                        useDefaultsConstructor = false,
                       ),
                     // Not all set, invoke the defaults constructor
                     elsePart =
@@ -598,8 +592,8 @@ internal class MoshiAdapterGenerator(
                         localVars,
                         components,
                         bitMasks,
-                        useDefaultsConstructor = true
-                      )
+                        useDefaultsConstructor = true,
+                      ),
                   )
                 }
               } else {
@@ -609,7 +603,7 @@ internal class MoshiAdapterGenerator(
                   localVars,
                   components,
                   bitMasks,
-                  useDefaultsConstructor = false
+                  useDefaultsConstructor = false,
                 )
               }
 
@@ -617,7 +611,7 @@ internal class MoshiAdapterGenerator(
               irTemporary(
                 constructorInvocationExpression,
                 nameHint = "result",
-                irType = target.irType
+                irType = target.irType,
               )
 
             // Assign properties not present in the constructor.
@@ -636,7 +630,7 @@ internal class MoshiAdapterGenerator(
                 irCall(property.target.property.setter!!).apply {
                   dispatchReceiver = irGet(result)
                   putValueArgument(0, irGet(localVars.getValue(property.localName)))
-                }
+                },
               )
             }
 
@@ -654,7 +648,7 @@ internal class MoshiAdapterGenerator(
     errors: IrVariable,
     maskAllSetValues: IntArray,
     bitMasks: List<IrVariable>,
-    components: List<FromJsonComponent>
+    components: List<FromJsonComponent>,
   ) =
     irWhile().apply {
       condition =
@@ -668,7 +662,7 @@ internal class MoshiAdapterGenerator(
               dispatchReceiver = irGet(readerParam)
               putValueArgument(0, irGetField(irGet(fieldsHolder), optionsField))
             },
-            nameHint = "nextName"
+            nameHint = "nextName",
           )
 
         // We track property index and mask index separately, because mask index is
@@ -728,7 +722,7 @@ internal class MoshiAdapterGenerator(
                           dispatchReceiver =
                             irGetField(
                               irGet(fieldsHolder),
-                              adapterProperties.getValue(property.delegateKey)
+                              adapterProperties.getValue(property.delegateKey),
                             )
                           putValueArgument(0, irGet(readerParam))
                         }
@@ -749,7 +743,7 @@ internal class MoshiAdapterGenerator(
                             +irSet(localVars.getValue(property.localHasErrorName), irBoolean(true))
                             +addError(errors, property, readerParam, "unexpectedNull")
                           },
-                        elsePart = setVarExpression
+                        elsePart = setVarExpression,
                       )
                     } else {
                       +setVarExpression
@@ -772,11 +766,11 @@ internal class MoshiAdapterGenerator(
                           pluginContext,
                           OperatorNameConventions.AND,
                           irGet(bitMasks[maskNameIndex]),
-                          irInt(inverted)
+                          irInt(inverted),
                         )
                       +irSet(bitMasks[maskNameIndex].symbol, and)
                     }
-                  }
+                  },
               )
             )
             propertyIndex++
@@ -794,7 +788,7 @@ internal class MoshiAdapterGenerator(
                   +irCall(moshiSymbols.jsonReader.getSimpleFunction("skipValue")!!).apply {
                     dispatchReceiver = irGet(readerParam)
                   }
-                }
+                },
             )
           )
           // TODO merge this and the -1? Throw an error?
@@ -811,7 +805,7 @@ internal class MoshiAdapterGenerator(
     errors: IrVariable,
     property: PropertyGenerator,
     readerParam: IrValueParameter,
-    moshiUtilFunction: String
+    moshiUtilFunction: String,
   ) =
     irSet(
       errors,
@@ -826,9 +820,9 @@ internal class MoshiAdapterGenerator(
                 putValueArgument(1, irString(property.jsonName))
                 putValueArgument(2, irGet(readerParam))
               }
-          }
+          },
         )
-      }
+      },
     )
 
   private fun IrBuilderWithScope.constructorCall(
@@ -836,7 +830,7 @@ internal class MoshiAdapterGenerator(
     localVars: Map<String, IrVariable>,
     components: List<FromJsonComponent>,
     bitMasks: List<IrVariable>,
-    useDefaultsConstructor: Boolean
+    useDefaultsConstructor: Boolean,
   ) =
     irCall(constructor).apply {
       var lastIndex = 0
@@ -853,12 +847,12 @@ internal class MoshiAdapterGenerator(
             // primitive type.
             putValueArgument(
               input.parameter.index,
-              defaultPrimitiveValue(input.type, pluginContext)
+              defaultPrimitiveValue(input.type, pluginContext),
             )
           } else {
             putValueArgument(
               input.parameter.index,
-              irGet(localVars.getValue((input as ParameterProperty).property.localName))
+              irGet(localVars.getValue((input as ParameterProperty).property.localName)),
             )
           }
         } else if (input !is ParameterOnly) {
@@ -884,7 +878,7 @@ internal class MoshiAdapterGenerator(
       startOffset,
       endOffset,
       pluginContext.irBuiltIns.unitType,
-      moshiSymbols.jsonAdapter.constructors.single()
+      moshiSymbols.jsonAdapter.constructors.single(),
     )
   }
 }
@@ -919,7 +913,7 @@ private sealed class FromJsonComponent {
 
   data class ParameterProperty(
     override val parameter: TargetParameter,
-    override val property: PropertyGenerator
+    override val property: PropertyGenerator,
   ) : FromJsonComponent(), ParameterComponent, PropertyComponent {
     override val type: IrType = parameter.type
   }
