@@ -20,15 +20,21 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
+import com.tschuchort.compiletesting.configureKsp
 import com.tschuchort.compiletesting.kspArgs
+import com.tschuchort.compiletesting.kspProcessorOptions
 import com.tschuchort.compiletesting.kspSourcesDir
-import com.tschuchort.compiletesting.symbolProcessorProviders
+import com.tschuchort.compiletesting.useKsp2
 import dev.zacsweers.moshix.proguardgen.MoshiProguardGenSymbolProcessor.Companion.OPTION_GENERATE_MOSHI_CORE_PROGUARD_RULES
 import dev.zacsweers.moshix.proguardgen.MoshiProguardGenSymbolProcessor.Companion.OPTION_GENERATE_PROGUARD_RULES
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import java.io.File
 import org.junit.Test
 
+@OptIn(ExperimentalCompilerApi::class)
 class MoshiSealedSymbolProcessorProviderTest {
+
+  private val useKSP2 = System.getProperty("kct.test.useKsp2", "false").toBoolean()
 
   @Test
   fun `standard test with only sealed enabled`() {
@@ -103,7 +109,7 @@ class MoshiSealedSymbolProcessorProviderTest {
       )
 
     val compilation =
-      prepareCompilation(source) { kspArgs += mapOf(OPTION_GENERATE_PROGUARD_RULES to "false") }
+      prepareCompilation(source) { kspProcessorOptions += mapOf(OPTION_GENERATE_PROGUARD_RULES to "false") }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
     assertThat(result.generatedFiles.filter { it.extension == "pro" }).isEmpty()
@@ -114,30 +120,29 @@ class MoshiSealedSymbolProcessorProviderTest {
     val source =
       kotlin(
         "BaseType.kt",
-        """
-      package test
-      import com.squareup.moshi.JsonClass
-      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
-      import dev.zacsweers.moshix.sealed.annotations.NestedSealed
+        """package test
 
-      @JsonClass(generateAdapter = true, generator = "sealed:type")
-      sealed class BaseType {
-        @TypeLabel("a", ["aa"])
-        class TypeA : BaseType()
-        @TypeLabel("b")
-        class TypeB : BaseType()
-        @NestedSealed
-        sealed class TypeC : BaseType() {
-          @TypeLabel("c")
-          class TypeCImpl : TypeC()
-        }
-      }
-    """,
+import com.squareup.moshi.JsonClass
+import dev.zacsweers.moshix.sealed.annotations.NestedSealed
+import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+
+@JsonClass(generateAdapter = true, generator = "sealed:type")
+sealed class BaseType {
+  @TypeLabel("a", ["aa"]) class TypeA : BaseType()
+
+  @TypeLabel("b") class TypeB : BaseType()
+
+  @NestedSealed
+  sealed class TypeC : BaseType() {
+    @TypeLabel("c") class TypeCImpl : TypeC()
+  }
+}
+""",
       )
 
     val compilation =
       prepareCompilation(source) {
-        kspArgs += mapOf(OPTION_GENERATE_MOSHI_CORE_PROGUARD_RULES to "true")
+        kspProcessorOptions += mapOf(OPTION_GENERATE_MOSHI_CORE_PROGUARD_RULES to "true")
       }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
@@ -178,8 +183,14 @@ class MoshiSealedSymbolProcessorProviderTest {
     KotlinCompilation().apply {
       sources = sourceFiles.toList()
       inheritClassPath = true
-      symbolProcessorProviders = listOf(MoshiProguardGenSymbolProcessor.Provider())
-      languageVersion = "1.9"
+      if (useKSP2) {
+        useKsp2()
+      } else {
+        languageVersion = "1.9"
+      }
+      configureKsp {
+        symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider()
+      }
       block()
     }
 

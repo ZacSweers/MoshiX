@@ -40,8 +40,14 @@ tasks.withType<Test>().configureEach {
 
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
-    freeCompilerArgs.addAll("-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
+    optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
   }
+}
+
+// It's not possible to test both KSP 1 and KSP 2 in the same compilation unit
+val testKsp2 = providers.systemProperty("kct.test.useKsp2").getOrElse("false").toBoolean()
+tasks.test {
+  systemProperty("kct.test.useKsp2", testKsp2)
 }
 
 dependencies {
@@ -61,8 +67,16 @@ dependencies {
   implementation(libs.moshi)
   implementation(project(":moshi-sealed:runtime"))
 
+  if (testKsp2) {
+    testImplementation(libs.ksp.aa.embeddable) {
+      exclude(group = "com.google.devtools.ksp", module = "common-deps")
+    }
+    testImplementation(libs.ksp.commonDeps)
+    testImplementation(libs.ksp.cli)
+  } else {
+    testImplementation(libs.ksp)
+  }
   testImplementation(libs.ksp.api)
-  testImplementation(libs.ksp)
   testImplementation(libs.truth)
   testImplementation(libs.junit)
   testImplementation(libs.kotlinCompileTesting)
