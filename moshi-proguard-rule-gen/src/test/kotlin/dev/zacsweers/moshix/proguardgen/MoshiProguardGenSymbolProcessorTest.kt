@@ -53,7 +53,7 @@ class MoshiSealedSymbolProcessorProviderTest {
           class TypeCImpl : TypeC()
         }
       }
-    """
+    """,
       )
 
     val compilation = prepareCompilation(source)
@@ -99,7 +99,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         @TypeLabel("b")
         class TypeB : BaseType()
       }
-    """
+    """,
       )
 
     val compilation =
@@ -132,7 +132,7 @@ class MoshiSealedSymbolProcessorProviderTest {
           class TypeCImpl : TypeC()
         }
       }
-    """
+    """,
       )
 
     val compilation =

@@ -136,10 +136,8 @@ internal fun IrElement.dumpSrc(): String {
 }
 
 @Suppress("DEPRECATION")
-internal class IrSourcePrinterVisitor(
-  out: Appendable,
-  indentUnit: String = "  ",
-) : IrElementVisitorVoid {
+internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  ") :
+  IrElementVisitorVoid {
   private val printer = Printer(out, indentUnit)
 
   private fun IrElement.print() {
@@ -476,7 +474,7 @@ internal class IrSourcePrinterVisitor(
 
   private fun IrFunctionAccessExpression.printArgumentList(
     forceParameterNames: Boolean = false,
-    forceSingleLine: Boolean = false
+    forceSingleLine: Boolean = false,
   ) {
     val arguments = mutableListOf<IrExpression>()
     val paramNames = mutableListOf<String>()
@@ -625,7 +623,7 @@ internal class IrSourcePrinterVisitor(
     if (printArgumentList) {
       expression.printArgumentList(
         forceParameterNames = isAnnotation,
-        forceSingleLine = isAnnotation
+        forceSingleLine = isAnnotation,
       )
     }
   }
@@ -1432,7 +1430,7 @@ private inline fun <T> StringBuilder.appendListWith(
   prefix: String,
   postfix: String,
   separator: String,
-  renderItem: StringBuilder.(T) -> Unit
+  renderItem: StringBuilder.(T) -> Unit,
 ) {
   append(prefix)
   var isFirst = true

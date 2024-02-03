@@ -24,9 +24,7 @@ plugins {
 
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
-    freeCompilerArgs.addAll(
-      "-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi",
-    )
+    freeCompilerArgs.addAll("-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
   }
 }
 

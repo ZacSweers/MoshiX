@@ -142,7 +142,7 @@ class GeneratedAdaptersTest {
     val foo: String,
     val bar: String = "",
     val nullableBar: String? = null,
-    val bazList: List<String> = emptyList()
+    val bazList: List<String> = emptyList(),
   )
 
   @Test
@@ -204,7 +204,7 @@ class GeneratedAdaptersTest {
         mutableMapOf(),
         emptyList(),
         emptySet(),
-        emptyMap()
+        emptyMap(),
       )
 
     val json = adapter.toJson(specialCollections)
@@ -219,7 +219,7 @@ class GeneratedAdaptersTest {
     val mutableMap: MutableMap<String, String>,
     val immutableList: List<String>,
     val immutableSet: Set<String>,
-    val immutableMap: Map<String, String>
+    val immutableMap: Map<String, String>,
   )
 
   @Test
@@ -239,7 +239,7 @@ class GeneratedAdaptersTest {
         mutableListOf("immutableMutableList"),
         mutableListOf("immutableImmutableList"),
         mutableListOf("mutableMutableList"),
-        mutableListOf("mutableImmutableList")
+        mutableListOf("mutableImmutableList"),
       )
 
     val json = adapter.toJson(mutableProperties)
@@ -260,7 +260,7 @@ class GeneratedAdaptersTest {
     val nullableImmutableMutableList: MutableList<String>?,
     val nullableImmutableImmutableList: List<String>?,
     var nullableMutableMutableList: MutableList<String>?,
-    var nullableMutableImmutableList: List<String>
+    var nullableMutableImmutableList: List<String>,
   )
 
   @Test
@@ -274,7 +274,7 @@ class GeneratedAdaptersTest {
         setOf("foo", null, "bar"),
         mapOf("foo" to "bar", "baz" to null),
         null,
-        1
+        1,
       )
 
     val noNullsTypeParams =
@@ -283,7 +283,7 @@ class GeneratedAdaptersTest {
         nullableTypeParams.nullableSet,
         nullableTypeParams.nullableMap.filterValues { it != null },
         null,
-        1
+        1,
       )
 
     val json = adapter.toJson(nullableTypeParams)
@@ -301,7 +301,7 @@ class GeneratedAdaptersTest {
     val nullableSet: Set<String?>,
     val nullableMap: Map<String, String?>,
     val nullableT: T?,
-    val nonNullT: T
+    val nonNullT: T,
   )
 
   @Test
@@ -576,7 +576,7 @@ class GeneratedAdaptersTest {
   class MultipleTransientConstructorParameters(
     @Transient var a: Int = -1,
     var b: Int = -1,
-    @Transient var c: Int = -1
+    @Transient var c: Int = -1,
   )
 
   @Test
@@ -680,7 +680,7 @@ class GeneratedAdaptersTest {
         129,
         130,
         131,
-        132
+        132,
       )
     val json =
       ("""
@@ -737,7 +737,7 @@ class GeneratedAdaptersTest {
     var v29: Int,
     var v30: Int,
     var v31: Int,
-    var v32: Int
+    var v32: Int,
   )
 
   @Test
@@ -779,7 +779,7 @@ class GeneratedAdaptersTest {
         130,
         131,
         132,
-        133
+        133,
       )
     val json =
       ("""
@@ -838,7 +838,7 @@ class GeneratedAdaptersTest {
     var v30: Int,
     var v31: Int,
     var v32: Int,
-    var v33: Int
+    var v33: Int,
   )
 
   @Test
@@ -1033,7 +1033,7 @@ class GeneratedAdaptersTest {
   @JsonClass(generateAdapter = true)
   class MultiplePropertiesShareAdapter(
     @Uppercase(true) var a: String,
-    @Uppercase(true) var b: String
+    @Uppercase(true) var b: String,
   )
 
   @Test
@@ -1415,7 +1415,7 @@ class GeneratedAdaptersTest {
         String,
         String,
         String,
-        String
+        String,
       ) -> Boolean)? =
       null,
   )
@@ -1428,5 +1428,5 @@ data class NullableTypeParams<T>(
   val nullableSet: Set<String?>,
   val nullableMap: Map<String, String?>,
   val nullableT: T?,
-  val nonNullT: T
+  val nonNullT: T,
 )
