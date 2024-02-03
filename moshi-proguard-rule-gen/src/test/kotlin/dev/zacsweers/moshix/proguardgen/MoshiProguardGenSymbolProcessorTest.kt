@@ -103,7 +103,7 @@ class MoshiSealedSymbolProcessorProviderTest {
       )
 
     val compilation =
-      prepareCompilation(source) { kspArgs[OPTION_GENERATE_PROGUARD_RULES] = "false" }
+      prepareCompilation(source) { kspArgs += mapOf(OPTION_GENERATE_PROGUARD_RULES to "false") }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
     assertThat(result.generatedFiles.filter { it.extension == "pro" }).isEmpty()
@@ -136,7 +136,9 @@ class MoshiSealedSymbolProcessorProviderTest {
       )
 
     val compilation =
-      prepareCompilation(source) { kspArgs[OPTION_GENERATE_MOSHI_CORE_PROGUARD_RULES] = "true" }
+      prepareCompilation(source) {
+        kspArgs += mapOf(OPTION_GENERATE_MOSHI_CORE_PROGUARD_RULES to "true")
+      }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
     val generatedSourcesDir = compilation.kspSourcesDir
