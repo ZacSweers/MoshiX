@@ -26,7 +26,7 @@ internal data class TargetProperty(
   val parameter: TargetParameter?,
   val visibility: DescriptorVisibility,
   val jsonName: String?,
-  val jsonIgnore: Boolean
+  val jsonIgnore: Boolean,
 ) {
   val name: String
     get() = property.name.identifier

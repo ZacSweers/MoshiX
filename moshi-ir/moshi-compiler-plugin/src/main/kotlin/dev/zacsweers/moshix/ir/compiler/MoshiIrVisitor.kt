@@ -58,9 +58,7 @@ internal class MoshiIrVisitor(
 
   private val moshiSealedSymbols by lazy { MoshiSealedSymbols(moshiSymbols) }
 
-  private fun adapterGenerator(
-    originalType: IrClass,
-  ): MoshiAdapterGenerator? {
+  private fun adapterGenerator(originalType: IrClass): MoshiAdapterGenerator? {
     val type = targetType(originalType, pluginContext, messageCollector) ?: return null
 
     val properties = mutableMapOf<String, PropertyGenerator>()
@@ -123,7 +121,7 @@ internal class MoshiIrVisitor(
                 moshiSymbols = moshiSymbols,
                 moshiSealedSymbols = moshiSealedSymbols,
                 target = declaration,
-                labelKey = labelKey
+                labelKey = labelKey,
               )
             } else {
               return super.visitClassNew(declaration)
@@ -143,7 +141,7 @@ internal class MoshiIrVisitor(
             val irSrc = adapterClass.adapterClass.dumpSrc()
             messageCollector.report(
               CompilerMessageSeverity.STRONG_WARNING,
-              "MOSHI: Dumping current IR src for ${adapterClass.adapterClass.name}\n$irSrc"
+              "MOSHI: Dumping current IR src for ${adapterClass.adapterClass.name}\n$irSrc",
             )
           }
           deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)

@@ -193,7 +193,7 @@ private fun walkTypeLabels(
       subtype,
       labels,
       objectSubtypes,
-      skipJsonClassCheck = subtype.objectInstance != null
+      skipJsonClassCheck = subtype.objectInstance != null,
     )
   }
 }
@@ -202,7 +202,7 @@ private fun addLabelKeyForType(
   subtype: KClass<*>,
   labels: MutableMap<String, Class<*>>,
   objectSubtypes: MutableMap<Class<*>, Any>,
-  skipJsonClassCheck: Boolean = false
+  skipJsonClassCheck: Boolean = false,
 ) {
   // Regular subtype, read its label
   val subtypeClazz = subtype.java

@@ -93,7 +93,7 @@ internal data class KtParameter(
   val km: KmValueParameter,
   val index: Int,
   val rawType: Class<*>,
-  val annotations: List<Annotation>
+  val annotations: List<Annotation>,
 ) {
   val name
     get() = km.name
@@ -110,7 +110,7 @@ internal data class KtConstructor(
   val km: KmConstructor,
   val jvm: Constructor<*>,
   val parameters: List<KtParameter>,
-  val isDefault: Boolean
+  val isDefault: Boolean,
 ) {
   init {
     jvm.isAccessible = true
@@ -204,7 +204,7 @@ internal data class KtProperty(
   val jvmGetter: Method?,
   val jvmSetter: Method?,
   val jvmAnnotationsMethod: Method?,
-  val parameter: KtParameter?
+  val parameter: KtParameter?,
 ) {
   init {
     jvmField?.isAccessible = true

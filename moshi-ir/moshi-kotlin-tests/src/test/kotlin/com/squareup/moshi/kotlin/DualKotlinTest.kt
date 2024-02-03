@@ -514,7 +514,7 @@ class DualKotlinTest {
         parameterized = GenericClass(6),
         wildcardIn = GenericClass(6),
         wildcardOut = GenericClass(6),
-        complex = GenericClass(listOf(GenericClass(6)))
+        complex = GenericClass(listOf(GenericClass(6))),
       )
     assertThat(adapter.toJson(testValue)).isEqualTo(testJson)
 
@@ -528,7 +528,7 @@ class DualKotlinTest {
     val parameterized: GenericClass<TypeAlias>,
     val wildcardIn: GenericClass<in TypeAlias>,
     val wildcardOut: GenericClass<out TypeAlias>,
-    val complex: GenericClass<GenericTypeAlias>?
+    val complex: GenericClass<GenericTypeAlias>?,
   )
 
   // Regression test for https://github.com/square/moshi/issues/991
@@ -550,7 +550,7 @@ class DualKotlinTest {
         int = 3,
         long = 3,
         float = 3.2f,
-        double = 3.2
+        double = 3.2,
       )
     assertThat(adapter.toJson(instance)).isEqualTo(testJson)
 
@@ -576,7 +576,7 @@ class DualKotlinTest {
     val float: Float,
     val nullableFloat: Float? = null,
     val double: Double,
-    val nullableDouble: Double? = null
+    val nullableDouble: Double? = null,
   )
 
   // Regression test for https://github.com/square/moshi/issues/990
@@ -617,7 +617,7 @@ class DualKotlinTest {
     val redundantNullableAShouldBeNullable: NullableA?,
     val manuallyNullableAShouldBeNullable: A?,
     val convolutedMultiNullableShouldBeNullable: NullableB?,
-    val deepNestedNullableShouldBeNullable: E
+    val deepNestedNullableShouldBeNullable: E,
   )
 
   // Regression test for https://github.com/square/moshi/issues/1009
@@ -690,7 +690,7 @@ class DualKotlinTest {
   class MultipleTransientConstructorParameters(
     @Transient var a: Int = -1,
     var b: Int = -1,
-    @Transient var c: Int = -1
+    @Transient var c: Int = -1,
   )
 
   @Test
@@ -754,7 +754,7 @@ class DualKotlinTest {
   class MultipleIgnoredConstructorParameters(
     @Json(ignore = true) var a: Int = -1,
     var b: Int = -1,
-    @Json(ignore = true) var c: Int = -1
+    @Json(ignore = true) var c: Int = -1,
   )
 
   @Test

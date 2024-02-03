@@ -46,7 +46,7 @@ class ObjectSerializationTest {
         FunctionSpec(
           name = "tacoFactory",
           returnType = Type.VoidType,
-          parameters = mapOf("param1" to Type.IntType, "param2" to Type.BooleanType)
+          parameters = mapOf("param1" to Type.IntType, "param2" to Type.BooleanType),
         )
       )
   }

@@ -69,7 +69,7 @@ internal class KotlinJsonAdapter<T>(
   private val constructor: KtConstructor,
   private val allBindings: List<Binding<T, Any?>?>,
   private val nonIgnoredBindings: List<Binding<T, Any?>>,
-  private val options: JsonReader.Options
+  private val options: JsonReader.Options,
 ) : JsonAdapter<T>() {
 
   override fun fromJson(reader: JsonReader): T {
@@ -109,7 +109,7 @@ internal class KotlinJsonAdapter<T>(
             throw Util.missingProperty(
               constructor.parameters[i].name,
               allBindings[i]?.jsonName,
-              reader
+              reader,
             )
           }
           values[i] = null // Replace absent with null.
@@ -150,7 +150,7 @@ internal class KotlinJsonAdapter<T>(
     val jsonName: String?,
     val adapter: JsonAdapter<P>,
     val property: KtProperty,
-    val propertyIndex: Int = property.parameter?.index ?: -1
+    val propertyIndex: Int = property.parameter?.index ?: -1,
   ) {
 
     fun get(value: K): Any? {
@@ -178,7 +178,7 @@ internal class KotlinJsonAdapter<T>(
   /** A simple [Map] that uses parameter indexes instead of sorting or hashing. */
   class IndexedParameterMap(
     private val parameterKeys: List<KtParameter>,
-    private val parameterValues: Array<Any?>
+    private val parameterValues: Array<Any?>,
   ) : AbstractMutableMap<KtParameter, Any?>() {
 
     override fun put(key: KtParameter, value: Any?): Any? = null
@@ -282,7 +282,7 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
           jvmGetter = getterMethod,
           jvmSetter = setterMethod,
           jvmAnnotationsMethod = annotationsMethod,
-          parameter = ktParameter
+          parameter = ktParameter,
         )
       val allAnnotations = ktProperty.annotations.toMutableList()
       val jsonAnnotation = allAnnotations.filterIsInstance<Json>().firstOrNull()
@@ -305,7 +305,7 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
         moshi.adapter<Any>(
           resolvedPropertyType,
           Util.jsonAnnotations(allAnnotations.toTypedArray()),
-          property.name
+          property.name,
         )
 
       bindingsByName[property.name] =
@@ -341,7 +341,7 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
         @Suppress("DEPRECATION")
         arguments valueEquals other.arguments &&
           classifier == other.classifier &&
-          flags == other.flags &&
+          isNullable == other.isNullable &&
           flexibleTypeUpperBound valueEquals other.flexibleTypeUpperBound &&
           outerType valueEquals other.outerType
       }
@@ -399,13 +399,13 @@ private fun Class<*>.header(): Metadata? {
       data2 = data2,
       extraString = extraString,
       packageName = packageName,
-      extraInt = extraInt
+      extraInt = extraInt,
     )
   }
 }
 
 private fun Metadata.toKmClass(): KmClass? {
-  val classMetadata = KotlinClassMetadata.read(this)
+  val classMetadata = KotlinClassMetadata.readLenient(this)
   if (classMetadata !is KotlinClassMetadata.Class) {
     return null
   }
