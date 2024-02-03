@@ -21,14 +21,13 @@ import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.configureKsp
-import com.tschuchort.compiletesting.kspArgs
 import com.tschuchort.compiletesting.kspProcessorOptions
 import com.tschuchort.compiletesting.kspSourcesDir
 import com.tschuchort.compiletesting.useKsp2
 import dev.zacsweers.moshix.proguardgen.MoshiProguardGenSymbolProcessor.Companion.OPTION_GENERATE_MOSHI_CORE_PROGUARD_RULES
 import dev.zacsweers.moshix.proguardgen.MoshiProguardGenSymbolProcessor.Companion.OPTION_GENERATE_PROGUARD_RULES
-import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import java.io.File
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
 
 @OptIn(ExperimentalCompilerApi::class)
@@ -109,7 +108,9 @@ class MoshiSealedSymbolProcessorProviderTest {
       )
 
     val compilation =
-      prepareCompilation(source) { kspProcessorOptions += mapOf(OPTION_GENERATE_PROGUARD_RULES to "false") }
+      prepareCompilation(source) {
+        kspProcessorOptions += mapOf(OPTION_GENERATE_PROGUARD_RULES to "false")
+      }
     val result = compilation.compile()
     assertThat(result.exitCode).isEqualTo(ExitCode.OK)
     assertThat(result.generatedFiles.filter { it.extension == "pro" }).isEmpty()
@@ -188,9 +189,7 @@ sealed class BaseType {
       } else {
         languageVersion = "1.9"
       }
-      configureKsp {
-        symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider()
-      }
+      configureKsp { symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider() }
       block()
     }
 

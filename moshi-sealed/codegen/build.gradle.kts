@@ -39,16 +39,13 @@ tasks.withType<Test>().configureEach {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-  compilerOptions {
-    optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
-  }
+  compilerOptions { optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi") }
 }
 
 // It's not possible to test both KSP 1 and KSP 2 in the same compilation unit
 val testKsp2 = providers.systemProperty("kct.test.useKsp2").getOrElse("false").toBoolean()
-tasks.test {
-  systemProperty("kct.test.useKsp2", testKsp2)
-}
+
+tasks.test { systemProperty("kct.test.useKsp2", testKsp2) }
 
 dependencies {
   implementation(libs.autoService)
