@@ -22,8 +22,8 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-  compilerOptions { optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerAp") }
+kotlin {
+  compilerOptions { optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi") }
 }
 
 // It's not possible to test both KSP 1 and KSP 2 in the same compilation unit
