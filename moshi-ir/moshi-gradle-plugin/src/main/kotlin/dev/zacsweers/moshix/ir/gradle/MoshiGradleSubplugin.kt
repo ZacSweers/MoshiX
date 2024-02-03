@@ -21,11 +21,7 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
   private companion object {
-    val SUPPORTED_PLATFORMS =
-      setOf(
-        KotlinPlatformType.androidJvm,
-        KotlinPlatformType.jvm,
-      )
+    val SUPPORTED_PLATFORMS = setOf(KotlinPlatformType.androidJvm, KotlinPlatformType.jvm)
   }
 
   override fun apply(target: Project) {
@@ -44,7 +40,7 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       fun addKspDep(configurationName: String) {
         target.dependencies.add(
           configurationName,
-          "dev.zacsweers.moshix:moshi-proguard-rule-gen:$VERSION"
+          "dev.zacsweers.moshix:moshi-proguard-rule-gen:$VERSION",
         )
       }
 
@@ -79,7 +75,7 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     SubpluginArtifact(
       groupId = "dev.zacsweers.moshix",
       artifactId = "moshi-compiler-plugin",
-      version = VERSION
+      version = VERSION,
     )
 
   override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
@@ -100,14 +96,14 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     // Minimum Moshi version
     project.dependencies.add(
       kotlinCompilation.implementationConfigurationName,
-      "com.squareup.moshi:moshi:1.13.0"
+      "com.squareup.moshi:moshi:1.13.0",
     )
 
     val enableSealed = extension.enableSealed.get()
     if (enableSealed) {
       project.dependencies.add(
         kotlinCompilation.implementationConfigurationName,
-        "dev.zacsweers.moshix:moshi-sealed-runtime:$VERSION"
+        "dev.zacsweers.moshix:moshi-sealed-runtime:$VERSION",
       )
     }
 

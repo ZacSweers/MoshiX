@@ -163,9 +163,7 @@ internal fun targetType(
   )
 }
 
-internal fun primaryConstructor(
-  targetType: IrClass,
-): TargetConstructor? {
+internal fun primaryConstructor(targetType: IrClass): TargetConstructor? {
   val primaryConstructor = targetType.primaryConstructor ?: return null
 
   val parameters = LinkedHashMap<String, TargetParameter>()
@@ -180,15 +178,11 @@ internal fun primaryConstructor(
         hasDefault = parameter.hasDefaultValue(),
         qualifiers = parameter.jsonQualifiers(),
         jsonIgnore = parameter.jsonIgnore(),
-        jsonName = parameter.jsonName()
+        jsonName = parameter.jsonName(),
       )
   }
 
-  return TargetConstructor(
-    primaryConstructor,
-    parameters,
-    primaryConstructor.visibility,
-  )
+  return TargetConstructor(primaryConstructor, parameters, primaryConstructor.visibility)
 }
 
 private fun declaredProperties(
@@ -208,7 +202,7 @@ private fun declaredProperties(
         visibility = property.visibility,
         jsonName = property.jsonNameFromAnywhere() ?: parameter?.jsonName ?: name,
         jsonIgnore =
-          isTransient || parameter?.jsonIgnore == true || property.jsonIgnoreFromAnywhere()
+          isTransient || parameter?.jsonIgnore == true || property.jsonIgnoreFromAnywhere(),
       )
   }
 

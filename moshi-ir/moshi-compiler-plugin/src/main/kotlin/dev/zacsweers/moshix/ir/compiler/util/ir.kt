@@ -95,7 +95,7 @@ internal fun IrElement?.locationIn(file: IrFile): CompilerMessageSourceLocation 
   val sourceRangeInfo =
     file.fileEntry.getSourceRangeInfo(
       beginOffset = this?.startOffset ?: SYNTHETIC_OFFSET,
-      endOffset = this?.endOffset ?: SYNTHETIC_OFFSET
+      endOffset = this?.endOffset ?: SYNTHETIC_OFFSET,
     )
   return CompilerMessageLocationWithRange.create(
     path = sourceRangeInfo.filePath,
@@ -103,7 +103,7 @@ internal fun IrElement?.locationIn(file: IrFile): CompilerMessageSourceLocation 
     columnStart = sourceRangeInfo.startColumnNumber + 1,
     lineEnd = sourceRangeInfo.endLineNumber + 1,
     columnEnd = sourceRangeInfo.endColumnNumber + 1,
-    lineContent = null
+    lineContent = null,
   )!!
 }
 
@@ -114,14 +114,14 @@ internal inline fun MessageCollector.error(declaration: IrDeclaration, message: 
 
 internal inline fun MessageCollector.error(
   noinline location: (() -> CompilerMessageSourceLocation)?,
-  message: () -> String
+  message: () -> String,
 ) {
   report(CompilerMessageSeverity.ERROR, message(), location?.invoke())
 }
 
 internal fun IrConstructor.irConstructorBody(
   context: IrGeneratorContext,
-  blockBody: DeclarationIrBuilder.(MutableList<IrStatement>) -> Unit
+  blockBody: DeclarationIrBuilder.(MutableList<IrStatement>) -> Unit,
 ) {
   val startOffset = UNDEFINED_OFFSET
   val endOffset = UNDEFINED_OFFSET
@@ -130,15 +130,12 @@ internal fun IrConstructor.irConstructorBody(
       generatorContext = context,
       symbol = IrSimpleFunctionSymbolImpl(),
       startOffset = startOffset,
-      endOffset = endOffset
+      endOffset = endOffset,
     )
   body =
-    context.irFactory
-      .createBlockBody(
-        startOffset = startOffset,
-        endOffset = endOffset,
-      )
-      .apply { constructorIrBuilder.blockBody(statements) }
+    context.irFactory.createBlockBody(startOffset = startOffset, endOffset = endOffset).apply {
+      constructorIrBuilder.blockBody(statements)
+    }
 }
 
 internal fun DeclarationIrBuilder.irInstanceInitializerCall(
@@ -168,13 +165,13 @@ internal fun IrPluginContext.createIrBuilder(symbol: IrSymbol): DeclarationIrBui
 internal fun IrPluginContext.irType(
   classId: ClassId,
   nullable: Boolean = false,
-  arguments: List<IrTypeArgument> = emptyList()
+  arguments: List<IrTypeArgument> = emptyList(),
 ): IrType = referenceClass(classId)!!.createType(hasQuestionMark = nullable, arguments = arguments)
 
 // returns null: Any? for boxed types and 0: <number type> for primitives
 internal fun IrBuilderWithScope.defaultPrimitiveValue(
   type: IrType,
-  pluginContext: IrPluginContext
+  pluginContext: IrPluginContext,
 ): IrExpression {
   // TODO check unit/void/nothing
   val defaultPrimitive: IrExpression? =
@@ -227,7 +224,7 @@ internal fun IrClass.addOverride(
   name: String,
   returnType: IrType,
   modality: Modality = Modality.FINAL,
-  overloadFilter: (function: IrSimpleFunction) -> Boolean = { true }
+  overloadFilter: (function: IrSimpleFunction) -> Boolean = { true },
 ): IrSimpleFunction =
   addFunction(name, returnType, modality).apply {
     overriddenSymbols =
@@ -253,7 +250,7 @@ internal fun IrBuilderWithScope.irBinOp(
   pluginContext: IrPluginContext,
   name: Name,
   lhs: IrExpression,
-  rhs: IrExpression
+  rhs: IrExpression,
 ): IrExpression {
   val classFqName = (lhs.type as IrSimpleType).classOrNull!!.owner.fqNameWhenAvailable!!
   val symbol =
@@ -265,7 +262,7 @@ internal fun IrBuilderWithScope.irInvoke(
   dispatchReceiver: IrExpression? = null,
   callee: IrFunctionSymbol,
   vararg args: IrExpression,
-  typeHint: IrType? = null
+  typeHint: IrType? = null,
 ): IrMemberAccessExpression<*> {
   assert(callee.isBound) { "Symbol $callee expected to be bound" }
   val returnType = typeHint ?: callee.owner.returnType
@@ -281,7 +278,7 @@ internal val IrProperty.isTransient: Boolean
 internal fun IrBuilderWithScope.irAnd(
   pluginContext: IrPluginContext,
   lhs: IrExpression,
-  rhs: IrExpression
+  rhs: IrExpression,
 ): IrExpression = irBinOp(pluginContext, OperatorNameConventions.AND, lhs, rhs)
 
 internal fun Sequence<IrExpression>.joinToIrAnd(

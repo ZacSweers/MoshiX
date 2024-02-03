@@ -51,7 +51,7 @@ class MoshiSealedSymbolProcessorProviderTest {
           class TypeCImpl : TypeC()
         }
       }
-    """
+    """,
       )
 
     val compilation = prepareCompilation(source)
@@ -117,7 +117,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         @TypeLabel("a")
         class TypeB : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -142,7 +142,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         @TypeLabel("b", alternateLabels = ["aa"])
         class TypeB : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -167,7 +167,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         @TypeLabel("b")
         class TypeB<T> : BaseType<T>()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -206,7 +206,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         @TypeLabel("a")
         class TypeA : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -235,7 +235,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         @DefaultObject
         object TypeB : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -275,7 +275,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         @DefaultObject
         object TypeB : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -318,7 +318,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         @DefaultObject
         object TypeB : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -347,7 +347,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         @TypeLabel("a")
         class TypeA : BaseType()
       }
-    """
+    """,
       )
 
     val result = compile(source)
@@ -373,7 +373,7 @@ class MoshiSealedSymbolProcessorProviderTest {
         @TypeLabel("b")
         object TypeB : BaseType()
       }
-    """
+    """,
       )
 
     val compilation = prepareCompilation(source)
@@ -443,7 +443,7 @@ class MoshiSealedSymbolProcessorProviderTest {
 
         @JsonClass(generateAdapter = true, generator = "sealed:type")
         sealed interface BaseType
-      """
+      """,
       )
 
     val subType =
@@ -457,7 +457,7 @@ class MoshiSealedSymbolProcessorProviderTest {
 
         @JsonClass(generateAdapter = true)
         @TypeLabel("a")
-        data class SubType(val foo: String): BaseType"""
+        data class SubType(val foo: String): BaseType""",
       )
 
     val compilation = prepareCompilation(base, subType)
@@ -505,18 +505,14 @@ class MoshiSealedSymbolProcessorProviderTest {
       )
   }
 
-  private fun prepareCompilation(
-    vararg sourceFiles: SourceFile,
-  ): KotlinCompilation =
+  private fun prepareCompilation(vararg sourceFiles: SourceFile): KotlinCompilation =
     KotlinCompilation().apply {
       sources = sourceFiles.toList()
       inheritClassPath = true
       symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
     }
 
-  private fun compile(
-    vararg sourceFiles: SourceFile,
-  ): CompilationResult {
+  private fun compile(vararg sourceFiles: SourceFile): CompilationResult {
     return prepareCompilation(*sourceFiles).compile()
   }
 }
