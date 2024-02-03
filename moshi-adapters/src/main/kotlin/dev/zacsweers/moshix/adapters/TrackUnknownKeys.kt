@@ -80,7 +80,7 @@ public annotation class TrackUnknownKeys {
     private val shouldTrack: (clazz: Class<*>, annotations: Set<Annotation>) -> Boolean = { _, _ ->
       true
     },
-    private val tracker: UnknownKeysTracker
+    private val tracker: UnknownKeysTracker,
   ) : JsonAdapter.Factory {
     override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
       if (type !is Class<*>) return null
@@ -95,7 +95,7 @@ public annotation class TrackUnknownKeys {
     private class TrackUnknownKeysJsonAdapter<T>(
       private val delegate: JsonAdapter<T>,
       private val clazz: Class<*>,
-      private val tracker: UnknownKeysTracker
+      private val tracker: UnknownKeysTracker,
     ) : JsonAdapter<T>() {
       override fun fromJson(reader: JsonReader): T? {
         val token = reader.peek()

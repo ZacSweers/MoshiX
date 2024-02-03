@@ -81,7 +81,7 @@ class ComplexGenericsInheritanceTest {
               data = Person("layer4F")
               data2 = "layer4F"
               data3 = "layer4F"
-            }
+            },
         )
         .apply {
           layer3C = listOf(1, 2, 3)

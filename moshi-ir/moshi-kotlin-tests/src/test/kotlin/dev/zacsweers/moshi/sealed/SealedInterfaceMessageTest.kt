@@ -35,7 +35,7 @@ class SealedInterfaceMessageTest {
       adapter,
       SealedInterfaceMessage.Success("Okay!"),
       SealedInterfaceMessage.Error(mapOf("order" to 66.0)),
-      SealedInterfaceMessage.Unknown
+      SealedInterfaceMessage.Unknown,
     )
   }
 
@@ -46,7 +46,7 @@ class SealedInterfaceMessageTest {
       adapter,
       MessageWithNullDefault.Success("Okay!"),
       MessageWithNullDefault.Error(mapOf("order" to 66.0)),
-      null
+      null,
     )
   }
 
@@ -57,7 +57,7 @@ class SealedInterfaceMessageTest {
       adapter,
       MessageWithNoDefault.Success("Okay!"),
       MessageWithNoDefault.Error(mapOf("order" to 66.0)),
-      null
+      null,
     )
   }
 
@@ -65,7 +65,7 @@ class SealedInterfaceMessageTest {
     adapter: JsonAdapter<T>,
     success: T,
     error: T,
-    defaultInstance: T?
+    defaultInstance: T?,
   ) {
     assertThat(adapter.fromJson("{\"type\":\"success\",\"value\":\"Okay!\"}")).isEqualTo(success)
     // Test alternates

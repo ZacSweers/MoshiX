@@ -94,7 +94,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
           // like for stylistic reasons.
           "LocalVariableName",
           // KotlinPoet always generates explicit public modifiers for public members.
-          "RedundantVisibilityModifier"
+          "RedundantVisibilityModifier",
         )
         .let { suppressions ->
           AnnotationSpec.builder(Suppress::class)
@@ -158,7 +158,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
           logger.error(
             "@NestedSealed-annotated subtype $type is inappropriately annotated with @JsonClass(generator = " +
               "\"sealed:$labelKey\").",
-            type
+            type,
           )
           return@forEach
         }
@@ -205,7 +205,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
       if (constructor?.isVisibleFrom(type) == false) {
         logger.error(
           "Fallback adapter type $adapterType and its primary constructor must be visible from $type",
-          fallbackAdapterAnnotation
+          fallbackAdapterAnnotation,
         )
         return
       }
@@ -223,7 +223,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
             if (!symbols.moshi.isAssignableFrom(moshiParam.type.resolve())) {
               logger.error(
                 "Fallback adapter type's primary constructor can only have a Moshi parameter",
-                fallbackAdapterAnnotation
+                fallbackAdapterAnnotation,
               )
               return
             }
@@ -232,7 +232,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
           else -> {
             logger.error(
               "Fallback adapter type's primary constructor can only have a Moshi parameter",
-              fallbackAdapterAnnotation
+              fallbackAdapterAnnotation,
             )
             return
           }
@@ -240,7 +240,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
       fallbackStrategy =
         FallbackStrategy.FallbackAdapter(
           className = adapterType.toClassName(),
-          hasMoshiParam = hasMoshiParam
+          hasMoshiParam = hasMoshiParam,
         )
     } else if (useDefaultNull) {
       fallbackStrategy = FallbackStrategy.Null
@@ -263,7 +263,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
                 Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: $subtype
               """
                 .trimIndent(),
-              subtype
+              subtype,
             )
             return
           } else {
@@ -278,7 +278,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
             seenLabels = seenLabels,
             objectAdapters = objectAdapters,
             originatingKSFiles = originatingKSFiles,
-            className = className
+            className = className,
           )
         }
       }
@@ -291,7 +291,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         generatedAnnotation = generatedAnnotation,
         subtypes = sealedSubtypes,
         objectAdapters = objectAdapters,
-        errorLogger = { message -> logger.error(message, type) }
+        errorLogger = { message -> logger.error(message, type) },
       ) {
         addAnnotation(COMMON_SUPPRESS)
         for (file in originatingKSFiles) {
@@ -337,7 +337,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
             seenLabels,
             objectAdapters,
             className,
-            skipJsonClassCheck = true
+            skipJsonClassCheck = true,
           )
         return classType?.let { sequenceOf(it) } ?: emptySequence()
       } else {
@@ -365,7 +365,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
           symbols = symbols,
           seenLabels = seenLabels,
           objectAdapters = objectAdapters,
-          className = className
+          className = className,
         )
       return classType?.let { sequenceOf(it) } ?: emptySequence()
     }
@@ -378,7 +378,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
     seenLabels: MutableMap<String, ClassName>,
     objectAdapters: MutableList<CodeBlock>,
     className: ClassName = subtype.toClassName(),
-    skipJsonClassCheck: Boolean = false
+    skipJsonClassCheck: Boolean = false,
   ): Subtype? {
     // Regular subtype, read its label
     val labelAnnotation =
@@ -420,7 +420,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
       seenLabels.put(alternate, className)?.let { prev ->
         logger.error(
           "Duplicate alternate label '$alternate' defined for $className and $prev.",
-          rootType
+          rootType,
         )
         return null
       }
@@ -431,7 +431,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
       if (labelKey != null) {
         logger.error(
           "Sealed subtype $subtype is annotated with @JsonClass(generator = \"sealed:$labelKey\") and @TypeLabel.",
-          subtype
+          subtype,
         )
         return null
       }
@@ -444,7 +444,7 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         CodeBlock.of(
           ".add(%1T::class.java,·%2T(%1T))",
           className,
-          ObjectJsonAdapter::class.asClassName()
+          ObjectJsonAdapter::class.asClassName(),
         )
       )
     }
@@ -474,7 +474,7 @@ internal sealed interface FallbackStrategy {
         className,
         constructorParams,
         JsonAdapter::class.asClassName(),
-        ANY
+        ANY,
       )
     }
   }
