@@ -11,6 +11,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: 'ci-${{ github.event.merge_group.head_ref || github.head_ref }}-${{ github.workflow }}'
+  cancel-in-progress: true
+
 jobs:
   build:
     name: 'JDK ${{ matrix.java }} / KSP ${{ matrix.ksp_enabled }} / K2 ${{ matrix.k2_enabled }} / KSP2 ${{ matrix.ksp2_enabled }}'
