@@ -55,6 +55,7 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.interpreter.hasAnnotation
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.createType
@@ -84,6 +85,7 @@ private constructor(
   private val target: IrClass,
   private val labelKey: String,
 ) : AdapterGenerator {
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   override fun prepare(): PreparedAdapter? {
     // If this is a nested sealed type of a moshi-sealed parent, defer to the parent
     val sealedParent =
@@ -222,6 +224,7 @@ private constructor(
     }
   }
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun walkTypeLabels(
     rootType: IrClass,
     subtype: IrClass,
@@ -512,6 +515,7 @@ private constructor(
     return PreparedAdapter(adapterCls)
   }
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrClass.generateToJsonFun(delegateField: IrField): IrFunction {
     return addOverride(
         FqName("com.squareup.moshi.JsonAdapter"),
@@ -544,6 +548,7 @@ private constructor(
       }
   }
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrClass.generateFromJsonFun(delegateField: IrField): IrFunction {
     return addOverride(
         FqName("com.squareup.moshi.JsonAdapter"),
@@ -594,6 +599,7 @@ private constructor(
     return ctor
   }
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
     IrDelegatingConstructorCall {
     return IrDelegatingConstructorCallImpl.fromSymbolOwner(

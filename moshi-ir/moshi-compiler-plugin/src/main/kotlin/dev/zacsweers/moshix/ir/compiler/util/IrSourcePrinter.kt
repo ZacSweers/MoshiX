@@ -453,7 +453,7 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
       print(".")
     }
 
-    val prop = (function as? IrSimpleFunction)?.correspondingPropertySymbol?.owner
+    val prop = function.correspondingPropertySymbol?.owner
 
     if (prop != null) {
       val propName = prop.name.asString()
