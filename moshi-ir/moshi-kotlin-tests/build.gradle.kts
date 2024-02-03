@@ -27,6 +27,7 @@ moshi { enableSealed.set(true) }
 val proguardRuleValidator =
   tasks.register("validateProguardRules") {
     doNotTrackState("This is a validation task that should always run")
+    notCompatibleWithConfigurationCache("This task always runs")
     doLast {
       logger.lifecycle("Validating proguard rules")
       val proguardRulesDir = project.file("build/generated/ksp/test/resources/META-INF/proguard")
