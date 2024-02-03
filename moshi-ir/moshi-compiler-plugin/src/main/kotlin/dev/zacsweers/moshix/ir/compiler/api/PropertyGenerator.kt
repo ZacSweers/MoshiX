@@ -29,7 +29,7 @@ import org.jetbrains.kotlin.ir.types.makeNullable
 internal class PropertyGenerator(
   val target: TargetProperty,
   val delegateKey: DelegateKey,
-  val isTransientOrIgnored: Boolean = false
+  val isTransientOrIgnored: Boolean = false,
 ) {
   val name: String = target.name
   val jsonName: String = target.jsonName ?: target.name
@@ -67,7 +67,7 @@ internal class PropertyGenerator(
 
   internal fun generateLocalProperty(
     builder: IrStatementsBuilder<*>,
-    pluginContext: IrPluginContext
+    pluginContext: IrPluginContext,
   ): IrVariable {
     builder.apply {
       val expression =
@@ -83,35 +83,35 @@ internal class PropertyGenerator(
         expression,
         isMutable = true,
         nameHint = localName,
-        irType = expression.type
+        irType = expression.type,
       )
     }
   }
 
   internal fun generateLocalIsPresentProperty(
     builder: IrStatementsBuilder<*>,
-    pluginContext: IrPluginContext
+    pluginContext: IrPluginContext,
   ): IrVariable {
     builder.apply {
       return irTemporary(
         irBoolean(false),
         isMutable = true,
         nameHint = localIsPresentName,
-        irType = pluginContext.irBuiltIns.booleanType
+        irType = pluginContext.irBuiltIns.booleanType,
       )
     }
   }
 
   internal fun generateLocalHasErrorProperty(
     builder: IrStatementsBuilder<*>,
-    pluginContext: IrPluginContext
+    pluginContext: IrPluginContext,
   ): IrVariable {
     builder.apply {
       return irTemporary(
         irBoolean(false),
         isMutable = true,
         nameHint = localHasErrorName,
-        irType = pluginContext.irBuiltIns.booleanType
+        irType = pluginContext.irBuiltIns.booleanType,
       )
     }
   }

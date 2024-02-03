@@ -82,7 +82,7 @@ class MessageTest(type: Type) {
       adapter,
       Message.Success("Okay!"),
       Message.Error(mapOf("order" to 66.0)),
-      Message.Unknown
+      Message.Unknown,
     )
   }
 
@@ -93,7 +93,7 @@ class MessageTest(type: Type) {
       adapter,
       MessageWithNullDefault.Success("Okay!"),
       MessageWithNullDefault.Error(mapOf("order" to 66.0)),
-      null
+      null,
     )
   }
 
@@ -144,7 +144,7 @@ class MessageTest(type: Type) {
       adapter,
       MessageWithNoDefault.Success("Okay!"),
       MessageWithNoDefault.Error(mapOf("order" to 66.0)),
-      null
+      null,
     )
   }
 
@@ -152,7 +152,7 @@ class MessageTest(type: Type) {
     adapter: JsonAdapter<T>,
     success: T,
     error: T,
-    defaultInstance: T?
+    defaultInstance: T?,
   ) {
     assertThat(adapter.fromJson("{\"type\":\"success\",\"value\":\"Okay!\"}")).isEqualTo(success)
     // Test alternates
