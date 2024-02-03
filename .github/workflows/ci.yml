@@ -27,8 +27,6 @@ jobs:
             ksp2_enabled: true
           - ksp_enabled: false
             ksp2_enabled: true
-          - ksp_enabled: false
-            ksp2_enabled: false
       fail-fast: false
 
     env:
