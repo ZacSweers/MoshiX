@@ -37,7 +37,7 @@ class JvmDescriptorsTest {
         Long::class.javaPrimitiveType,
         Short::class.javaPrimitiveType,
         Boolean::class.javaPrimitiveType,
-        Void::class.javaPrimitiveType
+        Void::class.javaPrimitiveType,
       )
       .inOrder()
   }
