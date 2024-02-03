@@ -28,7 +28,7 @@ private val PRIMITIVE_CLASS_TO_DESC =
     Long::class.javaPrimitiveType to 'J',
     Short::class.javaPrimitiveType to 'S',
     Boolean::class.javaPrimitiveType to 'Z',
-    Void::class.javaPrimitiveType to 'V'
+    Void::class.javaPrimitiveType to 'V',
   )
 
 @Suppress("RecursivePropertyAccessor")

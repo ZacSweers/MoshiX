@@ -36,7 +36,7 @@ import org.jetbrains.kotlin.name.Name
 internal open class BaseSymbols(
   protected val irBuiltIns: IrBuiltIns,
   protected val moduleFragment: IrModuleFragment,
-  val pluginContext: IrPluginContext
+  val pluginContext: IrPluginContext,
 ) {
   constructor(
     other: BaseSymbols
@@ -138,7 +138,7 @@ internal open class BaseSymbols(
   protected fun createPackage(packageName: String): IrPackageFragment =
     IrExternalPackageFragmentImpl.createEmptyExternalPackageFragment(
       moduleFragment.descriptor,
-      FqName(packageName)
+      FqName(packageName),
     )
 
   protected fun createClass(
@@ -147,7 +147,7 @@ internal open class BaseSymbols(
     classKind: ClassKind,
     classModality: Modality,
     isValueClass: Boolean = false,
-    body: IrClass.() -> Unit = {}
+    body: IrClass.() -> Unit = {},
   ): IrClassSymbol =
     irFactory
       .buildClass {
@@ -169,7 +169,7 @@ internal open class BaseSymbols(
       endOffset,
       context.irBuiltIns.kClassClass.starProjectedType,
       context.irBuiltIns.kClassClass,
-      classType
+      classType,
     )
 
   private fun IrBuilderWithScope.kClassToJavaClass(kClassReference: IrExpression) =
@@ -185,7 +185,7 @@ internal open class BaseSymbols(
   fun javaClassReference(
     irBuilder: IrBuilderWithScope,
     classType: IrType,
-    forceObjectType: Boolean = false
+    forceObjectType: Boolean = false,
   ) =
     with(irBuilder) {
       val kClassReference = kClassReference(classType)

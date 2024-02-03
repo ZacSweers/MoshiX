@@ -120,5 +120,5 @@ class MultipleMasks(
   val arg62: Long = 62,
   val arg63: Long = 63,
   val arg64: Long = 64,
-  val arg65: Long = 65
+  val arg65: Long = 65,
 )

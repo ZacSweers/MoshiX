@@ -327,7 +327,7 @@ class KotlinJsonAdapterTest {
   class MultipleTransientConstructorParameters(
     @Transient var a: Int = -1,
     var b: Int = -1,
-    @Transient var c: Int = -1
+    @Transient var c: Int = -1,
   )
 
   @Test
@@ -828,7 +828,7 @@ class KotlinJsonAdapterTest {
         129,
         130,
         131,
-        132
+        132,
       )
     val json =
       ("""
@@ -884,7 +884,7 @@ class KotlinJsonAdapterTest {
     var v29: Int,
     var v30: Int,
     var v31: Int,
-    var v32: Int
+    var v32: Int,
   )
 
   @Test
@@ -926,7 +926,7 @@ class KotlinJsonAdapterTest {
         130,
         131,
         132,
-        133
+        133,
       )
     val json =
       ("""
@@ -984,7 +984,7 @@ class KotlinJsonAdapterTest {
     var v30: Int,
     var v31: Int,
     var v32: Int,
-    var v33: Int
+    var v33: Int,
   )
 
   data class Box<out T>(val data: T)
@@ -997,7 +997,7 @@ class KotlinJsonAdapterTest {
         Types.newParameterizedTypeWithOwner(
           KotlinJsonAdapterTest::class.java,
           Box::class.java,
-          String::class.java
+          String::class.java,
         )
       )
     assertThat(stringBoxAdapter.fromJson("""{"data":"hello"}""")).isEqualTo(Box("hello"))
@@ -1018,8 +1018,8 @@ class KotlinJsonAdapterTest {
         Types.newParameterizedTypeWithOwner(
           KotlinJsonAdapterTest::class.java,
           Box::class.java,
-          String::class.java
-        )
+          String::class.java,
+        ),
       )
     val adapter = moshi.adapter<NestedGenerics<String, Int, Box<String>>>(type).indent("  ")
     val json =
@@ -1142,7 +1142,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToStandardReflection::class.java,
       """{"map":{"key":"value"}}""",
-      MapOfStringToStandardReflection(mapOf("key" to "value"))
+      MapOfStringToStandardReflection(mapOf("key" to "value")),
     )
   }
 
@@ -1154,7 +1154,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToStandardCodegen::class.java,
       """{"map":{"key":"value"}}""",
-      MapOfStringToStandardCodegen(mapOf("key" to "value"))
+      MapOfStringToStandardCodegen(mapOf("key" to "value")),
     )
   }
 
@@ -1167,7 +1167,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToEnumReflection::class.java,
       """{"map":{"key":"A"}}""",
-      MapOfStringToEnumReflection(mapOf("key" to KotlinEnum.A))
+      MapOfStringToEnumReflection(mapOf("key" to KotlinEnum.A)),
     )
   }
 
@@ -1179,7 +1179,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToEnumCodegen::class.java,
       """{"map":{"key":"A"}}""",
-      MapOfStringToEnumCodegen(mapOf("key" to KotlinEnum.A))
+      MapOfStringToEnumCodegen(mapOf("key" to KotlinEnum.A)),
     )
   }
 
@@ -1192,7 +1192,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToCollectionReflection::class.java,
       """{"map":{"key":[]}}""",
-      MapOfStringToCollectionReflection(mapOf("key" to listOf()))
+      MapOfStringToCollectionReflection(mapOf("key" to listOf())),
     )
   }
 
@@ -1204,7 +1204,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToCollectionCodegen::class.java,
       """{"map":{"key":[]}}""",
-      MapOfStringToCollectionCodegen(mapOf("key" to listOf()))
+      MapOfStringToCollectionCodegen(mapOf("key" to listOf())),
     )
   }
 
@@ -1217,7 +1217,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToMapReflection::class.java,
       """{"map":{"key":{}}}""",
-      MapOfStringToMapReflection(mapOf("key" to mapOf()))
+      MapOfStringToMapReflection(mapOf("key" to mapOf())),
     )
   }
 
@@ -1229,7 +1229,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToMapCodegen::class.java,
       """{"map":{"key":{}}}""",
-      MapOfStringToMapCodegen(mapOf("key" to mapOf()))
+      MapOfStringToMapCodegen(mapOf("key" to mapOf())),
     )
   }
 
@@ -1242,7 +1242,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToArrayReflection::class.java,
       """{"map":{"key":[]}}""",
-      MapOfStringToArrayReflection(mapOf("key" to arrayOf()))
+      MapOfStringToArrayReflection(mapOf("key" to arrayOf())),
     )
   }
 
@@ -1254,7 +1254,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToArrayCodegen::class.java,
       """{"map":{"key":[]}}""",
-      MapOfStringToArrayCodegen(mapOf("key" to arrayOf()))
+      MapOfStringToArrayCodegen(mapOf("key" to arrayOf())),
     )
   }
 
@@ -1267,7 +1267,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToClassReflection::class.java,
       """{"map":{"key":{"a":19,"b":42}}}""",
-      MapOfStringToClassReflection(mapOf("key" to ConstructorParameters(19, 42)))
+      MapOfStringToClassReflection(mapOf("key" to ConstructorParameters(19, 42))),
     )
   }
 
@@ -1279,7 +1279,7 @@ class KotlinJsonAdapterTest {
     mapWildcardsParameterizedTest(
       MapOfStringToClassCodegen::class.java,
       """{"map":{"key":{"a":19,"b":42}}}""",
-      MapOfStringToClassCodegen(mapOf("key" to ConstructorParameters(19, 42)))
+      MapOfStringToClassCodegen(mapOf("key" to ConstructorParameters(19, 42))),
     )
   }
 
