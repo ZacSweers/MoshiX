@@ -60,11 +60,7 @@ spotless {
     target("**/*.kt")
     trimTrailingWhitespace()
     endWithNewline()
-    targetExclude(
-      "**/Dependencies.kt",
-      "**/spotless.kt",
-      "**/build/**",
-    )
+    targetExclude("**/Dependencies.kt", "**/spotless.kt", "**/build/**")
   }
   kotlinGradle {
     ktfmt(ktfmtVersion).googleStyle()

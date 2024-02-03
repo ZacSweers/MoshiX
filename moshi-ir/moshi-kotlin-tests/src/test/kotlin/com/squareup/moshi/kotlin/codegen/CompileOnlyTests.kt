@@ -53,7 +53,7 @@ data class TestModel(val someVariable: Int, val anotherVariable: String)
 @JsonClass(generateAdapter = true)
 internal data class MismatchParentAndNestedClassVisibility(
   val type: Int,
-  val name: String? = null
+  val name: String? = null,
 ) {
 
   @JsonClass(generateAdapter = true) data class NestedClass(val nestedProperty: String)
@@ -67,7 +67,7 @@ data class KeysWithSpaces(
   @Json(name = "3. Last Refreshed") val lastRefreshed: String,
   @Json(name = "4. Interval") val interval: String,
   @Json(name = "5. Output Size") val size: String,
-  @Json(name = "6. Time Zone") val timeZone: String
+  @Json(name = "6. Time Zone") val timeZone: String,
 )
 
 // Regression test for https://github.com/square/moshi/issues/848
@@ -104,7 +104,7 @@ data class SmokeTestType(
   val aliasedName: TypeAliasName = "Woah",
   val genericAlias: GenericTypeAlias = listOf("Woah"),
   // Regression test for https://github.com/square/moshi/issues/1272
-  val nestedArray: Array<Map<String, Any>>? = null
+  val nestedArray: Array<Map<String, Any>>? = null,
 )
 
 typealias TypeAliasName = String

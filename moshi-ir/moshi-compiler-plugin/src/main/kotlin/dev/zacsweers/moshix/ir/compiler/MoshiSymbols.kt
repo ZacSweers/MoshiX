@@ -45,7 +45,7 @@ import org.jetbrains.kotlin.name.Name
 internal class MoshiSymbols(
   irBuiltIns: IrBuiltIns,
   moduleFragment: IrModuleFragment,
-  pluginContext: IrPluginContext
+  pluginContext: IrPluginContext,
 ) : BaseSymbols(irBuiltIns, moduleFragment, pluginContext) {
   private val moshiPackage: IrPackageFragment by lazy { createPackage("com.squareup.moshi") }
   private val moshiInternalPackage: IrPackageFragment by lazy {
@@ -71,7 +71,7 @@ internal class MoshiSymbols(
         addFunction(
           Name.identifier("beginObject").identifier,
           irBuiltIns.unitType,
-          Modality.ABSTRACT
+          Modality.ABSTRACT,
         )
         addFunction(Name.identifier("endObject").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
         addFunction(Name.identifier("skipName").identifier, irBuiltIns.unitType, Modality.ABSTRACT)
@@ -80,7 +80,7 @@ internal class MoshiSymbols(
         addFunction(
           Name.identifier("hasNext").identifier,
           irBuiltIns.booleanType,
-          Modality.ABSTRACT
+          Modality.ABSTRACT,
         )
 
         val optionsClass = createClass(this, "Options", ClassKind.CLASS, Modality.FINAL)
@@ -157,14 +157,14 @@ internal class MoshiSymbols(
         addFunction(
             Name.identifier("adapter").identifier,
             jsonAdapter.typeWith(irBuiltIns.anyNType),
-            Modality.FINAL
+            Modality.FINAL,
           )
           .apply {
             addTypeParameter("T", irBuiltIns.anyNType)
             addValueParameter("type", type.defaultType)
             addValueParameter(
               "annotations",
-              irBuiltIns.setClass.typeWith(irBuiltIns.annotationType)
+              irBuiltIns.setClass.typeWith(irBuiltIns.annotationType),
             )
             addValueParameter("fieldName", irBuiltIns.stringType)
           }
@@ -172,7 +172,7 @@ internal class MoshiSymbols(
         addFunction(
           Name.identifier("newBuilder").identifier,
           moshiBuilder.defaultType,
-          Modality.FINAL
+          Modality.FINAL,
         )
       }
       .symbol
@@ -205,7 +205,7 @@ internal class MoshiSymbols(
         addFunction(
             Name.identifier("fromJson").identifier,
             t.defaultType.makeNullable(),
-            Modality.ABSTRACT
+            Modality.ABSTRACT,
           )
           .apply { addValueParameter("reader", jsonReader.defaultType) }
 

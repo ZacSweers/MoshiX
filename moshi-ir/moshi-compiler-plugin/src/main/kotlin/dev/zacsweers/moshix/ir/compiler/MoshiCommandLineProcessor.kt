@@ -42,7 +42,7 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
         valueDescription = "<true | false>",
         description = KEY_ENABLED.toString(),
         required = true,
-        allowMultipleOccurrences = false
+        allowMultipleOccurrences = false,
       )
     val OPTION_DEBUG =
       CliOption(
@@ -50,7 +50,7 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
         valueDescription = "<true | false>",
         description = KEY_DEBUG.toString(),
         required = false,
-        allowMultipleOccurrences = false
+        allowMultipleOccurrences = false,
       )
     val OPTION_ENABLE_SEALED =
       CliOption(
@@ -58,7 +58,7 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
         valueDescription = "<true | false>",
         description = KEY_GENERATED_ANNOTATION.toString(),
         required = false,
-        allowMultipleOccurrences = false
+        allowMultipleOccurrences = false,
       )
     val OPTION_GENERATED_ANNOTATION =
       CliOption(
@@ -66,24 +66,19 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
         valueDescription = "String",
         description = KEY_ENABLE_SEALED.toString(),
         required = false,
-        allowMultipleOccurrences = false
+        allowMultipleOccurrences = false,
       )
   }
 
   override val pluginId: String = "dev.zacsweers.moshix.compiler"
 
   override val pluginOptions: Collection<AbstractCliOption> =
-    listOf(
-      OPTION_DEBUG,
-      OPTION_ENABLED,
-      OPTION_ENABLE_SEALED,
-      OPTION_GENERATED_ANNOTATION,
-    )
+    listOf(OPTION_DEBUG, OPTION_ENABLED, OPTION_ENABLE_SEALED, OPTION_GENERATED_ANNOTATION)
 
   override fun processOption(
     option: AbstractCliOption,
     value: String,
-    configuration: CompilerConfiguration
+    configuration: CompilerConfiguration,
   ): Unit =
     when (option.optionName) {
       "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())

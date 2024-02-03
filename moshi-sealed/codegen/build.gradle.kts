@@ -34,15 +34,13 @@ tasks.withType<Test>().configureEach {
     "--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
     "--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
     "--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
-    "--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+    "--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
   )
 }
 
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
-    freeCompilerArgs.addAll(
-      "-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi",
-    )
+    freeCompilerArgs.addAll("-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
   }
 }
 
