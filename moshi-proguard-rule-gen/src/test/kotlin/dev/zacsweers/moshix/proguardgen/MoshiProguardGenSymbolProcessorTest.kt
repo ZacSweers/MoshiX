@@ -189,7 +189,9 @@ sealed class BaseType {
       } else {
         languageVersion = "1.9"
       }
-      configureKsp { symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider() }
+      configureKsp(useKSP2) {
+        symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider()
+      }
       block()
     }
 

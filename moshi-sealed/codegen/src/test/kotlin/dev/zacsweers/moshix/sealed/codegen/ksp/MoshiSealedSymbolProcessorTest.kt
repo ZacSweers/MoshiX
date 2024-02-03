@@ -518,7 +518,7 @@ class MoshiSealedSymbolProcessorProviderTest {
       } else {
         languageVersion = "1.9"
       }
-      configureKsp { symbolProcessorProviders += MoshiSealedSymbolProcessorProvider() }
+      configureKsp(useKSP2) { symbolProcessorProviders += MoshiSealedSymbolProcessorProvider() }
     }
 
   private fun compile(vararg sourceFiles: SourceFile): CompilationResult {
