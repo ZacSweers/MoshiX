@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-agp = "8.2.1"
+agp = "8.2.2"
 autoService = "1.1.1"
 gjf = "1.17.0"
 incap = "1.0.0"
@@ -21,7 +21,7 @@ jdk = "21"
 jvmTarget = "11"
 kotlin = "1.9.22"
 kotlinCompileTesting = "0.4.0"
-kotlinpoet = "1.15.3"
+kotlinpoet = "1.16.0"
 ksp = "1.9.22-1.0.16"
 ktfmt = "0.47"
 moshi = "1.15.0"
@@ -30,13 +30,13 @@ retrofit = "2.9.0"
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version = "1.9.10" }
-kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.13.2" }
+kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.14.0" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.26.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.25.1" } # Always replaced by the local plugin
-spotless = { id = "com.diffplug.spotless", version = "6.23.3" }
+spotless = { id = "com.diffplug.spotless", version = "6.25.0" }
 
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -83,6 +83,6 @@ retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.re
 
 # Test libs
 junit = { module = "junit:junit", version = "4.13.2" }
-truth = { module = "com.google.truth:truth", version = "1.2.0" }
+truth = { module = "com.google.truth:truth", version = "1.4.0" }
 kotlinCompileTesting = { module = "dev.zacsweers.kctfork:core", version.ref = "kotlinCompileTesting" }
 kotlinCompileTesting-ksp = { module = "dev.zacsweers.kctfork:ksp", version.ref ="kotlinCompileTesting" }
