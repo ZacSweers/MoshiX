@@ -21,6 +21,14 @@ jobs:
         ksp_enabled: [ true, false ]
         k2_enabled: [ true, false ]
         ksp2_enabled: [ true, false ]
+        # Need to exclude any k2/ksp2 combo where ksp2 is enabled but k2 is not
+        exclude:
+          - k2_enabled: false
+            ksp2_enabled: true
+          - ksp_enabled: false
+            ksp2_enabled: true
+          - ksp_enabled: false
+            ksp2_enabled: false
       fail-fast: false
 
     env:
