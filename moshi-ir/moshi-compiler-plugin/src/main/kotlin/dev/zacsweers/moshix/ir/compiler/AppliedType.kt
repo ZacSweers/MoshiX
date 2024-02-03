@@ -32,9 +32,7 @@ internal class AppliedType private constructor(val type: IrClass) {
    * Returns all super classes of this, recursively. Only [IrClass] is used as we can't really use
    * other types.
    */
-  fun superclasses(
-    pluginContext: IrPluginContext,
-  ): LinkedHashSet<AppliedType> {
+  fun superclasses(pluginContext: IrPluginContext): LinkedHashSet<AppliedType> {
     val result: LinkedHashSet<AppliedType> = LinkedHashSet()
     result.add(this)
     for (supertype in type.getAllSuperclasses()) {

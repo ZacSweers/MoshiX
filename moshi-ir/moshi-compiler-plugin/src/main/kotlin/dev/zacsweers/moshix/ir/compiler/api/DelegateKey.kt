@@ -72,7 +72,7 @@ internal data class DelegateKey(
     adapterCls: IrClass,
     moshiParameter: IrValueParameter,
     typesParameter: IrValueParameter?,
-    propertyName: String
+    propertyName: String,
   ): IrField {
     val qualifierNames =
       jsonQualifiers.joinToString("") {
@@ -111,7 +111,7 @@ internal data class DelegateKey(
                 typesParameter,
                 genericIndex,
                 propertyName,
-                jsonQualifiers
+                jsonQualifiers,
               )
         }
     return field
@@ -126,7 +126,7 @@ private fun IrBuilderWithScope.moshiAdapterCall(
   typesParameter: IrValueParameter?,
   genericIndex: Int,
   propertyName: String,
-  jsonQualifiers: List<IrConstructorCall>
+  jsonQualifiers: List<IrConstructorCall>,
 ): IrExpressionBody {
   return irExprBody(
     irCall(moshiSymbols.moshiThreeArgAdapter).apply {
@@ -158,7 +158,7 @@ private fun IrBuilderWithScope.addTypeParam(
         irCall(moshiSymbols.arrayGet.symbol).apply {
           dispatchReceiver = irGet(typesParameter!!)
           putValueArgument(0, irInt(genericIndex))
-        }
+        },
       )
     }
   }
@@ -167,7 +167,7 @@ private fun IrBuilderWithScope.addAnnotationsParam(
   irCall: IrCall,
   pluginContext: IrPluginContext,
   moshiSymbols: MoshiSymbols,
-  jsonQualifiers: List<IrConstructorCall>
+  jsonQualifiers: List<IrConstructorCall>,
 ) =
   irCall.apply {
     val argumentExpression =
@@ -189,7 +189,7 @@ private fun IrBuilderWithScope.addAnnotationsParam(
             callee = callee,
             type =
               pluginContext.irBuiltIns.setClass.typeWith(pluginContext.irBuiltIns.annotationType),
-            typeArguments = listOf(pluginContext.irBuiltIns.annotationType)
+            typeArguments = listOf(pluginContext.irBuiltIns.annotationType),
           )
           .apply { putValueArgument(0, argExpression) }
       }
@@ -238,7 +238,7 @@ private fun IrBuilderWithScope.renderType(
   moshiSymbols: MoshiSymbols,
   delegateType: IrType,
   typesParameter: IrValueParameter?,
-  forceBoxing: Boolean = false
+  forceBoxing: Boolean = false,
 ): IrExpression {
   check(delegateType is IrSimpleType) { "Expected a SimpleType, got $delegateType" }
   val classifier = delegateType.classifier
@@ -265,8 +265,8 @@ private fun IrBuilderWithScope.renderType(
         renderType(
           moshiSymbols,
           builtIns.primitiveTypeToIrType.getValue(primitiveArrayType),
-          typesParameter
-        )
+          typesParameter,
+        ),
       )
     }
   }
@@ -278,8 +278,8 @@ private fun IrBuilderWithScope.renderType(
           moshiSymbols,
           delegateType.arguments[0].typeOrNull!!,
           typesParameter,
-          forceBoxing = true
-        )
+          forceBoxing = true,
+        ),
       )
     }
   }
@@ -288,7 +288,7 @@ private fun IrBuilderWithScope.renderType(
   return if (delegateType.arguments.isEmpty()) {
     irImplicitCast(
       moshiSymbols.javaClassReference(this, delegateType, forceObjectType = forceBoxing),
-      moshiSymbols.type.defaultType
+      moshiSymbols.type.defaultType,
     )
   } else {
     // Build the generic
@@ -334,12 +334,12 @@ private fun IrBuilderWithScope.renderType(
               irCall(moshiSymbols.moshiTypesSubtypeOf).apply {
                 putValueArgument(
                   0,
-                  renderType(moshiSymbols, builtIns.anyType, typesParameter, forceBoxing = true)
+                  renderType(moshiSymbols, builtIns.anyType, typesParameter, forceBoxing = true),
                 )
               }
             }
-          }
-        )
+          },
+        ),
       )
     }
   }

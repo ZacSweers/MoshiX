@@ -47,10 +47,7 @@ class JsonStringTest {
   }
 
   @JsonClass(generateAdapter = true)
-  data class ExampleClass(
-    val type: Int,
-    @JsonString val rawJson: String,
-  )
+  data class ExampleClass(val type: Int, @JsonString val rawJson: String)
 
   @Test
   fun nullableCase() {
@@ -68,10 +65,7 @@ class JsonStringTest {
   }
 
   @JsonClass(generateAdapter = true)
-  data class NullableExampleClass(
-    val type: Int,
-    @JsonString val rawJson: String?,
-  )
+  data class NullableExampleClass(val type: Int, @JsonString val rawJson: String?)
 
   @Test
   fun retrofitServiceMethodCase() {

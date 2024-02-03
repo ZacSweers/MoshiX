@@ -34,9 +34,8 @@ import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.types.Variance
 
-internal class MoshiSealedSymbols(
-  private val moshiSymbols: MoshiSymbols,
-) : BaseSymbols(moshiSymbols) {
+internal class MoshiSealedSymbols(private val moshiSymbols: MoshiSymbols) :
+  BaseSymbols(moshiSymbols) {
 
   private val moshiAdaptersPackage: IrPackageFragment by lazy {
     createPackage("com.squareup.moshi.adapters")
@@ -51,7 +50,7 @@ internal class MoshiSealedSymbols(
       moshiAdaptersPackage,
       "PolymorphicJsonAdapterFactory",
       ClassKind.CLASS,
-      Modality.FINAL
+      Modality.FINAL,
     ) {
       val classTypeParameter = addTypeParameter("T", irBuiltIns.anyNType, Variance.INVARIANT)
       //  val pjafWithDefaultValue by lazy { pjaf.getSimpleFunction("withDefaultValue")!! }
@@ -97,7 +96,7 @@ internal class MoshiSealedSymbols(
         .apply {
           addValueParameter(
             "fallbackJsonAdapter",
-            moshiSymbols.jsonAdapter.typeWith(irBuiltIns.anyNType).makeNullable()
+            moshiSymbols.jsonAdapter.typeWith(irBuiltIns.anyNType).makeNullable(),
           )
         }
     }

@@ -140,14 +140,14 @@ class AdaptedByTest {
       .isEqualTo(
         ClassUsingAnnotatedClasses(
           AnnotatedStringAlias("value"),
-          AnnotatedFactoryStringAlias("value")
+          AnnotatedFactoryStringAlias("value"),
         )
       )
   }
 
   data class ClassUsingAnnotatedClasses(
     val alias1: AnnotatedStringAlias,
-    val alias2: AnnotatedFactoryStringAlias
+    val alias2: AnnotatedFactoryStringAlias,
   )
 
   @Test
