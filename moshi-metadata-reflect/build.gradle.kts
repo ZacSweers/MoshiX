@@ -30,7 +30,7 @@ dependencies {
   implementation(libs.kotlin.metadata)
   implementation(libs.moshi)
   kspTest(libs.moshi.codegen)
-  testImplementation("org.assertj:assertj-core:3.25.2")
+  testImplementation("org.assertj:assertj-core:3.25.3")
   testImplementation(libs.junit)
   testImplementation(libs.truth)
 }
