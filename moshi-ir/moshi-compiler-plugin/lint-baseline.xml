@@ -1,0 +1,1126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.4.0-alpha11" type="baseline" client="gradle" dependencies="false" name="AGP (8.4.0-alpha11)" variant="all" version="8.4.0-alpha11">
+
+    <issue
+        id="IgnoreWithoutReason"
+        message="Test is ignored without giving any explanation"
+        errorLine1="  @Ignore"
+        errorLine2="  ~~~~~~~">
+        <location
+            file="src/test/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrVisitorTest.kt"
+            line="395"
+            column="3"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      if (supertype.kind != ClassKind.CLASS) continue"
+        errorLine2="                    ~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/AppliedType.kt"
+            line="39"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    createClass(javaLang, &quot;Class&quot;, ClassKind.CLASS, Modality.FINAL)"
+        errorLine2="                                   ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/BaseSymbols.kt"
+            line="111"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ModuleDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      moduleFragment.descriptor,"
+        errorLine2="                     ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/BaseSymbols.kt"
+            line="140"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    classKind: ClassKind,"
+        errorLine2="               ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/BaseSymbols.kt"
+            line="147"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        kind = classKind"
+        errorLine2="               ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/BaseSymbols.kt"
+            line="155"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          visibility = DescriptorVisibilities.PRIVATE"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
+            line="99"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.types.Variance appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="            if (typeArg is IrTypeProjection &amp;&amp; typeArg.variance != Variance.INVARIANT) {"
+        errorLine2="                                                       ~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
+            line="317"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.types.Variance appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="                when (typeArg.variance) {"
+        errorLine2="                              ~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
+            line="322"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.types.Variance appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="                  Variance.IN_VARIANCE -> moshiSymbols.moshiTypesSuperTypeOf"
+        errorLine2="                  ~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
+            line="323"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.types.Variance appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="                  Variance.OUT_VARIANCE -> moshiSymbols.moshiTypesSubtypeOf"
+        errorLine2="                  ~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
+            line="324"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.types.Variance appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="                  Variance.INVARIANT -> error(&quot;Not possible&quot;)"
+        errorLine2="                  ~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
+            line="325"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        declaration.visibility != DescriptorVisibilities.PUBLIC &amp;&amp;"
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="209"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        declaration.visibility != DescriptorVisibilities.PUBLIC &amp;&amp;"
+        errorLine2="                    ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="209"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          declaration.visibility != DescriptorVisibilities.LOCAL"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="210"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          declaration.visibility != DescriptorVisibilities.LOCAL"
+        errorLine2="                      ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="210"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        print(declaration.visibility.toString().toLowerCase(Locale.ROOT))"
+        errorLine2="                          ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="212"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ConstructorDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    val constructedClass = expression.symbol.descriptor.constructedClass"
+        errorLine2="                                                        ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="598"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.FunctionDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    val constructedClass = expression.symbol.descriptor.constructedClass"
+        errorLine2="                                             ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="598"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    val name = constructedClass.name"
+        errorLine2="               ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="599"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.Named appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    val name = constructedClass.name"
+        errorLine2="                                ~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="599"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.FunctionDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    val isAnnotation = expression.symbol.descriptor.isAnnotationConstructor()"
+        errorLine2="                                         ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="600"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.resolve.descriptorUtil.DescriptorUtilsKt appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    val isAnnotation = expression.symbol.descriptor.isAnnotationConstructor()"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="600"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.FunctionDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    if (expression.returnTargetSymbol.descriptor.name.asString() != &quot;&lt;anonymous>&quot;) {"
+        errorLine2="                                      ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="749"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.Named appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    if (expression.returnTargetSymbol.descriptor.name.asString() != &quot;&lt;anonymous>&quot;) {"
+        errorLine2="                                                 ~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="749"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.FunctionDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        print(call.symbol.descriptor.name)"
+        errorLine2="                          ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="806"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.Named appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        print(call.symbol.descriptor.name)"
+        errorLine2="                                     ~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="806"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      declaration.visibility != DescriptorVisibilities.PUBLIC &amp;&amp;"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="844"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      declaration.visibility != DescriptorVisibilities.PUBLIC &amp;&amp;"
+        errorLine2="                  ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="844"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        declaration.visibility != DescriptorVisibilities.LOCAL"
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="845"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        declaration.visibility != DescriptorVisibilities.LOCAL"
+        errorLine2="                    ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="845"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      print(declaration.visibility.toString().toLowerCase(Locale.ROOT))"
+        errorLine2="                        ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="847"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      declaration.visibility != DescriptorVisibilities.PUBLIC &amp;&amp;"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1020"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      declaration.visibility != DescriptorVisibilities.PUBLIC &amp;&amp;"
+        errorLine2="                  ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1020"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        declaration.visibility != DescriptorVisibilities.LOCAL"
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1021"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        declaration.visibility != DescriptorVisibilities.LOCAL"
+        errorLine2="                    ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1021"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      print(declaration.visibility.toString().toLowerCase(Locale.ROOT))"
+        errorLine2="                        ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1023"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ConstructorDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    val constructedClass = expression.symbol.descriptor.constructedClass"
+        errorLine2="                                                        ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1165"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.FunctionDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    val constructedClass = expression.symbol.descriptor.constructedClass"
+        errorLine2="                                             ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1165"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    val name = constructedClass.name"
+        errorLine2="               ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1166"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.Named appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    val name = constructedClass.name"
+        errorLine2="                                ~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1166"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassifierDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          append(classifier.descriptor.name)"
+        errorLine2="                            ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1278"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.Named appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          append(classifier.descriptor.name)"
+        errorLine2="                                       ~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1278"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.types.Variance appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          append(variance.label)"
+        errorLine2="                 ~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1318"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.types.Variance appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          if (variance != Variance.INVARIANT) append(&apos; &apos;)"
+        errorLine2="              ~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
+            line="1319"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="  private val visibility = target.visibility"
+        errorLine2="                                  ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/MoshiAdapterGenerator.kt"
+            line="114"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      kind = ClassKind.CLASS"
+        errorLine2="             ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/MoshiAdapterGenerator.kt"
+            line="156"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.types.Variance appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        variance = typeVariable.variance"
+        errorLine2="                                ~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/MoshiAdapterGenerator.kt"
+            line="165"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        visibility = DescriptorVisibilities.PRIVATE"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/MoshiAdapterGenerator.kt"
+            line="293"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    return visibility == DescriptorVisibilities.INTERNAL ||"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
+            line="75"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    return visibility == DescriptorVisibilities.INTERNAL ||"
+        errorLine2="           ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
+            line="75"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      visibility == DescriptorVisibilities.PROTECTED ||"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
+            line="76"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      visibility == DescriptorVisibilities.PROTECTED ||"
+        errorLine2="      ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
+            line="76"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      visibility == DescriptorVisibilities.PUBLIC"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
+            line="77"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      visibility == DescriptorVisibilities.PUBLIC"
+        errorLine2="      ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
+            line="77"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      ClassKind.CLASS,"
+        errorLine2="      ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/MoshiSealedSymbols.kt"
+            line="52"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.types.Variance appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      val classTypeParameter = addTypeParameter(&quot;T&quot;, irBuiltIns.anyNType, Variance.INVARIANT)"
+        errorLine2="                                                                          ~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/MoshiSealedSymbols.kt"
+            line="55"
+            column="75"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.types.Variance appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          val typeParameter = addTypeParameter(&quot;T&quot;, irBuiltIns.anyNType, Variance.INVARIANT)"
+        errorLine2="                                                                         ~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/MoshiSealedSymbols.kt"
+            line="66"
+            column="74"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    createClass(javaReflectPackage, &quot;Type&quot;, ClassKind.INTERFACE, Modality.ABSTRACT)"
+        errorLine2="                                            ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
+            line="57"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        kind = ClassKind.CLASS"
+        errorLine2="               ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
+            line="64"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        val optionsClass = createClass(this, &quot;Options&quot;, ClassKind.CLASS, Modality.FINAL)"
+        errorLine2="                                                        ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
+            line="86"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    createClass(jsonReader.owner, &quot;Options&quot;, ClassKind.CLASS, Modality.FINAL) {"
+        errorLine2="                                             ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
+            line="100"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        kind = ClassKind.CLASS"
+        errorLine2="               ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
+            line="123"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        kind = ClassKind.CLASS"
+        errorLine2="               ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
+            line="150"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        kind = ClassKind.CLASS"
+        errorLine2="               ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
+            line="195"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    createClass(moshiInternalPackage, &quot;Util&quot;, ClassKind.CLASS, Modality.FINAL) {"
+        errorLine2="                                              ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
+            line="241"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      constructor.visibility.checkIsVisible()"
+        errorLine2="                  ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
+            line="143"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          val isObject = subtype.kind == ClassKind.OBJECT"
+        errorLine2="                                 ~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
+            line="185"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      kind = ClassKind.CLASS"
+        errorLine2="             ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
+            line="372"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      visibility = targetType.visibility // always public or internal"
+        errorLine2="                              ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
+            line="373"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          visibility = DescriptorVisibilities.PRIVATE"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
+            line="406"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      if (target.kind != ClassKind.CLASS &amp;&amp; target.kind != ClassKind.INTERFACE) {"
+        errorLine2="                 ~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
+            line="616"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="/** A constructor in user code that should be called by generated code. */"
+        errorLine2="^">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/TargetConstructor.kt"
+            line="21"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="  val visibility: DescriptorVisibility,"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/TargetConstructor.kt"
+            line="25"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="/** A property in user code that maps to JSON. */"
+        errorLine2="^">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/TargetProperty.kt"
+            line="23"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="  val visibility: DescriptorVisibility,"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/TargetProperty.kt"
+            line="27"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="/** A user type that should be decoded and encoded by generated code. */"
+        errorLine2="^">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/TargetType.kt"
+            line="24"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="  val visibility: DescriptorVisibility,"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/TargetType.kt"
+            line="32"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    visibility.checkIsVisible()"
+        errorLine2="    ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/TargetType.kt"
+            line="36"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="  if (type.kind != ClassKind.CLASS) {"
+        errorLine2="           ~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="54"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    type.visibility != DescriptorVisibilities.PUBLIC &amp;&amp;"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="85"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    type.visibility != DescriptorVisibilities.PUBLIC &amp;&amp;"
+        errorLine2="         ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="85"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      type.visibility != DescriptorVisibilities.INTERNAL"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="86"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      type.visibility != DescriptorVisibilities.INTERNAL"
+        errorLine2="           ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="86"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    constructor.visibility != DescriptorVisibilities.INTERNAL &amp;&amp;"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="112"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    constructor.visibility != DescriptorVisibilities.INTERNAL &amp;&amp;"
+        errorLine2="                ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="112"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      constructor.visibility != DescriptorVisibilities.PUBLIC"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="113"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      constructor.visibility != DescriptorVisibilities.PUBLIC"
+        errorLine2="                  ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="113"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="  val visibility = type.visibility"
+        errorLine2="                        ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="140"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    if (visibility == DescriptorVisibilities.INTERNAL) {"
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="144"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    if (visibility == DescriptorVisibilities.INTERNAL) {"
+        errorLine2="        ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="144"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      visibility"
+        errorLine2="      ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="146"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          .any { it.visibility == DescriptorVisibilities.INTERNAL }"
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="152"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="          .any { it.visibility == DescriptorVisibilities.INTERNAL }"
+        errorLine2="                    ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="152"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      if (forceInternal) DescriptorVisibilities.INTERNAL else visibility"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="153"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="      if (forceInternal) DescriptorVisibilities.INTERNAL else visibility"
+        errorLine2="                                                              ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="153"
+            column="63"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    visibility = resolvedVisibility,"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="162"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="  return TargetConstructor(primaryConstructor, parameters, primaryConstructor.visibility)"
+        errorLine2="                                                                              ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="185"
+            column="79"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="        visibility = property.visibility,"
+        errorLine2="                              ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
+            line="202"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="internal fun DescriptorVisibility.checkIsVisible() {"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/ir.kt"
+            line="203"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="  if (this != DescriptorVisibilities.PUBLIC &amp;&amp; this != DescriptorVisibilities.INTERNAL) {"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/ir.kt"
+            line="204"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="KotlincFE10"
+        message="org.jetbrains.kotlin.descriptors.DescriptorVisibility appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
+        errorLine1="    throw CompilationException(&quot;Visibility must be one of public or internal. Is $name&quot;, null, null)"
+        errorLine2="                                                                                  ~~~~">
+        <location
+            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/ir.kt"
+            line="205"
+            column="83"/>
+    </issue>
+
+</issues>
