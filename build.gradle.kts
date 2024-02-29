@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.android.build.api.dsl.Lint
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import java.net.URI
 import org.jetbrains.dokka.gradle.DokkaTask
@@ -28,6 +29,7 @@ plugins {
   alias(libs.plugins.spotless)
   alias(libs.plugins.kotlinBinaryCompatibilityValidator)
   alias(libs.plugins.moshix) apply false
+  alias(libs.plugins.lint) apply false
 }
 
 apiValidation {
@@ -117,6 +119,15 @@ subprojects {
     // configuration required to produce unique META-INF/*.kotlin_module file names
     tasks.withType<KotlinCompile>().configureEach {
       compilerOptions { moduleName.set(project.property("POM_ARTIFACT_ID") as String) }
+    }
+  }
+
+  pluginManager.withPlugin("com.android.lint") {
+    configure<Lint> {
+      fatal += "KotlincFE10"
+      disable += "UnknownIssueId"
+      lintConfig = rootProject.layout.projectDirectory.file("config/lint/lint.xml").asFile
+      baseline = project.layout.projectDirectory.file("lint-baseline.xml").asFile
     }
   }
 }
