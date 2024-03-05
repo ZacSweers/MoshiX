@@ -21,21 +21,17 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
-kotlin {
-  compilerOptions { optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi") }
-}
-
-// It's not possible to test both KSP 1 and KSP 2 in the same compilation unit
-val testKsp2 = providers.systemProperty("kct.test.useKsp2").getOrElse("false").toBoolean()
+kotlin { compilerOptions.optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi") }
 
 tasks.test {
   systemProperty("moshix.jvmTarget", libs.versions.jvmTarget.get())
-  systemProperty("kct.test.useKsp2", testKsp2)
+  // KSP2 needs more memory to run
+  minHeapSize = "1024m"
+  maxHeapSize = "1024m"
 }
 
 dependencies {
   compileOnly(libs.kotlin.compilerEmbeddable)
-  compileOnly(libs.ksp)
   compileOnly(libs.ksp.api)
 
   implementation(libs.autoService)
@@ -46,20 +42,9 @@ dependencies {
 
   ksp(libs.autoService.ksp)
 
-  testImplementation(libs.ksp.api)
-  if (testKsp2) {
-    testImplementation(libs.ksp.aa.embeddable) {
-      exclude(group = "com.google.devtools.ksp", module = "common-deps")
-    }
-    testImplementation(libs.ksp.commonDeps)
-    testImplementation(libs.ksp.cli)
-  } else {
-    testImplementation(libs.ksp)
-  }
   testImplementation(libs.truth)
   testImplementation(libs.junit)
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.kotlinCompileTesting.ksp)
-  testImplementation(libs.kotlin.compilerEmbeddable)
   testImplementation(project(":moshi-sealed:runtime"))
 }

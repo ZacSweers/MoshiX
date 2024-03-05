@@ -29,11 +29,20 @@ import dev.zacsweers.moshix.proguardgen.MoshiProguardGenSymbolProcessor.Companio
 import java.io.File
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
 @OptIn(ExperimentalCompilerApi::class)
-class MoshiSealedSymbolProcessorProviderTest {
+@RunWith(Parameterized::class)
+class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
 
-  private val useKSP2 = System.getProperty("kct.test.useKsp2", "false").toBoolean()
+  companion object {
+    @JvmStatic
+    @Parameterized.Parameters(name = "useKSP2={0}")
+    fun data(): Collection<Array<Any>> {
+      return listOf(arrayOf(true), arrayOf(false))
+    }
+  }
 
   @Test
   fun `standard test with only sealed enabled`() {

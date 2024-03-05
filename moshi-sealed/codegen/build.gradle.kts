@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 /*
  * Copyright (C) 2020 Zac Sweers
  *
@@ -22,8 +20,13 @@ plugins {
   alias(libs.plugins.mavenPublish)
 }
 
-// --add-opens for kapt to work. KGP covers this for us but local JVMs in tests do not
-tasks.withType<Test>().configureEach {
+kotlin { compilerOptions.optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi") }
+
+tasks.test {
+  // KSP2 needs more memory to run
+  minHeapSize = "1024m"
+  maxHeapSize = "1024m"
+  // --add-opens for kapt to work. KGP covers this for us but local JVMs in tests do not
   jvmArgs(
     "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
     "--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
@@ -38,21 +41,10 @@ tasks.withType<Test>().configureEach {
   )
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-  compilerOptions { optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi") }
-}
-
-// It's not possible to test both KSP 1 and KSP 2 in the same compilation unit
-val testKsp2 = providers.systemProperty("kct.test.useKsp2").getOrElse("false").toBoolean()
-
-tasks.test { systemProperty("kct.test.useKsp2", testKsp2) }
-
 dependencies {
   implementation(libs.autoService)
   implementation(project(":moshi-proguard-rule-gen"))
   ksp(libs.autoService.ksp)
-  // For access to MessageCollectorBasedKSPLogger
-  compileOnly(libs.ksp)
   compileOnly(libs.ksp.api)
   compileOnly(libs.kotlin.compilerEmbeddable)
 
@@ -64,19 +56,8 @@ dependencies {
   implementation(libs.moshi)
   implementation(project(":moshi-sealed:runtime"))
 
-  if (testKsp2) {
-    testImplementation(libs.ksp.aa.embeddable) {
-      exclude(group = "com.google.devtools.ksp", module = "common-deps")
-    }
-    testImplementation(libs.ksp.commonDeps)
-    testImplementation(libs.ksp.cli)
-  } else {
-    testImplementation(libs.ksp)
-  }
-  testImplementation(libs.ksp.api)
   testImplementation(libs.truth)
   testImplementation(libs.junit)
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.kotlinCompileTesting.ksp)
-  testImplementation(libs.kotlin.compilerEmbeddable)
 }
