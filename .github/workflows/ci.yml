@@ -17,19 +17,12 @@ concurrency:
 
 jobs:
   build:
-    name: 'KSP ${{ matrix.ksp_enabled }} / K2 ${{ matrix.k2_enabled }} / KSP2 ${{ matrix.ksp2_enabled }}'
+    name: 'KSP ${{ matrix.ksp_enabled }} / K2 ${{ matrix.k2_enabled }}'
     runs-on: ubuntu-latest
     strategy:
       matrix:
         ksp_enabled: [ true, false ]
         k2_enabled: [ true, false ]
-        ksp2_enabled: [ true, false ]
-        # Need to exclude any k2/ksp2 combo where ksp2 is enabled but k2 is not
-        exclude:
-          - k2_enabled: false
-            ksp2_enabled: true
-          - ksp_enabled: false
-            ksp2_enabled: true
       fail-fast: false
 
     steps:
@@ -46,7 +39,7 @@ jobs:
           java-version: '21'
 
       - name: Build project
-        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} -Pkotlin.experimental.tryK2=${{ matrix.k2_enabled }} -D kct.test.useKsp2=${{ matrix.ksp2_enabled }} --quiet
+        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} -Pkotlin.experimental.tryK2=${{ matrix.k2_enabled }} --quiet
 
   publish-snapshot:
     needs: 'build'
