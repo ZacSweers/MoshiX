@@ -24,8 +24,8 @@ kotlin { compilerOptions.optIn.add("org.jetbrains.kotlin.compiler.plugin.Experim
 
 tasks.test {
   // KSP2 needs more memory to run
-  minHeapSize = "1024m"
-  maxHeapSize = "1024m"
+  minHeapSize = "2096m"
+  maxHeapSize = "2096m"
   // --add-opens for kapt to work. KGP covers this for us but local JVMs in tests do not
   jvmArgs(
     "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
