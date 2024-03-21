@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-agp = "8.3.0"
+agp = "8.3.1"
 autoService = "1.1.1"
 gjf = "1.17.0"
 incap = "1.0.0"
@@ -26,15 +26,15 @@ ksp = "2.0.0-Beta5-1.0.19"
 ktfmt = "0.47"
 moshi = "1.15.1"
 okhttp = "4.12.0"
-retrofit = "2.9.0"
+retrofit = "2.10.0"
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.14.0" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-lint = { id = "com.android.lint", version = "8.4.0-alpha12" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
+lint = { id = "com.android.lint", version = "8.4.0-alpha13" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.28.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.25.1" } # Always replaced by the local plugin
 spotless = { id = "com.diffplug.spotless", version = "6.25.0" }
@@ -48,7 +48,7 @@ autoService = { module = "com.google.auto.service:auto-service-annotations", ver
 autoService-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version = "1.1.0" }
 autoService-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
 
-guava = { module = "com.google.guava:guava", version = "33.0.0-jre" }
+guava = { module = "com.google.guava:guava", version = "33.1.0-jre" }
 
 incap = { module = "net.ltgt.gradle.incap:incap", version.ref = "incap" }
 incap-processor = { module = "net.ltgt.gradle.incap:incap-processor", version.ref = "incap" }
