@@ -93,7 +93,7 @@ import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
-import org.jetbrains.kotlin.ir.util.deepCopyWithSymbols
+import org.jetbrains.kotlin.ir.util.deepCopyWithoutPatchingParents
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getPropertyGetter
@@ -536,7 +536,7 @@ internal class MoshiAdapterGenerator(
                 // one to compile against
                 val defaultsConstructor =
                   target.constructor.irConstructor
-                    .deepCopyWithSymbols()
+                    .deepCopyWithoutPatchingParents()
                     .apply {
                       parent = target.irClass
                       repeat(maskCount) {
