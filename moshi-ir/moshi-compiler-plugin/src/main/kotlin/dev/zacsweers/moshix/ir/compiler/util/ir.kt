@@ -59,6 +59,7 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
@@ -158,6 +159,7 @@ internal fun IrSimpleFunction.overridesFunctionIn(fqName: FqName): Boolean =
   parentClassOrNull?.fqNameWhenAvailable == fqName ||
     allOverridden().any { it.parentClassOrNull?.fqNameWhenAvailable == fqName }
 
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun IrPluginContext.createIrBuilder(symbol: IrSymbol): DeclarationIrBuilder {
   return DeclarationIrBuilder(this, symbol, symbol.owner.startOffset, symbol.owner.endOffset)
 }
@@ -212,6 +214,7 @@ internal fun IrType.rawType(): IrClass {
 }
 
 /** Returns the raw [IrClass] of this [IrType] or null. */
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun IrType.rawTypeOrNull(): IrClass? {
   return when (val classifier = classifierOrNull) {
     is IrClassSymbol -> classifier.owner
@@ -219,6 +222,7 @@ internal fun IrType.rawTypeOrNull(): IrClass? {
   }
 }
 
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun IrClass.addOverride(
   baseFqName: FqName,
   name: String,
@@ -246,6 +250,7 @@ internal fun IrClass.addOverride(
         }
   }
 
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun IrBuilderWithScope.irBinOp(
   pluginContext: IrPluginContext,
   name: Name,
@@ -258,6 +263,7 @@ internal fun IrBuilderWithScope.irBinOp(
   return irInvoke(lhs, symbol, rhs)
 }
 
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun IrBuilderWithScope.irInvoke(
   dispatchReceiver: IrExpression? = null,
   callee: IrFunctionSymbol,

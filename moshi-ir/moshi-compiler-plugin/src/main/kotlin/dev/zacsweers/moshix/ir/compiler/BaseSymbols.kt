@@ -1,3 +1,5 @@
+@file:OptIn(UnsafeDuringIrConstructionAPI::class)
+
 package dev.zacsweers.moshix.ir.compiler
 
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -17,12 +19,13 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrPackageFragment
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
-import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
+import org.jetbrains.kotlin.ir.declarations.createEmptyExternalPackageFragment
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrClassReferenceImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
 import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classifierOrNull
@@ -136,10 +139,7 @@ internal open class BaseSymbols(
       .symbol
 
   protected fun createPackage(packageName: String): IrPackageFragment =
-    IrExternalPackageFragmentImpl.createEmptyExternalPackageFragment(
-      moduleFragment.descriptor,
-      FqName(packageName),
-    )
+    createEmptyExternalPackageFragment(moduleFragment.descriptor, FqName(packageName))
 
   protected fun createClass(
     irParent: IrDeclarationParent,

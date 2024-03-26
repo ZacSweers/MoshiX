@@ -19,10 +19,10 @@ gjf = "1.17.0"
 incap = "1.0.0"
 jdk = "21"
 jvmTarget = "11"
-kotlin = "1.9.22"
-kotlinCompileTesting = "0.4.0"
+kotlin = "2.0.0-Beta5"
+kotlinCompileTesting = "0.5.0-alpha06"
 kotlinpoet = "1.16.0"
-ksp = "1.9.23-1.0.19"
+ksp = "2.0.0-Beta5-1.0.19"
 ktfmt = "0.47"
 moshi = "1.15.1"
 okhttp = "4.12.0"
@@ -64,8 +64,11 @@ kotlinpoet-metadata = { module = "com.squareup:kotlinpoet-metadata", version.ref
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
 
 ksp = { module = "com.google.devtools.ksp:symbol-processing", version.ref = "ksp" }
-ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 ksp-gradlePlugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
+ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+ksp-cli = { module = "com.google.devtools.ksp:symbol-processing-cmdline", version.ref = "ksp" }
+ksp-aa-embeddable = { module = "com.google.devtools.ksp:symbol-processing-aa-embeddable", version.ref = "ksp" }
+ksp-commonDeps = { module = "com.google.devtools.ksp:symbol-processing-common-deps", version.ref = "ksp" }
 
 # Only present to trigger automatic renovate updates
 ktfmt = { module = "com.facebook:ktfmt", version.ref = "ktfmt" }

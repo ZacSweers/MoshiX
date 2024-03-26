@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import com.android.build.api.dsl.Lint
+import com.google.devtools.ksp.gradle.KspTask
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import java.net.URI
 import org.jetbrains.dokka.gradle.DokkaTask
@@ -85,15 +86,19 @@ subprojects {
     project.tasks.withType<JavaCompile>().configureEach { options.release.set(jvmTargetProvider) }
   }
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
-    tasks.withType<KotlinCompile>().configureEach {
-      compilerOptions {
-        jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
-        freeCompilerArgs.addAll("-Xjsr305=strict", "-progressive")
-        // TODO disabled because Gradle's Kotlin handling is silly
-        //  https://github.com/gradle/gradle/issues/16779
-        //  allWarningsAsErrors = true
+    tasks
+      .withType<KotlinCompile>()
+      .matching { it !is KspTask }
+      .configureEach {
+        compilerOptions {
+          jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
+          freeCompilerArgs.addAll("-Xjsr305=strict")
+          progressiveMode.set(true)
+          // TODO disabled because Gradle's Kotlin handling is silly
+          //  https://github.com/gradle/gradle/issues/16779
+          //  allWarningsAsErrors = true
+        }
       }
-    }
     if (
       project.name != "sample" && !project.path.contains("sample") && !project.path.contains("test")
     ) {
