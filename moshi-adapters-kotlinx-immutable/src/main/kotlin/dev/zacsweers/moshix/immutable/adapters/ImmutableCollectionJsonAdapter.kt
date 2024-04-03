@@ -5,40 +5,42 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import com.squareup.moshi.rawType
 import kotlinx.collections.immutable.PersistentCollection
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.PersistentSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
 /**
  * Applying [PersistentCollectionJsonAdapterFactory] to your Moshi instance will allow serialization between
- * JSON lists and [kotlinx.collections.immutable.PersistentList] types.
+ * JSON lists/map and these types:
+ *  - [kotlinx.collections.immutable.PersistentCollection]
+ *  - [kotlinx.collections.immutable.PersistentList]
+ *  - [kotlinx.collections.immutable.PersistentMap]
+ *  - [kotlinx.collections.immutable.PersistentSet]
  *
  * Example:
  * ```
- * JSON:
- * {
- *   "strings": ["value1", "value2", "value3"],
- *   "people": [
- *     {"first": "Jane", "last": "Doe"},
- *     {"first": "John", "last": "Doh"}
- *   ]
- * }
- *
  * val moshi = Moshi.Builder()
- *   .add(PersistentListJsonAdapterFactory)
+ *   .add(PersistentCollectionJsonAdapterFactory)
  *   .build()
  *
  * @JsonClass(generateAdapter = true)
  * data class Data(
  *   val strings: PersistentList<String>,
- *   val people: PersistentList<Person>
+ *   val people: PersistentList<Person>,
+ *   val count: PersistentMap<Int, String>,
+ *   val rates: PersistentSet<Int>,
+ *   val peopleCollection: PersistentCollection<Person>,
  * )
  * ```
  */
+
 public object PersistentCollectionJsonAdapterFactory : JsonAdapter.Factory {
 
     override fun create(type: Type, annotations: MutableSet<out Annotation>, moshi: Moshi): JsonAdapter<*>? {
@@ -51,6 +53,9 @@ public object PersistentCollectionJsonAdapterFactory : JsonAdapter.Factory {
 
             PersistentSet::class.java ->
                 newSetAdapter<Any>(type, moshi).nullSafe()
+
+            PersistentMap::class.java ->
+                newMapAdapter(type, moshi).nullSafe()
 
             else -> null
         }
@@ -70,6 +75,20 @@ public object PersistentCollectionJsonAdapterFactory : JsonAdapter.Factory {
         return object : PersistentCollectionJsonAdapter<PersistentSet<T?>, T>(elementAdapter) {
             override fun newCollection(): PersistentSet<T?> = persistentSetOf()
         }
+    }
+
+    private fun newMapAdapter(type: ParameterizedType, moshi: Moshi): JsonAdapter<out PersistentMap<out Any, Any?>> {
+        // alternative of Types.mapKeyAndValueTypes(type, type.rawType)
+        val keyType = type.actualTypeArguments[0]
+        val valueType = type.actualTypeArguments[1]
+
+        val keyAdapter = moshi.adapter(keyType.rawType)
+        val valueAdapter = moshi.adapter(valueType.rawType)
+
+        return PersistentMapJsonAdapter(
+            keyAdapter = keyAdapter,
+            valueAdapter = valueAdapter,
+        ).nullSafe()
     }
 }
 
@@ -95,5 +114,36 @@ private abstract class PersistentCollectionJsonAdapter<E : PersistentCollection<
         writer.beginArray()
         value?.forEach { adapter.toJson(writer, it) }
         writer.endArray()
+    }
+}
+
+private class PersistentMapJsonAdapter<K, V>(
+    private val keyAdapter: JsonAdapter<K>,
+    private val valueAdapter: JsonAdapter<V>,
+) : JsonAdapter<PersistentMap<K, V?>>() {
+
+    override fun fromJson(reader: JsonReader): PersistentMap<K, V?> {
+        val result = persistentMapOf<K, V?>().builder()
+        reader.beginObject()
+        while (reader.hasNext()) {
+            reader.promoteNameToValue()
+            val name = keyAdapter.fromJson(reader)
+            val value = valueAdapter.fromJson(reader)
+            if (name != null) {
+                result[name] = value
+            }
+        }
+        reader.endObject()
+        return result.build()
+    }
+
+    override fun toJson(writer: JsonWriter, map: PersistentMap<K, V?>?) {
+        writer.beginObject()
+        map?.forEach { (key, value) ->
+            writer.promoteValueToName()
+            keyAdapter.toJson(writer, key)
+            valueAdapter.toJson(writer, value)
+        }
+        writer.endObject()
     }
 }
