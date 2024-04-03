@@ -7,8 +7,10 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dev.zacsweers.moshix.immutable.adapters.addKotlinXImmutableAdapters
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentMap
+import kotlinx.collections.immutable.PersistentSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import org.junit.Test
 
 class ImmutableTypesAdaptersTest {
@@ -79,6 +81,27 @@ class ImmutableTypesAdaptersTest {
     }
 
     @Test
+    fun `test immutable type deserialization for PersistentSet of Strings`() {
+        val adapter = moshi.adapter(SetOfStringsType::class.java)
+        val response = adapter.fromJson(testListOfStringsJson)
+        assertThat(response?.stringList)
+            .isEqualTo(persistentSetOf("a", "b", "c"))
+    }
+
+    @Test
+    fun `test immutable type deserialization for PersistentSet of Objects`() {
+        val adapter = moshi.adapter(SetOfObjectsType::class.java)
+        val response = adapter.fromJson(testListOfObjectsJson)
+        assertThat(response?.objList)
+            .isEqualTo(
+                persistentSetOf(
+                    SimpleObject("test1"),
+                    SimpleObject("test2"),
+                )
+            )
+    }
+
+    @Test
     fun `test immutable type deserialization for PersistentMap of String to String`() {
         val adapter = moshi.adapter(MapOfStringsType::class.java)
         val response = adapter.fromJson(testMapOfStringsJson)
@@ -109,6 +132,16 @@ internal data class ListOfStringsType(
 @JsonClass(generateAdapter = true)
 internal data class ListOfObjectsType(
     val objList: PersistentList<SimpleObject>,
+)
+
+@JsonClass(generateAdapter = true)
+internal data class SetOfStringsType(
+    val stringList: PersistentSet<String>,
+)
+
+@JsonClass(generateAdapter = true)
+internal data class SetOfObjectsType(
+    val objList: PersistentSet<SimpleObject>,
 )
 
 @JsonClass(generateAdapter = true)
