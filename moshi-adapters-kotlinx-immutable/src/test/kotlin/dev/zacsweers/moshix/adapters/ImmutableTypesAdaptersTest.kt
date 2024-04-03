@@ -5,6 +5,7 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dev.zacsweers.moshix.immutable.adapters.addKotlinXImmutableAdapters
+import kotlinx.collections.immutable.PersistentCollection
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.PersistentSet
@@ -102,6 +103,22 @@ class ImmutableTypesAdaptersTest {
     }
 
     @Test
+    fun `test immutable type deserialization for PersistentCollection of Strings`() {
+        val adapter = moshi.adapter(CollectionOfStringsType::class.java)
+        val response = adapter.fromJson(testListOfStringsJson)
+        assertThat(response?.stringList)
+            .containsExactly("a", "b", "c")
+    }
+
+    @Test
+    fun `test immutable type deserialization for PersistentCollection of Objects`() {
+        val adapter = moshi.adapter(CollectionOfObjectsType::class.java)
+        val response = adapter.fromJson(testListOfObjectsJson)
+        assertThat(response?.objList)
+            .containsExactly(SimpleObject("test1"), SimpleObject("test2"))
+    }
+
+    @Test
     fun `test immutable type deserialization for PersistentMap of String to String`() {
         val adapter = moshi.adapter(MapOfStringsType::class.java)
         val response = adapter.fromJson(testMapOfStringsJson)
@@ -142,6 +159,16 @@ internal data class SetOfStringsType(
 @JsonClass(generateAdapter = true)
 internal data class SetOfObjectsType(
     val objList: PersistentSet<SimpleObject>,
+)
+
+@JsonClass(generateAdapter = true)
+internal data class CollectionOfStringsType(
+    val stringList: PersistentCollection<String>,
+)
+
+@JsonClass(generateAdapter = true)
+internal data class CollectionOfObjectsType(
+    val objList: PersistentCollection<SimpleObject>,
 )
 
 @JsonClass(generateAdapter = true)

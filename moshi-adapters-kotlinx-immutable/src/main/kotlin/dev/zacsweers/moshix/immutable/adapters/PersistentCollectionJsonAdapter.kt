@@ -46,7 +46,7 @@ public object PersistentCollectionJsonAdapterFactory : JsonAdapter.Factory {
         if (annotations.isNotEmpty()) return null
 
         return when (type.rawType) {
-            PersistentList::class.java ->
+            PersistentList::class.java, PersistentCollection::class.java ->
                 newListAdapter<Any>(type, moshi).nullSafe()
 
             PersistentSet::class.java ->
