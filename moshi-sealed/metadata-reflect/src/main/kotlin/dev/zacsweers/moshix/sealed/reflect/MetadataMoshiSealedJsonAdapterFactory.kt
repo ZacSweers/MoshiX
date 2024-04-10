@@ -28,14 +28,14 @@ import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
 import dev.zacsweers.moshix.sealed.runtime.internal.Util.fallbackAdapter
 import java.lang.reflect.Type
-import kotlinx.metadata.ClassKind
-import kotlinx.metadata.ClassName
-import kotlinx.metadata.KmClass
-import kotlinx.metadata.Modality
-import kotlinx.metadata.jvm.KotlinClassMetadata
-import kotlinx.metadata.jvm.Metadata
-import kotlinx.metadata.kind
-import kotlinx.metadata.modality
+import kotlin.metadata.ClassKind
+import kotlin.metadata.ClassName
+import kotlin.metadata.KmClass
+import kotlin.metadata.Modality
+import kotlin.metadata.jvm.KotlinClassMetadata
+import kotlin.metadata.jvm.Metadata
+import kotlin.metadata.kind
+import kotlin.metadata.modality
 
 /** Classes annotated with this are eligible for this adapter. */
 private val KOTLIN_METADATA = Metadata::class.java

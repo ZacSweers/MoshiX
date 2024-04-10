@@ -16,7 +16,7 @@
 package dev.zacsweers.moshix.reflect
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.metadata.jvm.JvmMethodSignature
+import kotlin.metadata.jvm.JvmMethodSignature
 import org.junit.Test
 
 class JvmDescriptorsTest {

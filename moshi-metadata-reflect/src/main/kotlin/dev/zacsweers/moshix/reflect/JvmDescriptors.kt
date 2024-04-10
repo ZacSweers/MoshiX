@@ -16,7 +16,7 @@
 package dev.zacsweers.moshix.reflect
 
 import java.lang.reflect.Constructor
-import kotlinx.metadata.jvm.JvmMethodSignature
+import kotlin.metadata.jvm.JvmMethodSignature
 
 private val PRIMITIVE_CLASS_TO_DESC =
   mapOf(

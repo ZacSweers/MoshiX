@@ -20,19 +20,19 @@ import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Type
-import kotlinx.metadata.KmClass
-import kotlinx.metadata.KmClassifier
-import kotlinx.metadata.KmClassifier.TypeAlias
-import kotlinx.metadata.KmClassifier.TypeParameter
-import kotlinx.metadata.KmConstructor
-import kotlinx.metadata.KmProperty
-import kotlinx.metadata.KmType
-import kotlinx.metadata.KmValueParameter
-import kotlinx.metadata.declaresDefaultValue
-import kotlinx.metadata.isLocalClassName
-import kotlinx.metadata.isNullable
-import kotlinx.metadata.isSecondary
-import kotlinx.metadata.jvm.signature
+import kotlin.metadata.KmClass
+import kotlin.metadata.KmClassifier
+import kotlin.metadata.KmClassifier.TypeAlias
+import kotlin.metadata.KmClassifier.TypeParameter
+import kotlin.metadata.KmConstructor
+import kotlin.metadata.KmProperty
+import kotlin.metadata.KmType
+import kotlin.metadata.KmValueParameter
+import kotlin.metadata.declaresDefaultValue
+import kotlin.metadata.isLocalClassName
+import kotlin.metadata.isNullable
+import kotlin.metadata.isSecondary
+import kotlin.metadata.jvm.signature
 
 private fun defaultPrimitiveValue(type: Type): Any? =
   if (type is Class<*> && type.isPrimitive) {
@@ -75,7 +75,7 @@ internal val KmType.canonicalName: String
   }
 
 /**
- * Creates a canonical class name as represented in Metadata's [kotlinx.metadata.ClassName], where
+ * Creates a canonical class name as represented in Metadata's [kotlin.metadata.ClassName], where
  * package names in this name are separated by '/' and class names are separated by '.'.
  *
  * Example ClassName that we want to canonicalize: `"java/util/Map.Entry"`.
