@@ -6,6 +6,10 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.rawType
+import kotlinx.collections.immutable.ImmutableCollection
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.PersistentCollection
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentMap
@@ -17,12 +21,16 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
 /**
- * Applying [PersistentCollectionJsonAdapterFactory] to your Moshi instance will allow serialization between
+ * Applying [ImmutableCollectionJsonAdapterFactory] to your Moshi instance will allow serialization between
  * JSON lists/map and these types:
  *  - [kotlinx.collections.immutable.PersistentCollection]
  *  - [kotlinx.collections.immutable.PersistentList]
  *  - [kotlinx.collections.immutable.PersistentMap]
  *  - [kotlinx.collections.immutable.PersistentSet]
+ *  - [kotlinx.collections.immutable.ImmutableCollection]
+ *  - [kotlinx.collections.immutable.ImmutableList]
+ *  - [kotlinx.collections.immutable.ImmutableMap]
+ *  - [kotlinx.collections.immutable.ImmutableSet]
  *
  * Example:
  * ```
@@ -32,29 +40,30 @@ import java.lang.reflect.Type
  *
  * @JsonClass(generateAdapter = true)
  * data class Data(
- *   val strings: PersistentList<String>,
- *   val people: PersistentList<Person>,
- *   val count: PersistentMap<Int, String>,
- *   val rates: PersistentSet<Int>,
- *   val peopleCollection: PersistentCollection<Person>,
+ *   val stringList: ImmutableList<String>, // or PersistentList<String>,
+ *   val objList: ImmutableList<SomeObject>, // or PersistentList<SomeObject>,
+ *   val objCollection: ImmutableCollection<SomeObject>, // or PersistentCollection<SomeObject>,
+ *   val objMap: ImmutableMap<String, SomeObject>, // or PersistentMap<String, SomeObject>,
+ *   val objectsSet: ImmutableMap<SomeObject>, // or PersistentMap<SomeObject>,
  * )
  * ```
  */
 
-public object PersistentCollectionJsonAdapterFactory : JsonAdapter.Factory {
+public class ImmutableCollectionJsonAdapterFactory : JsonAdapter.Factory {
 
     override fun create(type: Type, annotations: MutableSet<out Annotation>, moshi: Moshi): JsonAdapter<*>? {
         if (type !is ParameterizedType) return null
         if (annotations.isNotEmpty()) return null
 
         return when (type.rawType) {
+            ImmutableList::class.java, ImmutableCollection::class.java,
             PersistentList::class.java, PersistentCollection::class.java ->
                 newListAdapter<Any>(type, moshi).nullSafe()
 
-            PersistentSet::class.java ->
+            ImmutableSet::class.java, PersistentSet::class.java ->
                 newSetAdapter<Any>(type, moshi).nullSafe()
 
-            PersistentMap::class.java ->
+            ImmutableMap::class.java, PersistentMap::class.java ->
                 newMapAdapter(type, moshi).nullSafe()
 
             else -> null
@@ -64,7 +73,7 @@ public object PersistentCollectionJsonAdapterFactory : JsonAdapter.Factory {
     private fun <T> newListAdapter(type: ParameterizedType, moshi: Moshi): JsonAdapter<PersistentCollection<T?>> {
         val elementType = Types.collectionElementType(type, PersistentCollection::class.java)
         val elementAdapter = moshi.adapter<T>(elementType)
-        return object : PersistentCollectionJsonAdapter<PersistentCollection<T?>, T>(elementAdapter) {
+        return object : ImmutableCollectionJsonAdapter<PersistentCollection<T?>, T>(elementAdapter) {
             override fun newCollection(): PersistentCollection<T?> = persistentListOf()
         }
     }
@@ -72,7 +81,7 @@ public object PersistentCollectionJsonAdapterFactory : JsonAdapter.Factory {
     private fun <T> newSetAdapter(type: ParameterizedType, moshi: Moshi): JsonAdapter<PersistentSet<T?>> {
         val elementType = Types.collectionElementType(type, PersistentSet::class.java)
         val elementAdapter = moshi.adapter<T>(elementType)
-        return object : PersistentCollectionJsonAdapter<PersistentSet<T?>, T>(elementAdapter) {
+        return object : ImmutableCollectionJsonAdapter<PersistentSet<T?>, T>(elementAdapter) {
             override fun newCollection(): PersistentSet<T?> = persistentSetOf()
         }
     }
@@ -85,14 +94,14 @@ public object PersistentCollectionJsonAdapterFactory : JsonAdapter.Factory {
         val keyAdapter = moshi.adapter(keyType.rawType)
         val valueAdapter = moshi.adapter(valueType.rawType)
 
-        return PersistentMapJsonAdapter(
+        return ImmutableMapJsonAdapter(
             keyAdapter = keyAdapter,
             valueAdapter = valueAdapter,
         ).nullSafe()
     }
 }
 
-private abstract class PersistentCollectionJsonAdapter<E : PersistentCollection<T?>, T>(
+private abstract class ImmutableCollectionJsonAdapter<E : PersistentCollection<T?>, T>(
     private val adapter: JsonAdapter<T>
 ) : JsonAdapter<E>() {
 
@@ -117,7 +126,7 @@ private abstract class PersistentCollectionJsonAdapter<E : PersistentCollection<
     }
 }
 
-private class PersistentMapJsonAdapter<K, V>(
+private class ImmutableMapJsonAdapter<K, V>(
     private val keyAdapter: JsonAdapter<K>,
     private val valueAdapter: JsonAdapter<V>,
 ) : JsonAdapter<PersistentMap<K, V?>>() {
