@@ -13,20 +13,21 @@ dependencies {
 ```
 ## Immutable Collection Adapters
 
-Use `addKotlinXImmutableAdapters` to add `PersistentListJsonAdapterFactory` and `PersistentMapJsonAdapterFactory` type
-adapters. These will deserialize standard JSON list and dictionary types into [kotlinx.collections.immutable](https://github.com/Kotlin/kotlinx.collections.immutable)
-`PersistentList` and `PersistentMap` types.
+Add `ImmutableCollectionJsonAdapterFactory` to `Moshi`'s builder. These will deserialize standard JSON 
+list and dictionary types into [kotlinx.collections.immutable](https://github.com/Kotlin/kotlinx.collections.immutable)
+`Persistent*` and `Immutable*` types.
 
 ```Kotlin
 val moshi = Moshi.Builder()
-  .addKotlinXImmutableAdapters()
+  .add(ImmutableCollectionJsonAdapterFactory())
   .build()
 
 @JsonClass(generateAdapter = true)
 data class MyImmutableModel(
-  val stringList: PersistentList<String>,
-  val objList: PersistentList<SomeObject>,
-  val stringMap: PersistentMap<String, String>,
-  val objMap: PersistentMap<String, SomeObject>,  
+  val stringList: ImmutableList<String>, // or PersistentList<String>,
+  val objList: ImmutableList<SomeObject>, // or PersistentList<SomeObject>,
+  val objCollection: ImmutableCollection<SomeObject>, // or PersistentCollection<SomeObject>,
+  val objMap: ImmutableMap<String, SomeObject>, // or PersistentMap<String, SomeObject>,
+  val objectsSet: ImmutableMap<SomeObject>, // or PersistentMap<SomeObject>,  
 )
 ```
