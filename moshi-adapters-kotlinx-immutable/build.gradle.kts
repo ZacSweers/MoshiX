@@ -6,7 +6,7 @@ plugins {
   alias(libs.plugins.mavenPublish)
 }
 
-tasks.named<KotlinCompile>("compileTestKotlin") {
+compileTestKotlin {
   compilerOptions { freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi") }
 }
 
