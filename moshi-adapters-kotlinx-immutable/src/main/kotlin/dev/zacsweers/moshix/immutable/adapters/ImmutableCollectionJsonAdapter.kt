@@ -35,7 +35,7 @@ import java.lang.reflect.Type
  * Example:
  * ```
  * val moshi = Moshi.Builder()
- *   .add(PersistentCollectionJsonAdapterFactory)
+ *   .add(ImmutableCollectionJsonAdapterFactory())
  *   .build()
  *
  * @JsonClass(generateAdapter = true)
