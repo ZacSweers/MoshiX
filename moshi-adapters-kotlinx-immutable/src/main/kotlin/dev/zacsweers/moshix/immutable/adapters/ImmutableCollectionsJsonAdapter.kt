@@ -21,7 +21,7 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
 /**
- * Applying [ImmutableCollectionJsonAdapterFactory] to your Moshi instance will allow serialization between
+ * Applying [ImmutableCollectionsJsonAdapterFactory] to your Moshi instance will allow serialization between
  * JSON lists/map and these types:
  *  - [kotlinx.collections.immutable.PersistentCollection]
  *  - [kotlinx.collections.immutable.PersistentList]
@@ -35,7 +35,7 @@ import java.lang.reflect.Type
  * Example:
  * ```
  * val moshi = Moshi.Builder()
- *   .add(ImmutableCollectionJsonAdapterFactory())
+ *   .add(ImmutableCollectionsJsonAdapterFactory())
  *   .build()
  *
  * @JsonClass(generateAdapter = true)
@@ -49,7 +49,7 @@ import java.lang.reflect.Type
  * ```
  */
 
-public class ImmutableCollectionJsonAdapterFactory : JsonAdapter.Factory {
+public class ImmutableCollectionsJsonAdapterFactory : JsonAdapter.Factory {
 
     override fun create(type: Type, annotations: MutableSet<out Annotation>, moshi: Moshi): JsonAdapter<*>? {
         if (type !is ParameterizedType) return null

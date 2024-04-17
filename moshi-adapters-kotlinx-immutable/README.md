@@ -13,13 +13,13 @@ dependencies {
 ```
 ## Immutable Collection Adapters
 
-Add `ImmutableCollectionJsonAdapterFactory` to `Moshi`'s builder. These will deserialize standard JSON 
+Add `ImmutableCollectionsJsonAdapterFactory` to `Moshi`'s builder. These will deserialize standard JSON 
 list and dictionary types into [kotlinx.collections.immutable](https://github.com/Kotlin/kotlinx.collections.immutable)
 `Persistent*` and `Immutable*` types.
 
 ```Kotlin
 val moshi = Moshi.Builder()
-  .add(ImmutableCollectionJsonAdapterFactory())
+  .add(ImmutableCollectionsJsonAdapterFactory())
   .build()
 
 @JsonClass(generateAdapter = true)

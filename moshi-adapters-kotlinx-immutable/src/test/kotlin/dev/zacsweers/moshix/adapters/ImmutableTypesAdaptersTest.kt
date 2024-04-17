@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import dev.zacsweers.moshix.immutable.adapters.ImmutableCollectionJsonAdapterFactory
+import dev.zacsweers.moshix.immutable.adapters.ImmutableCollectionsJsonAdapterFactory
 import kotlinx.collections.immutable.ImmutableCollection
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -44,7 +44,7 @@ class ImmutableTypesAdaptersTest {
     private val object2 = SimpleObject("test2")
 
     private val moshi = Moshi.Builder()
-        .add(ImmutableCollectionJsonAdapterFactory())
+        .add(ImmutableCollectionsJsonAdapterFactory())
         .addLast(KotlinJsonAdapterFactory())
         .build()
 
