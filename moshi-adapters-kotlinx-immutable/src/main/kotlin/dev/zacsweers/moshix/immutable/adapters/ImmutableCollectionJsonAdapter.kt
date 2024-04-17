@@ -120,8 +120,9 @@ private abstract class ImmutableCollectionJsonAdapter<E : PersistentCollection<T
     }
 
     override fun toJson(writer: JsonWriter, value: E?) {
+        requireNotNull(value) // Always wrapped in nullSafe()
         writer.beginArray()
-        value?.forEach { adapter.toJson(writer, it) }
+        value.forEach { adapter.toJson(writer, it) }
         writer.endArray()
     }
 }
@@ -147,8 +148,9 @@ private class ImmutableMapJsonAdapter<K, V>(
     }
 
     override fun toJson(writer: JsonWriter, map: PersistentMap<K, V?>?) {
+        requireNotNull(map) // Always wrapped in nullSafe()
         writer.beginObject()
-        map?.forEach { (key, value) ->
+        map.forEach { (key, value) ->
             writer.promoteValueToName()
             keyAdapter.toJson(writer, key)
             valueAdapter.toJson(writer, value)
