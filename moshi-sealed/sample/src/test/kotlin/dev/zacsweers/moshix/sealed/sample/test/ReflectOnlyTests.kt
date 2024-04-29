@@ -46,7 +46,7 @@ class ReflectOnlyTests(type: Type) {
           .add(MetadataMoshiSealedJsonAdapterFactory())
           .addLast(KotlinJsonAdapterFactory())
           .build()
-    )
+    ),
   }
 
   companion object {

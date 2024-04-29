@@ -674,7 +674,7 @@ class KotlinJsonAdapterTest {
 
   enum class KotlinEnum {
     A,
-    B
+    B,
   }
 
   @Test

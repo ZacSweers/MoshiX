@@ -50,7 +50,7 @@ class SealedInterfaceMessageTest(type: Type) {
           .addLast(KotlinJsonAdapterFactory())
           .build()
     ),
-    CODEGEN
+    CODEGEN,
   }
 
   companion object {
