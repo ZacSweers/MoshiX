@@ -49,6 +49,7 @@ val copyVersionTemplatesProvider =
     expand(mapOf("projectVersion" to "${project.property("VERSION_NAME")}"))
     filteringCharset = "UTF-8"
   }
+
 // endregion
 
 tasks.withType<KotlinCompile>().configureEach {
