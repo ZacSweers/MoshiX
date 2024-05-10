@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
   alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.ksp)
   alias(libs.plugins.mavenPublish)
 }
 
-tasks.named<KotlinCompile>("compileTestKotlin") {
-  compilerOptions { freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi") }
-}
+tasks.compileTestKotlin { compilerOptions { optIn.add("kotlin.ExperimentalStdlibApi") } }
 
 dependencies {
   implementation(libs.moshi)

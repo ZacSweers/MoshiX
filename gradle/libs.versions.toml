@@ -42,6 +42,8 @@ spotless = { id = "com.diffplug.spotless", version = "6.25.0" }
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 
+assertj = "org.assertj:assertj-core:3.25.3"
+
 autoCommon = { module = "com.google.auto:auto-common", version = "1.2.2" }
 
 autoService = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
