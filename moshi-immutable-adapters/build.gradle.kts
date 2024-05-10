@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Zac Sweers
+ * Copyright (C) 2024 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,10 @@ plugins {
 tasks.compileTestKotlin { compilerOptions { optIn.add("kotlin.ExperimentalStdlibApi") } }
 
 dependencies {
-  implementation(libs.moshi)
+  api(libs.kotlinx.immutable)
+  api(libs.moshi)
   kspTest(libs.moshi.codegen)
   testImplementation(libs.moshi.kotlin)
-  testImplementation(libs.okhttp)
-  testImplementation(libs.okhttp.mockwebserver)
-  testImplementation(libs.retrofit)
-  testImplementation(libs.retrofit.moshi)
   testImplementation(libs.junit)
   testImplementation(libs.truth)
 }

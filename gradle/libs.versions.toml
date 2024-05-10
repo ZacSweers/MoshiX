@@ -42,6 +42,8 @@ spotless = { id = "com.diffplug.spotless", version = "6.25.0" }
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 
+assertj = "org.assertj:assertj-core:3.25.3"
+
 autoCommon = { module = "com.google.auto:auto-common", version = "1.2.2" }
 
 autoService = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
@@ -58,6 +60,7 @@ kotlin-metadata = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", versi
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradlePlugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
+kotlinx-immutable = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7"
 
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-metadata = { module = "com.squareup:kotlinpoet-metadata", version.ref = "kotlinpoet" }

@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
   kotlin("jvm")
   id("com.google.devtools.ksp")
   id("com.vanniktech.maven.publish")
 }
 
-tasks.named<KotlinCompile>("compileTestKotlin") {
-  compilerOptions { freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi") }
-}
+tasks.compileTestKotlin { compilerOptions { optIn.add("kotlin.ExperimentalStdlibApi") } }
 
 dependencies {
   implementation(libs.kotlin.metadata)
   implementation(libs.moshi)
   kspTest(libs.moshi.codegen)
-  testImplementation("org.assertj:assertj-core:3.25.3")
+  testImplementation(libs.assertj)
   testImplementation(libs.junit)
   testImplementation(libs.truth)
 }
