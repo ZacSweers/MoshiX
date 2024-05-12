@@ -1,5 +1,6 @@
 package dev.zacsweers.moshix.adapters.immutable
 
+import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -84,9 +85,12 @@ class ImmutableCollectionsJsonAdapterFactoryTest {
             "c" to persistentListOf(1, 2, 3),
           ),
       )
+    assertThat(instance).isEqualTo(expectedInstance)
+    val serializedAndReserializedInstance = adapter.fromJson(adapter.toJson(expectedInstance))!!
+    assertThat(serializedAndReserializedInstance).isEqualTo(expectedInstance)
   }
 
-  class ClassWithImmutables(
+  data class ClassWithImmutables(
     val list: ImmutableList<Int>,
     val set: ImmutableSet<Int>,
     val collection: ImmutableCollection<Int>,
