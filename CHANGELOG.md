@@ -7,7 +7,7 @@ Changelog
 0.26.0
 ------
 
-_2023-11-27_
+_2024-05-12_
 
 ### **New**: Publish a new `moshi-immutable-adapters` artifact with support for [kotlinx.collections.immutable](https://github.com/Kotlin/kotlinx.collections.immutable).
 
