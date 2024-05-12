@@ -4,6 +4,11 @@ Changelog
 **Unreleased**
 --------------
 
+0.26.0
+------
+
+_2023-11-27_
+
 ### **New**: Publish a new `moshi-immutable-adapters` artifact with support for [kotlinx.collections.immutable](https://github.com/Kotlin/kotlinx.collections.immutable).
 
 Gradle dependency
@@ -33,6 +38,13 @@ val moshi = Moshi.Builder().add(ImmutableCollectionsJsonAdapterFactory()).build(
 
 ### Misc
 - Omit the stdlib from transitive dependencies on the compiler plugin and Gradle plugin artifacts. Both kotlinc and Gradle impose their own versions on the classpath.
+- Update Moshi to `1.15.1`.
+- Update kotlinx-metadata to `0.9.0`.
+- Update KotlinPoet to `1.16.0`.
+- Update Kotlin to `1.9.24`.
+- Update KSP to `1.9.24-1.0.20`.
+- Update Guava to `33.2.0-jre`.
+- Compile against Gradle `8.7`.
 
 0.25.1
 ------
