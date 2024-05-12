@@ -34,6 +34,7 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
+  compileOnly(libs.kotlin.stdlib)
   compileOnly(libs.kotlin.compilerEmbeddable)
   implementation(libs.autoService)
   implementation(libs.moshi)

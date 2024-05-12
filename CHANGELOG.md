@@ -1,6 +1,39 @@
 Changelog
 =========
 
+**Unreleased**
+--------------
+
+### **New**: Publish a new `moshi-immutable-adapters` artifact with support for [kotlinx.collections.immutable](https://github.com/Kotlin/kotlinx.collections.immutable).
+
+Gradle dependency
+
+```kotlin
+dependencies {
+  implementation("dev.zacsweers.moshix:moshi-immutable-adapters:<version>")
+}
+```
+
+In code
+
+```kotlin
+val moshi = Moshi.Builder().add(ImmutableCollectionsJsonAdapterFactory()).build()
+```
+
+**Supported types**
+
+- `ImmutableCollection`
+- `ImmutableList`
+- `ImmutableSet`
+- `ImmutableMap`
+- `PersistentCollection`
+- `PersistentList`
+- `PersistentSet`
+- `PersistentMap`
+
+### Misc
+- Omit the stdlib from transitive dependencies on the compiler plugin and Gradle plugin artifacts. Both kotlinc and Gradle impose their own versions on the classpath.
+
 0.25.1
 ------
 
