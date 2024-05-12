@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-agp = "8.3.2"
+agp = "8.4.0"
 autoService = "1.1.1"
 gjf = "1.17.0"
 incap = "1.0.0"
@@ -33,7 +33,7 @@ dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.14.0" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-lint = { id = "com.android.lint", version = "8.5.0-alpha06" }
+lint = { id = "com.android.lint", version = "8.5.0-beta01" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.28.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.25.1" } # Always replaced by the local plugin
@@ -42,13 +42,15 @@ spotless = { id = "com.diffplug.spotless", version = "6.25.0" }
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 
+assertj = "org.assertj:assertj-core:3.25.3"
+
 autoCommon = { module = "com.google.auto:auto-common", version = "1.2.2" }
 
 autoService = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
 autoService-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version = "1.1.0" }
 autoService-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
 
-guava = { module = "com.google.guava:guava", version = "33.1.0-jre" }
+guava = { module = "com.google.guava:guava", version = "33.2.0-jre" }
 
 incap = { module = "net.ltgt.gradle.incap:incap", version.ref = "incap" }
 incap-processor = { module = "net.ltgt.gradle.incap:incap-processor", version.ref = "incap" }
@@ -58,6 +60,8 @@ kotlin-metadata = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradlePlugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlinx-immutable = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7"
 
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-metadata = { module = "com.squareup:kotlinpoet-metadata", version.ref = "kotlinpoet" }
