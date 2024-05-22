@@ -4,6 +4,19 @@ Changelog
 **Unreleased**
 --------------
 
+0.27.0
+------
+
+_2024-05-22_
+
+### Update to K2
+
+This release updates to K2, aka Kotlin `2.0.0`. This also builds against KSP `2.0.0-1.0.21`.
+
+- [moshi-metadata-reflect] Update to stable kotlin metadata API that ships in K2. The new transitive dependency is now `org.jetbrains.kotlin:kotlin-metadata-jvm:2.0.0`.
+- [ksp] All KSP processors are tested against both KSP 1 and the in-beta KSP2.
+- [moshi-ir] Support K2 IR API changes. We may explore building out FIR support for better IDE support in the future, but for now the entire implementation remains in an IR-only plugin.
+
 0.26.0
 ------
 
