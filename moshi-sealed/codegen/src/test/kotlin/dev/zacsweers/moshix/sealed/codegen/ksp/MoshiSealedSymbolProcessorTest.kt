@@ -21,12 +21,24 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
+import com.tschuchort.compiletesting.configureKsp
 import com.tschuchort.compiletesting.kspSourcesDir
-import com.tschuchort.compiletesting.symbolProcessorProviders
+import com.tschuchort.compiletesting.useKsp2
 import java.io.File
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-class MoshiSealedSymbolProcessorProviderTest {
+@RunWith(Parameterized::class)
+class MoshiSealedSymbolProcessorProviderTest(private val useKSP2: Boolean) {
+
+  companion object {
+    @JvmStatic
+    @Parameterized.Parameters(name = "useKSP2={0}")
+    fun data(): Collection<Array<Any>> {
+      return listOf(arrayOf(true), arrayOf(false))
+    }
+  }
 
   @Test
   fun smokeTest() {
@@ -509,7 +521,12 @@ class MoshiSealedSymbolProcessorProviderTest {
     KotlinCompilation().apply {
       sources = sourceFiles.toList()
       inheritClassPath = true
-      symbolProcessorProviders = listOf(MoshiSealedSymbolProcessorProvider())
+      if (useKSP2) {
+        useKsp2()
+      } else {
+        languageVersion = "1.9"
+      }
+      configureKsp(useKSP2) { symbolProcessorProviders += MoshiSealedSymbolProcessorProvider() }
     }
 
   private fun compile(vararg sourceFiles: SourceFile): CompilationResult {

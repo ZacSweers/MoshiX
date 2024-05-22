@@ -80,11 +80,11 @@ import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.IrVariable
-import org.jetbrains.kotlin.ir.deepCopyWithVariables
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.classifierOrFail
@@ -93,6 +93,7 @@ import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
+import org.jetbrains.kotlin.ir.util.deepCopyWithoutPatchingParents
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getPropertyGetter
@@ -306,6 +307,7 @@ internal class MoshiAdapterGenerator(
       }
   }
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrClass.generateToJsonFun(adapterProperties: Map<DelegateKey, IrField>): IrFunction {
     return addOverride(
         FqName("com.squareup.moshi.JsonAdapter"),
@@ -384,6 +386,7 @@ internal class MoshiAdapterGenerator(
       }
   }
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrClass.generateFromJsonFun(
     adapterProperties: Map<DelegateKey, IrField>,
     optionsField: IrField,
@@ -533,7 +536,7 @@ internal class MoshiAdapterGenerator(
                 // one to compile against
                 val defaultsConstructor =
                   target.constructor.irConstructor
-                    .deepCopyWithVariables()
+                    .deepCopyWithoutPatchingParents()
                     .apply {
                       parent = target.irClass
                       repeat(maskCount) {
@@ -639,6 +642,7 @@ internal class MoshiAdapterGenerator(
       }
   }
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrBuilderWithScope.buildWhileHasNextLoop(
     fieldsHolder: IrValueParameter,
     optionsField: IrField,
@@ -801,6 +805,7 @@ internal class MoshiAdapterGenerator(
   // TODO currently this creates an exception and just steals its message,
   //  would be nice if we had a separate utility? Not a big deal regardless
   //  since we're gonna error at the end anyway
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrBuilderWithScope.addError(
     errors: IrVariable,
     property: PropertyGenerator,
@@ -872,6 +877,7 @@ internal class MoshiAdapterGenerator(
       }
     }
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
     IrDelegatingConstructorCall {
     return IrDelegatingConstructorCallImpl.fromSymbolOwner(

@@ -29,6 +29,7 @@ import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.hasDefaultValue
@@ -163,6 +164,7 @@ internal fun targetType(
   )
 }
 
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun primaryConstructor(targetType: IrClass): TargetConstructor? {
   val primaryConstructor = targetType.primaryConstructor ?: return null
 
@@ -185,6 +187,7 @@ internal fun primaryConstructor(targetType: IrClass): TargetConstructor? {
   return TargetConstructor(primaryConstructor, parameters, primaryConstructor.visibility)
 }
 
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 private fun declaredProperties(
   constructor: TargetConstructor,
   classDecl: IrClass,

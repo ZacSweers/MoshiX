@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   alias(libs.plugins.kotlinJvm)
@@ -22,19 +21,17 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-  compilerOptions {
-    freeCompilerArgs.addAll("-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
-  }
-}
+kotlin { compilerOptions.optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi") }
 
-tasks.withType<Test>().configureEach {
+tasks.test {
   systemProperty("moshix.jvmTarget", libs.versions.jvmTarget.get())
+  // KSP2 needs more memory to run
+  minHeapSize = "1024m"
+  maxHeapSize = "1024m"
 }
 
 dependencies {
   compileOnly(libs.kotlin.compilerEmbeddable)
-  compileOnly(libs.ksp)
   compileOnly(libs.ksp.api)
 
   implementation(libs.autoService)
@@ -45,12 +42,9 @@ dependencies {
 
   ksp(libs.autoService.ksp)
 
-  testImplementation(libs.ksp.api)
-  testImplementation(libs.ksp)
   testImplementation(libs.truth)
   testImplementation(libs.junit)
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.kotlinCompileTesting.ksp)
-  testImplementation(libs.kotlin.compilerEmbeddable)
   testImplementation(project(":moshi-sealed:runtime"))
 }

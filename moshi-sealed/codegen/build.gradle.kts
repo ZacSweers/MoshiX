@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 /*
  * Copyright (C) 2020 Zac Sweers
  *
@@ -22,8 +20,13 @@ plugins {
   alias(libs.plugins.mavenPublish)
 }
 
-// --add-opens for kapt to work. KGP covers this for us but local JVMs in tests do not
-tasks.withType<Test>().configureEach {
+kotlin { compilerOptions.optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi") }
+
+tasks.test {
+  // KSP2 needs more memory to run
+  minHeapSize = "2096m"
+  maxHeapSize = "2096m"
+  // --add-opens for kapt to work. KGP covers this for us but local JVMs in tests do not
   jvmArgs(
     "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
     "--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
@@ -38,18 +41,10 @@ tasks.withType<Test>().configureEach {
   )
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-  compilerOptions {
-    freeCompilerArgs.addAll("-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
-  }
-}
-
 dependencies {
   implementation(libs.autoService)
   implementation(project(":moshi-proguard-rule-gen"))
   ksp(libs.autoService.ksp)
-  // For access to MessageCollectorBasedKSPLogger
-  compileOnly(libs.ksp)
   compileOnly(libs.ksp.api)
   compileOnly(libs.kotlin.compilerEmbeddable)
 
@@ -61,11 +56,8 @@ dependencies {
   implementation(libs.moshi)
   implementation(project(":moshi-sealed:runtime"))
 
-  testImplementation(libs.ksp.api)
-  testImplementation(libs.ksp)
   testImplementation(libs.truth)
   testImplementation(libs.junit)
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.kotlinCompileTesting.ksp)
-  testImplementation(libs.kotlin.compilerEmbeddable)
 }

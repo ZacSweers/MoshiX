@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(UnsafeDuringIrConstructionAPI::class)
+
 package dev.zacsweers.moshix.ir.compiler.util
 
 import java.util.Locale
@@ -87,6 +89,7 @@ import org.jetbrains.kotlin.ir.expressions.IrWhen
 import org.jetbrains.kotlin.ir.expressions.IrWhileLoop
 import org.jetbrains.kotlin.ir.expressions.impl.IrIfThenElseImpl
 import org.jetbrains.kotlin.ir.symbols.IrTypeAliasSymbol
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrDynamicType
 import org.jetbrains.kotlin.ir.types.IrErrorType
 import org.jetbrains.kotlin.ir.types.IrSimpleType
@@ -450,7 +453,7 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
       print(".")
     }
 
-    val prop = (function as? IrSimpleFunction)?.correspondingPropertySymbol?.owner
+    val prop = function.correspondingPropertySymbol?.owner
 
     if (prop != null) {
       val propName = prop.name.asString()

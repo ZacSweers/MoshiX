@@ -29,6 +29,7 @@ import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrGetEnumValue
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.getAnnotation
@@ -38,6 +39,7 @@ import org.jetbrains.kotlin.name.FqName
 internal val JSON_ANNOTATION = FqName("com.squareup.moshi.Json")
 internal val JSON_QUALIFIER_ANNOTATION = FqName("com.squareup.moshi.JsonQualifier")
 
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun IrAnnotationContainer?.jsonQualifiers(): Set<IrConstructorCall> {
   if (this == null) return emptySet()
   return annotations.filterTo(LinkedHashSet()) {
@@ -81,6 +83,7 @@ private val TargetProperty.isVisible: Boolean
  * Returns a generator for this property, or null if either there is an error and this property
  * cannot be used with code gen, or if no codegen is necessary for this property.
  */
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun TargetProperty.generator(
   originalType: IrClass,
   errors: MutableList<(logger: MessageCollector) -> Unit>,

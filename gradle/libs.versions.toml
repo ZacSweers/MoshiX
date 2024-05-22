@@ -19,10 +19,10 @@ gjf = "1.17.0"
 incap = "1.0.0"
 jdk = "21"
 jvmTarget = "11"
-kotlin = "1.9.24"
-kotlinCompileTesting = "0.4.1"
+kotlin = "2.0.0"
+kotlinCompileTesting = "0.5.0-alpha07"
 kotlinpoet = "1.16.0"
-ksp = "1.9.24-1.0.20"
+ksp = "2.0.0-1.0.21"
 ktfmt = "0.49"
 moshi = "1.15.1"
 okhttp = "4.12.0"
@@ -33,7 +33,7 @@ dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.14.0" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-lint = { id = "com.android.lint", version = "8.5.0-beta01" }
+lint = { id = "com.android.lint", version = "8.6.0-alpha02" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.28.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.26.0" } # Always replaced by the local plugin
@@ -56,7 +56,7 @@ incap = { module = "net.ltgt.gradle.incap:incap", version.ref = "incap" }
 incap-processor = { module = "net.ltgt.gradle.incap:incap-processor", version.ref = "incap" }
 
 kotlin-compilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
-kotlin-metadata = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", version = "0.9.0" }
+kotlin-metadata = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradlePlugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
@@ -68,8 +68,11 @@ kotlinpoet-metadata = { module = "com.squareup:kotlinpoet-metadata", version.ref
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
 
 ksp = { module = "com.google.devtools.ksp:symbol-processing", version.ref = "ksp" }
-ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 ksp-gradlePlugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
+ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+ksp-cli = { module = "com.google.devtools.ksp:symbol-processing-cmdline", version.ref = "ksp" }
+ksp-aa-embeddable = { module = "com.google.devtools.ksp:symbol-processing-aa-embeddable", version.ref = "ksp" }
+ksp-commonDeps = { module = "com.google.devtools.ksp:symbol-processing-common-deps", version.ref = "ksp" }
 
 # Only present to trigger automatic renovate updates
 ktfmt = { module = "com.facebook:ktfmt", version.ref = "ktfmt" }

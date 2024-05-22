@@ -41,6 +41,7 @@ import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeProjection
@@ -66,6 +67,7 @@ internal data class DelegateKey(
     get() = delegateType.isNullable()
 
   /** Returns an adapter to use when encoding and decoding this property. */
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   internal fun generateProperty(
     pluginContext: IrPluginContext,
     moshiSymbols: MoshiSymbols,
@@ -203,6 +205,7 @@ private fun IrBuilderWithScope.addAnnotationsParam(
 private fun List<IrType>.toVariableNames() = joinToString("") { it.toVariableName() }
 
 /** Returns a suggested variable name derived from a type name, like nullableListOfString. */
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 private fun IrType.toVariableName(): String {
   val base =
     when (val classifier = classifierOrNull) {
@@ -234,6 +237,7 @@ private fun IrType.toVariableName(): String {
  * are too late to properly use it hear, and also avoids some possible conflicts with
  * kotlin-reflect.
  */
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 private fun IrBuilderWithScope.renderType(
   moshiSymbols: MoshiSymbols,
   delegateType: IrType,

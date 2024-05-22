@@ -29,28 +29,28 @@ import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.lang.reflect.Type
-import kotlinx.metadata.ClassKind
-import kotlinx.metadata.KmClass
-import kotlinx.metadata.KmFlexibleTypeUpperBound
-import kotlinx.metadata.KmProperty
-import kotlinx.metadata.KmType
-import kotlinx.metadata.KmTypeProjection
-import kotlinx.metadata.Modality
-import kotlinx.metadata.Visibility
-import kotlinx.metadata.isInner
-import kotlinx.metadata.isNullable
-import kotlinx.metadata.isVar
-import kotlinx.metadata.jvm.JvmFieldSignature
-import kotlinx.metadata.jvm.JvmMethodSignature
-import kotlinx.metadata.jvm.KotlinClassMetadata
-import kotlinx.metadata.jvm.Metadata
-import kotlinx.metadata.jvm.fieldSignature
-import kotlinx.metadata.jvm.getterSignature
-import kotlinx.metadata.jvm.setterSignature
-import kotlinx.metadata.jvm.syntheticMethodForAnnotations
-import kotlinx.metadata.kind
-import kotlinx.metadata.modality
-import kotlinx.metadata.visibility
+import kotlin.metadata.ClassKind
+import kotlin.metadata.KmClass
+import kotlin.metadata.KmFlexibleTypeUpperBound
+import kotlin.metadata.KmProperty
+import kotlin.metadata.KmType
+import kotlin.metadata.KmTypeProjection
+import kotlin.metadata.Modality
+import kotlin.metadata.Visibility
+import kotlin.metadata.isInner
+import kotlin.metadata.isNullable
+import kotlin.metadata.isVar
+import kotlin.metadata.jvm.JvmFieldSignature
+import kotlin.metadata.jvm.JvmMethodSignature
+import kotlin.metadata.jvm.KotlinClassMetadata
+import kotlin.metadata.jvm.Metadata
+import kotlin.metadata.jvm.fieldSignature
+import kotlin.metadata.jvm.getterSignature
+import kotlin.metadata.jvm.setterSignature
+import kotlin.metadata.jvm.syntheticMethodForAnnotations
+import kotlin.metadata.kind
+import kotlin.metadata.modality
+import kotlin.metadata.visibility
 
 /** Classes annotated with this are eligible for this adapter. */
 private val KOTLIN_METADATA = Metadata::class.java
@@ -338,7 +338,6 @@ public class MetadataKotlinJsonAdapterFactory : JsonAdapter.Factory {
       this != null && other != null -> {
         // Note we don't check abbreviatedType because typealiases and their backing types are equal
         // for our purposes.
-        @Suppress("DEPRECATION")
         arguments valueEquals other.arguments &&
           classifier == other.classifier &&
           isNullable == other.isNullable &&
