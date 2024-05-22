@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 8.4.0-alpha11" type="baseline" client="gradle" dependencies="false" name="AGP (8.4.0-alpha11)" variant="all" version="8.4.0-alpha11">
+<issues format="6" by="lint 8.6.0-alpha02" type="baseline" client="gradle" dependencies="false" name="AGP (8.6.0-alpha02)" variant="all" version="8.6.0-alpha02">
 
     <issue
         id="IgnoreWithoutReason"
@@ -30,19 +30,19 @@
         errorLine2="                                   ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/BaseSymbols.kt"
-            line="111"
+            line="114"
             column="36"/>
     </issue>
 
     <issue
         id="KotlincFE10"
         message="org.jetbrains.kotlin.descriptors.ModuleDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
-        errorLine1="      moduleFragment.descriptor,"
-        errorLine2="                     ~~~~~~~~~~">
+        errorLine1="    createEmptyExternalPackageFragment(moduleFragment.descriptor, FqName(packageName))"
+        errorLine2="                                                      ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/BaseSymbols.kt"
-            line="140"
-            column="22"/>
+            line="142"
+            column="55"/>
     </issue>
 
     <issue
@@ -74,7 +74,7 @@
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
-            line="99"
+            line="101"
             column="24"/>
     </issue>
 
@@ -85,7 +85,7 @@
         errorLine2="                                                       ~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
-            line="317"
+            line="321"
             column="56"/>
     </issue>
 
@@ -96,7 +96,7 @@
         errorLine2="                              ~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
-            line="322"
+            line="326"
             column="31"/>
     </issue>
 
@@ -107,7 +107,7 @@
         errorLine2="                  ~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
-            line="323"
+            line="327"
             column="19"/>
     </issue>
 
@@ -118,7 +118,7 @@
         errorLine2="                  ~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
-            line="324"
+            line="328"
             column="19"/>
     </issue>
 
@@ -129,7 +129,7 @@
         errorLine2="                  ~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/DelegateKey.kt"
-            line="325"
+            line="329"
             column="19"/>
     </issue>
 
@@ -140,7 +140,7 @@
         errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="209"
+            line="212"
             column="35"/>
     </issue>
 
@@ -151,7 +151,7 @@
         errorLine2="                    ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="209"
+            line="212"
             column="21"/>
     </issue>
 
@@ -162,7 +162,7 @@
         errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="210"
+            line="213"
             column="37"/>
     </issue>
 
@@ -173,7 +173,7 @@
         errorLine2="                      ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="210"
+            line="213"
             column="23"/>
     </issue>
 
@@ -184,7 +184,7 @@
         errorLine2="                          ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="212"
+            line="215"
             column="27"/>
     </issue>
 
@@ -195,19 +195,8 @@
         errorLine2="                                                        ~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="598"
+            line="601"
             column="57"/>
-    </issue>
-
-    <issue
-        id="KotlincFE10"
-        message="org.jetbrains.kotlin.descriptors.FunctionDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
-        errorLine1="    val constructedClass = expression.symbol.descriptor.constructedClass"
-        errorLine2="                                             ~~~~~~~~~~">
-        <location
-            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="598"
-            column="46"/>
     </issue>
 
     <issue
@@ -217,7 +206,7 @@
         errorLine2="               ~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="599"
+            line="602"
             column="16"/>
     </issue>
 
@@ -228,19 +217,8 @@
         errorLine2="                                ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="599"
+            line="602"
             column="33"/>
-    </issue>
-
-    <issue
-        id="KotlincFE10"
-        message="org.jetbrains.kotlin.descriptors.FunctionDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
-        errorLine1="    val isAnnotation = expression.symbol.descriptor.isAnnotationConstructor()"
-        errorLine2="                                         ~~~~~~~~~~">
-        <location
-            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="600"
-            column="42"/>
     </issue>
 
     <issue
@@ -250,7 +228,7 @@
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="600"
+            line="603"
             column="24"/>
     </issue>
 
@@ -261,7 +239,7 @@
         errorLine2="                                      ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="749"
+            line="752"
             column="39"/>
     </issue>
 
@@ -272,7 +250,7 @@
         errorLine2="                                                 ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="749"
+            line="752"
             column="50"/>
     </issue>
 
@@ -283,7 +261,7 @@
         errorLine2="                          ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="806"
+            line="809"
             column="27"/>
     </issue>
 
@@ -294,7 +272,7 @@
         errorLine2="                                     ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="806"
+            line="809"
             column="38"/>
     </issue>
 
@@ -305,7 +283,7 @@
         errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="844"
+            line="847"
             column="33"/>
     </issue>
 
@@ -316,7 +294,7 @@
         errorLine2="                  ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="844"
+            line="847"
             column="19"/>
     </issue>
 
@@ -327,7 +305,7 @@
         errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="845"
+            line="848"
             column="35"/>
     </issue>
 
@@ -338,7 +316,7 @@
         errorLine2="                    ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="845"
+            line="848"
             column="21"/>
     </issue>
 
@@ -349,7 +327,7 @@
         errorLine2="                        ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="847"
+            line="850"
             column="25"/>
     </issue>
 
@@ -360,7 +338,7 @@
         errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1020"
+            line="1023"
             column="33"/>
     </issue>
 
@@ -371,7 +349,7 @@
         errorLine2="                  ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1020"
+            line="1023"
             column="19"/>
     </issue>
 
@@ -382,7 +360,7 @@
         errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1021"
+            line="1024"
             column="35"/>
     </issue>
 
@@ -393,7 +371,7 @@
         errorLine2="                    ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1021"
+            line="1024"
             column="21"/>
     </issue>
 
@@ -404,7 +382,7 @@
         errorLine2="                        ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1023"
+            line="1026"
             column="25"/>
     </issue>
 
@@ -415,19 +393,8 @@
         errorLine2="                                                        ~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1165"
+            line="1168"
             column="57"/>
-    </issue>
-
-    <issue
-        id="KotlincFE10"
-        message="org.jetbrains.kotlin.descriptors.FunctionDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
-        errorLine1="    val constructedClass = expression.symbol.descriptor.constructedClass"
-        errorLine2="                                             ~~~~~~~~~~">
-        <location
-            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1165"
-            column="46"/>
     </issue>
 
     <issue
@@ -437,7 +404,7 @@
         errorLine2="               ~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1166"
+            line="1169"
             column="16"/>
     </issue>
 
@@ -448,7 +415,7 @@
         errorLine2="                                ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1166"
+            line="1169"
             column="33"/>
     </issue>
 
@@ -459,7 +426,7 @@
         errorLine2="                            ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1278"
+            line="1281"
             column="29"/>
     </issue>
 
@@ -470,7 +437,7 @@
         errorLine2="                                       ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1278"
+            line="1281"
             column="40"/>
     </issue>
 
@@ -481,7 +448,7 @@
         errorLine2="                 ~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1318"
+            line="1321"
             column="18"/>
     </issue>
 
@@ -492,7 +459,7 @@
         errorLine2="              ~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/IrSourcePrinter.kt"
-            line="1319"
+            line="1322"
             column="15"/>
     </issue>
 
@@ -503,7 +470,7 @@
         errorLine2="                                  ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/MoshiAdapterGenerator.kt"
-            line="114"
+            line="115"
             column="35"/>
     </issue>
 
@@ -514,7 +481,7 @@
         errorLine2="             ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/MoshiAdapterGenerator.kt"
-            line="156"
+            line="157"
             column="14"/>
     </issue>
 
@@ -525,7 +492,7 @@
         errorLine2="                                ~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/MoshiAdapterGenerator.kt"
-            line="165"
+            line="166"
             column="33"/>
     </issue>
 
@@ -536,7 +503,7 @@
         errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/api/MoshiAdapterGenerator.kt"
-            line="293"
+            line="294"
             column="22"/>
     </issue>
 
@@ -547,7 +514,7 @@
         errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
-            line="75"
+            line="77"
             column="26"/>
     </issue>
 
@@ -558,7 +525,7 @@
         errorLine2="           ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
-            line="75"
+            line="77"
             column="12"/>
     </issue>
 
@@ -569,7 +536,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
-            line="76"
+            line="78"
             column="21"/>
     </issue>
 
@@ -580,7 +547,7 @@
         errorLine2="      ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
-            line="76"
+            line="78"
             column="7"/>
     </issue>
 
@@ -591,7 +558,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
-            line="77"
+            line="79"
             column="21"/>
     </issue>
 
@@ -602,7 +569,7 @@
         errorLine2="      ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrUtil.kt"
-            line="77"
+            line="79"
             column="7"/>
     </issue>
 
@@ -613,7 +580,7 @@
         errorLine2="      ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/MoshiSealedSymbols.kt"
-            line="52"
+            line="54"
             column="7"/>
     </issue>
 
@@ -624,7 +591,7 @@
         errorLine2="                                                                          ~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/MoshiSealedSymbols.kt"
-            line="55"
+            line="57"
             column="75"/>
     </issue>
 
@@ -635,7 +602,7 @@
         errorLine2="                                                                         ~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/MoshiSealedSymbols.kt"
-            line="66"
+            line="68"
             column="74"/>
     </issue>
 
@@ -646,7 +613,7 @@
         errorLine2="                                            ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
-            line="57"
+            line="60"
             column="45"/>
     </issue>
 
@@ -657,7 +624,7 @@
         errorLine2="               ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
-            line="64"
+            line="67"
             column="16"/>
     </issue>
 
@@ -668,7 +635,7 @@
         errorLine2="                                                        ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
-            line="86"
+            line="89"
             column="57"/>
     </issue>
 
@@ -679,7 +646,7 @@
         errorLine2="                                             ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
-            line="100"
+            line="103"
             column="46"/>
     </issue>
 
@@ -690,7 +657,7 @@
         errorLine2="               ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
-            line="123"
+            line="126"
             column="16"/>
     </issue>
 
@@ -701,7 +668,7 @@
         errorLine2="               ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
-            line="150"
+            line="153"
             column="16"/>
     </issue>
 
@@ -712,7 +679,7 @@
         errorLine2="               ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
-            line="195"
+            line="198"
             column="16"/>
     </issue>
 
@@ -723,7 +690,7 @@
         errorLine2="                                              ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiSymbols.kt"
-            line="241"
+            line="244"
             column="47"/>
     </issue>
 
@@ -734,7 +701,7 @@
         errorLine2="                  ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="143"
+            line="145"
             column="19"/>
     </issue>
 
@@ -745,7 +712,7 @@
         errorLine2="                                 ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="185"
+            line="187"
             column="34"/>
     </issue>
 
@@ -756,7 +723,7 @@
         errorLine2="             ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="372"
+            line="375"
             column="14"/>
     </issue>
 
@@ -767,7 +734,7 @@
         errorLine2="                              ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="373"
+            line="376"
             column="31"/>
     </issue>
 
@@ -778,7 +745,7 @@
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="406"
+            line="409"
             column="24"/>
     </issue>
 
@@ -789,7 +756,7 @@
         errorLine2="                 ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="616"
+            line="622"
             column="18"/>
     </issue>
 
@@ -877,7 +844,7 @@
         errorLine2="           ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="54"
+            line="55"
             column="12"/>
     </issue>
 
@@ -888,7 +855,7 @@
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="85"
+            line="86"
             column="24"/>
     </issue>
 
@@ -899,7 +866,7 @@
         errorLine2="         ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="85"
+            line="86"
             column="10"/>
     </issue>
 
@@ -910,7 +877,7 @@
         errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="86"
+            line="87"
             column="26"/>
     </issue>
 
@@ -921,7 +888,7 @@
         errorLine2="           ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="86"
+            line="87"
             column="12"/>
     </issue>
 
@@ -932,7 +899,7 @@
         errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="112"
+            line="113"
             column="31"/>
     </issue>
 
@@ -943,7 +910,7 @@
         errorLine2="                ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="112"
+            line="113"
             column="17"/>
     </issue>
 
@@ -954,7 +921,7 @@
         errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="113"
+            line="114"
             column="33"/>
     </issue>
 
@@ -965,7 +932,7 @@
         errorLine2="                  ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="113"
+            line="114"
             column="19"/>
     </issue>
 
@@ -976,7 +943,7 @@
         errorLine2="                        ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="140"
+            line="141"
             column="25"/>
     </issue>
 
@@ -987,7 +954,7 @@
         errorLine2="                      ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="144"
+            line="145"
             column="23"/>
     </issue>
 
@@ -998,7 +965,7 @@
         errorLine2="        ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="144"
+            line="145"
             column="9"/>
     </issue>
 
@@ -1009,7 +976,7 @@
         errorLine2="      ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="146"
+            line="147"
             column="7"/>
     </issue>
 
@@ -1020,7 +987,7 @@
         errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="152"
+            line="153"
             column="35"/>
     </issue>
 
@@ -1031,7 +998,7 @@
         errorLine2="                    ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="152"
+            line="153"
             column="21"/>
     </issue>
 
@@ -1042,7 +1009,7 @@
         errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="153"
+            line="154"
             column="26"/>
     </issue>
 
@@ -1053,7 +1020,7 @@
         errorLine2="                                                              ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="153"
+            line="154"
             column="63"/>
     </issue>
 
@@ -1064,7 +1031,7 @@
         errorLine2="                 ~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="162"
+            line="163"
             column="18"/>
     </issue>
 
@@ -1075,7 +1042,7 @@
         errorLine2="                                                                              ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="185"
+            line="187"
             column="79"/>
     </issue>
 
@@ -1086,7 +1053,7 @@
         errorLine2="                              ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/TargetTypes.kt"
-            line="202"
+            line="205"
             column="31"/>
     </issue>
 
@@ -1097,7 +1064,7 @@
         errorLine2="             ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/ir.kt"
-            line="203"
+            line="205"
             column="14"/>
     </issue>
 
@@ -1108,7 +1075,7 @@
         errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/ir.kt"
-            line="204"
+            line="206"
             column="15"/>
     </issue>
 
@@ -1119,7 +1086,7 @@
         errorLine2="                                                                                  ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/util/ir.kt"
-            line="205"
+            line="207"
             column="83"/>
     </issue>
 
