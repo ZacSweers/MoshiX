@@ -4,11 +4,16 @@ Changelog
 **Unreleased**
 --------------
 
-- Improve moshi-sealed KSP error messages.
-- Fix fallback adapter support in IR code gen not recognizing Moshi parameters to primary constructors.
-- Check for same subtypes before erroring on duplicate labels in moshi-sealed IR.
-- Fix proguard rule gen not capturing non-sealed subtypes.
-- Don't write empty proguard rule files if not rules were necessary.
+0.27.1
+------
+
+_2024-05-28_
+
+- [moshi-sealed] Improve moshi-sealed KSP error messages.
+- [moshi-ir] Fix fallback adapter support in IR code gen not recognizing Moshi parameters to primary constructors.
+- [moshi-sealed and moshi-ir] Check for same subtypes before erroring on duplicate labels in moshi-sealed IR.
+- [moshi-proguard-rule-gen] Fix proguard rule gen not capturing non-sealed subtypes.
+- [moshi-proguard-rule-gen] Don't write empty proguard rule files if not rules were necessary.
 
 0.27.0
 ------
