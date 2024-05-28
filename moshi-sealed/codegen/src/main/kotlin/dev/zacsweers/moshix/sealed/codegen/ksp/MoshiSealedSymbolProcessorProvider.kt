@@ -105,14 +105,23 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
 
   private val codeGenerator = environment.codeGenerator
   private val logger = environment.logger
-  private val generatedOption =
-    environment.options[OPTION_GENERATED]?.also {
-      require(it in POSSIBLE_GENERATED_NAMES) {
-        "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
+  private val generatedOption: String?
+  private var hasInitErrors: Boolean = false
+
+  init {
+    generatedOption =
+      environment.options[OPTION_GENERATED]?.also {
+        if (it !in POSSIBLE_GENERATED_NAMES) {
+          logger.error(
+            "Invalid option value for $OPTION_GENERATED. Found $it, allowable values are $POSSIBLE_GENERATED_NAMES."
+          )
+          hasInitErrors = true
+        }
       }
-    }
+  }
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
+    if (hasInitErrors) return emptyList()
     val generatedAnnotation =
       generatedOption?.let {
         val annotationType =
@@ -129,12 +138,18 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
 
     val symbols = MoshiSealedSymbols(resolver)
 
-    resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME).asSequence().forEach { type ->
-      check(type is KSClassDeclaration) { "@JsonClass is only applicable to classes!" }
+    resolver.getSymbolsWithAnnotation(JSON_CLASS_NAME).forEach { type ->
+      if (type !is KSClassDeclaration) {
+        logger.error("@JsonClass is only applicable to classes!", type)
+        return@forEach
+      }
 
       val labelKey = type.findAnnotationWithType(symbols.jsonClass)?.labelKey() ?: return@forEach
 
-      check(Modifier.SEALED in type.modifiers) { "Must be a sealed class!" }
+      if (Modifier.SEALED !in type.modifiers) {
+        logger.error("Must be a sealed class!", type)
+        return@forEach
+      }
 
       // If this is a nested sealed type of a moshi-sealed parent, defer to the parent
       val sealedParent =
