@@ -14,6 +14,7 @@ _2024-05-28_
 - [moshi-sealed and moshi-ir] Check for same subtypes before erroring on duplicate labels in moshi-sealed IR.
 - [moshi-proguard-rule-gen] Fix proguard rule gen not capturing non-sealed subtypes.
 - [moshi-proguard-rule-gen] Don't write empty proguard rule files if not rules were necessary.
+- Update KotlinPoet to `1.17.0`.
 
 0.27.0
 ------
