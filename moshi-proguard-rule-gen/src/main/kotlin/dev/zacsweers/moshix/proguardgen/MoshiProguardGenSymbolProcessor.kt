@@ -98,6 +98,11 @@ public class MoshiProguardGenSymbolProcessor(private val environment: SymbolProc
               targetConstructorHasDefaults = false,
               targetConstructorParams = emptyList(),
             )
+
+          if (!enableMoshi && nestedSealedClassNames.isEmpty()) {
+            return emptyList()
+          }
+
           environment.logger.info(
             "MOSHI: Writing proguard rules for ${targetType.canonicalName}: $config",
             clazz,
@@ -163,6 +168,8 @@ public class MoshiProguardGenSymbolProcessor(private val environment: SymbolProc
       for (nested in getSealedSubclasses()) {
         nested.walkSealedSubtypes(elements, skipAnnotationCheck = false)
       }
+    } else {
+      elements += toClassName()
     }
   }
 
