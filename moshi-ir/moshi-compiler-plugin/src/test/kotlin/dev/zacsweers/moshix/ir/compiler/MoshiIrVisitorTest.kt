@@ -1027,6 +1027,55 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       .contains("Fallback adapter type's primary constructor can only have a Moshi parameter")
   }
 
+  @Test
+  fun correctConstructorParam() {
+    val source =
+      kotlin(
+        "BaseType.kt",
+        """
+      package test
+      import com.squareup.moshi.JsonClass
+      import com.squareup.moshi.Moshi
+      import com.squareup.moshi.JsonAdapter
+      import com.squareup.moshi.adapter
+      import com.squareup.moshi.JsonWriter
+      import com.squareup.moshi.JsonReader
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+      import dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter
+      import dev.zacsweers.moshix.sealed.runtime.internal.ObjectJsonAdapter
+
+      @OptIn(ExperimentalStdlibApi::class)
+      @FallbackJsonAdapter(MessageWithFallbackAdapter.SuccessAdapter::class)
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed class MessageWithFallbackAdapter {
+
+        @TypeLabel("success", ["successful"])
+        @JsonClass(generateAdapter = true)
+        data class Success(val value: String) : MessageWithFallbackAdapter()
+
+        @TypeLabel("error")
+        @JsonClass(generateAdapter = true)
+        data class Error(val error_logs: Map<String, Any>) : MessageWithFallbackAdapter()
+
+        class SuccessAdapter(moshi: Moshi) : JsonAdapter<MessageWithFallbackAdapter>() {
+          private val delegate = moshi.adapter<Success>()
+
+          override fun fromJson(reader: JsonReader): MessageWithFallbackAdapter? {
+            return delegate.fromJson(reader)
+          }
+
+          override fun toJson(writer: JsonWriter, value: MessageWithFallbackAdapter?) {
+            throw NotImplementedError()
+          }
+        }
+      }
+    """,
+      )
+
+    val result = compile(source)
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+  }
+
   private fun prepareCompilation(
     generatedAnnotation: String? = null,
     vararg sourceFiles: SourceFile,
