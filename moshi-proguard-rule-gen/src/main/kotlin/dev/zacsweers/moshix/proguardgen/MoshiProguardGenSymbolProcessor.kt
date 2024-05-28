@@ -163,6 +163,8 @@ public class MoshiProguardGenSymbolProcessor(private val environment: SymbolProc
       for (nested in getSealedSubclasses()) {
         nested.walkSealedSubtypes(elements, skipAnnotationCheck = false)
       }
+    } else {
+      elements += toClassName()
     }
   }
 
