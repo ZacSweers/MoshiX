@@ -6,6 +6,7 @@ Changelog
 
 - Improve moshi-sealed KSP error messages.
 - Fix fallback adapter support in IR code gen not recognizing Moshi parameters to primary constructors.
+- Check for same subtypes before erroring on duplicate labels in moshi-sealed IR.
 
 0.27.0
 ------

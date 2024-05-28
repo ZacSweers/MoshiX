@@ -317,8 +317,10 @@ private constructor(
         }
 
     seenLabels.put(mainLabel, subtype)?.let { prev ->
-      logger.error(target) {
-        "Duplicate label '$mainLabel' defined for ${subtype.fqNameWhenAvailable} and ${prev.fqNameWhenAvailable}."
+      if (prev != subtype) {
+        logger.error(target) {
+          "Duplicate label '$mainLabel' defined for ${subtype.fqNameWhenAvailable} and ${prev.fqNameWhenAvailable}."
+        }
       }
       return null
     }

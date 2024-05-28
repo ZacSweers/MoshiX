@@ -1076,6 +1076,36 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
   }
 
+  // Covers cases where a nested sealed interface is also implemented by a subtype that implements
+  // the super type
+  @Test
+  fun nestedSealedWithCommonSubtypes() {
+    val source =
+      kotlin(
+        "BaseType.kt",
+        """
+      package test
+      import com.squareup.moshi.JsonClass
+      import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+      import dev.zacsweers.moshix.sealed.annotations.NestedSealed
+
+      @JsonClass(generateAdapter = true, generator = "sealed:type")
+      sealed interface Foo {
+
+        @NestedSealed
+        sealed interface SuperFoo : Foo
+
+        @JsonClass(generateAdapter = true)
+        @TypeLabel("real")
+        data class RealFoo(val value: String) : SuperFoo, Foo
+      }
+    """,
+      )
+
+    val result = compile(source)
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+  }
+
   private fun prepareCompilation(
     generatedAnnotation: String? = null,
     vararg sourceFiles: SourceFile,
