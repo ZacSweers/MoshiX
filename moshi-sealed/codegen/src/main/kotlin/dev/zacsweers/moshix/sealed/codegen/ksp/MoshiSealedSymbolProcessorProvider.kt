@@ -418,8 +418,10 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
         }
 
     seenLabels.put(mainLabel, className)?.let { prev ->
-      logger.error("Duplicate label '$mainLabel' defined for $className and $prev.", rootType)
-      return null
+      if (prev != className) {
+        logger.error("Duplicate label '$mainLabel' defined for $className and $prev.", rootType)
+        return null
+      }
     }
 
     labels += mainLabel
