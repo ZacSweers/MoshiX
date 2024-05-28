@@ -8,6 +8,7 @@ Changelog
 - Fix fallback adapter support in IR code gen not recognizing Moshi parameters to primary constructors.
 - Check for same subtypes before erroring on duplicate labels in moshi-sealed IR.
 - Fix proguard rule gen not capturing non-sealed subtypes.
+- Don't write empty proguard rule files if not rules were necessary.
 
 0.27.0
 ------
