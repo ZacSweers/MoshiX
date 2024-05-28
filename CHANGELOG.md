@@ -4,6 +4,8 @@ Changelog
 **Unreleased**
 --------------
 
+- Improve moshi-sealed KSP error messages.
+
 0.27.0
 ------
 
