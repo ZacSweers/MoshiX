@@ -58,10 +58,12 @@ import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classifierOrFail
+import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
+import org.jetbrains.kotlin.ir.types.isClassWithFqName
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.classId
 import org.jetbrains.kotlin.ir.util.constructors
@@ -74,6 +76,7 @@ import org.jetbrains.kotlin.ir.util.packageFqName
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.FqNameUnsafe
 import org.jetbrains.kotlin.name.Name
 
 internal class SealedAdapterGenerator
@@ -153,9 +156,13 @@ private constructor(
             // Check it's a Moshi parameter
             val moshiParam = constructor.valueParameters[0]
             // TODO can this be simpler?
-            if (moshiSymbols.moshi != moshiParam.type) {
+            if (
+              moshiParam.type.classifierOrNull?.isClassWithFqName(
+                FqNameUnsafe("com.squareup.moshi.Moshi")
+              ) != true
+            ) {
               logger.error(target) {
-                "Fallback adapter type's primary constructor can only have a Moshi parameter"
+                "Fallback adapter type's primary constructor can only have a Moshi parameter. Found ${moshiParam.type.classifierOrNull}"
               }
               return null
             }
@@ -163,7 +170,7 @@ private constructor(
           }
           else -> {
             logger.error(target) {
-              "Fallback adapter type's primary constructor can only have a Moshi parameter"
+              "Fallback adapter type's primary constructor can only have a Moshi parameter. Found ${constructor.valueParameters.joinToString()}"
             }
             return null
           }
