@@ -47,7 +47,7 @@ assertj = "org.assertj:assertj-core:3.26.0"
 autoCommon = { module = "com.google.auto:auto-common", version = "1.2.2" }
 
 autoService = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
-autoService-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version = "1.1.0" }
+autoService-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version = "1.2.0" }
 autoService-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
 
 guava = { module = "com.google.guava:guava", version = "33.2.1-jre" }
