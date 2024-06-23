@@ -36,27 +36,23 @@ internal class PropertyGenerator(
   val hasDefault: Boolean = target.hasDefault
 
   lateinit var localName: String
-  lateinit var localIsPresentName: String
-  lateinit var localHasErrorName: String
-
-  val isRequired: Boolean
-    get() = !delegateKey.nullable && !hasDefault
-
-  val hasConstructorParameter: Boolean
-    get() = target.parameterIndex != -1
-
   /**
    * IsPresent is required if the following conditions are met:
-   * - Is not transient
+   * - Is not ignored
    * - Has a default
-   * - Is not a constructor parameter (for constructors we use a defaults mask)
-   * - Is nullable (because we differentiate absent from null)
    *
    * This is used to indicate that presence should be checked first before possible assigning null
    * to an absent value
    */
-  val hasLocalIsPresentName: Boolean =
-    !isTransientOrIgnored && hasDefault && !hasConstructorParameter && delegateKey.nullable
+  lateinit var localIsPresentName: String
+  lateinit var localHasErrorName: String
+
+  val isRequired: Boolean
+    get() = !hasDefault
+
+  val hasConstructorParameter: Boolean
+    get() = target.parameterIndex != -1
+
   val hasConstructorDefault: Boolean = hasDefault && hasConstructorParameter
 
   internal fun allocateNames(nameAllocator: NameAllocator) {

@@ -265,7 +265,7 @@ class GeneratedAdaptersTest {
 
   @Test
   fun nullableTypeParams() {
-    val adapter = moshi.adapter<NullableTypeParams<Int>>()
+    val adapter = moshi.adapter<NullableTypeParams<Int>>().serializeNulls()
     val nullSerializing = adapter.serializeNulls()
 
     val nullableTypeParams =
@@ -281,7 +281,7 @@ class GeneratedAdaptersTest {
       NullableTypeParams(
         nullableTypeParams.nullableList,
         nullableTypeParams.nullableSet,
-        nullableTypeParams.nullableMap.filterValues { it != null },
+        nullableTypeParams.nullableMap,
         null,
         1,
       )
@@ -444,9 +444,12 @@ class GeneratedAdaptersTest {
     assertThat(jsonAdapter.toJson(encoded)).isEqualTo("""{"b":5}""")
     assertThat(jsonAdapter.serializeNulls().toJson(encoded)).isEqualTo("""{"a":null,"b":5}""")
 
-    val decoded = jsonAdapter.fromJson("""{"b":6}""")!!
-    assertThat(decoded.a).isNull()
-    assertThat(decoded.b).isEqualTo(6)
+    try {
+      jsonAdapter.fromJson("""{"b":6}""")!!
+      fail()
+    } catch (expected: JsonDataException) {
+      assertThat(expected).hasMessageThat().isEqualTo("Required value 'a' missing at $")
+    }
   }
 
   @JsonClass(generateAdapter = true) class AbsentNull(var a: Int?, var b: Int?)
