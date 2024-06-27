@@ -169,6 +169,75 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
   }
 
   @Test
+  fun `ensure sealed classes in packages with reserved keywords yield valid rules`() {
+    // https://kotlinlang.org/docs/keyword-reference.html
+    val hardKeywords = listOf("as", "break", "class")
+    val softKeywords = listOf("by", "catch", "constructor")
+    val modifierKeywords = listOf("abstract", "sealed", "tailrec")
+    val keyWordsToTest = hardKeywords + softKeywords + modifierKeywords
+
+    keyWordsToTest.forEach { keyword ->
+      val source =
+        kotlin(
+          "BaseType.kt",
+          """
+          package test.${'`'}$keyword${'`'}
+          import com.squareup.moshi.Json
+          import com.squareup.moshi.JsonClass
+          import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+          import dev.zacsweers.moshix.sealed.annotations.DefaultObject
+  
+          @JsonClass(generateAdapter = true, generator = "sealed:type")
+          sealed class Message {
+          
+              @TypeLabel("success")
+              @JsonClass(generateAdapter = true)
+              data class Success(
+                  @Json(name = "value")
+                  val value: String
+              ) : Message()
+
+              @DefaultObject
+              object Unknown : Message()
+          }
+          """.trimIndent(),
+        )
+
+      val compilation = prepareCompilation(source)
+      val result = compilation.compile()
+      assertThat(result.exitCode).isEqualTo(ExitCode.OK)
+      val generatedSourcesDir = compilation.kspSourcesDir
+      val proguardFiles =
+        generatedSourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()
+      check(proguardFiles.isNotEmpty())
+      for (generatedFile in proguardFiles) {
+        generatedFile.assertInCorrectPath()
+        when (generatedFile.nameWithoutExtension) {
+          "moshi-test.$keyword.Message" ->
+            assertThat(generatedFile.readText().trimIndent())
+              .isEqualTo(
+                // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
+                """
+                  # Conditionally keep this adapter for every possible nested subtype that uses it.
+                  -if class test.$keyword.Message${'$'}Success
+                  -keep class test.$keyword.MessageJsonAdapter {
+                      public <init>(com.squareup.moshi.Moshi);
+                  }
+                  -if class test.$keyword.Message${'$'}Unknown
+                  -keep class test.$keyword.MessageJsonAdapter {
+                      public <init>(com.squareup.moshi.Moshi);
+                  }
+                """
+                  .trimIndent()
+              )
+
+          else -> error("Unrecognized proguard file: $generatedFile")
+        }
+      }
+    }
+  }
+
+  @Test
   fun disableProguardGeneration() {
     val source =
       kotlin(
