@@ -131,7 +131,8 @@ public class MoshiProguardGenSymbolProcessor(private val environment: SymbolProc
                 val adapterCanonicalName =
                   ClassName(targetType.packageName, adapterName).canonicalName
                 for (target in nestedSealedClassNames.sorted()) {
-                  writer.appendLine("-if class $target")
+                  val targetReflectionName = target.reflectionName()
+                  writer.appendLine("-if class $targetReflectionName")
                   writer.appendLine("-keep class $adapterCanonicalName {")
                   // Keep the constructor for Moshi's reflective lookup
                   val constructorArgs = adapterConstructorParams.joinToString(",")
