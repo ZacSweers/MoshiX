@@ -82,21 +82,22 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
         "moshi-test.BaseType" ->
           assertThat(generatedFile.readText().trimIndent())
             .isEqualTo(
+              // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
               """
                   # Conditionally keep this adapter for every possible nested subtype that uses it.
-                  -if class test.BaseType.TypeA
+                  -if class test.BaseType${'$'}TypeA
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.BaseType.TypeB
+                  -if class test.BaseType${'$'}TypeB
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.BaseType.TypeC
+                  -if class test.BaseType${'$'}TypeC
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.BaseType.TypeC.TypeCImpl
+                  -if class test.BaseType${'$'}TypeC${'$'}TypeCImpl
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
@@ -118,7 +119,6 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
       import com.squareup.moshi.Json
       import com.squareup.moshi.JsonClass
       import dev.zacsweers.moshix.sealed.annotations.TypeLabel
-      import dev.zacsweers.moshix.sealed.annotations.NestedSealed
       import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 
       @JsonClass(generateAdapter = true, generator = "sealed:type")
@@ -149,13 +149,14 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
         "moshi-test.Message" ->
           assertThat(generatedFile.readText().trimIndent())
             .isEqualTo(
+              // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
               """
                   # Conditionally keep this adapter for every possible nested subtype that uses it.
-                  -if class test.Message.Success
+                  -if class test.Message${'$'}Success
                   -keep class test.MessageJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.Message.Unknown
+                  -if class test.Message${'$'}Unknown
                   -keep class test.MessageJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
