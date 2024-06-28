@@ -4,6 +4,18 @@ Changelog
 **Unreleased**
 --------------
 
+0.27.2
+------
+
+_2024-06-28_
+
+- [moshi-proguard-rule-gen] Fix proguard rule gen when using nested classes or packages with soft-keyword segments.
+- [docs] Add immutable-adapters in `README.md`.
+- Build against KSP to `2.0.0-1.0.22`.
+- Build against Gradle `8.8`.
+
+Special thanks to [@mhelder](https://github.com/mhelder) and [@beigirad](https://github.com/beigirad) for contributing to this release!
+
 0.27.1
 ------
 
