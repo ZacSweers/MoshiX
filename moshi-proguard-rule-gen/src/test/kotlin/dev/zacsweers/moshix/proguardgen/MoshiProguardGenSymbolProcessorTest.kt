@@ -186,10 +186,10 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
           import com.squareup.moshi.JsonClass
           import dev.zacsweers.moshix.sealed.annotations.TypeLabel
           import dev.zacsweers.moshix.sealed.annotations.DefaultObject
-  
+
           @JsonClass(generateAdapter = true, generator = "sealed:type")
           sealed class Message {
-          
+
               @TypeLabel("success")
               @JsonClass(generateAdapter = true)
               data class Success(
@@ -200,7 +200,8 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
               @DefaultObject
               object Unknown : Message()
           }
-          """.trimIndent(),
+          """
+            .trimIndent(),
         )
 
       val compilation = prepareCompilation(source)
