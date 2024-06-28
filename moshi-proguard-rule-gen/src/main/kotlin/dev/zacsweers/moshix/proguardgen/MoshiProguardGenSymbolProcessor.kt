@@ -128,12 +128,12 @@ public class MoshiProguardGenSymbolProcessor(private val environment: SymbolProc
                 writer.appendLine(
                   "\n# Conditionally keep this adapter for every possible nested subtype that uses it."
                 )
-                val adapterCanonicalName =
-                  ClassName(targetType.packageName, adapterName).canonicalName
+                val adapterReflectionName =
+                  ClassName(targetType.packageName, adapterName).reflectionName()
                 for (target in nestedSealedClassNames.sorted()) {
                   val targetReflectionName = target.reflectionName()
                   writer.appendLine("-if class $targetReflectionName")
-                  writer.appendLine("-keep class $adapterCanonicalName {")
+                  writer.appendLine("-keep class $adapterReflectionName {")
                   // Keep the constructor for Moshi's reflective lookup
                   val constructorArgs = adapterConstructorParams.joinToString(",")
                   writer.appendLine("    public <init>($constructorArgs);")
