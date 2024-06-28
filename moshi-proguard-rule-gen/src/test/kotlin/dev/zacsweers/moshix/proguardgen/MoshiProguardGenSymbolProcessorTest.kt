@@ -82,21 +82,22 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
         "moshi-test.BaseType" ->
           assertThat(generatedFile.readText().trimIndent())
             .isEqualTo(
+              // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
               """
                   # Conditionally keep this adapter for every possible nested subtype that uses it.
-                  -if class test.BaseType.TypeA
+                  -if class test.BaseType${'$'}TypeA
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.BaseType.TypeB
+                  -if class test.BaseType${'$'}TypeB
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.BaseType.TypeC
+                  -if class test.BaseType${'$'}TypeC
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.BaseType.TypeC.TypeCImpl
+                  -if class test.BaseType${'$'}TypeC${'$'}TypeCImpl
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
@@ -118,7 +119,6 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
       import com.squareup.moshi.Json
       import com.squareup.moshi.JsonClass
       import dev.zacsweers.moshix.sealed.annotations.TypeLabel
-      import dev.zacsweers.moshix.sealed.annotations.NestedSealed
       import dev.zacsweers.moshix.sealed.annotations.DefaultObject
 
       @JsonClass(generateAdapter = true, generator = "sealed:type")
@@ -149,13 +149,14 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
         "moshi-test.Message" ->
           assertThat(generatedFile.readText().trimIndent())
             .isEqualTo(
+              // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
               """
                   # Conditionally keep this adapter for every possible nested subtype that uses it.
-                  -if class test.Message.Success
+                  -if class test.Message${'$'}Success
                   -keep class test.MessageJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.Message.Unknown
+                  -if class test.Message${'$'}Unknown
                   -keep class test.MessageJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
@@ -163,6 +164,76 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
                 .trimIndent()
             )
         else -> error("Unrecognized proguard file: $generatedFile")
+      }
+    }
+  }
+
+  @Test
+  fun `ensure sealed classes in packages with reserved keywords yield valid rules`() {
+    // https://kotlinlang.org/docs/keyword-reference.html
+    val hardKeywords = listOf("as", "break", "class")
+    val softKeywords = listOf("by", "catch", "constructor")
+    val modifierKeywords = listOf("abstract", "sealed", "tailrec")
+    val keyWordsToTest = hardKeywords + softKeywords + modifierKeywords
+
+    keyWordsToTest.forEach { keyword ->
+      val source =
+        kotlin(
+          "BaseType.kt",
+          """
+          package test.${'`'}$keyword${'`'}
+          import com.squareup.moshi.Json
+          import com.squareup.moshi.JsonClass
+          import dev.zacsweers.moshix.sealed.annotations.TypeLabel
+          import dev.zacsweers.moshix.sealed.annotations.DefaultObject
+
+          @JsonClass(generateAdapter = true, generator = "sealed:type")
+          sealed class Message {
+
+              @TypeLabel("success")
+              @JsonClass(generateAdapter = true)
+              data class Success(
+                  @Json(name = "value")
+                  val value: String
+              ) : Message()
+
+              @DefaultObject
+              object Unknown : Message()
+          }
+          """
+            .trimIndent(),
+        )
+
+      val compilation = prepareCompilation(source)
+      val result = compilation.compile()
+      assertThat(result.exitCode).isEqualTo(ExitCode.OK)
+      val generatedSourcesDir = compilation.kspSourcesDir
+      val proguardFiles =
+        generatedSourcesDir.walkTopDown().filter { it.extension == "pro" }.toList()
+      check(proguardFiles.isNotEmpty())
+      for (generatedFile in proguardFiles) {
+        generatedFile.assertInCorrectPath()
+        when (generatedFile.nameWithoutExtension) {
+          "moshi-test.$keyword.Message" ->
+            assertThat(generatedFile.readText().trimIndent())
+              .isEqualTo(
+                // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
+                """
+                  # Conditionally keep this adapter for every possible nested subtype that uses it.
+                  -if class test.$keyword.Message${'$'}Success
+                  -keep class test.$keyword.MessageJsonAdapter {
+                      public <init>(com.squareup.moshi.Moshi);
+                  }
+                  -if class test.$keyword.Message${'$'}Unknown
+                  -keep class test.$keyword.MessageJsonAdapter {
+                      public <init>(com.squareup.moshi.Moshi);
+                  }
+                """
+                  .trimIndent()
+              )
+
+          else -> error("Unrecognized proguard file: $generatedFile")
+        }
       }
     }
   }
@@ -236,6 +307,7 @@ sealed class BaseType {
         "moshi-test.BaseType" ->
           assertThat(generatedFile.readText().trimIndent())
             .isEqualTo(
+              // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
               """
                   -if class test.BaseType
                   -keepnames class test.BaseType
@@ -245,19 +317,19 @@ sealed class BaseType {
                   }
 
                   # Conditionally keep this adapter for every possible nested subtype that uses it.
-                  -if class test.BaseType.TypeA
+                  -if class test.BaseType${'$'}TypeA
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.BaseType.TypeB
+                  -if class test.BaseType${'$'}TypeB
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.BaseType.TypeC
+                  -if class test.BaseType${'$'}TypeC
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
-                  -if class test.BaseType.TypeC.TypeCImpl
+                  -if class test.BaseType${'$'}TypeC${'$'}TypeCImpl
                   -keep class test.BaseTypeJsonAdapter {
                       public <init>(com.squareup.moshi.Moshi);
                   }
