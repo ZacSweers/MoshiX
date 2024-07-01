@@ -799,6 +799,44 @@ class DualKotlinTest {
 
   @JsonClass(generateAdapter = true)
   data class PropertyWithDollarSign(val `$a`: String, @Json(name = "\$b") val b: String)
+
+  @Test
+  fun nullSafety() {
+    val jsonAdapter = moshi.adapter<NullSafety>()
+
+    // Present is ok
+    jsonAdapter.fromJson(
+      """
+      {
+        "a": "hello"
+      }
+      """
+        .trimIndent()
+    )
+
+    // Explicit null is ok
+    jsonAdapter.fromJson(
+      """
+      {
+        "a": null
+      }
+      """
+        .trimIndent()
+    )
+
+    // Absent is not
+    try {
+      jsonAdapter.fromJson("{}")
+      fail()
+    } catch (expected: JsonDataException) {
+      assertThat(expected).hasMessageThat().isEqualTo("Required value 'a' missing at $")
+    }
+  }
+
+  @JsonClass(generateAdapter = true)
+  data class NullSafety(
+    val a: String? // No default value means absence should fail if absent
+  )
 }
 
 typealias TypeAlias = Int

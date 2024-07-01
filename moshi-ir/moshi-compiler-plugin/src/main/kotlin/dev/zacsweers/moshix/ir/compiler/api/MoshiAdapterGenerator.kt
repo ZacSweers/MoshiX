@@ -412,7 +412,7 @@ internal class MoshiAdapterGenerator(
               localVars[property.localName] = property.generateLocalProperty(this, pluginContext)
               localVars[property.localHasErrorName] =
                 property.generateLocalHasErrorProperty(this, pluginContext)
-              if (property.hasLocalIsPresentName) {
+              if (property.isRequired) {
                 localVars[property.localIsPresentName] =
                   property.generateLocalIsPresentProperty(this, pluginContext)
               }
@@ -493,12 +493,12 @@ internal class MoshiAdapterGenerator(
               if (!property.isTransientOrIgnored && property.isRequired) {
                 // Note we check if we've reported an error about a local var to avoid domino
                 // error reporting
-                // Otherwise an unexpected null prop could then get reported as missing too
+                // Otherwise an unexpected absent prop could then get reported as missing too
                 val compositeCondition =
                   irAnd(
                     pluginContext,
                     irNot(irGet(localVars.getValue(property.localHasErrorName))),
-                    irEqualsNull(irGet(localVars.getValue(property.localName))),
+                    irNot(irGet(localVars.getValue(property.localIsPresentName))),
                   )
                 +irIfThen(
                   condition = compositeCondition,
@@ -623,7 +623,7 @@ internal class MoshiAdapterGenerator(
                 continue // Property already handled.
               }
               val condition =
-                if (property.hasLocalIsPresentName) {
+                if (property.isRequired) {
                   irGet(localVars.getValue(property.localIsPresentName))
                 } else {
                   irNot(irEqualsNull(irGet(localVars.getValue(property.localName))))
@@ -753,7 +753,7 @@ internal class MoshiAdapterGenerator(
                       +setVarExpression
                     }
 
-                    if (property.hasLocalIsPresentName) {
+                    if (property.isRequired) {
                       // Presence tracker for a mutable property
                       +irSet(localVars.getValue(property.localIsPresentName), irBoolean(true))
                     }
