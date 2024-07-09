@@ -30,7 +30,7 @@ retrofit = "2.11.0"
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
-kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.14.0" }
+kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.15.1" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 lint = { id = "com.android.lint", version = "8.6.0-alpha08" }
