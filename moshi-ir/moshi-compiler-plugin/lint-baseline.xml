@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 8.6.0-alpha02" type="baseline" client="gradle" dependencies="false" name="AGP (8.6.0-alpha02)" variant="all" version="8.6.0-alpha02">
+<issues format="6" by="lint 8.7.0-alpha06" type="baseline" client="gradle" dependencies="false" name="AGP (8.7.0-alpha06)" variant="all" version="8.7.0-alpha06">
 
     <issue
         id="IgnoreWithoutReason"
@@ -701,7 +701,7 @@
         errorLine2="                  ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="145"
+            line="148"
             column="19"/>
     </issue>
 
@@ -712,7 +712,7 @@
         errorLine2="                                 ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="187"
+            line="194"
             column="34"/>
     </issue>
 
@@ -723,7 +723,7 @@
         errorLine2="             ~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="375"
+            line="384"
             column="14"/>
     </issue>
 
@@ -734,7 +734,7 @@
         errorLine2="                              ~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="376"
+            line="385"
             column="31"/>
     </issue>
 
@@ -745,7 +745,7 @@
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="409"
+            line="418"
             column="24"/>
     </issue>
 
@@ -756,7 +756,7 @@
         errorLine2="                 ~~~~">
         <location
             file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/sealed/SealedAdapterGenerator.kt"
-            line="622"
+            line="631"
             column="18"/>
     </issue>
 

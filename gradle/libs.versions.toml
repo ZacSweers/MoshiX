@@ -19,10 +19,10 @@ gjf = "1.17.0"
 incap = "1.0.0"
 jdk = "21"
 jvmTarget = "11"
-kotlin = "2.0.20-Beta2"
+kotlin = "2.0.20-RC2"
 kotlinCompileTesting = "0.5.1"
 kotlinpoet = "1.18.1"
-ksp = "2.0.20-Beta2-1.0.23"
+ksp = "2.0.20-RC2-1.0.24"
 ktfmt = "0.51"
 moshi = "1.15.1"
 okhttp = "4.12.0"
@@ -33,7 +33,7 @@ dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.16.3" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-lint = { id = "com.android.lint", version = "8.6.0-rc01" }
+lint = { id = "com.android.lint", version = "8.7.0-alpha06" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.29.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.27.2" } # Always replaced by the local plugin
