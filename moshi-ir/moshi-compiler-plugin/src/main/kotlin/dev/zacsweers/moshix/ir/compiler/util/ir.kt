@@ -35,6 +35,7 @@ import org.jetbrains.kotlin.ir.builders.IrGeneratorContext
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBoolean
+import org.jetbrains.kotlin.ir.builders.irByte
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irChar
 import org.jetbrains.kotlin.ir.builders.irConcat
@@ -42,6 +43,7 @@ import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irLong
 import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
+import org.jetbrains.kotlin.ir.builders.irShort
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
@@ -183,8 +185,8 @@ internal fun IrBuilderWithScope.defaultPrimitiveValue(
       when (type.getPrimitiveType()) {
         PrimitiveType.BOOLEAN -> irBoolean(false)
         PrimitiveType.CHAR -> irChar(0.toChar())
-        PrimitiveType.BYTE -> IrConstImpl.byte(startOffset, endOffset, type, 0)
-        PrimitiveType.SHORT -> IrConstImpl.short(startOffset, endOffset, type, 0)
+        PrimitiveType.BYTE -> irByte(0)
+        PrimitiveType.SHORT -> irShort(0)
         PrimitiveType.INT -> irInt(0)
         PrimitiveType.FLOAT -> IrConstImpl.float(startOffset, endOffset, type, 0.0f)
         PrimitiveType.LONG -> irLong(0L)
