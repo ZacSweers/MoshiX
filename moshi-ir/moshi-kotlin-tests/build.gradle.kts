@@ -40,7 +40,7 @@ val proguardRuleValidator =
 
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions { freeCompilerArgs.addAll("-opt-in=kotlin.ExperimentalStdlibApi") }
-  if (name == "compileTestKotlin" && project.findProperty("kotlin.experimental.tryK2") != "true") {
+  if (name == "compileTestKotlin" && providers.gradleProperty("kotlin.experimental.tryK2").orNull != "true") {
     finalizedBy(proguardRuleValidator)
   }
 }
