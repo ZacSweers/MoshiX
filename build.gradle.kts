@@ -76,6 +76,7 @@ spotless {
 subprojects {
   pluginManager.withPlugin("java") {
     // javaReleaseVersion can be set to override the global version
+    // Can't use providers.gradleProperty() because it doesn't work on subprojects
     val jvmTargetProvider =
       provider<String> { findProperty("moshix.javaReleaseVersion") as? String? }
         .orElse(libs.versions.jvmTarget)
