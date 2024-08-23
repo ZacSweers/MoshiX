@@ -15,6 +15,8 @@ _2024-08-22_
 - Build against KSP `2.0.20-1.0.24`.
 - Build against Gradle `8.10`.
 
+Special thanks to [@ansman](https://github.com/ansman) for contributing to this release!
+
 0.27.2
 ------
 
