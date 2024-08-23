@@ -26,24 +26,34 @@ kotlin.compilerOptions.optIn.add("kotlin.ExperimentalStdlibApi")
 
 moshi { enableSealed.set(true) }
 
-val proguardRuleValidator =
-  tasks.register("validateProguardRules") {
-    doNotTrackState("This is a validation task that should always run")
-    notCompatibleWithConfigurationCache("This task always runs")
-    doLast {
-      logger.lifecycle("Validating proguard rules")
-      val proguardRulesDir = project.file("build/generated/ksp/test/resources/META-INF/proguard")
-      check(proguardRulesDir.exists() && proguardRulesDir.listFiles()!!.isNotEmpty()) {
-        "No proguard rules found! Did you forget to apply the KSP Gradle plugin?"
-      }
-      logger.lifecycle("Proguard rules properly generated ✅ ")
-    }
-  }
+@CacheableTask
+abstract class ProguardRuleValidator : DefaultTask() {
+  @get:InputFiles
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val proguardRulesDir: DirectoryProperty
 
-tasks
-  .withType<KotlinCompile>()
-  .named { it == "compileTestKotlin" }
-  .configureEach { finalizedBy(proguardRuleValidator) }
+  @get:OutputFile abstract val output: RegularFileProperty
+
+  @TaskAction
+  fun validate() {
+    logger.lifecycle("Validating proguard rules")
+    val proguardRulesDir = this@ProguardRuleValidator.proguardRulesDir.asFile.get()
+    check(proguardRulesDir.exists() && proguardRulesDir.walkTopDown().any()) {
+      "No proguard rules found! Did you forget to apply the KSP Gradle plugin?"
+    }
+    logger.lifecycle("Proguard rules properly generated ✅ ")
+    output.get().asFile.writeText("validated")
+  }
+}
+
+val proguardRuleValidator =
+  tasks.register<ProguardRuleValidator>("validateProguardRules") {
+    proguardRulesDir.set(
+      project.layout.buildDirectory.dir("generated/ksp/test/resources/META-INF/proguard")
+    )
+    output.set(project.layout.buildDirectory.file("moshix/validation/validated.txt"))
+    dependsOn(tasks.withType<KotlinCompile>().named { it == "compileTestKotlin" })
+  }
 
 dependencies {
   testImplementation("junit:junit:4.13.2")
