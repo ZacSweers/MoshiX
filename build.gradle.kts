@@ -131,7 +131,6 @@ subprojects {
     configure<Lint> {
       fatal += "KotlincFE10"
       disable += "UnknownIssueId"
-      lintConfig = rootProject.layout.projectDirectory.file("config/lint/lint.xml").asFile
       baseline = project.layout.projectDirectory.file("lint-baseline.xml").asFile
     }
   }
