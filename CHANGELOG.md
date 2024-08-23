@@ -4,6 +4,17 @@ Changelog
 **Unreleased**
 --------------
 
+0.28.0
+------
+
+_2024-08-22_
+
+- Make moshi-ir Gradle plugin compatible with Gradle's incubating "Project Isolation" feature.
+- Update to Kotlin `2.0.20`. Note that this release requires Kotlin `2.0.20` or later for moshi-ir due to changes in the IR API. It may work on older releases, but it's untested.
+- Update Guava to `33.3.0-jre`.
+- Build against KSP `2.0.20-1.0.24`.
+- Build against Gradle `8.10`.
+
 0.27.2
 ------
 
