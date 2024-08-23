@@ -26,7 +26,9 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
   override fun apply(target: Project) {
     target.extensions.create("moshi", MoshiPluginExtension::class.java)
-    if (target.providers.gradleProperty("moshix.generateProguardRules").orNull?.toBoolean() != false) {
+    if (
+      target.providers.gradleProperty("moshix.generateProguardRules").orNull?.toBoolean() != false
+    ) {
       try {
         target.pluginManager.apply("com.google.devtools.ksp")
       } catch (e: Exception) {
