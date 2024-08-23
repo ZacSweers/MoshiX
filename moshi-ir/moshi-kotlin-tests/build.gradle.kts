@@ -22,6 +22,8 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
+kotlin.compilerOptions.optIn.add("kotlin.ExperimentalStdlibApi")
+
 moshi { enableSealed.set(true) }
 
 val proguardRuleValidator =
@@ -38,15 +40,10 @@ val proguardRuleValidator =
     }
   }
 
-tasks.withType<KotlinCompile>().configureEach {
-  compilerOptions { freeCompilerArgs.addAll("-opt-in=kotlin.ExperimentalStdlibApi") }
-  if (
-    name == "compileTestKotlin" &&
-      providers.gradleProperty("kotlin.experimental.tryK2").orNull != "true"
-  ) {
-    finalizedBy(proguardRuleValidator)
-  }
-}
+tasks
+  .withType<KotlinCompile>()
+  .named { it == "compileTestKotlin" }
+  .configureEach { finalizedBy(proguardRuleValidator) }
 
 dependencies {
   testImplementation("junit:junit:4.13.2")
