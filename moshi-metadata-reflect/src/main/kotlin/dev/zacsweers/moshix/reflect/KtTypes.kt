@@ -150,7 +150,8 @@ internal data class KtConstructor(
     }
 
     if (!isDefault) {
-      @Suppress("UNCHECKED_CAST") return jvm.newInstance(*arguments.toTypedArray()) as R
+      @Suppress("UNCHECKED_CAST")
+      return jvm.newInstance(*arguments.toTypedArray()) as R
     }
 
     masks += mask
@@ -159,7 +160,8 @@ internal data class KtConstructor(
     // DefaultConstructorMarker
     arguments += null
 
-    @Suppress("UNCHECKED_CAST") return jvm.newInstance(*arguments.toTypedArray()) as R
+    @Suppress("UNCHECKED_CAST")
+    return jvm.newInstance(*arguments.toTypedArray()) as R
   }
 
   companion object {
