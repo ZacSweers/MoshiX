@@ -17,12 +17,11 @@ concurrency:
 
 jobs:
   build:
-    name: 'KSP ${{ matrix.ksp_enabled }} / K2 ${{ matrix.k2_enabled }}'
+    name: 'KSP ${{ matrix.ksp_enabled }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         ksp_enabled: [ true, false ]
-        k2_enabled: [ true, false ]
       fail-fast: false
 
     steps:
@@ -38,8 +37,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Build project
-        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} -Pkotlin.experimental.tryK2=${{ matrix.k2_enabled }} --quiet
+        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} --quiet
 
   publish-snapshot:
     needs: 'build'
@@ -54,6 +56,9 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '22'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4

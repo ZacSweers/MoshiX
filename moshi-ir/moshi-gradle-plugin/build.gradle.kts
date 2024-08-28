@@ -67,15 +67,15 @@ tasks.withType<KotlinCompile>().configureEach {
 tasks.matching { it.name == "sourcesJar" }.configureEach { dependsOn(copyVersionTemplatesProvider) }
 
 gradlePlugin {
-  website = project.findProperty("POM_URL") as String
-  vcsUrl = project.findProperty("POM_SCM_URL") as String
+  website = providers.gradleProperty("POM_URL").get()
+  vcsUrl = providers.gradleProperty("POM_SCM_URL").get()
 
   plugins {
     register("moshiPlugin") {
       id = "dev.zacsweers.moshix"
-      displayName = project.findProperty("POM_NAME") as String
+      displayName = providers.gradleProperty("POM_NAME").get()
       implementationClass = "dev.zacsweers.moshix.ir.gradle.MoshiGradleSubplugin"
-      description = project.findProperty("POM_DESCRIPTION") as String
+      description = providers.gradleProperty("POM_DESCRIPTION").get()
     }
   }
 }

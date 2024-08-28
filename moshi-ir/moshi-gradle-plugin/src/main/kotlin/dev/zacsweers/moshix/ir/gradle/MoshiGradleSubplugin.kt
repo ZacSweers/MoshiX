@@ -22,11 +22,23 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
   private companion object {
     val SUPPORTED_PLATFORMS = setOf(KotlinPlatformType.androidJvm, KotlinPlatformType.jvm)
+    const val GENERATE_PROGUARD_RULES_KEY = "moshix.generateProguardRules"
   }
 
   override fun apply(target: Project) {
     target.extensions.create("moshi", MoshiPluginExtension::class.java)
-    if (target.findProperty("moshix.generateProguardRules")?.toString()?.toBoolean() != false) {
+
+    val localGradlePropertyProvider =
+      target.createPropertiesProvider("gradle.properties").map {
+        it.getProperty(GENERATE_PROGUARD_RULES_KEY)
+      }
+
+    if (
+      localGradlePropertyProvider
+        .orElse(target.providers.gradleProperty(GENERATE_PROGUARD_RULES_KEY))
+        .orNull
+        ?.toBoolean() != false
+    ) {
       try {
         target.pluginManager.apply("com.google.devtools.ksp")
       } catch (e: Exception) {
