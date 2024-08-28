@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   build:
-    name: 'KSP ${{ matrix.ksp_enabled }}
+    name: 'KSP ${{ matrix.ksp_enabled }}'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -33,9 +33,6 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '22'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -56,9 +53,6 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '22'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
