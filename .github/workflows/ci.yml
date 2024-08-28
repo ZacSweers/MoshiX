@@ -36,7 +36,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '21'
+          java-version: '22'
 
       - name: Build project
         run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} -Pkotlin.experimental.tryK2=${{ matrix.k2_enabled }} --quiet
@@ -56,7 +56,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '21'
+          java-version: '22'
 
       - name: Publish
         env:
