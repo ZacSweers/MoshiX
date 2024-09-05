@@ -108,7 +108,7 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     // Minimum Moshi version
     project.dependencies.add(
       kotlinCompilation.implementationConfigurationName,
-      "com.squareup.moshi:moshi:1.13.0",
+      "com.squareup.moshi:moshi:1.15.1",
     )
 
     val enableSealed = extension.enableSealed.get()
