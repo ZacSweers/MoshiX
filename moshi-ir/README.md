@@ -40,6 +40,8 @@ plugins {
 moshi {
   // Opt-in to enable moshi-sealed, disabled by default.
   enableSealed.set(true)
+  // You can use moshiVersion property to override version of Moshi dependency applied by IR plugin.
+  moshiVersion.set("1.15.1")
 }
 ```
 

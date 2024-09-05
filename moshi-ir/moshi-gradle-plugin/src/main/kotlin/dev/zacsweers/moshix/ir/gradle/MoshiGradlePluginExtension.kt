@@ -21,4 +21,6 @@ abstract class MoshiPluginExtension @Inject constructor(objects: ObjectFactory) 
   val generatedAnnotation: Property<String> = objects.property(String::class.java)
   /** Enables moshi-sealed code gen. Disabled by default. */
   val enableSealed: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
+  /** Moshi version to be used when applying dependency. */
+  val moshiVersion: Property<String> = objects.property(String::class.java).convention("1.15.1")
 }
