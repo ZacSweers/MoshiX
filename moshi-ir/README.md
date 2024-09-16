@@ -40,6 +40,8 @@ plugins {
 moshi {
   // Opt-in to enable moshi-sealed, disabled by default.
   enableSealed.set(true)
+  // Opt-out to disable auto-application of Moshi dependency, enabled by default.
+  applyMoshiDependency.set(false)
 }
 ```
 
