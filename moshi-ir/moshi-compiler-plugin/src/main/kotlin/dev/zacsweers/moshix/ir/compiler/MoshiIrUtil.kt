@@ -60,14 +60,24 @@ internal fun IrProperty.jsonIgnoreFromAnywhere(): Boolean {
 
 internal fun IrAnnotationContainer.jsonName(): String? {
   @Suppress("UNCHECKED_CAST")
-  return (getAnnotation(JSON_ANNOTATION)?.getValueArgument(0) as? IrConst<String>?)
-    ?.value
-    ?.takeUnless { it == Json.UNSET_NAME }
+  return getAnnotation(JSON_ANNOTATION)?.constArgumentOfTypeAt<String>(0)?.takeUnless {
+    it == Json.UNSET_NAME
+  }
+}
+
+internal fun <T> IrConstructorCall.constArgumentOfTypeAt(position: Int): T? {
+  @Suppress("UNCHECKED_CAST")
+  return (getValueArgument(position) as? IrConst?)?.value as? T?
+}
+
+internal fun <T> IrConst.valueAs(): T {
+  @Suppress("UNCHECKED_CAST")
+  return value as T
 }
 
 internal fun IrAnnotationContainer.jsonIgnore(): Boolean {
   @Suppress("UNCHECKED_CAST")
-  return (getAnnotation(JSON_ANNOTATION)?.getValueArgument(1) as? IrConst<Boolean>?)?.value == true
+  return getAnnotation(JSON_ANNOTATION)?.constArgumentOfTypeAt<Boolean>(1) == true
 }
 
 private val TargetProperty.isSettable

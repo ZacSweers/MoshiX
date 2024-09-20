@@ -3,6 +3,7 @@ package dev.zacsweers.moshix.ir.compiler.sealed
 import dev.zacsweers.moshix.ir.compiler.MoshiSymbols
 import dev.zacsweers.moshix.ir.compiler.api.AdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PreparedAdapter
+import dev.zacsweers.moshix.ir.compiler.constArgumentOfTypeAt
 import dev.zacsweers.moshix.ir.compiler.labelKey
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
 import dev.zacsweers.moshix.ir.compiler.util.checkIsVisible
@@ -29,6 +30,7 @@ import org.jetbrains.kotlin.ir.builders.declarations.buildValueParameter
 import org.jetbrains.kotlin.ir.builders.irAs
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.builders.irExprBody
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
@@ -51,7 +53,6 @@ import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrVararg
-import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.interpreter.hasAnnotation
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
@@ -310,7 +311,7 @@ private constructor(
 
     @Suppress("UNCHECKED_CAST")
     val mainLabel =
-      (labelAnnotation.getValueArgument(0) as? IrConst<String>)?.value
+      labelAnnotation.constArgumentOfTypeAt<String>(0)
         ?: run {
           logger.error(subtype) { "No label member for TypeLabel annotation!" }
           return null
@@ -340,7 +341,7 @@ private constructor(
     @Suppress("UNCHECKED_CAST")
     val alternates =
       (labelAnnotation.getValueArgument(1) as IrVararg?)?.elements.orEmpty().map {
-        (it as IrConst<String>).value
+        (it as IrConst).value as String
       }
 
     for (alternate in alternates) {
@@ -611,12 +612,7 @@ private constructor(
   @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
     IrDelegatingConstructorCall {
-    return IrDelegatingConstructorCallImpl.fromSymbolOwner(
-      startOffset,
-      endOffset,
-      pluginContext.irBuiltIns.unitType,
-      moshiSymbols.jsonAdapter.constructors.single(),
-    )
+    return irDelegatingConstructorCall(moshiSymbols.jsonAdapter.constructors.single().owner)
   }
 
   companion object {
