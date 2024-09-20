@@ -87,7 +87,6 @@ import org.jetbrains.kotlin.ir.expressions.IrValueAccessExpression
 import org.jetbrains.kotlin.ir.expressions.IrVararg
 import org.jetbrains.kotlin.ir.expressions.IrWhen
 import org.jetbrains.kotlin.ir.expressions.IrWhileLoop
-import org.jetbrains.kotlin.ir.expressions.impl.IrIfThenElseImpl
 import org.jetbrains.kotlin.ir.symbols.IrTypeAliasSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrDynamicType
@@ -98,6 +97,7 @@ import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeAbbreviation
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.IrTypeProjection
+import org.jetbrains.kotlin.ir.types.SimpleTypeNullability
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.isAny
 import org.jetbrains.kotlin.ir.types.isInt
@@ -636,7 +636,7 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
     print("\"")
     for (arg in arguments) {
       when {
-        arg is IrConst<*> && arg.kind == IrConstKind.String -> print(arg.value)
+        arg is IrConst && arg.kind == IrConstKind.String -> print(arg.value)
         arg is IrGetValue -> {
           print("$")
           arg.print()
@@ -664,7 +664,7 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
   }
 
   override fun visitWhen(expression: IrWhen) {
-    val isIf = expression.origin == IrStatementOrigin.IF || expression is IrIfThenElseImpl
+    val isIf = expression.origin == IrStatementOrigin.IF
     when {
       expression.origin == IrStatementOrigin.OROR -> {
         val lhs = expression.branches[0].condition
@@ -681,12 +681,10 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
         rhs.print()
       }
       isIf -> {
-        val singleLine =
-          expression.branches.all { it.result is IrConst<*> || it.result is IrGetValue }
+        val singleLine = expression.branches.all { it.result is IrConst || it.result is IrGetValue }
         expression.branches.forEachIndexed { index, branch ->
           val isElse =
-            index == expression.branches.size - 1 &&
-              (branch.condition as? IrConst<*>)?.value == true
+            index == expression.branches.size - 1 && (branch.condition as? IrConst)?.value == true
           when {
             index == 0 -> {
               print("if (")
@@ -715,7 +713,7 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
         print("when ")
         bracedBlock {
           expression.branches.forEach {
-            val isElse = (it.condition as? IrConst<*>)?.value == true
+            val isElse = (it.condition as? IrConst)?.value == true
 
             if (isElse) {
               print("else")
@@ -978,7 +976,7 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
     return "${if (value < 0) "-" else ""}0b$result"
   }
 
-  override fun visitConst(expression: IrConst<*>) {
+  override fun visitConst(expression: IrConst) {
     val result =
       when (expression.kind) {
         is IrConstKind.Null -> "${expression.value}"
@@ -1286,8 +1284,11 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
               }
             )
           }
-          if (hasQuestionMark) {
-            append('?')
+          when (nullability) {
+            SimpleTypeNullability.MARKED_NULLABLE -> append('?')
+            SimpleTypeNullability.NOT_SPECIFIED -> {}
+
+            SimpleTypeNullability.DEFINITELY_NOT_NULL -> append("& Any")
           }
           abbreviation?.let { append(it.renderTypeAbbreviation()) }
         }
@@ -1411,7 +1412,7 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
     when (irElement) {
       null -> append("<null>")
       is IrConstructorCall -> renderAsAnnotation(irElement)
-      is IrConst<*> -> {
+      is IrConst -> {
         append('\'')
         append(irElement.value.toString())
         append('\'')
