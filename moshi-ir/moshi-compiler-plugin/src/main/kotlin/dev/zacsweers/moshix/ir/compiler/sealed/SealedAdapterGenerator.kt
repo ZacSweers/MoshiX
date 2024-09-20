@@ -63,6 +63,7 @@ import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.getClass
+import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.types.isClassWithFqName
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.classId
@@ -390,7 +391,13 @@ private constructor(
     val adapterReceiver =
       buildValueParameter(adapterCls) {
         name = Name.special("<this>")
-        type = adapterCls.defaultType
+        type =
+          IrSimpleTypeImpl(
+            classifier = adapterCls.symbol,
+            hasQuestionMark = false,
+            arguments = emptyList(),
+            annotations = emptyList(),
+          )
         origin = IrDeclarationOrigin.INSTANCE_RECEIVER
       }
     adapterCls.thisReceiver = adapterReceiver

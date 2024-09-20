@@ -89,6 +89,7 @@ import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.createType
+import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
@@ -171,7 +172,13 @@ internal class MoshiAdapterGenerator(
     val adapterReceiver =
       buildValueParameter(adapterCls) {
         name = Name.special("<this>")
-        type = adapterCls.defaultType
+        type =
+          IrSimpleTypeImpl(
+            classifier = adapterCls.symbol,
+            hasQuestionMark = false,
+            arguments = emptyList(),
+            annotations = emptyList(),
+          )
         origin = IrDeclarationOrigin.INSTANCE_RECEIVER
       }
     adapterCls.thisReceiver = adapterReceiver
