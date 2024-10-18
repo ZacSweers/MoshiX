@@ -212,11 +212,11 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
         declaration.visibility != DescriptorVisibilities.PUBLIC &&
           declaration.visibility != DescriptorVisibilities.LOCAL
       ) {
-        print(declaration.visibility.toString().toLowerCase(Locale.ROOT))
+        print(declaration.visibility.toString().lowercase(Locale.ROOT))
         print(" ")
       }
       if (declaration.modality != Modality.FINAL) {
-        print(declaration.modality.toString().toLowerCase(Locale.ROOT))
+        print(declaration.modality.toString().lowercase(Locale.ROOT))
         print(" ")
       }
     }
@@ -845,7 +845,7 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
       declaration.visibility != DescriptorVisibilities.PUBLIC &&
         declaration.visibility != DescriptorVisibilities.LOCAL
     ) {
-      print(declaration.visibility.toString().toLowerCase(Locale.ROOT))
+      print(declaration.visibility.toString().lowercase(Locale.ROOT))
       print(" ")
     }
     if (declaration.isStatic) {
@@ -1021,7 +1021,7 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
       declaration.visibility != DescriptorVisibilities.PUBLIC &&
         declaration.visibility != DescriptorVisibilities.LOCAL
     ) {
-      print(declaration.visibility.toString().toLowerCase(Locale.ROOT))
+      print(declaration.visibility.toString().lowercase(Locale.ROOT))
       print(" ")
     }
     if (declaration.isInner) {
@@ -1036,7 +1036,7 @@ internal class IrSourcePrinterVisitor(out: Appendable, indentUnit: String = "  "
       print("object ")
     } else {
       if (declaration.modality != Modality.FINAL) {
-        print(declaration.modality.toString().toLowerCase(Locale.ROOT))
+        print(declaration.modality.toString().lowercase(Locale.ROOT))
         print(" ")
       }
       if (declaration.isAnnotationClass) {
