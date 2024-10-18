@@ -30,7 +30,6 @@ import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
-import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.util.file
@@ -101,16 +100,16 @@ internal class MoshiIrVisitor(
 
   override fun visitClassNew(declaration: IrClass): IrStatement {
     declaration.getAnnotation(JSON_CLASS_ANNOTATION)?.let { call ->
-      call.getValueArgument(0)?.let { generateAdapter ->
+      call.constArgumentOfTypeAt<Boolean>(0)?.let { generateAdapter ->
         // This is generateAdapter
         @Suppress("UNCHECKED_CAST")
-        if (!(generateAdapter as IrConst<Boolean>).value) {
+        if (!generateAdapter) {
           return super.visitClassNew(declaration)
         }
 
         // This is generator
         @Suppress("UNCHECKED_CAST")
-        val generatorValue = (call.getValueArgument(1) as? IrConst<String>?)?.value.orEmpty()
+        val generatorValue = call.constArgumentOfTypeAt<String>(1).orEmpty()
         val generator =
           if (generatorValue.isNotBlank()) {
             val labelKey = generatorValue.labelKey()
@@ -160,13 +159,12 @@ internal class MoshiIrVisitor(
 internal fun IrConstructorCall.labelKey(checkGenerateAdapter: Boolean = true): String? {
   // This is generateAdapter
   @Suppress("UNCHECKED_CAST")
-  if (checkGenerateAdapter && !(getValueArgument(0) as IrConst<Boolean>).value) {
+  if (checkGenerateAdapter && constArgumentOfTypeAt<Boolean>(0) != true) {
     return null
   }
 
   // This is generator
-  @Suppress("UNCHECKED_CAST")
-  val generatorValue = (getValueArgument(1) as? IrConst<String>?)?.value.orEmpty()
+  @Suppress("UNCHECKED_CAST") val generatorValue = constArgumentOfTypeAt<String>(1).orEmpty()
   return generatorValue.labelKey()
 }
 
