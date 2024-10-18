@@ -15,7 +15,6 @@
  */
 
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -80,8 +79,11 @@ gradlePlugin {
   }
 }
 
-tasks.named<DokkaTask>("dokkaHtml") {
-  outputDirectory.set(rootProject.file("../docs/0.x"))
+dokka {
+  dokkaPublications.html {
+    outputDirectory.set(rootDir.resolve("docs/api/0.x"))
+    includes.from(project.layout.projectDirectory.file("README.md"))
+  }
   dokkaSourceSets.configureEach { skipDeprecated.set(true) }
 }
 
