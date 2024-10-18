@@ -16,8 +16,7 @@
 import com.android.build.api.dsl.Lint
 import com.google.devtools.ksp.gradle.KspTask
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import java.net.URI
-import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -25,7 +24,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   alias(libs.plugins.kotlinJvm) apply false
   alias(libs.plugins.ksp) apply false
-  alias(libs.plugins.dokka) apply false
+  alias(libs.plugins.dokka)
   alias(libs.plugins.mavenPublish) apply false
   alias(libs.plugins.spotless)
   alias(libs.plugins.kotlinBinaryCompatibilityValidator)
@@ -42,6 +41,13 @@ apiValidation {
       /* :moshi-sealed: */
       "sample",
     )
+}
+
+dokka {
+  dokkaPublications.html {
+    outputDirectory.set(rootDir.resolve("docs/api/0.x"))
+    includes.from(project.layout.projectDirectory.file("README.md"))
+  }
 }
 
 val ktfmtVersion = libs.versions.ktfmt.get()
@@ -108,15 +114,13 @@ subprojects {
   }
   pluginManager.withPlugin("com.vanniktech.maven.publish") {
     apply(plugin = "org.jetbrains.dokka")
-    tasks.named<DokkaTask>("dokkaHtml") {
-      outputDirectory.set(rootProject.rootDir.resolve("docs/0.x"))
+    configure<DokkaExtension> {
+      dokkaPublicationDirectory.set(layout.buildDirectory.dir("dokkaDir"))
       dokkaSourceSets.configureEach {
         skipDeprecated.set(true)
-        externalDocumentationLink {
-          url.set(URI("https://square.github.io/okio/2.x/okio/").toURL())
-        }
-        externalDocumentationLink {
-          url.set(URI("https://square.github.io/moshi/1.x/moshi/").toURL())
+        externalDocumentationLinks {
+          register("okio") { url("https://square.github.io/okio/2.x/okio/") }
+          register("moshi") { url("https://square.github.io/moshi/1.x/moshi/") }
         }
       }
     }
@@ -135,4 +139,17 @@ subprojects {
       baseline = project.layout.projectDirectory.file("lint-baseline.xml").asFile
     }
   }
+}
+
+dependencies {
+  dokka(projects.moshiAdapters)
+  dokka(projects.moshiImmutableAdapters)
+  dokka(projects.moshiIr.moshiCompilerPlugin)
+  dokka(projects.moshiMetadataReflect)
+  dokka(projects.moshiProguardRuleGen)
+  dokka(projects.moshiSealed.codegen)
+  dokka(projects.moshiSealed.javaSealedReflect)
+  dokka(projects.moshiSealed.metadataReflect)
+  dokka(projects.moshiSealed.reflect)
+  dokka(projects.moshiSealed.runtime)
 }

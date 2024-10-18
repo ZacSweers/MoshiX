@@ -86,3 +86,6 @@ includeBuild("moshi-ir/moshi-gradle-plugin") {
     substitute(module("dev.zacsweers.moshix:moshi-gradle-plugin")).using(project(":"))
   }
 }
+
+// https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
