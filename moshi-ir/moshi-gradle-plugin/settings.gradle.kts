@@ -30,5 +30,7 @@ dependencyResolutionManagement {
   }
 }
 
+rootProject.name = "moshi-gradle-plugin"
+
 // https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
