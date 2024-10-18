@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-agp = "8.6.1"
+agp = "8.7.1"
 autoService = "1.1.1"
 gjf = "1.17.0"
 incap = "1.0.0"
@@ -22,7 +22,7 @@ jvmTarget = "11"
 kotlin = "2.0.20"
 kotlinCompileTesting = "0.5.1"
 kotlinpoet = "1.18.1"
-ksp = "2.0.20-1.0.25"
+ksp = "2.0.21-1.0.25"
 ktfmt = "0.52"
 moshi = "1.15.1"
 okhttp = "4.12.0"
@@ -33,11 +33,11 @@ dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.16.3" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-lint = { id = "com.android.lint", version = "8.7.0-beta02" }
+lint = { id = "com.android.lint", version = "8.7.1" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.30.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.28.0" } # Always replaced by the local plugin
-spotless = { id = "com.diffplug.spotless", version = "7.0.0.BETA2" }
+spotless = { id = "com.diffplug.spotless", version = "7.0.0.BETA3" }
 
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -50,7 +50,7 @@ autoService = { module = "com.google.auto.service:auto-service-annotations", ver
 autoService-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version = "1.2.0" }
 autoService-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
 
-guava = { module = "com.google.guava:guava", version = "33.3.0-jre" }
+guava = { module = "com.google.guava:guava", version = "33.3.1-jre" }
 
 incap = { module = "net.ltgt.gradle.incap:incap", version.ref = "incap" }
 incap-processor = { module = "net.ltgt.gradle.incap:incap-processor", version.ref = "incap" }
