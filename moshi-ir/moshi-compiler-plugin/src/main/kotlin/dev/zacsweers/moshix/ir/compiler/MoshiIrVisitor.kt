@@ -19,7 +19,6 @@ import dev.zacsweers.moshix.ir.compiler.api.MoshiAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.sealed.MoshiSealedSymbols
 import dev.zacsweers.moshix.ir.compiler.sealed.SealedAdapterGenerator
-import dev.zacsweers.moshix.ir.compiler.util.dumpSrc
 import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -32,6 +31,7 @@ import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+import org.jetbrains.kotlin.ir.util.dumpKotlinLike
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAnnotation
@@ -137,7 +137,7 @@ internal class MoshiIrVisitor(
             // TODO add generated annotation
           }
           if (debug) {
-            val irSrc = adapterClass.adapterClass.dumpSrc()
+            val irSrc = adapterClass.adapterClass.dumpKotlinLike()
             messageCollector.report(
               CompilerMessageSeverity.STRONG_WARNING,
               "MOSHI: Dumping current IR src for ${adapterClass.adapterClass.name}\n$irSrc",
