@@ -6,7 +6,6 @@ import dev.zacsweers.moshix.ir.compiler.api.PreparedAdapter
 import dev.zacsweers.moshix.ir.compiler.constArgumentOfTypeAt
 import dev.zacsweers.moshix.ir.compiler.labelKey
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
-import dev.zacsweers.moshix.ir.compiler.util.buildBlockBody
 import dev.zacsweers.moshix.ir.compiler.util.checkIsVisible
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.error
@@ -393,10 +392,10 @@ private constructor(
           val hasObjectSubtypes = objectSubtypes.isNotEmpty()
           val ctor =
             addSimpleDelegatingConstructor(
-              moshiSymbols.jsonAdapter.constructors.single().owner,
-              pluginContext.irBuiltIns,
-              isPrimary = true,
-            )
+                moshiSymbols.jsonAdapter.constructors.single().owner,
+                pluginContext.irBuiltIns,
+                isPrimary = true,
+              )
               .apply {
                 addValueParameter {
                   name = Name.identifier("moshi")
