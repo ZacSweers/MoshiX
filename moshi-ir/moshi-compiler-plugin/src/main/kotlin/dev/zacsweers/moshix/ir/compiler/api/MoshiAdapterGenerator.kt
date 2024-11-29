@@ -53,6 +53,7 @@ import org.jetbrains.kotlin.ir.builders.irBoolean
 import org.jetbrains.kotlin.ir.builders.irBranch
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irConcat
+import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.builders.irElseBranch
 import org.jetbrains.kotlin.ir.builders.irEquals
 import org.jetbrains.kotlin.ir.builders.irEqualsNull
@@ -82,7 +83,6 @@ import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.addArgument
-import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
@@ -437,11 +437,12 @@ internal class MoshiAdapterGenerator(
             // Add parameters (± properties) first, their index matters
             for ((index, parameter) in targetConstructorParams) {
               val property = propertiesByIndex[index]
-              if (property == null) {
-                components += ParameterOnly(parameter)
-              } else {
-                components += ParameterProperty(parameter, property)
-              }
+              components +=
+                if (property == null) {
+                  ParameterOnly(parameter)
+                } else {
+                  ParameterProperty(parameter, property)
+                }
             }
 
             // Now add the remaining properties that aren't parameters
@@ -880,12 +881,7 @@ internal class MoshiAdapterGenerator(
   @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
     IrDelegatingConstructorCall {
-    return IrDelegatingConstructorCallImpl.fromSymbolOwner(
-      startOffset,
-      endOffset,
-      pluginContext.irBuiltIns.unitType,
-      moshiSymbols.jsonAdapter.constructors.single(),
-    )
+    return irDelegatingConstructorCall(moshiSymbols.jsonAdapter.constructors.single().owner)
   }
 }
 
