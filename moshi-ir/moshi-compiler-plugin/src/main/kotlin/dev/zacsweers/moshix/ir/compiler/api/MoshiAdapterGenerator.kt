@@ -437,11 +437,12 @@ internal class MoshiAdapterGenerator(
             // Add parameters (± properties) first, their index matters
             for ((index, parameter) in targetConstructorParams) {
               val property = propertiesByIndex[index]
-              components += if (property == null) {
-                ParameterOnly(parameter)
-              } else {
-                ParameterProperty(parameter, property)
-              }
+              components +=
+                if (property == null) {
+                  ParameterOnly(parameter)
+                } else {
+                  ParameterProperty(parameter, property)
+                }
             }
 
             // Now add the remaining properties that aren't parameters
