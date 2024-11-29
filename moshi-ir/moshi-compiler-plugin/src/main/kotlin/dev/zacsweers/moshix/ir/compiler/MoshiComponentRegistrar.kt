@@ -30,8 +30,8 @@ public class MoshiComponentRegistrar : CompilerPluginRegistrar() {
 
   override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
     if (configuration[KEY_ENABLED] == false) return
-    val debug = configuration[KEY_DEBUG] ?: false
-    val enableSealed = configuration[KEY_ENABLE_SEALED] ?: false
+    val debug = configuration[KEY_DEBUG] == true
+    val enableSealed = configuration[KEY_ENABLE_SEALED] == true
 
     val messageCollector =
       configuration.get(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
