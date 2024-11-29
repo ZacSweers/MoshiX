@@ -4,6 +4,8 @@ Changelog
 **Unreleased**
 --------------
 
+- Remove most IR internal/impl API usages.
+
 0.29.0
 ------
 
