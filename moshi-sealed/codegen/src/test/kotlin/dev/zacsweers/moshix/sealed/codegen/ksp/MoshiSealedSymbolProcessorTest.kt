@@ -106,7 +106,8 @@ class MoshiSealedSymbolProcessorProviderTest(private val useKSP2: Boolean) {
             runtimeAdapter.toJson(writer, value_)
           }
         }
-        """.trimIndent()
+        """
+          .trimIndent()
       )
   }
 
@@ -435,7 +436,8 @@ class MoshiSealedSymbolProcessorProviderTest(private val useKSP2: Boolean) {
             runtimeAdapter.toJson(writer, value_)
           }
         }
-        """.trimIndent()
+        """
+          .trimIndent()
       )
   }
 
@@ -507,7 +509,8 @@ class MoshiSealedSymbolProcessorProviderTest(private val useKSP2: Boolean) {
             runtimeAdapter.toJson(writer, value_)
           }
         }
-        """.trimIndent()
+        """
+          .trimIndent()
       )
   }
 
