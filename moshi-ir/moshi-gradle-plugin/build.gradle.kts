@@ -63,7 +63,9 @@ tasks.withType<KotlinCompile>().configureEach {
   }
 }
 
-tasks.matching { it.name == "sourcesJar" }.configureEach { dependsOn(copyVersionTemplatesProvider) }
+tasks
+  .matching { it.name == "sourcesJar" || it.name == "dokkaGeneratePublicationHtml" }
+  .configureEach { dependsOn(copyVersionTemplatesProvider) }
 
 gradlePlugin {
   website = providers.gradleProperty("POM_URL").get()

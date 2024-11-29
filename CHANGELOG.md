@@ -4,6 +4,21 @@ Changelog
 **Unreleased**
 --------------
 
+0.29.0
+------
+
+_2024-11-29_
+
+- **New**: Add option to disable auto-application of the Moshi dependency in the moshi-ir Gradle plugin. `moshi { applyMoshiDependency.set(false) }`.
+- Update to Kotlin `2.1.0`. Note that this release requires Kotlin `2.1.0` or later for moshi-ir due to changes in the IR API. It may work on older releases, but it's untested.
+- Update KotlinPoet to `2.0.0`.
+- Update Guava to `33.3.1-jre`.
+- Update kotlinx-collections-immutable to `0.3.8`.
+- Build against KSP `2.1.0-1.0.29`.
+- Build against Gradle `8.11.1`.
+
+Special thanks to [@plnice](https://github.com/plnice) for contributing to this release!
+
 0.28.0
 ------
 
