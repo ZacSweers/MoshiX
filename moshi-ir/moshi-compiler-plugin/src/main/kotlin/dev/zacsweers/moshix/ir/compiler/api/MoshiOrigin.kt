@@ -18,5 +18,4 @@ package dev.zacsweers.moshix.ir.compiler.api
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOriginImpl
 
-internal val MoshiOrigin: IrDeclarationOrigin =
-  IrDeclarationOriginImpl("GENERATED_MOSHI_ADAPTER_CLASS")
+internal val MoshiOrigin: IrDeclarationOrigin by IrDeclarationOriginImpl

@@ -28,10 +28,8 @@ import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrElement
-import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
+import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
-import org.jetbrains.kotlin.ir.builders.IrGeneratorContext
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBoolean
@@ -46,23 +44,18 @@ import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irShort
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
-import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrInstanceInitializerCall
 import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
 import org.jetbrains.kotlin.ir.expressions.addArgument
-import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
-import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
@@ -78,6 +71,7 @@ import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
+import org.jetbrains.kotlin.ir.util.toIrConst
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -122,35 +116,11 @@ internal inline fun MessageCollector.error(
   report(CompilerMessageSeverity.ERROR, message(), location?.invoke())
 }
 
-internal fun IrConstructor.irConstructorBody(
-  context: IrGeneratorContext,
-  blockBody: DeclarationIrBuilder.(MutableList<IrStatement>) -> Unit,
+internal fun IrFunction.buildBlockBody(
+  context: IrPluginContext,
+  blockBody: IrBlockBodyBuilder.() -> Unit,
 ) {
-  val startOffset = UNDEFINED_OFFSET
-  val endOffset = UNDEFINED_OFFSET
-  val constructorIrBuilder =
-    DeclarationIrBuilder(
-      generatorContext = context,
-      symbol = IrSimpleFunctionSymbolImpl(),
-      startOffset = startOffset,
-      endOffset = endOffset,
-    )
-  body =
-    context.irFactory.createBlockBody(startOffset = startOffset, endOffset = endOffset).apply {
-      constructorIrBuilder.blockBody(statements)
-    }
-}
-
-internal fun DeclarationIrBuilder.irInstanceInitializerCall(
-  context: IrGeneratorContext,
-  classSymbol: IrClassSymbol,
-): IrInstanceInitializerCall {
-  return IrInstanceInitializerCallImpl(
-    startOffset = startOffset,
-    endOffset = endOffset,
-    classSymbol = classSymbol,
-    type = context.irBuiltIns.unitType,
-  )
+  body = context.createIrBuilder(symbol).irBlockBody(body = blockBody)
 }
 
 internal fun IrClass.isSubclassOfFqName(fqName: String): Boolean =
@@ -188,9 +158,9 @@ internal fun IrBuilderWithScope.defaultPrimitiveValue(
         PrimitiveType.BYTE -> irByte(0)
         PrimitiveType.SHORT -> irShort(0)
         PrimitiveType.INT -> irInt(0)
-        PrimitiveType.FLOAT -> IrConstImpl.float(startOffset, endOffset, type, 0.0f)
+        PrimitiveType.FLOAT -> 0.0f.toIrConst(type)
         PrimitiveType.LONG -> irLong(0L)
-        PrimitiveType.DOUBLE -> IrConstImpl.double(startOffset, endOffset, type, 0.0)
+        PrimitiveType.DOUBLE -> 0.0.toIrConst(type)
         else -> null
       }
     }

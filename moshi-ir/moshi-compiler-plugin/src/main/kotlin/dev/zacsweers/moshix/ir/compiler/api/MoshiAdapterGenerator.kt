@@ -21,13 +21,12 @@ import dev.zacsweers.moshix.ir.compiler.api.FromJsonComponent.ParameterProperty
 import dev.zacsweers.moshix.ir.compiler.api.FromJsonComponent.PropertyOnly
 import dev.zacsweers.moshix.ir.compiler.util.NameAllocator
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
+import dev.zacsweers.moshix.ir.compiler.util.buildBlockBody
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.defaultPrimitiveValue
 import dev.zacsweers.moshix.ir.compiler.util.generateToStringFun
 import dev.zacsweers.moshix.ir.compiler.util.irAnd
 import dev.zacsweers.moshix.ir.compiler.util.irBinOp
-import dev.zacsweers.moshix.ir.compiler.util.irConstructorBody
-import dev.zacsweers.moshix.ir.compiler.util.irInstanceInitializerCall
 import dev.zacsweers.moshix.ir.compiler.util.irType
 import dev.zacsweers.moshix.ir.compiler.util.joinToIrAnd
 import dev.zacsweers.moshix.ir.compiler.util.rawType
@@ -41,7 +40,6 @@ import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
-import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.addField
 import org.jetbrains.kotlin.ir.builders.declarations.addTypeParameter
 import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
@@ -53,7 +51,6 @@ import org.jetbrains.kotlin.ir.builders.irBoolean
 import org.jetbrains.kotlin.ir.builders.irBranch
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irConcat
-import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.builders.irElseBranch
 import org.jetbrains.kotlin.ir.builders.irEquals
 import org.jetbrains.kotlin.ir.builders.irEqualsNull
@@ -81,7 +78,6 @@ import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.IrVariable
-import org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
@@ -89,16 +85,16 @@ import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.createType
-import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.typeWith
+import org.jetbrains.kotlin.ir.util.addSimpleDelegatingConstructor
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.deepCopyWithoutPatchingParents
-import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getPropertyGetter
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
 import org.jetbrains.kotlin.ir.util.packageFqName
+import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -172,13 +168,7 @@ internal class MoshiAdapterGenerator(
     val adapterReceiver =
       buildValueParameter(adapterCls) {
         name = Name.special("<this>")
-        type =
-          IrSimpleTypeImpl(
-            classifier = adapterCls.symbol,
-            hasQuestionMark = false,
-            arguments = emptyList(),
-            annotations = emptyList(),
-          )
+        type = adapterCls.typeWith()
         origin = IrDeclarationOrigin.INSTANCE_RECEIVER
       }
     adapterCls.thisReceiver = adapterReceiver
@@ -212,14 +202,16 @@ internal class MoshiAdapterGenerator(
     return adapterCls
   }
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrClass.generateConstructor(isGeneric: Boolean): IrConstructor {
     val adapterCls = this
     val ctor =
       adapterCls
-        .addConstructor {
-          isPrimary = true
-          returnType = adapterCls.defaultType
-        }
+        .addSimpleDelegatingConstructor(
+          moshiSymbols.jsonAdapter.constructors.single().owner,
+          pluginContext.irBuiltIns,
+          isPrimary = true,
+        )
         .apply {
           addValueParameter {
             name = Name.identifier("moshi")
@@ -234,55 +226,54 @@ internal class MoshiAdapterGenerator(
                 )
             }
           }
-        }
-    ctor.irConstructorBody(pluginContext) { statements ->
-      statements += generateJsonAdapterSuperConstructorCall()
-      statements +=
-        irInstanceInitializerCall(context = pluginContext, classSymbol = adapterCls.symbol)
 
-      // Size check for types array. Must be equal to the number of type parameters
-      // require(types.size == 1) {
-      //   "TypeVariable mismatch: Expecting 1 type(s) for generic type variables [T], but received
-      // ${types.size} with values $types"
-      // }
-      if (isGeneric) {
-        val expectedSize = typeVariables.size
-        statements +=
-          DeclarationIrBuilder(pluginContext, ctor.symbol).irBlock {
-            val receivedSize =
-              irTemporary(
-                irCall(moshiSymbols.arraySizeGetter).apply {
-                  dispatchReceiver = irGet(ctor.valueParameters[1])
-                },
-                nameHint = "receivedSize",
-              )
-            +irIfThen(
-              condition = irNotEquals(irGet(receivedSize), irInt(expectedSize)),
-              thenPart =
-                irThrow(
-                  irCall(pluginContext.irBuiltIns.illegalArgumentExceptionSymbol).apply {
-                    putValueArgument(
-                      0,
-                      irConcat().apply {
-                        addArgument(irString("TypeVariable mismatch: Expecting "))
-                        addArgument(irInt(expectedSize))
-                        val typeWord = if (expectedSize == 1) "type" else "types"
-                        addArgument(irString(" $typeWord for generic type variables ["))
-                        addArgument(
-                          irString(
-                            typeVariables.joinToString(separator = ", ") { it.name.asString() }
+          // Replace the body with a new one that adds the size check
+          val originalBody = checkNotNull(body)
+          buildBlockBody(pluginContext) {
+            +originalBody.statements
+
+            // Size check for types array. Must be equal to the number of type parameters
+            // require(types.size == 1) {
+            //   "TypeVariable mismatch: Expecting 1 type(s) for generic type variables [T], but
+            // received
+            // ${types.size} with values $types"
+            // }
+            if (isGeneric) {
+              val expectedSize = typeVariables.size
+              val receivedSize =
+                irTemporary(
+                  irCall(moshiSymbols.arraySizeGetter).apply {
+                    dispatchReceiver = irGet(valueParameters[1])
+                  },
+                  nameHint = "receivedSize",
+                )
+              +irIfThen(
+                condition = irNotEquals(irGet(receivedSize), irInt(expectedSize)),
+                thenPart =
+                  irThrow(
+                    irCall(pluginContext.irBuiltIns.illegalArgumentExceptionSymbol).apply {
+                      putValueArgument(
+                        0,
+                        irConcat().apply {
+                          addArgument(irString("TypeVariable mismatch: Expecting "))
+                          addArgument(irInt(expectedSize))
+                          val typeWord = if (expectedSize == 1) "type" else "types"
+                          addArgument(irString(" $typeWord for generic type variables ["))
+                          addArgument(
+                            irString(
+                              typeVariables.joinToString(separator = ", ") { it.name.asString() }
+                            )
                           )
-                        )
-                        addArgument(irString("], but received "))
-                        addArgument(irGet(receivedSize))
-                      },
-                    )
-                  }
-                ),
-            )
+                          addArgument(irString("], but received "))
+                          addArgument(irGet(receivedSize))
+                        },
+                      )
+                    }
+                  ),
+              )
+            }
           }
-      }
-    }
+        }
 
     return ctor
   }
@@ -877,12 +868,6 @@ internal class MoshiAdapterGenerator(
         putValueArgument(++lastIndex, irNull())
       }
     }
-
-  @OptIn(UnsafeDuringIrConstructionAPI::class)
-  private fun IrBuilderWithScope.generateJsonAdapterSuperConstructorCall():
-    IrDelegatingConstructorCall {
-    return irDelegatingConstructorCall(moshiSymbols.jsonAdapter.constructors.single().owner)
-  }
 }
 
 private interface PropertyComponent {
