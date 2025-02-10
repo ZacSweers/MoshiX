@@ -309,7 +309,6 @@ sealed class BaseType {
             .isEqualTo(
               // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
               """
-                  -if class test.BaseType
                   -keepnames class test.BaseType
                   -if class test.BaseType
                   -keep class test.BaseTypeJsonAdapter {
