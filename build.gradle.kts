@@ -56,7 +56,7 @@ spotless {
   format("misc") {
     target("*.md", ".gitignore")
     trimTrailingWhitespace()
-    indentWithSpaces(2)
+    leadingTabsToSpaces(2)
     endWithNewline()
   }
   java {
