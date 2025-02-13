@@ -56,7 +56,7 @@ spotless {
   format("misc") {
     target("*.md", ".gitignore")
     trimTrailingWhitespace()
-    indentWithSpaces(2)
+    leadingTabsToSpaces(2)
     endWithNewline()
   }
   java {
@@ -99,7 +99,11 @@ subprojects {
       .configureEach {
         compilerOptions {
           jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
-          freeCompilerArgs.addAll("-Xjsr305=strict")
+          freeCompilerArgs.addAll(
+            "-Xjsr305=strict",
+            // https://youtrack.jetbrains.com/issue/KT-73255
+            "-Xannotation-default-target=param-property",
+          )
           progressiveMode.set(true)
           // TODO disabled because Gradle's Kotlin handling is silly
           //  https://github.com/gradle/gradle/issues/16779
