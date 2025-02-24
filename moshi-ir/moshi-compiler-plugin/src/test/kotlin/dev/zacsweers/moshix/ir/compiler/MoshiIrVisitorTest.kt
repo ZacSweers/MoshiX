@@ -884,7 +884,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       )
 
     val result = compile(source)
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
       .contains("Only one of @DefaultNull or @FallbackJsonAdapter can be used at a time")
   }
@@ -913,7 +913,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       )
 
     val result = compile(source)
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages).contains("Cannot have both @DefaultNull and @DefaultObject")
   }
 
@@ -953,7 +953,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       )
 
     val result = compile(source)
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
       .contains(
         "Only one of @DefaultObject, @DefaultNull, or @FallbackJsonAdapter can be used at a time"
@@ -996,7 +996,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       )
 
     val result = compile(source)
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages).contains("Visibility must be one of public or internal. Is private")
   }
 
@@ -1022,7 +1022,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       )
 
     val result = compile(source)
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
     assertThat(result.messages)
       .contains("Fallback adapter type's primary constructor can only have a Moshi parameter")
   }
@@ -1073,7 +1073,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       )
 
     val result = compile(source)
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    assertThat(result.exitCode).isEqualTo(OK)
   }
 
   // Covers cases where a nested sealed interface is also implemented by a subtype that implements
@@ -1103,7 +1103,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       )
 
     val result = compile(source)
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    assertThat(result.exitCode).isEqualTo(OK)
   }
 
   private fun prepareCompilation(

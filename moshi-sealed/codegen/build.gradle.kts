@@ -60,4 +60,8 @@ dependencies {
   testImplementation(libs.junit)
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.kotlinCompileTesting.ksp)
+  testImplementation(libs.kotlin.compilerEmbeddable)
+  testImplementation(libs.ksp)
+  testImplementation(libs.ksp.aa.embeddable)
+  testImplementation(libs.ksp.commonDeps)
 }
