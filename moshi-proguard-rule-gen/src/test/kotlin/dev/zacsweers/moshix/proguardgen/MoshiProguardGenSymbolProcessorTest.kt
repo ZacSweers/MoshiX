@@ -347,14 +347,13 @@ sealed class BaseType {
     KotlinCompilation().apply {
       sources = sourceFiles.toList()
       inheritClassPath = true
-      if (useKSP2) {
-        useKsp2()
-      } else {
+      if (!useKSP2) {
         languageVersion = "1.9"
       }
       configureKsp(useKSP2) {
         symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider()
       }
+      kotlincArguments += "-Xskip-prerelease-check"
       block()
     }
 
