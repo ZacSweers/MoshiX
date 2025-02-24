@@ -56,7 +56,7 @@ spotless {
   format("misc") {
     target("*.md", ".gitignore")
     trimTrailingWhitespace()
-    indentWithSpaces(2)
+    leadingTabsToSpaces(2)
     endWithNewline()
   }
   java {
@@ -115,7 +115,7 @@ subprojects {
   pluginManager.withPlugin("com.vanniktech.maven.publish") {
     apply(plugin = "org.jetbrains.dokka")
     configure<DokkaExtension> {
-      dokkaPublicationDirectory.set(layout.buildDirectory.dir("dokkaDir"))
+      basePublicationsDirectory.set(layout.buildDirectory.dir("dokkaDir"))
       dokkaSourceSets.configureEach {
         skipDeprecated.set(true)
         externalDocumentationLinks {
