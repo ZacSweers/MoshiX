@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-agp = "8.8.1"
+agp = "8.9.0"
 autoService = "1.1.1"
 gjf = "1.17.0"
 incap = "1.0.0"
@@ -21,7 +21,7 @@ jdk = "23"
 jvmTarget = "11"
 kotlin = "2.1.20-RC2"
 kotlinCompileTesting = "0.7.0"
-kotlinpoet = "2.0.0"
+kotlinpoet = "2.1.0"
 ksp = "2.1.20-RC2-1.0.31"
 ktfmt = "0.54"
 moshi = "1.15.2"
@@ -33,8 +33,8 @@ dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.17.0" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-lint = { id = "com.android.lint", version = "8.8.1" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.30.0" }
+lint = { id = "com.android.lint", version = "8.9.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.31.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.29.0" } # Always replaced by the local plugin
 spotless = { id = "com.diffplug.spotless", version = "7.0.2" }
