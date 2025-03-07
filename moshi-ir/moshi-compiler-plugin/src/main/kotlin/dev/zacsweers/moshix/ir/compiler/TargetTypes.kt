@@ -19,6 +19,7 @@ import dev.zacsweers.moshix.ir.compiler.api.TargetConstructor
 import dev.zacsweers.moshix.ir.compiler.api.TargetParameter
 import dev.zacsweers.moshix.ir.compiler.api.TargetProperty
 import dev.zacsweers.moshix.ir.compiler.api.TargetType
+import dev.zacsweers.moshix.ir.compiler.util.checkIsVisible
 import dev.zacsweers.moshix.ir.compiler.util.error
 import dev.zacsweers.moshix.ir.compiler.util.isTransient
 import dev.zacsweers.moshix.ir.compiler.util.rawType
@@ -153,6 +154,10 @@ internal fun targetType(
           .any { it.visibility == DescriptorVisibilities.INTERNAL }
       if (forceInternal) DescriptorVisibilities.INTERNAL else visibility
     }
+  resolvedVisibility.checkIsVisible { message ->
+    logger.error(type) { message }
+    return null
+  }
   return TargetType(
     irClass = type,
     irType = type.defaultType,
