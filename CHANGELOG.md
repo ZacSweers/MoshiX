@@ -4,6 +4,11 @@ Changelog
 **Unreleased**
 --------------
 
+0.30.0
+------
+
+_2025-03-26_
+
 - Remove most IR internal/impl API usages.
 - Update to Kotlin `2.1.20`. Note that this release requires Kotlin `2.1.20` or later for moshi-ir due to changes in the IR API. It may work on older releases, but it's untested.
 - Build against KSP `2.1.20-1.0.31`.
