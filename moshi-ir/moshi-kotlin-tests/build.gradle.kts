@@ -55,6 +55,15 @@ val proguardRuleValidator =
     dependsOn(tasks.withType<KotlinCompile>().named { it == "compileTestKotlin" })
   }
 
+kotlin {
+  compilerOptions {
+    freeCompilerArgs.add(
+      // https://youtrack.jetbrains.com/issue/KT-73255
+      "-Xannotation-default-target=param-property"
+    )
+  }
+}
+
 dependencies {
   testImplementation("junit:junit:4.13.2")
   testImplementation("com.google.truth:truth:1.4.4")

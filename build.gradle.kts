@@ -99,11 +99,7 @@ subprojects {
       .configureEach {
         compilerOptions {
           jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
-          freeCompilerArgs.addAll(
-            "-Xjsr305=strict",
-            // https://youtrack.jetbrains.com/issue/KT-73255
-            "-Xannotation-default-target=param-property",
-          )
+          freeCompilerArgs.addAll("-Xjsr305=strict")
           progressiveMode.set(true)
           // TODO disabled because Gradle's Kotlin handling is silly
           //  https://github.com/gradle/gradle/issues/16779
