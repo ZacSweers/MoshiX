@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
   alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.ksp)
@@ -41,6 +39,12 @@ val generatedAnnotation = "javax.annotation.processing.Generated"
 
 ksp { arg("moshi.generated", generatedAnnotation) }
 
-tasks.withType<KotlinCompile>().configureEach {
-  compilerOptions { freeCompilerArgs.add("-opt-in=kotlin.ExperimentalStdlibApi") }
+kotlin {
+  compilerOptions {
+    optIn.add("kotlin.ExperimentalStdlibApi")
+    freeCompilerArgs.add(
+      // https://youtrack.jetbrains.com/issue/KT-73255
+      "-Xannotation-default-target=param-property"
+    )
+  }
 }
