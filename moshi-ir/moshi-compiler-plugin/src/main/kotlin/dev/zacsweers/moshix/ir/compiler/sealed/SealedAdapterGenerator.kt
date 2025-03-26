@@ -139,13 +139,17 @@ private constructor(
             }
             return null
           }
-      constructor.visibility.checkIsVisible()
+      constructor.visibility.checkIsVisible { message ->
+        logger.error(adapterDeclaration) { message }
+        return null
+      }
       val hasMoshiParam =
         when (constructor.valueParameters.size) {
           0 -> {
             // Nothing to do
             false
           }
+
           1 -> {
             // Check it's a Moshi parameter
             val moshiParam = constructor.valueParameters[0]
@@ -162,6 +166,7 @@ private constructor(
             }
             true
           }
+
           else -> {
             logger.error(target) {
               "Fallback adapter type's primary constructor can only have a Moshi parameter. Found ${constructor.valueParameters.joinToString()}"

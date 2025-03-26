@@ -23,7 +23,6 @@ import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.configureKsp
 import com.tschuchort.compiletesting.kspSourcesDir
-import com.tschuchort.compiletesting.useKsp2
 import java.io.File
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -548,12 +547,11 @@ class MoshiSealedSymbolProcessorProviderTest(private val useKSP2: Boolean) {
     KotlinCompilation().apply {
       sources = sourceFiles.toList()
       inheritClassPath = true
-      if (useKSP2) {
-        useKsp2()
-      } else {
+      if (!useKSP2) {
         languageVersion = "1.9"
       }
       configureKsp(useKSP2) { symbolProcessorProviders += MoshiSealedSymbolProcessorProvider() }
+      kotlincArguments += "-Xskip-prerelease-check"
     }
 
   private fun compile(vararg sourceFiles: SourceFile): CompilationResult {

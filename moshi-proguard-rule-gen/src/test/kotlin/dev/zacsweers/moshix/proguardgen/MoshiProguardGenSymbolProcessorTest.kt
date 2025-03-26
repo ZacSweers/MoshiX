@@ -23,7 +23,6 @@ import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import com.tschuchort.compiletesting.configureKsp
 import com.tschuchort.compiletesting.kspProcessorOptions
 import com.tschuchort.compiletesting.kspSourcesDir
-import com.tschuchort.compiletesting.useKsp2
 import dev.zacsweers.moshix.proguardgen.MoshiProguardGenSymbolProcessor.Companion.OPTION_GENERATE_MOSHI_CORE_PROGUARD_RULES
 import dev.zacsweers.moshix.proguardgen.MoshiProguardGenSymbolProcessor.Companion.OPTION_GENERATE_PROGUARD_RULES
 import java.io.File
@@ -347,14 +346,13 @@ sealed class BaseType {
     KotlinCompilation().apply {
       sources = sourceFiles.toList()
       inheritClassPath = true
-      if (useKSP2) {
-        useKsp2()
-      } else {
+      if (!useKSP2) {
         languageVersion = "1.9"
       }
       configureKsp(useKSP2) {
         symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider()
       }
+      kotlincArguments += "-Xskip-prerelease-check"
       block()
     }
 
