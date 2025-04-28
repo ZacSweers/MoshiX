@@ -28,7 +28,6 @@ plugins {
   alias(libs.plugins.mavenPublish) apply false
   alias(libs.plugins.spotless)
   alias(libs.plugins.kotlinBinaryCompatibilityValidator)
-  alias(libs.plugins.moshix) apply false
   alias(libs.plugins.lint) apply false
 }
 

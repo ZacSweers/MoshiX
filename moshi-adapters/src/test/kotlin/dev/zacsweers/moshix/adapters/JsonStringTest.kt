@@ -16,10 +16,10 @@
 package dev.zacsweers.moshix.adapters
 
 import com.google.common.truth.Truth.assertThat
-import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi.Builder
 import com.squareup.moshi.adapter
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertThrows
@@ -36,7 +36,7 @@ class JsonStringTest {
     // language=JSON
     val json = "{\"type\":1,\"rawJson\":{\"a\":2,\"b\":3,\"c\":[1,2,3]}}"
 
-    val moshi = Builder().add(JsonString.Factory()).build()
+    val moshi = Builder().add(JsonString.Factory()).addLast(KotlinJsonAdapterFactory()).build()
 
     val example = moshi.adapter<ExampleClass>().fromJson(json)!!
 
@@ -46,7 +46,6 @@ class JsonStringTest {
     assertThat(example.rawJson).isEqualTo("{\"a\":2,\"b\":3,\"c\":[1,2,3]}")
   }
 
-  @JsonClass(generateAdapter = true)
   data class ExampleClass(val type: Int, @JsonString val rawJson: String)
 
   @Test
@@ -54,7 +53,7 @@ class JsonStringTest {
     // language=JSON
     val json = "{\"type\":1,\"rawJson\":null}"
 
-    val moshi = Builder().add(JsonString.Factory()).build()
+    val moshi = Builder().add(JsonString.Factory()).addLast(KotlinJsonAdapterFactory()).build()
 
     val example = moshi.adapter<NullableExampleClass>().fromJson(json)!!
 
@@ -64,7 +63,6 @@ class JsonStringTest {
     assertThat(example.rawJson).isNull()
   }
 
-  @JsonClass(generateAdapter = true)
   data class NullableExampleClass(val type: Int, @JsonString val rawJson: String?)
 
   @Test
