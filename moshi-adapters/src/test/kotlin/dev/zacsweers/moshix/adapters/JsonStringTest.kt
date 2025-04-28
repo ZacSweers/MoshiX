@@ -16,7 +16,6 @@
 package dev.zacsweers.moshix.adapters
 
 import com.google.common.truth.Truth.assertThat
-import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi.Builder
 import com.squareup.moshi.adapter
