@@ -16,15 +16,13 @@
 
 plugins {
   alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.ksp)
   alias(libs.plugins.mavenPublish)
 }
 
 tasks.compileTestKotlin { compilerOptions { optIn.add("kotlin.ExperimentalStdlibApi") } }
 
 dependencies {
-  implementation(libs.moshi)
-  kspTest(libs.moshi.codegen)
+  api(libs.moshi)
   testImplementation(libs.moshi.kotlin)
   testImplementation(libs.okhttp)
   testImplementation(libs.okhttp.mockwebserver)

@@ -19,6 +19,7 @@ import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi.Builder
 import com.squareup.moshi.adapter
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.junit.Test
 
 class TrackUnknownKeysTest {
@@ -29,14 +30,14 @@ class TrackUnknownKeysTest {
     val json = "{\"a\":1,\"b\":2,\"c\":3}"
 
     val tracker = RecordingKeysTracker()
-    val moshi = Builder().add(TrackUnknownKeys.Factory(tracker = tracker)).build()
+    val moshi = Builder().add(TrackUnknownKeys.Factory(tracker = tracker)).addLast(KotlinJsonAdapterFactory()).build()
 
     val example = moshi.adapter<Letters>().fromJson(json)!!
     assertThat(example).isEqualTo(Letters(1, 2))
     tracker.assertUnknown<Letters>("c")
   }
 
-  @TrackUnknownKeys @JsonClass(generateAdapter = true) data class Letters(val a: Int, val b: Int)
+  @TrackUnknownKeys data class Letters(val a: Int, val b: Int)
 
   class RecordingKeysTracker : TrackUnknownKeys.UnknownKeysTracker {
 
