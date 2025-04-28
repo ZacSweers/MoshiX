@@ -29,6 +29,7 @@ plugins {
   alias(libs.plugins.spotless)
   alias(libs.plugins.kotlinBinaryCompatibilityValidator)
   alias(libs.plugins.lint) apply false
+  alias(libs.plugins.moshix) apply false
 }
 
 apiValidation {

@@ -81,5 +81,11 @@ include(
   ":moshi-sealed:sealed-interfaces-samples:java",
 )
 
+includeBuild("moshi-ir/moshi-gradle-plugin") {
+  dependencySubstitution {
+    substitute(module("dev.zacsweers.moshix:moshi-gradle-plugin")).using(project(":"))
+  }
+}
+
 // https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
