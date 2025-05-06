@@ -27,21 +27,13 @@ import java.io.File
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.JvmTarget
-import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized::class)
-class MoshiIrVisitorTest(private val useK2: Boolean) {
-
-  companion object {
-    @JvmStatic @Parameterized.Parameters(name = "useK2 = {0}") fun data() = listOf(true, false)
-  }
+class MoshiIrVisitorTest {
 
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
@@ -576,7 +568,6 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
 
   @Test
   fun `Processor should generate comprehensive proguard rules`() {
-    assumeFalse(useK2)
     val compilation =
       prepareCompilation(
         generatedAnnotation = null,
@@ -1133,9 +1124,7 @@ class MoshiIrVisitorTest(private val useK2: Boolean) {
       jvmTarget = JvmTarget.fromString(System.getProperty("moshix.jvmTarget"))!!.description
       // Necessary for K2 testing, even if useK2 itself isn't part of this test!
       kotlincArguments += listOf("-Xskip-prerelease-check", "-Xallow-unstable-dependencies")
-      if (this@MoshiIrVisitorTest.useK2) {
-        languageVersion = "2.0"
-      }
+      languageVersion = "2.0"
     }
   }
 
