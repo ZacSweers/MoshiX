@@ -20,7 +20,12 @@ plugins {
   id("com.vanniktech.maven.publish")
 }
 
-tasks.compileTestKotlin { compilerOptions { optIn.add("kotlin.ExperimentalStdlibApi") } }
+tasks.compileTestKotlin {
+  compilerOptions {
+    optIn.add("kotlin.ExperimentalStdlibApi")
+    freeCompilerArgs.add("-Xannotation-default-target=param-property")
+  }
+}
 
 dependencies {
   implementation(libs.kotlin.metadata)
