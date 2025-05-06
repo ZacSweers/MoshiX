@@ -60,12 +60,14 @@ import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.addSimpleDelegatingConstructor
 import org.jetbrains.kotlin.ir.util.classId
 import org.jetbrains.kotlin.ir.util.constructors
-import org.jetbrains.kotlin.ir.util.createImplicitParameterDeclarationWithWrappedDescriptor
+import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
 import org.jetbrains.kotlin.ir.util.isObject
+import org.jetbrains.kotlin.ir.util.nonDispatchArguments
+import org.jetbrains.kotlin.ir.util.nonDispatchParameters
 import org.jetbrains.kotlin.ir.util.packageFqName
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.name.ClassId
@@ -128,7 +130,7 @@ private constructor(
     }
 
     if (fallbackAdapterAnnotation != null) {
-      val adapterType = fallbackAdapterAnnotation.getValueArgument(0) as IrClassReference
+      val adapterType = fallbackAdapterAnnotation.arguments[0] as IrClassReference
       // TODO can we check adapter type is valid? Compiler will check it for us
       val adapterDeclaration = adapterType.classType.rawType()
       val constructor =
@@ -144,7 +146,7 @@ private constructor(
         return null
       }
       val hasMoshiParam =
-        when (constructor.valueParameters.size) {
+        when (constructor.nonDispatchParameters.size) {
           0 -> {
             // Nothing to do
             false
@@ -152,7 +154,7 @@ private constructor(
 
           1 -> {
             // Check it's a Moshi parameter
-            val moshiParam = constructor.valueParameters[0]
+            val moshiParam = constructor.nonDispatchParameters[0]
             // TODO can this be simpler?
             if (
               moshiParam.type.classifierOrNull?.isClassWithFqName(
@@ -169,7 +171,7 @@ private constructor(
 
           else -> {
             logger.error(target) {
-              "Fallback adapter type's primary constructor can only have a Moshi parameter. Found ${constructor.valueParameters.joinToString()}"
+              "Fallback adapter type's primary constructor can only have a Moshi parameter. Found ${constructor.nonDispatchParameters.joinToString()}"
             }
             return null
           }
@@ -286,6 +288,7 @@ private constructor(
     }
   }
 
+  @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun addLabelKeyForType(
     subtype: IrClass,
     seenLabels: MutableMap<String, IrClass>,
@@ -338,7 +341,7 @@ private constructor(
 
     @Suppress("UNCHECKED_CAST")
     val alternates =
-      (labelAnnotation.getValueArgument(1) as IrVararg?)?.elements.orEmpty().map {
+      (labelAnnotation.nonDispatchArguments[1] as IrVararg?)?.elements.orEmpty().map {
         (it as IrConst).value as String
       }
 
@@ -387,7 +390,7 @@ private constructor(
           origin = MoshiSealedOrigin
         }
         .apply {
-          createImplicitParameterDeclarationWithWrappedDescriptor()
+          createThisReceiverParameter()
           val jsonAdapterType =
             pluginContext
               .irType(ClassId.fromString("com/squareup/moshi/JsonAdapter"))
@@ -420,37 +423,31 @@ private constructor(
                   pluginContext.createIrBuilder(symbol).run {
                     val ofCreatorExpression =
                       irCall(moshiSealedSymbols.pjafOf).apply {
-                        putTypeArgument(0, targetType.defaultType)
-                        putValueArgument(
-                          0,
-                          moshiSymbols.javaClassReference(this@run, targetType.defaultType),
-                        )
-                        putValueArgument(1, irString(labelKey))
+                        typeArguments[0] = targetType.defaultType
+                        arguments[0] =
+                          moshiSymbols.javaClassReference(this@run, targetType.defaultType)
+                        arguments[1] = irString(labelKey)
                       }
 
-                    val moshiParam = ctor.valueParameters[0]
+                    val moshiParam = ctor.nonDispatchParameters[0]
                     val moshiAccess: IrExpression =
                       if (hasObjectSubtypes) {
                         val initial =
                           irCall(moshiSymbols.moshiNewBuilder).apply {
-                            dispatchReceiver = irGet(moshiParam)
+                            arguments[0] = irGet(moshiParam)
                           }
                         val newBuilds =
                           objectSubtypes.fold(initial) { receiver, subtype ->
                             irCall(moshiSymbols.addAdapter).apply {
-                              extensionReceiver = receiver
-                              putTypeArgument(0, subtype.defaultType)
-                              putValueArgument(
-                                0,
+                              typeArguments[0] = subtype.defaultType
+                              arguments[0] = receiver
+                              arguments[1] =
                                 irCall(moshiSealedSymbols.objectJsonAdapterCtor).apply {
-                                  putValueArgument(0, irGetObject(subtype.symbol))
-                                },
-                              )
+                                  arguments[0] = irGetObject(subtype.symbol)
+                                }
                             }
                           }
-                        irCall(moshiSymbols.moshiBuilderBuild).apply {
-                          dispatchReceiver = newBuilds
-                        }
+                        irCall(moshiSymbols.moshiBuilderBuild).apply { arguments[0] = newBuilds }
                       } else {
                         irGet(moshiParam)
                       }
@@ -461,15 +458,13 @@ private constructor(
                         subtype ->
                         subtype.labels.fold(receiver) { nestedReceiver, label ->
                           irCall(moshiSealedSymbols.pjafWithSubtype).apply {
-                            dispatchReceiver = nestedReceiver
-                            putValueArgument(
-                              0,
+                            arguments[0] = nestedReceiver
+                            arguments[1] =
                               moshiSymbols.javaClassReference(
                                 this@run,
                                 subtype.className.defaultType,
-                              ),
-                            )
-                            putValueArgument(1, irString(label))
+                              )
+                            arguments[2] = irString(label)
                           }
                         }
                       }
@@ -502,13 +497,12 @@ private constructor(
                     irExprBody(
                       irAs(
                         irCall(moshiSymbols.jsonAdapterFactoryCreate).apply {
-                          dispatchReceiver = possiblyWithDefaultExpression
-                          putValueArgument(
-                            0,
-                            moshiSymbols.javaClassReference(this@run, targetType.defaultType),
-                          )
-                          putValueArgument(1, irCall(moshiSymbols.emptySet))
-                          putValueArgument(2, moshiAccess)
+                          arguments[0] = possiblyWithDefaultExpression
+                          arguments[1] =
+                            moshiSymbols.javaClassReference(this@run, targetType.defaultType)
+
+                          arguments[2] = irCall(moshiSymbols.emptySet)
+                          arguments[3] = moshiAccess
                         },
                         jsonAdapterType,
                       )
@@ -536,8 +530,8 @@ private constructor(
         pluginContext.irBuiltIns.unitType,
         modality = Modality.OPEN,
       ) { function ->
-        function.valueParameters.size == 2 &&
-          function.valueParameters[0].type.classifierOrFail == moshiSymbols.jsonWriter
+        function.nonDispatchParameters.size == 2 &&
+          function.nonDispatchParameters[0].type.classifierOrFail == moshiSymbols.jsonWriter
       }
       .apply {
         val writer = addValueParameter {
@@ -552,9 +546,9 @@ private constructor(
         body =
           DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
             +irCall(moshiSymbols.jsonAdapter.getSimpleFunction("toJson")!!).apply {
-              dispatchReceiver = irGetField(irGet(dispatchReceiverParameter!!), delegateField)
-              putValueArgument(0, irGet(writer))
-              putValueArgument(1, irGet(value))
+              arguments[0] = irGetField(irGet(dispatchReceiverParameter!!), delegateField)
+              arguments[1] = irGet(writer)
+              arguments[2] = irGet(value)
             }
             +irReturnUnit()
           }
@@ -569,8 +563,8 @@ private constructor(
         pluginContext.irBuiltIns.anyNType,
         modality = Modality.OPEN,
       ) { function ->
-        function.valueParameters.size == 1 &&
-          function.valueParameters[0].type.classifierOrFail == moshiSymbols.jsonReader
+        function.nonDispatchParameters.size == 1 &&
+          function.nonDispatchParameters[0].type.classifierOrFail == moshiSymbols.jsonReader
       }
       .apply {
         val readerParam = addValueParameter {
@@ -581,8 +575,8 @@ private constructor(
           DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
             +irReturn(
               irCall(moshiSymbols.jsonAdapter.getSimpleFunction("fromJson")!!).apply {
-                dispatchReceiver = irGetField(irGet(dispatchReceiverParameter!!), delegateField)
-                putValueArgument(0, irGet(readerParam))
+                arguments[0] = irGetField(irGet(dispatchReceiverParameter!!), delegateField)
+                arguments[1] = irGet(readerParam)
               }
             )
           }
@@ -645,8 +639,8 @@ private sealed interface FallbackStrategy {
     ) =
       with(builder) {
         irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
-          dispatchReceiver = subtypesExpression
-          putValueArgument(0, irNull(targetType))
+          arguments[0] = subtypesExpression
+          arguments[1] = irNull(targetType)
         }
       }
   }
@@ -662,7 +656,7 @@ private sealed interface FallbackStrategy {
     ): IrCall {
       return with(builder) {
         irCall(moshiSealedSymbols.pjafWithFallbackJsonAdapter).apply {
-          dispatchReceiver = subtypesExpression
+          arguments[0] = subtypesExpression
           // TODO cast to JsonAdapter<Any>
           val args =
             if (hasMoshiParam) {
@@ -670,7 +664,7 @@ private sealed interface FallbackStrategy {
             } else {
               emptyArray()
             }
-          putValueArgument(0, irInvoke(callee = targetConstructor, args = args))
+          arguments[1] = irInvoke(callee = targetConstructor, args = args)
         }
       }
     }
@@ -686,8 +680,8 @@ private sealed interface FallbackStrategy {
     ): IrCall {
       return with(builder) {
         irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
-          dispatchReceiver = subtypesExpression
-          putValueArgument(0, irGetObject(defaultObject))
+          arguments[0] = subtypesExpression
+          arguments[1] = irGetObject(defaultObject)
         }
       }
     }

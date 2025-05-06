@@ -2,8 +2,9 @@
 
 package dev.zacsweers.moshix.ir.compiler
 
+import org.jetbrains.kotlin.DeprecatedForRemovalCompilerApi
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.backend.common.ir.addExtensionReceiver
+import org.jetbrains.kotlin.backend.common.ir.createExtensionReceiver
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrBuiltIns
@@ -17,6 +18,7 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
 import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrPackageFragment
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.createEmptyExternalPackageFragment
@@ -31,7 +33,8 @@ import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.starProjectedType
-import org.jetbrains.kotlin.ir.util.createImplicitParameterDeclarationWithWrappedDescriptor
+import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
+import org.jetbrains.kotlin.ir.util.nonDispatchParameters
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -65,7 +68,8 @@ internal open class BaseSymbols(
     pluginContext
       .referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("setOf")))
       .first {
-        it.owner.valueParameters.size == 1 && it.owner.valueParameters[0].varargElementType != null
+        it.owner.nonDispatchParameters.size == 1 &&
+          it.owner.nonDispatchParameters[0].varargElementType != null
       }
   }
 
@@ -73,7 +77,8 @@ internal open class BaseSymbols(
     pluginContext
       .referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("setOf")))
       .first {
-        it.owner.valueParameters.size == 1 && it.owner.valueParameters[0].varargElementType == null
+        it.owner.nonDispatchParameters.size == 1 &&
+          it.owner.nonDispatchParameters[0].varargElementType == null
       }
   }
 
@@ -82,9 +87,10 @@ internal open class BaseSymbols(
       .referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("plus")))
       .single {
         val owner = it.owner
-        owner.extensionReceiverParameter?.type?.classFqName == FqName("kotlin.collections.Set") &&
-          owner.valueParameters.size == 1 &&
-          owner.valueParameters[0].type.classifierOrNull is IrTypeParameterSymbol
+        owner.nonDispatchParameters.firstOrNull()?.type?.classFqName ==
+          FqName("kotlin.collections.Set") &&
+          owner.nonDispatchParameters.size == 2 &&
+          owner.nonDispatchParameters[1].type.classifierOrNull is IrTypeParameterSymbol
       }
   }
 
@@ -105,8 +111,10 @@ internal open class BaseSymbols(
     pluginContext
       .referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("joinToString")))
       .single {
-        it.owner.extensionReceiverParameter?.type?.classFqName ==
-          FqName("kotlin.collections.Iterable")
+        it.owner.parameters
+          .firstOrNull { it.kind == IrParameterKind.ExtensionReceiver }
+          ?.type
+          ?.classFqName == FqName("kotlin.collections.Iterable")
       }
   }
 
@@ -114,25 +122,29 @@ internal open class BaseSymbols(
     createClass(javaLang, "Class", ClassKind.CLASS, Modality.FINAL)
   }
 
+  @OptIn(DeprecatedForRemovalCompilerApi::class)
   protected val kotlinKClassJava: IrPropertySymbol =
     irFactory
       .buildProperty { name = Name.identifier("java") }
       .apply {
         parent = kotlinJvm
         addGetter().apply {
-          addExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
+          extensionReceiverParameter =
+            createExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
           returnType = javaLangClass.defaultType
         }
       }
       .symbol
 
+  @OptIn(DeprecatedForRemovalCompilerApi::class)
   protected val kotlinKClassJavaObjectType: IrPropertySymbol =
     irFactory
       .buildProperty { name = Name.identifier("javaObjectType") }
       .apply {
         parent = kotlinJvm
         addGetter().apply {
-          addExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
+          extensionReceiverParameter =
+            createExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
           returnType = javaLangClass.defaultType
         }
       }
@@ -158,7 +170,7 @@ internal open class BaseSymbols(
       }
       .apply {
         parent = irParent
-        createImplicitParameterDeclarationWithWrappedDescriptor()
+        createThisReceiverParameter()
         body()
       }
       .symbol
@@ -173,13 +185,14 @@ internal open class BaseSymbols(
     )
 
   private fun IrBuilderWithScope.kClassToJavaClass(kClassReference: IrExpression) =
-    irGet(javaLangClass.starProjectedType, null, kotlinKClassJava.owner.getter!!.symbol).apply {
-      extensionReceiver = kClassReference
-    }
+    irGet(javaLangClass.starProjectedType, kClassReference, kotlinKClassJava.owner.getter!!.symbol)
 
   private fun IrBuilderWithScope.kClassToJavaObjectClass(kClassReference: IrExpression) =
-    irGet(javaLangClass.starProjectedType, null, kotlinKClassJavaObjectType.owner.getter!!.symbol)
-      .apply { extensionReceiver = kClassReference }
+    irGet(
+      javaLangClass.starProjectedType,
+      kClassReference,
+      kotlinKClassJavaObjectType.owner.getter!!.symbol,
+    )
 
   // Produce a static reference to the java class of the given type.
   fun javaClassReference(

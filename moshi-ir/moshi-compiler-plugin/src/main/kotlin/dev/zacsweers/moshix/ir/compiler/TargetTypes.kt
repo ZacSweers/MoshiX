@@ -23,6 +23,7 @@ import dev.zacsweers.moshix.ir.compiler.util.checkIsVisible
 import dev.zacsweers.moshix.ir.compiler.util.error
 import dev.zacsweers.moshix.ir.compiler.util.isTransient
 import dev.zacsweers.moshix.ir.compiler.util.rawType
+import org.jetbrains.kotlin.DeprecatedForRemovalCompilerApi
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.ClassKind
@@ -37,6 +38,7 @@ import org.jetbrains.kotlin.ir.util.hasDefaultValue
 import org.jetbrains.kotlin.ir.util.isEnumClass
 import org.jetbrains.kotlin.ir.util.isFromJava
 import org.jetbrains.kotlin.ir.util.isLocal
+import org.jetbrains.kotlin.ir.util.nonDispatchParameters
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
@@ -169,12 +171,12 @@ internal fun targetType(
   )
 }
 
-@OptIn(UnsafeDuringIrConstructionAPI::class)
+@OptIn(UnsafeDuringIrConstructionAPI::class, DeprecatedForRemovalCompilerApi::class)
 internal fun primaryConstructor(targetType: IrClass): TargetConstructor? {
   val primaryConstructor = targetType.primaryConstructor ?: return null
 
   val parameters = LinkedHashMap<String, TargetParameter>()
-  for (parameter in primaryConstructor.valueParameters) {
+  for (parameter in primaryConstructor.nonDispatchParameters) {
     val index = parameter.index
     val name = parameter.name.identifier
     parameters[name] =

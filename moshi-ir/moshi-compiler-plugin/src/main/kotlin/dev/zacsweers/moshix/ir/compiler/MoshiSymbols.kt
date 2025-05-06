@@ -36,10 +36,11 @@ import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
-import org.jetbrains.kotlin.ir.util.createImplicitParameterDeclarationWithWrappedDescriptor
+import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
+import org.jetbrains.kotlin.ir.util.nonDispatchParameters
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -68,7 +69,7 @@ internal class MoshiSymbols(
         modality = Modality.ABSTRACT
       }
       .apply {
-        createImplicitParameterDeclarationWithWrappedDescriptor()
+        createThisReceiverParameter()
         parent = moshiPackage
 
         addFunction(
@@ -127,7 +128,7 @@ internal class MoshiSymbols(
         modality = Modality.ABSTRACT
       }
       .apply {
-        createImplicitParameterDeclarationWithWrappedDescriptor()
+        createThisReceiverParameter()
         parent = moshiPackage
 
         addFunction(Name.identifier("beginObject").identifier, defaultType, Modality.ABSTRACT)
@@ -154,7 +155,7 @@ internal class MoshiSymbols(
         modality = Modality.FINAL
       }
       .apply {
-        createImplicitParameterDeclarationWithWrappedDescriptor()
+        createThisReceiverParameter()
         parent = moshiPackage
 
         addFunction(
@@ -199,7 +200,7 @@ internal class MoshiSymbols(
         modality = Modality.ABSTRACT
       }
       .apply {
-        createImplicitParameterDeclarationWithWrappedDescriptor()
+        createThisReceiverParameter()
         val t = addTypeParameter("T", irBuiltIns.anyNType)
         parent = moshiPackage
 
@@ -233,8 +234,8 @@ internal class MoshiSymbols(
 
   val jsonDataExceptionStringConstructor: IrFunctionSymbol by lazy {
     jsonDataException.constructors.first {
-      it.owner.valueParameters.size == 1 &&
-        it.owner.valueParameters[0].type.makeNotNull() == pluginContext.irBuiltIns.stringType
+      it.owner.nonDispatchParameters.size == 1 &&
+        it.owner.nonDispatchParameters[0].type.makeNotNull() == pluginContext.irBuiltIns.stringType
     }
   }
 
