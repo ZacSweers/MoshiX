@@ -17,7 +17,6 @@ package dev.zacsweers.moshix.ir.compiler.util
 
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.backend.jvm.ir.erasedUpperBound
 import org.jetbrains.kotlin.builtins.PrimitiveType
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
@@ -65,10 +64,12 @@ import org.jetbrains.kotlin.ir.types.getPrimitiveType
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.allOverridden
+import org.jetbrains.kotlin.ir.util.erasedUpperBound
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.nonDispatchParameters
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.toIrConst
 import org.jetbrains.kotlin.name.CallableId
@@ -169,7 +170,7 @@ internal fun IrBuilderWithScope.defaultPrimitiveValue(
 internal val IrProperty.type: IrType
   get() =
     getter?.returnType
-      ?: setter?.valueParameters?.first()?.type
+      ?: setter?.nonDispatchParameters?.first()?.type
       ?: backingField?.type
       ?: error("No type for property $name")
 
@@ -244,8 +245,12 @@ internal fun IrBuilderWithScope.irInvoke(
   assert(callee.isBound) { "Symbol $callee expected to be bound" }
   val returnType = typeHint ?: callee.owner.returnType
   val call = irCall(callee, type = returnType)
-  call.dispatchReceiver = dispatchReceiver
-  args.forEachIndexed(call::putValueArgument)
+  val dispatchReceiverIndex = callee.owner.dispatchReceiverParameter?.indexInParameters
+  dispatchReceiver?.let { call.arguments[dispatchReceiverIndex!!] = dispatchReceiver }
+  val parameterIndexOffset = if (dispatchReceiverIndex != null) 1 else 0
+  args.forEachIndexed { index, valueArgument ->
+    call.arguments[index + parameterIndexOffset] = valueArgument
+  }
   return call
 }
 
