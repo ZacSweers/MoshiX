@@ -89,10 +89,11 @@ import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.addSimpleDelegatingConstructor
 import org.jetbrains.kotlin.ir.util.constructors
-import org.jetbrains.kotlin.ir.util.deepCopyWithoutPatchingParents
+import org.jetbrains.kotlin.ir.util.deepCopyWithSymbols
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getPropertyGetter
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
+import org.jetbrains.kotlin.ir.util.nonDispatchParameters
 import org.jetbrains.kotlin.ir.util.packageFqName
 import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.name.ClassId
@@ -189,8 +190,8 @@ internal class MoshiAdapterGenerator(
           pluginContext,
           moshiSymbols,
           adapterCls,
-          ctor.valueParameters[0],
-          ctor.valueParameters.getOrNull(1),
+          ctor.nonDispatchParameters[0],
+          ctor.nonDispatchParameters.getOrNull(1),
           uniqueAdapter.name,
         )
     }
@@ -243,7 +244,7 @@ internal class MoshiAdapterGenerator(
               val receivedSize =
                 irTemporary(
                   irCall(moshiSymbols.arraySizeGetter).apply {
-                    dispatchReceiver = irGet(valueParameters[1])
+                    arguments[0] = irGet(nonDispatchParameters[1])
                   },
                   nameHint = "receivedSize",
                 )
@@ -252,8 +253,7 @@ internal class MoshiAdapterGenerator(
                 thenPart =
                   irThrow(
                     irCall(pluginContext.irBuiltIns.illegalArgumentExceptionSymbol).apply {
-                      putValueArgument(
-                        0,
+                      arguments[0] =
                         irConcat().apply {
                           addArgument(irString("TypeVariable mismatch: Expecting "))
                           addArgument(irInt(expectedSize))
@@ -266,8 +266,7 @@ internal class MoshiAdapterGenerator(
                           )
                           addArgument(irString("], but received "))
                           addArgument(irGet(receivedSize))
-                        },
-                      )
+                        }
                     }
                   ),
               )
@@ -291,7 +290,7 @@ internal class MoshiAdapterGenerator(
             irExprBody(
               irCall(moshiSymbols.jsonReaderOptionsOf).apply {
                 val args = nonTransientProperties.map { irString(it.jsonName) }
-                this.putValueArgument(0, irVararg(pluginContext.irBuiltIns.stringType, args))
+                this.arguments[0] = irVararg(pluginContext.irBuiltIns.stringType, args)
               }
             )
           }
@@ -306,8 +305,8 @@ internal class MoshiAdapterGenerator(
         pluginContext.irBuiltIns.unitType,
         modality = Modality.OPEN,
       ) { function ->
-        function.valueParameters.size == 2 &&
-          function.valueParameters[0].type.classifierOrFail == moshiSymbols.jsonWriter
+        function.nonDispatchParameters.size == 2 &&
+          function.nonDispatchParameters[0].type.classifierOrFail == moshiSymbols.jsonWriter
       }
       .apply {
         val writer = addValueParameter {
@@ -329,13 +328,11 @@ internal class MoshiAdapterGenerator(
                     pluginContext
                       .referenceClass(ClassId.fromString("kotlin/KotlinNullPointerException"))!!
                       .constructors
-                      .first { it.owner.valueParameters.size == 1 }
+                      .first { it.owner.nonDispatchParameters.size == 1 }
                   )
                   .apply {
-                    putValueArgument(
-                      0,
-                      irString("value was null! Wrap in .nullSafe() to write nullable values."),
-                    )
+                    arguments[0] =
+                      irString("value was null! Wrap in .nullSafe() to write nullable values.")
                   }
               ),
             )
@@ -343,34 +340,32 @@ internal class MoshiAdapterGenerator(
             val castValue =
               irTemporary(irImplicitCast(irGet(value), target.irType.makeNotNull()), "castValue")
             +irCall(moshiSymbols.jsonWriter.getSimpleFunction("beginObject")!!).apply {
-              dispatchReceiver = irGet(writer)
+              arguments[0] = irGet(writer)
             }
             for (property in nonTransientProperties) {
               +irCall(moshiSymbols.jsonWriter.getSimpleFunction("name")!!).apply {
-                dispatchReceiver = irGet(writer)
-                putValueArgument(0, irString(property.jsonName))
+                arguments[0] = irGet(writer)
+                arguments[1] = irString(property.jsonName)
               }
               // adapter.toJson(writer, value.prop)
               +irCall(moshiSymbols.jsonAdapter.getSimpleFunction("toJson")!!).apply {
                 // adapter.
-                dispatchReceiver =
+                arguments[0] =
                   irGetField(
                     irGet(dispatchReceiverParameter!!),
                     adapterProperties.getValue(property.delegateKey),
                   )
                 // writer
-                putValueArgument(0, irGet(writer))
+                arguments[1] = irGet(writer)
                 // value.prop
-                putValueArgument(
-                  1,
+                arguments[2] =
                   irCall(target.irClass.getPropertyGetter(property.name)!!).apply {
-                    dispatchReceiver = irGet(castValue)
-                  },
-                )
+                    arguments[0] = irGet(castValue)
+                  }
               }
             }
             +irCall(moshiSymbols.jsonWriter.getSimpleFunction("endObject")!!).apply {
-              dispatchReceiver = irGet(writer)
+              arguments[0] = irGet(writer)
             }
             +irReturnUnit()
           }
@@ -388,8 +383,8 @@ internal class MoshiAdapterGenerator(
         pluginContext.irBuiltIns.anyNType,
         modality = Modality.OPEN,
       ) { function ->
-        function.valueParameters.size == 1 &&
-          function.valueParameters[0].type.classifierOrFail == moshiSymbols.jsonReader
+        function.nonDispatchParameters.size == 1 &&
+          function.nonDispatchParameters[0].type.classifierOrFail == moshiSymbols.jsonReader
       }
       .apply {
         val readerParam = addValueParameter {
@@ -411,7 +406,9 @@ internal class MoshiAdapterGenerator(
 
             val errors =
               irTemporary(
-                irCall(moshiSymbols.emptySet),
+                irCall(moshiSymbols.emptySet).apply {
+                  typeArguments[0] = pluginContext.irBuiltIns.stringType
+                },
                 "errors",
                 irType =
                   pluginContext.irBuiltIns.setClass.typeWith(pluginContext.irBuiltIns.stringType),
@@ -463,7 +460,7 @@ internal class MoshiAdapterGenerator(
               components.filterIsInstance<ParameterComponent>().any { it.parameter.hasDefault }
 
             +irCall(moshiSymbols.jsonReader.getSimpleFunction("beginObject")!!).apply {
-              dispatchReceiver = irGet(readerParam)
+              arguments[0] = irGet(readerParam)
             }
             +buildWhileHasNextLoop(
               fieldsHolder = dispatchReceiverParameter!!,
@@ -477,7 +474,7 @@ internal class MoshiAdapterGenerator(
               components = components,
             )
             +irCall(moshiSymbols.jsonReader.getSimpleFunction("endObject")!!).apply {
-              dispatchReceiver = irGet(readerParam)
+              arguments[0] = irGet(readerParam)
             }
 
             for (input in components.filterIsInstance<PropertyComponent>()) {
@@ -504,19 +501,17 @@ internal class MoshiAdapterGenerator(
               condition =
                 irNotEquals(
                   irCall(pluginContext.irBuiltIns.setClass.owner.getPropertyGetter("size")!!)
-                    .apply { dispatchReceiver = irGet(errors) },
+                    .apply { arguments[0] = irGet(errors) },
                   irInt(0),
                 ),
               thenPart =
                 irThrow(
                   irCall(moshiSymbols.jsonDataExceptionStringConstructor).apply {
-                    putValueArgument(
-                      0,
+                    arguments[0] =
                       irCall(moshiSymbols.iterableJoinToString).apply {
-                        extensionReceiver = irGet(errors)
-                        putValueArgument(0, irString("\n"))
-                      },
-                    )
+                        arguments[0] = irGet(errors)
+                        arguments[1] = irString("\n")
+                      }
                   }
                 ),
             )
@@ -528,7 +523,7 @@ internal class MoshiAdapterGenerator(
                 // one to compile against
                 val defaultsConstructor =
                   target.constructor.irConstructor
-                    .deepCopyWithoutPatchingParents()
+                    .deepCopyWithSymbols(target.irClass)
                     .apply {
                       parent = target.irClass
                       repeat(maskCount) {
@@ -623,8 +618,8 @@ internal class MoshiAdapterGenerator(
               +irIfThen(
                 condition,
                 irCall(property.target.property.setter!!).apply {
-                  dispatchReceiver = irGet(result)
-                  putValueArgument(0, irGet(localVars.getValue(property.localName)))
+                  arguments[0] = irGet(result)
+                  arguments[1] = irGet(localVars.getValue(property.localName))
                 },
               )
             }
@@ -649,14 +644,14 @@ internal class MoshiAdapterGenerator(
     irWhile().apply {
       condition =
         irCall(moshiSymbols.jsonReader.getSimpleFunction("hasNext")!!).apply {
-          dispatchReceiver = irGet(readerParam)
+          arguments[0] = irGet(readerParam)
         }
       body = irBlock {
         val nextName =
           irTemporary(
             irCall(moshiSymbols.jsonReader.getSimpleFunction("selectName")!!).apply {
-              dispatchReceiver = irGet(readerParam)
-              putValueArgument(0, irGetField(irGet(fieldsHolder), optionsField))
+              arguments[0] = irGet(readerParam)
+              arguments[1] = irGetField(irGet(fieldsHolder), optionsField)
             },
             nameHint = "nextName",
           )
@@ -715,12 +710,12 @@ internal class MoshiAdapterGenerator(
                     val result =
                       irTemporary(
                         irCall(moshiSymbols.jsonAdapter.getSimpleFunction("fromJson")!!).apply {
-                          dispatchReceiver =
+                          arguments[0] =
                             irGetField(
                               irGet(fieldsHolder),
                               adapterProperties.getValue(property.delegateKey),
                             )
-                          putValueArgument(0, irGet(readerParam))
+                          arguments[1] = irGet(readerParam)
                         }
                       )
                     val setVarExpression =
@@ -779,10 +774,10 @@ internal class MoshiAdapterGenerator(
               result =
                 irBlock {
                   +irCall(moshiSymbols.jsonReader.getSimpleFunction("skipName")!!).apply {
-                    dispatchReceiver = irGet(readerParam)
+                    arguments[0] = irGet(readerParam)
                   }
                   +irCall(moshiSymbols.jsonReader.getSimpleFunction("skipValue")!!).apply {
-                    dispatchReceiver = irGet(readerParam)
+                    arguments[0] = irGet(readerParam)
                   }
                 },
             )
@@ -807,18 +802,16 @@ internal class MoshiAdapterGenerator(
     irSet(
       errors,
       irCall(moshiSymbols.setPlus).apply {
-        extensionReceiver = irGet(errors)
-        putValueArgument(
-          0,
+        arguments[0] = irGet(errors)
+        arguments[1] =
           irCall(pluginContext.irBuiltIns.throwableClass.getPropertyGetter("message")!!).apply {
-            dispatchReceiver =
+            arguments[0] =
               irCall(moshiSymbols.moshiUtil.getSimpleFunction(moshiUtilFunction)!!).apply {
-                putValueArgument(0, irString(property.localName))
-                putValueArgument(1, irString(property.jsonName))
-                putValueArgument(2, irGet(readerParam))
+                arguments[0] = irString(property.localName)
+                arguments[1] = irString(property.jsonName)
+                arguments[2] = irGet(readerParam)
               }
-          },
-        )
+          }
       },
     )
 
@@ -842,19 +835,14 @@ internal class MoshiAdapterGenerator(
             // order for invokeDefaultConstructor to properly invoke it. Just
             // using "null" isn't safe because the transient type may be a
             // primitive type.
-            putValueArgument(
-              input.parameter.index,
-              defaultPrimitiveValue(input.type, pluginContext),
-            )
+            arguments[input.parameter.index] = defaultPrimitiveValue(input.type, pluginContext)
           } else {
-            putValueArgument(
-              input.parameter.index,
-              irGet(localVars.getValue((input as ParameterProperty).property.localName)),
-            )
+            arguments[input.parameter.index] =
+              irGet(localVars.getValue((input as ParameterProperty).property.localName))
           }
         } else if (input !is ParameterOnly) {
           val property = (input as ParameterProperty).property
-          putValueArgument(input.parameter.index, irGet(localVars.getValue(property.localName)))
+          arguments[input.parameter.index] = irGet(localVars.getValue(property.localName))
         }
       }
 
@@ -862,10 +850,10 @@ internal class MoshiAdapterGenerator(
         // Add the masks and a null instance for the trailing default marker
         // instance
         for (mask in bitMasks) {
-          putValueArgument(++lastIndex, irGet(mask))
+          arguments[++lastIndex] = irGet(mask)
         }
         // DefaultConstructorMarker
-        putValueArgument(++lastIndex, irNull())
+        arguments[++lastIndex] = irNull()
       }
     }
 }
