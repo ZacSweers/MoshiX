@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-agp = "8.9.2"
+agp = "8.10.0"
 autoService = "1.1.1"
 gjf = "1.17.0"
 incap = "1.0.0"
@@ -21,20 +21,20 @@ jdk = "23"
 jvmTarget = "11"
 kotlin = "2.2.0-RC"
 kotlinCompileTesting = "0.7.1"
-kotlinpoet = "2.1.0"
+kotlinpoet = "2.2.0"
 ksp = "2.2.0-RC-2.0.1"
 ktfmt = "0.54"
 moshi = "1.15.2"
 okhttp = "4.12.0"
-retrofit = "2.11.0"
+retrofit = "3.0.0"
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.17.0" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-lint = { id = "com.android.lint", version = "8.9.2" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.31.0" }
+lint = { id = "com.android.lint", version = "8.10.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.32.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.30.0" } # Always replaced by the local plugin
 spotless = { id = "com.diffplug.spotless", version = "7.0.3" }
@@ -61,7 +61,7 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref =
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradlePlugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
-kotlinx-immutable = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.8"
+kotlinx-immutable = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0"
 
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-metadata = { module = "com.squareup:kotlinpoet-metadata", version.ref = "kotlinpoet" }
