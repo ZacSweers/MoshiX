@@ -132,11 +132,12 @@ private fun IrBuilderWithScope.moshiAdapterCall(
 ): IrExpressionBody {
   return irExprBody(
     irCall(moshiSymbols.moshiThreeArgAdapter).apply {
-      dispatchReceiver = irGet(moshiParameter)
+      arguments[0] = irGet(moshiParameter)
 
       addTypeParam(this, moshiSymbols, delegateType, genericIndex, typesParameter)
       addAnnotationsParam(this, pluginContext, moshiSymbols, jsonQualifiers)
-      putValueArgument(2, irString(propertyName))
+      arguments[3] = irString(propertyName)
+      typeArguments[0] = delegateType
     }
   )
 }
@@ -152,16 +153,14 @@ private fun IrBuilderWithScope.addTypeParam(
     // type
     if (genericIndex == -1) {
       // Use typeOf() intrinsic
-      putValueArgument(0, renderType(moshiSymbols, delegateType, typesParameter))
+      arguments[1] = renderType(moshiSymbols, delegateType, typesParameter)
     } else {
       // It's generic, get from types array
-      putValueArgument(
-        0,
+      arguments[1] =
         irCall(moshiSymbols.arrayGet.symbol).apply {
-          dispatchReceiver = irGet(typesParameter!!)
-          putValueArgument(0, irInt(genericIndex))
-        },
-      )
+          arguments[0] = irGet(typesParameter!!)
+          arguments[1] = irInt(genericIndex)
+        }
     }
   }
 
@@ -175,7 +174,7 @@ private fun IrBuilderWithScope.addAnnotationsParam(
     val argumentExpression =
       if (jsonQualifiers.isEmpty()) {
         irCall(moshiSymbols.emptySet).apply {
-          putTypeArgument(0, pluginContext.irType(ClassId.fromString("kotlin/Annotation")))
+          typeArguments[0] = pluginContext.irType(ClassId.fromString("kotlin/Annotation"))
         }
       } else {
         val callee: IrFunctionSymbol
@@ -193,9 +192,9 @@ private fun IrBuilderWithScope.addAnnotationsParam(
               pluginContext.irBuiltIns.setClass.typeWith(pluginContext.irBuiltIns.annotationType),
             typeArguments = listOf(pluginContext.irBuiltIns.annotationType),
           )
-          .apply { putValueArgument(0, argExpression) }
+          .apply { arguments[0] = argExpression }
       }
-    putValueArgument(1, argumentExpression)
+    arguments[2] = argumentExpression
   }
 
 /**
@@ -251,8 +250,8 @@ private fun IrBuilderWithScope.renderType(
     // Get the type from the types array param
     val index = classifier.owner.index
     return irCall(moshiSymbols.arrayGet.symbol).apply {
-      dispatchReceiver = irGet(typesParameter!!)
-      putValueArgument(0, irInt(index))
+      arguments[0] = irGet(typesParameter!!)
+      arguments[1] = irInt(index)
     }
   }
 
@@ -264,27 +263,23 @@ private fun IrBuilderWithScope.renderType(
   val builtIns = moshiSymbols.pluginContext.irBuiltIns
   builtIns.primitiveArraysToPrimitiveTypes[irClass.symbol]?.let { primitiveArrayType ->
     return irCall(moshiSymbols.moshiTypesArrayOf).apply {
-      putValueArgument(
-        0,
+      arguments[0] =
         renderType(
           moshiSymbols,
           builtIns.primitiveTypeToIrType.getValue(primitiveArrayType),
           typesParameter,
-        ),
-      )
+        )
     }
   }
   if (irClass.symbol == builtIns.arrayClass) {
     return irCall(moshiSymbols.moshiTypesArrayOf).apply {
-      putValueArgument(
-        0,
+      arguments[0] =
         renderType(
           moshiSymbols,
           delegateType.arguments[0].typeOrNull!!,
           typesParameter,
           forceBoxing = true,
-        ),
-      )
+        )
     }
   }
 
@@ -296,25 +291,24 @@ private fun IrBuilderWithScope.renderType(
     )
   } else {
     // Build the generic
-    val arguments = mutableListOf<IrExpression>()
+    val genericArgs = mutableListOf<IrExpression>()
     val parentClass = irClass.parentClassOrNull
     val symbol =
       if (parentClass != null) {
-        arguments +=
+        genericArgs +=
           renderType(moshiSymbols, parentClass.defaultType, typesParameter, forceBoxing = true)
         moshiSymbols.moshiTypesNewParameterizedTypeWithOwner
       } else {
         moshiSymbols.moshiTypesNewParameterizedType
       }
 
-    arguments += moshiSymbols.javaClassReference(this, delegateType, forceObjectType = true)
+    genericArgs += moshiSymbols.javaClassReference(this, delegateType, forceObjectType = true)
 
     irCall(symbol).apply {
-      for ((i, arg) in arguments.withIndex()) {
-        putValueArgument(i, arg)
+      for ((i, arg) in genericArgs.withIndex()) {
+        arguments[i] = arg
       }
-      putValueArgument(
-        arguments.size,
+      arguments[genericArgs.size] =
         irVararg(
           moshiSymbols.type.defaultType,
           delegateType.arguments.map { typeArg ->
@@ -328,7 +322,7 @@ private fun IrBuilderWithScope.renderType(
                   Variance.OUT_VARIANCE -> moshiSymbols.moshiTypesSubtypeOf
                   Variance.INVARIANT -> error("Not possible")
                 }
-              return@map irCall(targetMethod).apply { putValueArgument(0, renderedType) }
+              return@map irCall(targetMethod).apply { arguments[0] = renderedType }
             }
             val type = typeArg.typeOrNull
             if (type != null) {
@@ -336,15 +330,12 @@ private fun IrBuilderWithScope.renderType(
             } else {
               // Star projection
               irCall(moshiSymbols.moshiTypesSubtypeOf).apply {
-                putValueArgument(
-                  0,
-                  renderType(moshiSymbols, builtIns.anyType, typesParameter, forceBoxing = true),
-                )
+                arguments[0] =
+                  renderType(moshiSymbols, builtIns.anyType, typesParameter, forceBoxing = true)
               }
             }
           },
-        ),
-      )
+        )
     }
   }
 }
