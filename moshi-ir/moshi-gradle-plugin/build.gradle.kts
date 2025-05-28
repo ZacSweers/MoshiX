@@ -58,8 +58,8 @@ tasks.withType<KotlinCompile>().configureEach {
     jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
 
     // Enforce lower target Kotlin version for Gradle compat
-    languageVersion.set(KotlinVersion.KOTLIN_1_8)
-    apiVersion.set(KotlinVersion.KOTLIN_1_8)
+    languageVersion.set(KotlinVersion.KOTLIN_2_0)
+    apiVersion.set(KotlinVersion.KOTLIN_2_0)
   }
 }
 
