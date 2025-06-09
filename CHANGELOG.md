@@ -4,6 +4,10 @@ Changelog
 **Unreleased**
 --------------
 
+- Update to Kotlin `2.2.0`.
+- Update to KSP `2.2.0-2.0.1`.
+- Update gradle plugin to target Kotlin 2.0.
+
 0.30.0
 ------
 
