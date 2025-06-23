@@ -2,6 +2,8 @@ public final class dev/zacsweers/moshix/proguardgen/MoshiProguardGenSymbolProces
 	public static final field OPTION_GENERATE_MOSHI_CORE_PROGUARD_RULES Ljava/lang/String;
 	public static final field OPTION_GENERATE_PROGUARD_RULES Ljava/lang/String;
 	public fun <init> (Lcom/google/devtools/ksp/processing/SymbolProcessorEnvironment;)V
+	public fun finish ()V
+	public fun onError ()V
 	public fun process (Lcom/google/devtools/ksp/processing/Resolver;)Ljava/util/List;
 }
 

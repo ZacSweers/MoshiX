@@ -34,6 +34,7 @@ import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.nonDispatchArguments
 import org.jetbrains.kotlin.name.FqName
 
 internal val JSON_ANNOTATION = FqName("com.squareup.moshi.Json")
@@ -65,9 +66,10 @@ internal fun IrAnnotationContainer.jsonName(): String? {
   }
 }
 
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun <T> IrConstructorCall.constArgumentOfTypeAt(position: Int): T? {
   @Suppress("UNCHECKED_CAST")
-  return (getValueArgument(position) as? IrConst?)?.value as? T?
+  return (nonDispatchArguments[position] as? IrConst?)?.value as? T?
 }
 
 internal fun <T> IrConst.valueAs(): T {
@@ -122,7 +124,7 @@ internal fun TargetProperty.generator(
   for (jsonQualifier in qualifiers) {
     val qualifierRawType = jsonQualifier.type.classOrNull!!.owner
     val retentionValue =
-      qualifierRawType.getAnnotation(FqName("kotlin.annotation.Retention"))?.getValueArgument(0)
+      qualifierRawType.getAnnotation(FqName("kotlin.annotation.Retention"))?.nonDispatchArguments[0]
         as IrGetEnumValue? ?: continue
     // TODO what about java qualifiers types?
     val retention = retentionValue.symbol.owner.name.identifier
