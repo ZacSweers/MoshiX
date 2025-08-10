@@ -37,12 +37,12 @@ lint = { id = "com.android.lint", version = "8.11.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.34.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.31.0" } # Always replaced by the local plugin
-spotless = { id = "com.diffplug.spotless", version = "7.1.0" }
+spotless = { id = "com.diffplug.spotless", version = "7.2.1" }
 
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 
-assertj = "org.assertj:assertj-core:3.27.3"
+assertj = "org.assertj:assertj-core:3.27.4"
 
 autoCommon = { module = "com.google.auto:auto-common", version = "1.2.2" }
 
