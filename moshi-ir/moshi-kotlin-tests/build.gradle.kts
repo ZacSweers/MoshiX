@@ -66,7 +66,7 @@ kotlin {
 
 dependencies {
   testImplementation("junit:junit:4.13.2")
-  testImplementation("com.google.truth:truth:1.4.4")
+  testImplementation("com.google.truth:truth:1.4.5")
   testImplementation(libs.moshi)
   testImplementation(kotlin("reflect"))
   testImplementation(project(":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module"))
