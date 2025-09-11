@@ -10,6 +10,7 @@ Changelog
 _2025-09-11_
 
 - Update to Kotlin `2.2.20`. This release requires `2.2.20` or later.
+- Build against KSP `2.2.20-2.0.2`.
 - Build against Gradle `9.0`.
 
 0.31.0
