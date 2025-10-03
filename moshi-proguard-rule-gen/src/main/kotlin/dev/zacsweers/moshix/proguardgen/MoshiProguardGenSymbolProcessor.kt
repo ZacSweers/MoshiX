@@ -18,6 +18,7 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.codegen.api.InternalMoshiCodegenApi
 import com.squareup.moshi.kotlin.codegen.api.ProguardConfig
+import java.lang.reflect.Type
 
 public class MoshiProguardGenSymbolProcessor(private val environment: SymbolProcessorEnvironment) :
   SymbolProcessor {
@@ -26,8 +27,7 @@ public class MoshiProguardGenSymbolProcessor(private val environment: SymbolProc
 
     private val JSON_CLASS_FQ_NAME = JsonClass::class.qualifiedName!!
     private val MOSHI_REFLECTIVE_NAME = Moshi::class.asClassName().reflectionName()
-    private val TYPE_ARRAY_REFLECTIVE_NAME =
-      "${java.lang.reflect.Type::class.asClassName().reflectionName()}[]"
+    private val TYPE_ARRAY_REFLECTIVE_NAME = "${Type::class.asClassName().reflectionName()}[]"
     private const val NESTED_SEALED_FQ_NAME = "dev.zacsweers.moshix.sealed.annotations.NestedSealed"
 
     /**
