@@ -79,6 +79,7 @@ include(
   ":moshi-sealed:runtime",
   ":moshi-sealed:sample",
   ":moshi-sealed:sealed-interfaces-samples:java",
+  ":moshix-runtime",
 )
 
 includeBuild("moshi-ir/moshi-gradle-plugin") {
