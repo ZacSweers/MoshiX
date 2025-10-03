@@ -66,15 +66,15 @@ class ObjectSerializationTest(type: Type) {
     // language=json
     val json =
       """
-     {
-       "name": "tacoFactory",
-       "returnType": { "type": "void" },
-       "parameters": {
-         "param1": { "type": "int" },
-         "param2": { "type": "boolean" }
+       {
+         "name": "tacoFactory",
+         "returnType": { "type": "void" },
+         "parameters": {
+           "param1": { "type": "int" },
+           "param2": { "type": "boolean" }
+         }
        }
-     }
-    """
+      """
         .trimIndent()
 
     val functionSpec = moshi.adapter<FunctionSpec>().fromJson(json)

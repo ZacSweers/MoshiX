@@ -63,9 +63,9 @@ class DualKotlinTest {
         .hasMessageThat()
         .isEqualTo(
           """
-              Required value 'b' missing at $
-              Required value 'c' missing at $
-              """
+          Required value 'b' missing at $
+          Required value 'c' missing at $
+          """
             .trimIndent()
         )
     }
@@ -119,9 +119,9 @@ class DualKotlinTest {
         .hasMessageThat()
         .isEqualTo(
           """
-              Non-null value 'a' was null at $.a
-              Non-null value 'b' was null at $.b
-              """
+          Non-null value 'a' was null at $.a
+          Non-null value 'b' was null at $.b
+          """
             .trimIndent()
         )
     }

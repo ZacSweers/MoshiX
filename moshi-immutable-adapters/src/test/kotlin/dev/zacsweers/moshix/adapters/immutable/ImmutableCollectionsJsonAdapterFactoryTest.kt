@@ -27,35 +27,35 @@ class ImmutableCollectionsJsonAdapterFactoryTest {
   // language=JSON
   private val json =
     """
-      {
-        "list": [1, 2, 3],
-        "set": [1, 2, 3],
-        "collection": [1, 2, 3],
-        "map": {
-          "a": 1,
-          "b": 2,
-          "c": 3
-        },
-        "nested": {
-          "a": [1, 2, 3],
-          "b": [1, 2, 3],
-          "c": [1, 2, 3]
-        },
-        "persistentList": [1, 2, 3],
-        "persistentSet": [1, 2, 3],
-        "persistentCollection": [1, 2, 3],
-        "persistentMap": {
-          "a": 1,
-          "b": 2,
-          "c": 3
-        },
-        "persistentNested": {
-          "a": [1, 2, 3],
-          "b": [1, 2, 3],
-          "c": [1, 2, 3]
-        }
+    {
+      "list": [1, 2, 3],
+      "set": [1, 2, 3],
+      "collection": [1, 2, 3],
+      "map": {
+        "a": 1,
+        "b": 2,
+        "c": 3
+      },
+      "nested": {
+        "a": [1, 2, 3],
+        "b": [1, 2, 3],
+        "c": [1, 2, 3]
+      },
+      "persistentList": [1, 2, 3],
+      "persistentSet": [1, 2, 3],
+      "persistentCollection": [1, 2, 3],
+      "persistentMap": {
+        "a": 1,
+        "b": 2,
+        "c": 3
+      },
+      "persistentNested": {
+        "a": [1, 2, 3],
+        "b": [1, 2, 3],
+        "c": [1, 2, 3]
       }
-        """
+    }
+      """
       .trimIndent()
 
   @Test
