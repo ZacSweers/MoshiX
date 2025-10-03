@@ -83,24 +83,24 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
             .isEqualTo(
               // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
               """
-                  # Conditionally keep this adapter for every possible nested subtype that uses it.
-                  -if class test.BaseType${'$'}TypeA
-                  -keep class test.BaseTypeJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
-                  -if class test.BaseType${'$'}TypeB
-                  -keep class test.BaseTypeJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
-                  -if class test.BaseType${'$'}TypeC
-                  -keep class test.BaseTypeJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
-                  -if class test.BaseType${'$'}TypeC${'$'}TypeCImpl
-                  -keep class test.BaseTypeJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
-                """
+                # Conditionally keep this adapter for every possible nested subtype that uses it.
+                -if class test.BaseType${'$'}TypeA
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+                -if class test.BaseType${'$'}TypeB
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+                -if class test.BaseType${'$'}TypeC
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+                -if class test.BaseType${'$'}TypeC${'$'}TypeCImpl
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+              """
                 .trimIndent()
             )
         else -> error("Unrecognized proguard file: $generatedFile")
@@ -150,16 +150,16 @@ class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
             .isEqualTo(
               // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
               """
-                  # Conditionally keep this adapter for every possible nested subtype that uses it.
-                  -if class test.Message${'$'}Success
-                  -keep class test.MessageJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
-                  -if class test.Message${'$'}Unknown
-                  -keep class test.MessageJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
-                """
+                # Conditionally keep this adapter for every possible nested subtype that uses it.
+                -if class test.Message${'$'}Success
+                -keep class test.MessageJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+                -if class test.Message${'$'}Unknown
+                -keep class test.MessageJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+              """
                 .trimIndent()
             )
         else -> error("Unrecognized proguard file: $generatedFile")
@@ -308,30 +308,30 @@ sealed class BaseType {
             .isEqualTo(
               // $ in multiline strings: https://youtrack.jetbrains.com/issue/KT-2425
               """
-                  -keepnames class test.BaseType
-                  -if class test.BaseType
-                  -keep class test.BaseTypeJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
+                -keepnames class test.BaseType
+                -if class test.BaseType
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
 
-                  # Conditionally keep this adapter for every possible nested subtype that uses it.
-                  -if class test.BaseType${'$'}TypeA
-                  -keep class test.BaseTypeJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
-                  -if class test.BaseType${'$'}TypeB
-                  -keep class test.BaseTypeJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
-                  -if class test.BaseType${'$'}TypeC
-                  -keep class test.BaseTypeJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
-                  -if class test.BaseType${'$'}TypeC${'$'}TypeCImpl
-                  -keep class test.BaseTypeJsonAdapter {
-                      public <init>(com.squareup.moshi.Moshi);
-                  }
-                """
+                # Conditionally keep this adapter for every possible nested subtype that uses it.
+                -if class test.BaseType${'$'}TypeA
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+                -if class test.BaseType${'$'}TypeB
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+                -if class test.BaseType${'$'}TypeC
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+                -if class test.BaseType${'$'}TypeC${'$'}TypeCImpl
+                -keep class test.BaseTypeJsonAdapter {
+                    public <init>(com.squareup.moshi.Moshi);
+                }
+              """
                 .trimIndent()
             )
         else -> error("Unrecognized proguard file: $generatedFile")
