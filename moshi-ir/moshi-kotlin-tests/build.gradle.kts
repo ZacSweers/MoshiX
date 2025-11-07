@@ -80,7 +80,6 @@ configurations.configureEach {
       .using(project(":moshi-ir:moshi-compiler-plugin"))
     substitute(module("dev.zacsweers.moshix:moshi-sealed-runtime"))
       .using(project(":moshi-sealed:runtime"))
-    substitute(module("dev.zacsweers.moshix:moshix-runtime"))
-      .using(project(":moshix-runtime"))
+    substitute(module("dev.zacsweers.moshix:moshix-runtime")).using(project(":moshix-runtime"))
   }
 }
