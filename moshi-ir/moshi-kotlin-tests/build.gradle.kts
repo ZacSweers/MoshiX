@@ -80,7 +80,7 @@ configurations.configureEach {
       .using(project(":moshi-ir:moshi-compiler-plugin"))
     substitute(module("dev.zacsweers.moshix:moshi-sealed-runtime"))
       .using(project(":moshi-sealed:runtime"))
-    substitute(module("dev.zacsweers.moshix:moshi-proguard-rule-gen"))
-      .using(project(":moshi-proguard-rule-gen"))
+    substitute(module("dev.zacsweers.moshix:moshix-runtime"))
+      .using(project(":moshix-runtime"))
   }
 }
