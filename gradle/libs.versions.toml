@@ -13,27 +13,27 @@
 # limitations under the License.
 
 [versions]
-agp = "8.10.1"
+agp = "8.13.0"
 autoService = "1.1.1"
 gjf = "1.17.0"
 incap = "1.0.0"
 jdk = "23"
 jvmTarget = "11"
-kotlin = "2.2.20"
+kotlin = "2.2.21"
 kotlinCompileTesting = "0.9.0"
 kotlinpoet = "2.2.0"
 ksp = "2.2.20-2.0.4"
 ktfmt = "0.59"
 moshi = "1.15.2"
-okhttp = "5.2.1"
+okhttp = "5.3.0"
 retrofit = "3.0.0"
 
 [plugins]
-dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
+dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
 kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.18.1" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-lint = { id = "com.android.lint", version = "8.11.0" }
+lint = { id = "com.android.lint", version = "8.13.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.34.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.32.0" } # Always replaced by the local plugin
