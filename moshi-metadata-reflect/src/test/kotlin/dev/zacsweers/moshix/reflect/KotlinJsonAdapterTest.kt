@@ -1037,7 +1037,8 @@ class KotlinJsonAdapterTest {
       |      ]
       |    }
       |  }
-      |}"""
+      |}
+      """
         .trimMargin()
     val value = NestedGenerics(mapOf("hello" to mapOf(1 to listOf(Box(" "), Box("world!")))))
     assertThat(adapter.fromJson(json)).isEqualTo(value)

@@ -1245,8 +1245,7 @@ class GeneratedAdaptersTest {
     assertThat(adapter.toJson(null)).isEqualTo("null")
   }
 
-  @JsonClass(generateAdapter = true)
-  data class HasCollectionOfPrimitives(val listOfInts: List<Int>)
+  @JsonClass(generateAdapter = true) data class HasCollectionOfPrimitives(val listOfInts: List<Int>)
 
   @Test
   fun hasCollectionOfPrimitives() {
