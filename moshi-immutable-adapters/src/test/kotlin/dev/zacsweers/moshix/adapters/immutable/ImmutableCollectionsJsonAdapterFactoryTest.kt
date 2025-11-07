@@ -55,7 +55,7 @@ class ImmutableCollectionsJsonAdapterFactoryTest {
         "c": [1, 2, 3]
       }
     }
-      """
+    """
       .trimIndent()
 
   @Test
