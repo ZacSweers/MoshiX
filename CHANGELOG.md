@@ -7,6 +7,7 @@ Changelog
 - Update moshi-ir Gradle plugin to target Kotlin `2.0`.
 - Build against Gradle `9.1`.
 - Raise min Gradle version to `8.11`.
+- Build against KSP 2.3.2. KSP2 is no longer tested or supported.
 
 0.32.0
 ------
