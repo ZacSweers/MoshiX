@@ -71,7 +71,6 @@ include(
   ":moshi-ir:moshi-kotlin-tests",
   ":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module",
   ":moshi-metadata-reflect",
-  ":moshi-proguard-rule-gen",
   ":moshi-sealed:codegen",
   ":moshi-sealed:java-sealed-reflect",
   ":moshi-sealed:metadata-reflect",
