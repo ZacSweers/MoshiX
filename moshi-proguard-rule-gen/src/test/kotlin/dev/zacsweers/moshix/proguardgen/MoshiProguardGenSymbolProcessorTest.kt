@@ -335,7 +335,7 @@ sealed class BaseType {
     KotlinCompilation().apply {
       sources = sourceFiles.toList()
       inheritClassPath = true
-      configureKsp(true) { symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider() }
+      configureKsp { symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider() }
       kotlincArguments += "-Xskip-prerelease-check"
       block()
     }

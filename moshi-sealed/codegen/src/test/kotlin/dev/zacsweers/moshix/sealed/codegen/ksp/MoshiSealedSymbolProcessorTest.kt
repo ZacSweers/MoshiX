@@ -536,7 +536,7 @@ class MoshiSealedSymbolProcessorProviderTest {
     KotlinCompilation().apply {
       sources = sourceFiles.toList()
       inheritClassPath = true
-      configureKsp(true) { symbolProcessorProviders += MoshiSealedSymbolProcessorProvider() }
+      configureKsp { symbolProcessorProviders += MoshiSealedSymbolProcessorProvider() }
       kotlincArguments += "-Xskip-prerelease-check"
     }
 
