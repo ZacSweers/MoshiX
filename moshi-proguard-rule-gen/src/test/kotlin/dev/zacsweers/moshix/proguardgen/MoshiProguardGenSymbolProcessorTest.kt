@@ -28,20 +28,9 @@ import dev.zacsweers.moshix.proguardgen.MoshiProguardGenSymbolProcessor.Companio
 import java.io.File
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
 @OptIn(ExperimentalCompilerApi::class)
-@RunWith(Parameterized::class)
-class MoshiProguardGenSymbolProcessorTest(private val useKSP2: Boolean) {
-
-  companion object {
-    @JvmStatic
-    @Parameterized.Parameters(name = "useKSP2={0}")
-    fun data(): Collection<Array<Any>> {
-      return listOf(arrayOf(true), arrayOf(false))
-    }
-  }
+class MoshiProguardGenSymbolProcessorTest {
 
   @Test
   fun `standard test with only sealed enabled`() {
@@ -346,12 +335,7 @@ sealed class BaseType {
     KotlinCompilation().apply {
       sources = sourceFiles.toList()
       inheritClassPath = true
-      if (!useKSP2) {
-        languageVersion = "1.9"
-      }
-      configureKsp(useKSP2) {
-        symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider()
-      }
+      configureKsp(true) { symbolProcessorProviders += MoshiProguardGenSymbolProcessor.Provider() }
       kotlincArguments += "-Xskip-prerelease-check"
       block()
     }
