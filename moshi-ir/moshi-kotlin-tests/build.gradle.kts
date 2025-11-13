@@ -38,14 +38,19 @@ kotlin {
   }
 }
 
+val r8Test = gradle.startParameter.taskNames.any { it.contains("testR8", ignoreCase = true) }
+
 dependencies {
   testImplementation("junit:junit:4.13.2")
   testImplementation("com.google.truth:truth:1.4.5")
   testImplementation(libs.moshi)
-  testImplementation(kotlin("reflect"))
   testImplementation(project(":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module"))
   testImplementation(project(":moshi-adapters"))
-  testImplementation(libs.moshi.kotlin)
+
+  if (!r8Test) {
+    testImplementation(kotlin("reflect"))
+    testImplementation(libs.moshi.kotlin)
+  }
 }
 
 configurations.configureEach {
@@ -201,15 +206,14 @@ kotlin.target {
       }
     }
 
-  val r8Test =
-    tasks.register<Test>("testR8") {
-      group = VERIFICATION_GROUP
-      description = "Runs the unit tests with R8-processed classes."
+  tasks.register<Test>("testR8") {
+    group = VERIFICATION_GROUP
+    description = "Runs the unit tests with R8-processed classes."
 
-      dependsOn(r8Task)
-      classpath = project.files(r8Task.map { it.r8Jar })
-      testClassesDirs = project.files(testDependencyFiles)
-    }
+    dependsOn(r8Task)
+    classpath = project.files(r8Task.map { it.r8Jar })
+    testClassesDirs = project.files(testDependencyFiles)
 
-  tasks.named("check") { dependsOn(r8Test) }
+    systemProperty("moshi.r8Test", "true")
+  }
 }

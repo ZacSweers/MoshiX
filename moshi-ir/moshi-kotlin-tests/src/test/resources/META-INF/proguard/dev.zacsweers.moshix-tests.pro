@@ -60,3 +60,7 @@
 
 # An annotation used for build tooling, won't be directly accessed.
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+
+-keep @com.google.errorprone.annotations.Keep class * {
+  *** *(...);
+}
