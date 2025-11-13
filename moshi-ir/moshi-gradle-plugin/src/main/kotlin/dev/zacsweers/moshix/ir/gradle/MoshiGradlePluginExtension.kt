@@ -28,8 +28,8 @@ abstract class MoshiPluginExtension @Inject constructor(objects: ObjectFactory) 
   val applyMoshiDependency: Property<Boolean> =
     objects.property(Boolean::class.java).convention(true)
   /**
-   * Set this property to false to disable auto-application of the MoshiX runtime dependency. Enabled by
-   * default.
+   * Set this property to false to disable auto-application of the MoshiX runtime dependency.
+   * Enabled by default.
    */
   val applyMoshiXDependency: Property<Boolean> =
     objects.property(Boolean::class.java).convention(true)
