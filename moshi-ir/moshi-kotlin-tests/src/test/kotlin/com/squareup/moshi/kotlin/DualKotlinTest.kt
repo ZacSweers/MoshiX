@@ -16,14 +16,10 @@
 package com.squareup.moshi.kotlin
 
 import com.google.common.truth.Truth.assertThat
-import com.google.errorprone.annotations.Keep
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.Types

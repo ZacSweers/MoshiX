@@ -16,7 +16,6 @@
 package com.squareup.moshi.kotlin.codegen
 
 import com.google.common.truth.Truth.assertThat
-import com.google.errorprone.annotations.Keep
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
@@ -50,5 +49,5 @@ class MixingReflectAndCodeGenTest {
 
   @JsonClass(generateAdapter = true) class UsesGeneratedAdapter(var a: Int, var b: Int)
 
-  @JsonClass(generateAdapter = false) @Keep class UsesReflectionAdapter(var a: Int, var b: Int)
+  @JsonClass(generateAdapter = false) class UsesReflectionAdapter(var a: Int, var b: Int)
 }
