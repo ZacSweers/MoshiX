@@ -37,8 +37,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Build project
+      - name: Check project
         run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} --quiet
+
+      - name: Check R8 tests
+        run: ./gradlew testR8 --quiet
 
   publish-snapshot:
     needs: 'build'

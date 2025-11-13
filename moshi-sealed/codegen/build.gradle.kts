@@ -43,7 +43,6 @@ tasks.test {
 
 dependencies {
   implementation(libs.autoService)
-  implementation(project(":moshi-proguard-rule-gen"))
   ksp(libs.autoService.ksp)
   compileOnly(libs.ksp.api)
   compileOnly(libs.kotlin.compilerEmbeddable)
