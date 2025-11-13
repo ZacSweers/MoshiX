@@ -22,7 +22,7 @@ import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.junit.Test
 
-class MixingReflectAndCodeGen {
+class MixingReflectAndCodeGenTest {
   @Test
   fun mixingReflectionAndCodegen() {
     val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
@@ -30,10 +30,10 @@ class MixingReflectAndCodeGen {
     val reflectionAdapter = moshi.adapter<UsesReflectionAdapter>()
 
     assertThat(generatedAdapter.toString())
-      .isEqualTo("GeneratedJsonAdapter(MixingReflectAndCodeGen.UsesGeneratedAdapter).nullSafe()")
+      .isEqualTo("GeneratedJsonAdapter(MixingReflectAndCodeGenTest.UsesGeneratedAdapter).nullSafe()")
     assertThat(reflectionAdapter.toString())
       .isEqualTo(
-        "KotlinJsonAdapter(com.squareup.moshi.kotlin.codegen.MixingReflectAndCodeGen" +
+        "KotlinJsonAdapter(com.squareup.moshi.kotlin.codegen.MixingReflectAndCodeGenTest" +
           ".UsesReflectionAdapter).nullSafe()"
       )
   }
