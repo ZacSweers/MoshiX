@@ -59,6 +59,11 @@ dependencyResolutionManagement {
         includeGroupByRegex("org\\.jetbrains.*")
       }
     }
+    // R8 releases repository for shrinker testing
+    maven("https://storage.googleapis.com/r8-releases/raw/") {
+      name = "R8-Releases"
+      content { includeModule("com.android.tools", "r8") }
+    }
   }
 }
 
