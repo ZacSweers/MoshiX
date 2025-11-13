@@ -54,6 +54,14 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       )
     }
 
+    val applyMoshiXDependency = extension.applyMoshiXDependency.get()
+    if (applyMoshiXDependency) {
+      project.dependencies.add(
+        kotlinCompilation.implementationConfigurationName,
+        "dev.zacsweers.moshix:moshix-runtime:$VERSION",
+      )
+    }
+
     val enableSealed = extension.enableSealed.get()
     if (enableSealed) {
       project.dependencies.add(
