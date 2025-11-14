@@ -28,13 +28,10 @@ extension.
 The Gradle plugin is published to Maven Central, so ensure you have `mavenCentral()` visible to your buildscript 
 classpath.
 
-MoshiX generates proguard rules for generated adapters as well, so the KSP plugin must also be on your project's buildscript classpath
-
 ```gradle
 plugins {
   kotlin("jvm")
   id("dev.zacsweers.moshix") version "x.y.z"
-  id("com.google.devtools.ksp") version "x.y.z"
 }
 
 moshi {
@@ -44,8 +41,6 @@ moshi {
   applyMoshiDependency.set(false)
 }
 ```
-
-If you don't want/need proguard rule gen, you can remove KSP and disable it via the `moshix.generateProguardRules` boolean gradle property.
 
 Snapshots of the development version are available in [Sonatype's snapshots repository][snapshots].
 
