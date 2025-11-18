@@ -66,7 +66,7 @@ configurations.configureEach {
 // R8 test infrastructure
 val r8Configuration: Configuration by configurations.creating
 
-dependencies { r8Configuration("com.android.tools:r8:8.11.18") }
+dependencies { r8Configuration("com.android.tools:r8:8.13.17") }
 
 abstract class BaseR8Task : JavaExec() {
   @get:InputFile
