@@ -4,11 +4,17 @@ Changelog
 **Unreleased**
 --------------
 
+0.33.0
+------
+
+_2025-11-13_
+
+- Remove `moshi-proguard-rule-gen`. moshi-ir now includes a sourceless runtime artifact with embedded proguard rules that cover the same functionality. This also means that KSP is no longer required to use moshi-ir in any capacity 🎉.
 - Update moshi-ir Gradle plugin to target Kotlin `2.0`.
 - Build against Gradle `9.1`.
 - Raise min Gradle version to `8.11`.
 - Update to Kotlin `2.2.21`.
-- Build against KSP 2.3.2. KSP2 is no longer tested or supported.
+- [moshi-sealed KSP] Build against KSP `2.3.2`. KSP1 is no longer tested or supported, only KSP2 is supported.
 
 0.32.0
 ------

@@ -59,6 +59,11 @@ dependencyResolutionManagement {
         includeGroupByRegex("org\\.jetbrains.*")
       }
     }
+    // R8 releases repository for shrinker testing
+    maven("https://storage.googleapis.com/r8-releases/raw/") {
+      name = "R8-Releases"
+      content { includeModule("com.android.tools", "r8") }
+    }
   }
 }
 
@@ -71,7 +76,6 @@ include(
   ":moshi-ir:moshi-kotlin-tests",
   ":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module",
   ":moshi-metadata-reflect",
-  ":moshi-proguard-rule-gen",
   ":moshi-sealed:codegen",
   ":moshi-sealed:java-sealed-reflect",
   ":moshi-sealed:metadata-reflect",
@@ -79,6 +83,7 @@ include(
   ":moshi-sealed:runtime",
   ":moshi-sealed:sample",
   ":moshi-sealed:sealed-interfaces-samples:java",
+  ":moshix-runtime",
 )
 
 includeBuild("moshi-ir/moshi-gradle-plugin") {

@@ -142,7 +142,6 @@ dependencies {
   dokka(projects.moshiImmutableAdapters)
   dokka(projects.moshiIr.moshiCompilerPlugin)
   dokka(projects.moshiMetadataReflect)
-  dokka(projects.moshiProguardRuleGen)
   dokka(projects.moshiSealed.codegen)
   dokka(projects.moshiSealed.javaSealedReflect)
   dokka(projects.moshiSealed.metadataReflect)
