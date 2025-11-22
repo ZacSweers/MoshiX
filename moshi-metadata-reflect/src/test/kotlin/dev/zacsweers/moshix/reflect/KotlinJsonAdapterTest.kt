@@ -742,7 +742,7 @@ class KotlinJsonAdapterTest {
       assertThat(e)
         .hasMessageThat()
         .contains(
-          "Cannot serialize local class " +
+          "Cannot serialize local class or object expression " +
             "dev.zacsweers.moshix.reflect.KotlinJsonAdapterTest\$localClassesNotSupported\$LocalClass"
         )
     }
