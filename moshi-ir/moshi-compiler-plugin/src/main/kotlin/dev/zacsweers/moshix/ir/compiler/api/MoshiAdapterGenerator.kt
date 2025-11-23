@@ -517,77 +517,110 @@ internal class MoshiAdapterGenerator(
             )
 
             val standardConstructor = target.constructor.irConstructor.symbol
+
             val constructorInvocationExpression =
               if (useDefaultsConstructor) {
-                // We can't get the synthetic constructor from here but we _can_ make a fake
-                // one to compile against
-                val defaultsConstructor =
-                  target.constructor.irConstructor
-                    .deepCopyWithSymbols(target.irClass)
-                    .apply {
-                      parent = target.irClass
-                      repeat(maskCount) {
-                        addValueParameter("mask$it", pluginContext.irBuiltIns.intType)
-                      }
-                      addValueParameter(
-                        "marker",
-                        irType(ClassId.fromString("kotlin/jvm/internal/DefaultConstructorMarker")),
-                      )
-                    }
-                    .symbol
+                if (target.irClass.isValue) {
+                  // Value class with defaults - use conditional constructor invocation
+                  // Value classes only have a single parameter, so we can branch on whether
+                  // the value was present in the JSON (tracked via bitmask)
+                  val parameterComponent =
+                    components.filterIsInstance<ParameterComponent>().single()
+                  check(parameterComponent is ParameterProperty) {
+                    "Value class parameter must be a ParameterProperty"
+                  }
+                  val property = parameterComponent.property
+                  val localVar = localVars.getValue(property.localName)
 
-                // If there are any transient/ignored properties they _must_ use the defaults
-                // constructor
-                val hasIgnoredProperties =
-                  components
-                    .filterIsInstance<ParameterComponent>()
-                    .filterIsInstance<PropertyComponent>()
-                    .any { it.property.isTransientOrIgnored }
-
-                if (hasIgnoredProperties) {
-                  constructorCall(
-                    defaultsConstructor,
-                    localVars,
-                    components,
-                    bitMasks,
-                    useDefaultsConstructor = true,
-                  )
-                } else {
-                  // Happy path - all parameters with defaults are set
-                  val compositeExpression =
-                    bitMasks
-                      .withIndex()
-                      .asSequence()
-                      .map { (index, maskName) ->
-                        irEquals(irGet(maskName), irInt(maskAllSetValues[index]))
-                      }
-                      .joinToIrAnd(this, pluginContext)
+                  // Check the bitmask to see if the value was present in the JSON
+                  // If the mask is at its golden value (0), the value was present
+                  val mask = bitMasks[0]
+                  val wasPresent = irEquals(irGet(mask), irInt(maskAllSetValues[0]))
 
                   irIfThenElse(
                     type = target.irType,
-                    condition = compositeExpression,
-                    // Golden masks - invoke the standard constructor
-                    thenPart =
-                      constructorCall(
-                        standardConstructor,
-                        localVars,
-                        components,
-                        bitMasks,
-                        useDefaultsConstructor = false,
-                      ),
-                    // Not all set, invoke the defaults constructor
+                    condition = wasPresent,
+                    // Value was present - invoke constructor with the value
+                    thenPart = irCall(standardConstructor).apply { arguments[0] = irGet(localVar) },
+                    // Value was absent - invoke constructor without arguments (uses default)
                     elsePart =
-                      constructorCall(
-                        defaultsConstructor,
-                        localVars,
-                        components,
-                        bitMasks,
-                        useDefaultsConstructor = true,
-                      ),
+                      irCall(standardConstructor).apply {
+                        // Don't set any arguments - this invokes the no-arg constructor
+                        // which will use the default value
+                      },
                   )
+                } else {
+                  // Regular class with defaults - use the defaults constructor approach
+                  // We can't get the synthetic constructor from here but we _can_ make a fake
+                  // one to compile against
+                  val defaultsConstructor =
+                    target.constructor.irConstructor
+                      .deepCopyWithSymbols(target.irClass)
+                      .apply {
+                        parent = target.irClass
+                        repeat(maskCount) {
+                          addValueParameter("mask$it", pluginContext.irBuiltIns.intType)
+                        }
+                        addValueParameter(
+                          "marker",
+                          irType(ClassId.fromString("kotlin/jvm/internal/DefaultConstructorMarker")),
+                        )
+                      }
+                      .symbol
+
+                  // If there are any transient/ignored properties they _must_ use the defaults
+                  // constructor
+                  val hasIgnoredProperties =
+                    components
+                      .filterIsInstance<ParameterComponent>()
+                      .filterIsInstance<PropertyComponent>()
+                      .any { it.property.isTransientOrIgnored }
+
+                  if (hasIgnoredProperties) {
+                    constructorCall(
+                      defaultsConstructor,
+                      localVars,
+                      components,
+                      bitMasks,
+                      useDefaultsConstructor = true,
+                    )
+                  } else {
+                    // Happy path - all parameters with defaults are set
+                    val compositeExpression =
+                      bitMasks
+                        .withIndex()
+                        .asSequence()
+                        .map { (index, maskName) ->
+                          irEquals(irGet(maskName), irInt(maskAllSetValues[index]))
+                        }
+                        .joinToIrAnd(this, pluginContext)
+
+                    irIfThenElse(
+                      type = target.irType,
+                      condition = compositeExpression,
+                      // Golden masks - invoke the standard constructor
+                      thenPart =
+                        constructorCall(
+                          standardConstructor,
+                          localVars,
+                          components,
+                          bitMasks,
+                          useDefaultsConstructor = false,
+                        ),
+                      // Not all set, invoke the defaults constructor
+                      elsePart =
+                        constructorCall(
+                          defaultsConstructor,
+                          localVars,
+                          components,
+                          bitMasks,
+                          useDefaultsConstructor = true,
+                        ),
+                    )
+                  }
                 }
               } else {
-                // Invoke the standard constructor
+                // Invoke the standard constructor (no defaults or value class without defaults)
                 constructorCall(
                   standardConstructor,
                   localVars,

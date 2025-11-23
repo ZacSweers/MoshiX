@@ -105,13 +105,6 @@ internal fun targetType(
         return null
       }
 
-  if (type.isValue && constructor.parameters.values.first().hasDefault) {
-    logger.error(constructor.irConstructor) {
-      "value classes with default values are not currently supported in Moshi code gen"
-    }
-    return null
-  }
-
   if (
     constructor.visibility != DescriptorVisibilities.INTERNAL &&
       constructor.visibility != DescriptorVisibilities.PUBLIC

@@ -4,6 +4,12 @@ Changelog
 **Unreleased**
 --------------
 
+### Full value classes support
+
+This release fully supports encoding/decoding of value classes in both `MetadataKotlinJsonAdapterFactory` and moshi-ir. Note that MoshiX does not propagate inlining to JSON. For example: `@JvmInline value class Color(val raw: Int)` is serialized to `{"raw": 12345}`.
+
+### Misc
+
 - Align `MetadataKotlinJsonAdapterFactory` with the recently upstreamed implementation in Moshi.
 
 0.33.0
