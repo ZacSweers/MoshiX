@@ -4,6 +4,8 @@ Changelog
 **Unreleased**
 --------------
 
+- Align `MetadataKotlinJsonAdapterFactory` with the recently upstreamed implementation in Moshi.
+
 0.33.0
 ------
 
