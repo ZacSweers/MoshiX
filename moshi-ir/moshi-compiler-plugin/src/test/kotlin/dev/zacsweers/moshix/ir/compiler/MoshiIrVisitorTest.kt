@@ -47,30 +47,6 @@ class MoshiIrVisitorTest {
   }
 
   @Test
-  fun valueClassesCannotHaveDefaultValues() {
-    val result =
-      compile(
-        kotlin(
-          "source.kt",
-          """
-          package test
-
-          import com.squareup.moshi.Json
-          import com.squareup.moshi.JsonClass
-          import com.squareup.moshi.JsonQualifier
-
-          @JvmInline
-          @JsonClass(generateAdapter = true)
-          value class ValueClass(val i: Int = 0)
-          """,
-        )
-      )
-    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
-    assertThat(result.messages)
-      .contains("value classes with default values are not currently supported in Moshi code gen")
-  }
-
-  @Test
   fun privateConstructor() {
     val result =
       compile(

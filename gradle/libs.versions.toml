@@ -22,10 +22,10 @@ jvmTarget = "11"
 kotlin = "2.3.0-RC"
 kotlinCompileTesting = "0.12.0-alpha01"
 kotlinpoet = "2.2.0"
-ksp = "2.3.2"
+ksp = "2.3.3"
 ktfmt = "0.59"
 moshi = "1.15.2"
-okhttp = "5.3.1"
+okhttp = "5.3.2"
 retrofit = "3.0.0"
 
 [plugins]
@@ -37,7 +37,7 @@ lint = { id = "com.android.lint", version = "8.13.1" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.35.0" }
 mavenShadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
 moshix = { id = "dev.zacsweers.moshix", version = "0.33.0" } # Always replaced by the local plugin
-spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
 
 [libraries]
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
