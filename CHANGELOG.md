@@ -4,6 +4,18 @@ Changelog
 **Unreleased**
 --------------
 
+0.34.1
+------
+
+_2025-11-24_
+
+- Add `MoshiComponentRegistrar.pluginId` for forward compatibility with Kotlin `2.3.0`'s new API.
+
+0.34.0
+------
+
+_2025-11-22_
+
 ### Full value classes support
 
 This release fully supports encoding/decoding of value classes in both `MetadataKotlinJsonAdapterFactory` and moshi-ir. Note that MoshiX does not propagate inlining to JSON. For example: `@JvmInline value class Color(val raw: Int)` is serialized to `{"raw": 12345}`.
