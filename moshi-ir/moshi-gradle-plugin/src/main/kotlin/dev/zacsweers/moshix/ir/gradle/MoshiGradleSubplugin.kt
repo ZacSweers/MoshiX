@@ -49,7 +49,7 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     val applyMoshiDependency = extension.applyMoshiDependency.get()
     if (applyMoshiDependency) {
       project.dependencies.add(
-        kotlinCompilation.implementationConfigurationName,
+        kotlinCompilation.defaultSourceSet.implementationConfigurationName,
         "com.squareup.moshi:moshi:1.13.0",
       )
     }
@@ -57,7 +57,7 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     val applyMoshiXDependency = extension.applyMoshiXDependency.get()
     if (applyMoshiXDependency) {
       project.dependencies.add(
-        kotlinCompilation.implementationConfigurationName,
+        kotlinCompilation.defaultSourceSet.implementationConfigurationName,
         "dev.zacsweers.moshix:moshix-runtime:$VERSION",
       )
     }
@@ -65,7 +65,7 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     val enableSealed = extension.enableSealed.get()
     if (enableSealed) {
       project.dependencies.add(
-        kotlinCompilation.implementationConfigurationName,
+        kotlinCompilation.defaultSourceSet.implementationConfigurationName,
         "dev.zacsweers.moshix:moshi-sealed-runtime:$VERSION",
       )
     }
