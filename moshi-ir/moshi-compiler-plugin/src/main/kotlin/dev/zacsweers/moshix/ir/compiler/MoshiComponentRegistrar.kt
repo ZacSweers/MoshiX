@@ -26,7 +26,7 @@ import org.jetbrains.kotlin.name.ClassId
 @AutoService(CompilerPluginRegistrar::class)
 public class MoshiComponentRegistrar : CompilerPluginRegistrar() {
 
-  public val pluginId: String = "dev.zacsweers.moshix.compiler"
+  override val pluginId: String = "dev.zacsweers.moshix.compiler"
 
   override val supportsK2: Boolean = true
 
