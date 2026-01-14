@@ -4,7 +4,14 @@ Changelog
 **Unreleased**
 --------------
 
+0.34.2
+------
+
+_2026-01-13_
+
 - **Fix**: Avoid usage of `Executable` to support Android API <26.
+- Build against Kotlin `2.3.0`.
+- Build against KSP `2.3.4`.
 
 0.34.1
 ------

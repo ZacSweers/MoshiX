@@ -1,12 +1,16 @@
 Releasing
 =========
 
-1. Change the version in `gradle.properties` to a non-SNAPSHOT version.
-    - Note: do this in both the top-level file and `moshi-ir/moshi-gradle-plugin`
-2. Update the `CHANGELOG.md` for the impending release.
-3. `git commit -am "Prepare for release X.Y.Z."` (where X.Y.Z is the new version)
-4. `git tag -a X.Y.Z -m "Version X.Y.Z"` (where X.Y.Z is the new version)
-5. `./publish.sh`
-6. Update the `gradle.properties` to the next SNAPSHOT version.
-7. `git commit -am "Prepare next development version."`
-8. `git push && git push --tags`
+1. Update the `CHANGELOG.md` for the impending release.
+2. Run `./release.sh`. This will:
+    - Automatically determine the new version from CHANGELOG.md
+    - Update all `gradle.properties` files with the release version
+    - Commit and tag the release
+    - Run `./publish.sh`
+    - Update to the next SNAPSHOT version
+    - Commit and push everything
+
+The script accepts an optional version type argument:
+- `./release.sh` - defaults to `--patch` (e.g., 0.34.2 -> 0.34.3)
+- `./release.sh --minor` - bumps minor version (e.g., 0.34.2 -> 0.35.0)
+- `./release.sh --major` - bumps major version (e.g., 0.34.2 -> 1.0.0)
