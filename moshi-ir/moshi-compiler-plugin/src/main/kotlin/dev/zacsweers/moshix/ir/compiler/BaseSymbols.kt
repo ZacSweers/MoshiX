@@ -54,7 +54,8 @@ internal open class BaseSymbols(
 
   val emptySet by lazy {
     pluginContext
-      .referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("emptySet")))
+      .finderForBuiltins()
+      .findFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("emptySet")))
       .first()
   }
 
@@ -66,7 +67,8 @@ internal open class BaseSymbols(
 
   val setOfVararg by lazy {
     pluginContext
-      .referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("setOf")))
+      .finderForBuiltins()
+      .findFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("setOf")))
       .first {
         it.owner.nonDispatchParameters.size == 1 &&
           it.owner.nonDispatchParameters[0].varargElementType != null
@@ -75,7 +77,8 @@ internal open class BaseSymbols(
 
   val setOfSingleton by lazy {
     pluginContext
-      .referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("setOf")))
+      .finderForBuiltins()
+      .findFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("setOf")))
       .first {
         it.owner.nonDispatchParameters.size == 1 &&
           it.owner.nonDispatchParameters[0].varargElementType == null
@@ -84,7 +87,8 @@ internal open class BaseSymbols(
 
   val setPlus by lazy {
     pluginContext
-      .referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("plus")))
+      .finderForBuiltins()
+      .findFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("plus")))
       .single {
         val owner = it.owner
         owner.nonDispatchParameters.firstOrNull()?.type?.classFqName ==
@@ -109,7 +113,8 @@ internal open class BaseSymbols(
 
   val iterableJoinToString by lazy {
     pluginContext
-      .referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("joinToString")))
+      .finderForBuiltins()
+      .findFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("joinToString")))
       .single {
         it.owner.parameters
           .firstOrNull { it.kind == IrParameterKind.ExtensionReceiver }
