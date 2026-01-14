@@ -4,6 +4,8 @@ Changelog
 **Unreleased**
 --------------
 
+- **Fix**: Avoid usage of `Executable` to support Android API <26.
+
 0.34.1
 ------
 
