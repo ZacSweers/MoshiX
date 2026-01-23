@@ -4,6 +4,14 @@ Changelog
 **Unreleased**
 --------------
 
+0.34.3
+------
+
+_2026-01-23_
+
+- **Fix**: Don't depend on kotlinpoet in `moshi-sealed-reflect`.
+- Build against Gradle `9.3.0`.
+
 0.34.2
 ------
 
