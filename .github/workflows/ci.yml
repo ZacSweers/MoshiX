@@ -43,6 +43,9 @@ jobs:
       - name: Check R8 tests
         run: ./gradlew testR8 --quiet
 
+      - name: Build Health
+        run: ./gradlew buildHealth --quiet
+
   publish-snapshot:
     needs: 'build'
     name: 'Publish snapshot (main only)'

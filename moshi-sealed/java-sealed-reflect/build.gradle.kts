@@ -20,8 +20,7 @@ plugins {
 }
 
 dependencies {
+  api(libs.moshi)
   implementation(project(":moshi-sealed:runtime"))
   implementation(libs.moshi.adapters)
-  testImplementation(libs.junit)
-  testImplementation(libs.truth)
 }

@@ -30,6 +30,15 @@ pluginManagement {
     }
     gradlePluginPortal()
   }
+  plugins {
+    id("org.jetbrains.kotlin.jvm") version "2.3.0"
+    id("com.autonomousapps.build-health") version "3.5.1"
+  }
+}
+
+plugins {
+  id("org.jetbrains.kotlin.jvm") apply false
+  id("com.autonomousapps.build-health")
 }
 
 dependencyResolutionManagement {
@@ -65,6 +74,11 @@ dependencyResolutionManagement {
       content { includeModule("com.android.tools", "r8") }
     }
   }
+}
+
+dependencyAnalysis {
+  reporting { printBuildHealth(true) }
+  issues { all { onAny { severity("fail") } } }
 }
 
 rootProject.name = "moshix-root"
