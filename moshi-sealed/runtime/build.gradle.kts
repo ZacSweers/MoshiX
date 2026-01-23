@@ -20,7 +20,7 @@ plugins {
 }
 
 dependencies {
-  api(libs.moshi.adapters)
+  implementation(libs.moshi.adapters)
   api(libs.moshi)
 
   testImplementation(libs.junit)

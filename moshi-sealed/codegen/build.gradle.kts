@@ -42,25 +42,22 @@ tasks.test {
 }
 
 dependencies {
-  implementation(libs.autoService)
+  compileOnly(libs.autoService)
   ksp(libs.autoService.ksp)
   compileOnly(libs.ksp.api)
   compileOnly(libs.kotlin.compilerEmbeddable)
 
-  implementation(libs.autoCommon)
   implementation(libs.kotlinpoet)
-  implementation(libs.kotlinpoet.metadata)
   implementation(libs.kotlinpoet.ksp)
   implementation(libs.moshi.adapters)
   implementation(libs.moshi)
   implementation(project(":moshi-sealed:runtime"))
 
+  runtimeOnly(libs.kotlin.metadata)
+
   testImplementation(libs.truth)
   testImplementation(libs.junit)
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.kotlinCompileTesting.ksp)
-  testImplementation(libs.kotlin.compilerEmbeddable)
-  testImplementation(libs.ksp)
-  testImplementation(libs.ksp.aa.embeddable)
-  testImplementation(libs.ksp.commonDeps)
+  testRuntimeOnly(libs.ksp.aa.embeddable)
 }

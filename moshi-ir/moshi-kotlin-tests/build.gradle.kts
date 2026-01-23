@@ -41,15 +41,15 @@ kotlin {
 val r8Test = gradle.startParameter.taskNames.any { it.contains("testR8", ignoreCase = true) }
 
 dependencies {
+  testImplementation(libs.moshi.adapters)
   testImplementation("junit:junit:4.13.2")
   testImplementation("com.google.truth:truth:1.4.5")
-  testImplementation(libs.moshi)
   testImplementation(project(":moshi-ir:moshi-kotlin-tests:extra-moshi-test-module"))
   testImplementation(project(":moshi-adapters"))
 
   if (!r8Test) {
     testImplementation(kotlin("reflect"))
-    testImplementation(libs.moshi.kotlin)
+    testRuntimeOnly(libs.moshi.kotlin)
   }
 }
 

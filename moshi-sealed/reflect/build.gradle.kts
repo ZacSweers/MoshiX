@@ -20,9 +20,8 @@ plugins {
 }
 
 dependencies {
-  implementation(project(":moshi-sealed:runtime"))
   api(libs.moshi)
-  api(libs.moshi.adapters)
-  implementation(libs.kotlinpoet)
+  implementation(project(":moshi-sealed:runtime"))
+  implementation(libs.moshi.adapters)
   implementation(libs.kotlin.reflect)
 }

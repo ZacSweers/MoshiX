@@ -34,18 +34,18 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
+  implementation(libs.moshi)
+  ksp(libs.autoService.ksp)
+
   compileOnly(libs.kotlin.stdlib)
   compileOnly(libs.kotlin.compilerEmbeddable)
-  implementation(libs.autoService)
-  implementation(libs.moshi)
-  implementation(libs.kotlinpoet)
-  implementation(libs.moshi.kotlinCodegen)
-  ksp(libs.autoService.ksp)
+  compileOnly(libs.autoService)
+  runtimeOnly(libs.moshi.kotlinCodegen)
 
   testImplementation(libs.kotlin.reflect)
   testImplementation(libs.kotlin.compilerEmbeddable)
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.junit)
   testImplementation(libs.truth)
-  testImplementation(project(":moshi-sealed:runtime"))
+  testRuntimeOnly(project(":moshi-sealed:runtime"))
 }
