@@ -40,6 +40,15 @@ kotlin {
 
 val r8Test = gradle.startParameter.taskNames.any { it.contains("testR8", ignoreCase = true) }
 
+dependencyAnalysis {
+  issues {
+    onUnusedDependencies {
+      // The compiler plugin adds this as a convenience to the user, but it is not used here
+      exclude(libs.moshi)
+    }
+  }
+}
+
 dependencies {
   testImplementation(libs.moshi.adapters)
   testImplementation("junit:junit:4.13.2")
