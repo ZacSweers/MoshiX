@@ -28,8 +28,9 @@ tasks.compileTestKotlin {
 }
 
 dependencies {
+  api(libs.moshi)
   implementation(libs.kotlin.metadata)
-  implementation(libs.moshi)
+
   kspTest(libs.moshi.codegen)
   testImplementation(libs.assertj)
   testImplementation(libs.junit)

@@ -4,6 +4,30 @@ Changelog
 **Unreleased**
 --------------
 
+0.34.4
+------
+
+_2026-01-24_
+
+- **Fix**: Mark the `moshi-adapters` dependency as an `api` dependency in moshi-sealed-runtime again.
+
+0.34.3
+------
+
+_2026-01-23_
+
+- **Fix**: Don't depend on kotlinpoet in `moshi-sealed-reflect`.
+- Build against Gradle `9.3.0`.
+
+0.34.2
+------
+
+_2026-01-13_
+
+- **Fix**: Avoid usage of `Executable` to support Android API <26.
+- Build against Kotlin `2.3.0`.
+- Build against KSP `2.3.4`.
+
 0.34.1
 ------
 

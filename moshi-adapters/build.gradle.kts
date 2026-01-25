@@ -23,6 +23,7 @@ tasks.compileTestKotlin { compilerOptions { optIn.add("kotlin.ExperimentalStdlib
 
 dependencies {
   api(libs.moshi)
+  implementation(libs.okio)
   testImplementation(libs.moshi.kotlin)
   testImplementation(libs.okhttp)
   testImplementation(libs.okhttp.mockwebserver)

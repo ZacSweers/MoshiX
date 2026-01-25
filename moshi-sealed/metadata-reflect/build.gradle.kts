@@ -29,8 +29,8 @@ kotlin {
 }
 
 dependencies {
-  implementation(project(":moshi-sealed:runtime"))
   api(libs.moshi)
-  api(libs.moshi.adapters)
+  implementation(project(":moshi-sealed:runtime"))
+  implementation(libs.moshi.adapters)
   implementation(libs.kotlin.metadata)
 }

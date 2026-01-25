@@ -20,16 +20,18 @@ plugins {
 }
 
 dependencies {
+  api(libs.moshi)
+  api(project(":moshi-sealed:runtime"))
+  implementation(libs.moshi.adapters)
+
   ksp(project(":moshi-sealed:codegen"))
   ksp(libs.moshi.codegen)
   kspTest(project(":moshi-sealed:codegen"))
   kspTest(libs.moshi.codegen)
 
-  implementation(project(":moshi-sealed:runtime"))
-  implementation(libs.moshi.kotlin)
-  implementation(project(":moshi-sealed:reflect"))
-  implementation(project(":moshi-sealed:metadata-reflect"))
-
+  testImplementation(libs.moshi.kotlin)
+  testImplementation(project(":moshi-sealed:reflect"))
+  testImplementation(project(":moshi-sealed:metadata-reflect"))
   testImplementation(project(":moshi-adapters"))
   testImplementation(libs.junit)
   testImplementation(libs.truth)

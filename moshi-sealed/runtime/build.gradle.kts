@@ -19,6 +19,15 @@ plugins {
   alias(libs.plugins.mavenPublish)
 }
 
+dependencyAnalysis {
+  issues {
+    onIncorrectConfiguration {
+      // We expose this as a convenience to the user
+      exclude(libs.moshi.adapters)
+    }
+  }
+}
+
 dependencies {
   api(libs.moshi.adapters)
   api(libs.moshi)
