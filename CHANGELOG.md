@@ -4,6 +4,8 @@ Changelog
 **Unreleased**
 --------------
 
+- **Fix**: Mark the `moshi-adapters` dependency as an `api` dependency in moshi-sealed-runtime again.
+
 0.34.3
 ------
 
