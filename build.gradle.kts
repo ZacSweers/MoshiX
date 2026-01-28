@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import com.android.build.api.dsl.Lint
+import com.vanniktech.maven.publish.DeploymentValidation
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -121,7 +122,10 @@ subprojects {
       }
     }
     configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(automaticRelease = true, validateDeployment = false)
+      publishToMavenCentral(
+        automaticRelease = true,
+        validateDeployment = DeploymentValidation.VALIDATED,
+      )
     }
 
     // configuration required to produce unique META-INF/*.kotlin_module file names

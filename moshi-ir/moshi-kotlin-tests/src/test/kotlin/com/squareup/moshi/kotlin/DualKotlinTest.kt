@@ -816,6 +816,7 @@ typealias NullableA = A?
 
 typealias B = NullableA
 
+@Suppress("REDUNDANT_NULLABLE")
 typealias NullableB = B?
 
 typealias C = NullableA

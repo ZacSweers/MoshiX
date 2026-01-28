@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import com.vanniktech.maven.publish.DeploymentValidation
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
@@ -90,7 +91,10 @@ dokka {
 }
 
 configure<MavenPublishBaseExtension> {
-  publishToMavenCentral(automaticRelease = true, validateDeployment = false)
+  publishToMavenCentral(
+    automaticRelease = true,
+    validateDeployment = DeploymentValidation.VALIDATED,
+  )
 }
 
 spotless {
