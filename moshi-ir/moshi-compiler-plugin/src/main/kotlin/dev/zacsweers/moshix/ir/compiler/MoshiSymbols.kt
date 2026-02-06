@@ -142,7 +142,9 @@ internal class MoshiSymbols(
   }
 
   val moshiBuilder by lazy {
-    pluginContext.referenceClass(ClassId.fromString("com/squareup/moshi/Moshi.Builder"))!!
+    pluginContext
+      .finderForBuiltins()
+      .findClass(ClassId.fromString("com/squareup/moshi/Moshi.Builder"))!!
   }
 
   val moshiBuilderBuild by lazy { moshiBuilder.getSimpleFunction("build")!! }
@@ -188,7 +190,8 @@ internal class MoshiSymbols(
 
   val jsonAdapterFactoryCreate by lazy {
     pluginContext
-      .referenceClass(ClassId.fromString("com/squareup/moshi/JsonAdapter.Factory"))!!
+      .finderForBuiltins()
+      .findClass(ClassId.fromString("com/squareup/moshi/JsonAdapter.Factory"))!!
       .getSimpleFunction("create")!!
   }
 
@@ -224,12 +227,15 @@ internal class MoshiSymbols(
 
   val addAdapter by lazy {
     pluginContext
-      .referenceFunctions(CallableId(FqName("com.squareup.moshi"), Name.identifier("addAdapter")))
+      .finderForBuiltins()
+      .findFunctions(CallableId(FqName("com.squareup.moshi"), Name.identifier("addAdapter")))
       .first()
   }
 
   val jsonDataException: IrClassSymbol by lazy {
-    pluginContext.referenceClass(ClassId.fromString("com/squareup/moshi/JsonDataException"))!!
+    pluginContext
+      .finderForBuiltins()
+      .findClass(ClassId.fromString("com/squareup/moshi/JsonDataException"))!!
   }
 
   val jsonDataExceptionStringConstructor: IrFunctionSymbol by lazy {
@@ -272,7 +278,7 @@ internal class MoshiSymbols(
   }
 
   val moshiTypes by lazy {
-    pluginContext.referenceClass(ClassId.fromString("com/squareup/moshi/Types"))!!
+    pluginContext.finderForBuiltins().findClass(ClassId.fromString("com/squareup/moshi/Types"))!!
   }
 
   val moshiTypesArrayOf by lazy { moshiTypes.getSimpleFunction("arrayOf")!! }

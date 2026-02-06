@@ -34,7 +34,7 @@ internal class MoshiIrGenerationExtension(
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
     val generatedAnnotation =
       generatedAnnotationName?.let { name ->
-        pluginContext.referenceClass(name).also {
+        pluginContext.finderForBuiltins().findClass(name).also {
           if (it == null) {
             messageCollector.error { "Unknown generated annotation $generatedAnnotationName" }
             return
