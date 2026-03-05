@@ -91,7 +91,8 @@ private constructor(
       if (target.hasAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.NestedSealed"))) {
         target.superTypes.firstNotNullOfOrNull { supertype ->
           pluginContext
-            .referenceClass(supertype.getClass()!!.classId!!)!!
+            .finderForBuiltins()
+            .findClass(supertype.getClass()!!.classId!!)!!
             .owner
             .getAnnotation(FqName("com.squareup.moshi.JsonClass"))
             ?.labelKey()
