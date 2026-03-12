@@ -121,12 +121,7 @@ subprojects {
         }
       }
     }
-    configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(
-        automaticRelease = true,
-        validateDeployment = DeploymentValidation.VALIDATED,
-      )
-    }
+    configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = true) }
 
     // configuration required to produce unique META-INF/*.kotlin_module file names
     tasks.withType<KotlinCompile>().configureEach {

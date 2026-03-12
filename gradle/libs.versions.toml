@@ -15,7 +15,7 @@
 [versions]
 agp = "9.1.0"
 autoService = "1.1.1"
-gjf = "1.17.0"
+gjf = "1.35.0"
 incap = "1.0.0"
 jdk = "23"
 jvmTarget = "11"
@@ -77,6 +77,7 @@ ksp-commonDeps = { module = "com.google.devtools.ksp:symbol-processing-common-de
 
 # Only present to trigger automatic renovate updates
 ktfmt = { module = "com.facebook:ktfmt", version.ref = "ktfmt" }
+gjf = { module = "com.google.googlejavaformat:google-java-format", version.ref = "gjf" }
 
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }

@@ -90,12 +90,7 @@ dokka {
   dokkaSourceSets.configureEach { skipDeprecated.set(true) }
 }
 
-configure<MavenPublishBaseExtension> {
-  publishToMavenCentral(
-    automaticRelease = true,
-    validateDeployment = DeploymentValidation.VALIDATED,
-  )
-}
+configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = true) }
 
 spotless {
   format("misc") {
