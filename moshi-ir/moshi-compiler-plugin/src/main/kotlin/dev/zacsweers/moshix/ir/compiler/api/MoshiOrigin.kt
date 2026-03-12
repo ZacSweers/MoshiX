@@ -18,4 +18,4 @@ package dev.zacsweers.moshix.ir.compiler.api
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOriginImpl
 
-internal val MoshiOrigin: IrDeclarationOrigin by IrDeclarationOriginImpl
+internal val MoshiOrigin: IrDeclarationOrigin by IrDeclarationOriginImpl.Regular

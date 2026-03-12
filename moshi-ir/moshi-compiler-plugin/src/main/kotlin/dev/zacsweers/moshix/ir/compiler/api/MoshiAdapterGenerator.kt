@@ -326,7 +326,8 @@ internal class MoshiAdapterGenerator(
                 irCall(
                     // TODO why can't I use kotlin.NullPointerException here?
                     pluginContext
-                      .referenceClass(ClassId.fromString("kotlin/KotlinNullPointerException"))!!
+                      .finderForBuiltins()
+                      .findClass(ClassId.fromString("kotlin/KotlinNullPointerException"))!!
                       .constructors
                       .first { it.owner.nonDispatchParameters.size == 1 }
                   )
