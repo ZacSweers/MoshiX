@@ -797,6 +797,17 @@ class DualKotlinTest {
 
   @JsonClass(generateAdapter = true)
   data class PropertyWithDollarSign(val `$a`: String, @Json(name = "\$b") val b: String)
+
+  // Regression test for https://github.com/ZacSweers/MoshiX/issues/878
+  @Test
+  fun typealiasToNestedGenericClass() {
+    val adapter = moshi.adapter<TypealiasNestedGenericData>()
+    @Language("JSON") val json = """{"subtitle":{"text":{"value":"hello"}}}"""
+    val result = adapter.fromJson(json)!!
+    assertThat(result.subtitle)
+      .isEqualTo(TypealiasGenericListItem.Subtitle(TypealiasMyText("hello")))
+    assertThat(adapter.toJson(result)).isEqualTo(json)
+  }
 }
 
 typealias TypeAlias = Int
@@ -816,6 +827,7 @@ typealias NullableA = A?
 
 typealias B = NullableA
 
+@Suppress("REDUNDANT_NULLABLE")
 typealias NullableB = B?
 
 typealias C = NullableA
@@ -823,3 +835,20 @@ typealias C = NullableA
 typealias D = C
 
 typealias E = D
+
+// Regression test for https://github.com/ZacSweers/MoshiX/issues/878
+@JsonClass(generateAdapter = true)
+data class TypealiasGenericListItem<TextT>(
+  @Json(name = "subtitle") val subtitle: Subtitle<TextT>?
+) {
+  @JsonClass(generateAdapter = true)
+  data class Subtitle<TextT>(@Json(name = "text") val text: TextT?)
+}
+
+@JsonClass(generateAdapter = true)
+data class TypealiasMyText(@Json(name = "value") val value: String)
+
+typealias TypealiasMySubtitle = TypealiasGenericListItem.Subtitle<TypealiasMyText>
+
+@JsonClass(generateAdapter = true)
+data class TypealiasNestedGenericData(@Json(name = "subtitle") val subtitle: TypealiasMySubtitle?)
