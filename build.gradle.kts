@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import com.android.build.api.dsl.Lint
-import com.vanniktech.maven.publish.DeploymentValidation
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
