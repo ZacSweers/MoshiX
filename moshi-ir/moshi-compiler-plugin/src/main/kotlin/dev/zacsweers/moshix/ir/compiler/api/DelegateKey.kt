@@ -296,11 +296,12 @@ private fun IrBuilderWithScope.renderType(
     val symbol =
       if (parentClass != null) {
         // Use the raw class reference for the owner type. Kotlin nested classes (non-inner) are
-        // equivalent to Java static nested classes, so the owner type never carries type parameters.
+        // equivalent to Java static nested classes, so the owner type never carries type
+        // parameters.
         // Previously this called renderType(parentClass.defaultType, ...) which would try to
         // resolve the parent's type parameters (e.g., GenericListItem<TextT>). This fails when the
-        // type comes from a typealias in a non-generic context where typesParameter is null, causing
-        // an NPE when encountering the parent's unresolved type parameter symbols.
+        // type comes from a typealias in a non-generic context where typesParameter is null,
+        // causing an NPE when encountering the parent's unresolved type parameter symbols.
         // See https://github.com/ZacSweers/MoshiX/issues/878
         genericArgs +=
           irImplicitCast(
