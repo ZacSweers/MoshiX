@@ -4,6 +4,11 @@ Changelog
 **Unreleased**
 --------------
 
+0.34.5
+------
+
+_2026-03-13_
+
 - **Fix**: Fix an NPE in the IR compiler plugin that could be caused by generics in nested classes.
 
 0.34.4
