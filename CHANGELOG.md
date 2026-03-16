@@ -4,7 +4,7 @@ Changelog
 **Unreleased**
 --------------
 
-- Update to Kotlin `2.3.20`. IR now requires 2.3.20+, but may work on older versions (untested).
+- Update to Kotlin `2.3.20`. IR now requires 2.3.20+.
 
 0.34.5
 ------
