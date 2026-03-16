@@ -4,6 +4,11 @@ Changelog
 **Unreleased**
 --------------
 
+0.35.0
+------
+
+_2026-03-16_
+
 - Update to Kotlin `2.3.20`. IR now requires 2.3.20+.
 
 0.34.5
