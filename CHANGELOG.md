@@ -4,6 +4,8 @@ Changelog
 **Unreleased**
 --------------
 
+- [moshi-ir] Avoid deprecated IR parameter APIs that are removed in `2.4.0-Beta2`+.
+
 0.35.0
 ------
 
