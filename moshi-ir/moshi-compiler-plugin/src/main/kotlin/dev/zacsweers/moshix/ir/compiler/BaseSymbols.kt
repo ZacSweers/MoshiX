@@ -134,8 +134,7 @@ internal open class BaseSymbols(
       .apply {
         parent = kotlinJvm
         addGetter().apply {
-          extensionReceiverParameter =
-            createExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
+          parameters += createExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
           returnType = javaLangClass.defaultType
         }
       }
@@ -148,8 +147,7 @@ internal open class BaseSymbols(
       .apply {
         parent = kotlinJvm
         addGetter().apply {
-          extensionReceiverParameter =
-            createExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
+          parameters += createExtensionReceiver(irBuiltIns.kClassClass.starProjectedType)
           returnType = javaLangClass.defaultType
         }
       }

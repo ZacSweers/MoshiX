@@ -170,7 +170,7 @@ internal fun primaryConstructor(targetType: IrClass): TargetConstructor? {
 
   val parameters = LinkedHashMap<String, TargetParameter>()
   for (parameter in primaryConstructor.nonDispatchParameters) {
-    val index = parameter.index
+    val index = parameter.indexInParameters
     val name = parameter.name.identifier
     parameters[name] =
       TargetParameter(
