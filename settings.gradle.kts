@@ -32,7 +32,7 @@ pluginManagement {
   }
   plugins {
     id("org.jetbrains.kotlin.jvm") version "2.4.0-RC"
-    id("com.autonomousapps.build-health") version "3.6.1"
+    id("com.autonomousapps.build-health") version "3.11.0"
   }
 }
 
