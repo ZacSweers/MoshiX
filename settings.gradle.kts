@@ -31,8 +31,8 @@ pluginManagement {
     gradlePluginPortal()
   }
   plugins {
-    id("org.jetbrains.kotlin.jvm") version "2.4.0-RC"
-    id("com.autonomousapps.build-health") version "3.11.0"
+    id("org.jetbrains.kotlin.jvm") version "2.4.0-RC2"
+    id("com.autonomousapps.build-health") version "3.13.0"
   }
 }
 
