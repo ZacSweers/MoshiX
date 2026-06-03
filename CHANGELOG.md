@@ -4,7 +4,16 @@ Changelog
 **Unreleased**
 --------------
 
+0.36.0
+------
+
+_2026-03-16_
+
+- Update to Kotlin `2.4.0`. IR now requires `2.4.0`+. Older versions may work but are untested.
 - [moshi-ir] Avoid deprecated IR parameter APIs that are removed in `2.4.0-Beta2`+.
+- Build against KSP `2.3.9`.
+- Update kotlinpoet to `2.3.0`.
+- Build against Gradle `9.5.1`.
 
 0.35.0
 ------
