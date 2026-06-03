@@ -122,19 +122,18 @@ private class MoshiSealedSymbolProcessor(environment: SymbolProcessorEnvironment
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
     if (hasInitErrors) return emptyList()
-    val generatedAnnotation =
-      generatedOption?.let {
-        val annotationType =
-          resolver.getClassDeclarationByName(resolver.getKSNameFromString(it))
-            ?: run {
-              logger.error("Generated annotation type doesn't exist: $it")
-              return emptyList()
-            }
-        AnnotationSpec.builder(annotationType.toClassName())
-          .addMember("value = [%S]", MoshiSealedSymbolProcessor::class.java.canonicalName)
-          .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
-          .build()
-      }
+    val generatedAnnotation = generatedOption?.let {
+      val annotationType =
+        resolver.getClassDeclarationByName(resolver.getKSNameFromString(it))
+          ?: run {
+            logger.error("Generated annotation type doesn't exist: $it")
+            return emptyList()
+          }
+      AnnotationSpec.builder(annotationType.toClassName())
+        .addMember("value = [%S]", MoshiSealedSymbolProcessor::class.java.canonicalName)
+        .addMember("comments = %S", "https://github.com/ZacSweers/moshi-sealed")
+        .build()
+    }
 
     val symbols = MoshiSealedSymbols(resolver)
 
