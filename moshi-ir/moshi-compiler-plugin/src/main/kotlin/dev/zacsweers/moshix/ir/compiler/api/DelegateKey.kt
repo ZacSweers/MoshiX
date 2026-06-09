@@ -148,54 +148,52 @@ private fun IrBuilderWithScope.addTypeParam(
   delegateType: IrType,
   genericIndex: Int,
   typesParameter: IrValueParameter?,
-) =
-  irCall.apply {
-    // type
-    if (genericIndex == -1) {
-      // Use typeOf() intrinsic
-      arguments[1] = renderType(moshiSymbols, delegateType, typesParameter)
-    } else {
-      // It's generic, get from types array
-      arguments[1] =
-        irCall(moshiSymbols.arrayGet.symbol).apply {
-          arguments[0] = irGet(typesParameter!!)
-          arguments[1] = irInt(genericIndex)
-        }
-    }
+) = irCall.apply {
+  // type
+  if (genericIndex == -1) {
+    // Use typeOf() intrinsic
+    arguments[1] = renderType(moshiSymbols, delegateType, typesParameter)
+  } else {
+    // It's generic, get from types array
+    arguments[1] =
+      irCall(moshiSymbols.arrayGet.symbol).apply {
+        arguments[0] = irGet(typesParameter!!)
+        arguments[1] = irInt(genericIndex)
+      }
   }
+}
 
 private fun IrBuilderWithScope.addAnnotationsParam(
   irCall: IrCall,
   pluginContext: IrPluginContext,
   moshiSymbols: MoshiSymbols,
   jsonQualifiers: List<IrConstructorCall>,
-) =
-  irCall.apply {
-    val argumentExpression =
-      if (jsonQualifiers.isEmpty()) {
-        irCall(moshiSymbols.emptySet).apply {
-          typeArguments[0] = pluginContext.irType(ClassId.fromString("kotlin/Annotation"))
-        }
-      } else {
-        val callee: IrFunctionSymbol
-        val argExpression: IrExpression
-        if (jsonQualifiers.size == 1) {
-          callee = moshiSymbols.setOfSingleton
-          argExpression = jsonQualifiers[0]
-        } else {
-          callee = moshiSymbols.setOfVararg
-          argExpression = irVararg(pluginContext.irBuiltIns.annotationType, jsonQualifiers)
-        }
-        irCall(
-            callee = callee,
-            type =
-              pluginContext.irBuiltIns.setClass.typeWith(pluginContext.irBuiltIns.annotationType),
-            typeArguments = listOf(pluginContext.irBuiltIns.annotationType),
-          )
-          .apply { arguments[0] = argExpression }
+) = irCall.apply {
+  val argumentExpression =
+    if (jsonQualifiers.isEmpty()) {
+      irCall(moshiSymbols.emptySet).apply {
+        typeArguments[0] = pluginContext.irType(ClassId.fromString("kotlin/Annotation"))
       }
-    arguments[2] = argumentExpression
-  }
+    } else {
+      val callee: IrFunctionSymbol
+      val argExpression: IrExpression
+      if (jsonQualifiers.size == 1) {
+        callee = moshiSymbols.setOfSingleton
+        argExpression = jsonQualifiers[0]
+      } else {
+        callee = moshiSymbols.setOfVararg
+        argExpression = irVararg(pluginContext.irBuiltIns.annotationType, jsonQualifiers)
+      }
+      irCall(
+          callee = callee,
+          type =
+            pluginContext.irBuiltIns.setClass.typeWith(pluginContext.irBuiltIns.annotationType),
+          typeArguments = listOf(pluginContext.irBuiltIns.annotationType),
+        )
+        .apply { arguments[0] = argExpression }
+    }
+  arguments[2] = argumentExpression
+}
 
 /**
  * Returns a suggested variable name derived from a list of type names. This just concatenates,

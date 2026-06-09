@@ -32,15 +32,14 @@ internal class MoshiIrGenerationExtension(
 
   @OptIn(UnsafeDuringIrConstructionAPI::class)
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
-    val generatedAnnotation =
-      generatedAnnotationName?.let { name ->
-        pluginContext.finderForBuiltins().findClass(name).also {
-          if (it == null) {
-            messageCollector.error { "Unknown generated annotation $generatedAnnotationName" }
-            return
-          }
+    val generatedAnnotation = generatedAnnotationName?.let { name ->
+      pluginContext.finderForBuiltins().findClass(name).also {
+        if (it == null) {
+          messageCollector.error { "Unknown generated annotation $generatedAnnotationName" }
+          return
         }
       }
+    }
     val deferred = mutableListOf<GeneratedAdapter>()
     val moshiTransformer =
       MoshiIrVisitor(

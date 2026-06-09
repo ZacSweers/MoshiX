@@ -564,7 +564,9 @@ internal class MoshiAdapterGenerator(
                         }
                         addValueParameter(
                           "marker",
-                          irType(ClassId.fromString("kotlin/jvm/internal/DefaultConstructorMarker")),
+                          irType(
+                            ClassId.fromString("kotlin/jvm/internal/DefaultConstructorMarker")
+                          ),
                         )
                       }
                       .symbol
