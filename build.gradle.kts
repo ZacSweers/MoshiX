@@ -1,18 +1,5 @@
-/*
- * Copyright (C) 2020 Zac Sweers
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright (C) 2026 Zac Sweers
+// SPDX-License-Identifier: Apache-2.0
 import com.android.build.api.dsl.Lint
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaExtension
@@ -25,7 +12,6 @@ plugins {
   alias(libs.plugins.ksp) apply false
   alias(libs.plugins.dokka)
   alias(libs.plugins.mavenPublish) apply false
-  alias(libs.plugins.spotless)
   alias(libs.plugins.kotlinBinaryCompatibilityValidator)
   alias(libs.plugins.lint) apply false
   alias(libs.plugins.moshix) apply false
@@ -46,35 +32,6 @@ dokka {
   dokkaPublications.html {
     outputDirectory.set(rootDir.resolve("docs/api/0.x"))
     includes.from(project.layout.projectDirectory.file("README.md"))
-  }
-}
-
-val ktfmtVersion = libs.versions.ktfmt.get()
-
-spotless {
-  format("misc") {
-    target("*.md", ".gitignore")
-    trimTrailingWhitespace()
-    leadingTabsToSpaces(2)
-    endWithNewline()
-  }
-  java {
-    googleJavaFormat(libs.versions.gjf.get())
-    target("**/*.java")
-    targetExclude("**/spotless.java", "**/build/**", "**/.gradle/**")
-  }
-  kotlin {
-    ktfmt(ktfmtVersion).googleStyle()
-    target("**/*.kt")
-    trimTrailingWhitespace()
-    endWithNewline()
-    targetExclude("**/Dependencies.kt", "**/spotless.kt", "**/build/**")
-  }
-  kotlinGradle {
-    ktfmt(ktfmtVersion).googleStyle()
-    target("**/*.gradle.kts")
-    trimTrailingWhitespace()
-    endWithNewline()
   }
 }
 
