@@ -1,3 +1,5 @@
+// Copyright (C) 2026 Zac Sweers
+// SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.moshix.reflect
 
 /** A simple [Map] that uses parameter indexes instead of sorting or hashing. */
