@@ -5,15 +5,6 @@ plugins {
   alias(libs.plugins.mavenPublish)
 }
 
-kotlin {
-  compilerOptions {
-    freeCompilerArgs.add(
-      // https://youtrack.jetbrains.com/issue/KT-73255
-      "-Xannotation-default-target=param-property"
-    )
-  }
-}
-
 dependencies {
   api(libs.moshi)
   implementation(project(":moshi-sealed:runtime"))
