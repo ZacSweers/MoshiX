@@ -9,7 +9,6 @@ import dev.zacsweers.moshix.ir.compiler.sealed.SealedAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
@@ -40,31 +39,13 @@ internal class MoshiIrVisitor(
 
   private val moshiSealedSymbols by lazy { MoshiSealedSymbols(moshiSymbols) }
 
-  private fun adapterGenerator(originalType: IrClass): MoshiAdapterGenerator? {
-    val type = targetType(originalType, pluginContext) ?: return null
+  private fun adapterGenerator(originalType: IrClass): MoshiAdapterGenerator {
+    val type = targetType(originalType, pluginContext)
 
     val properties = mutableMapOf<String, PropertyGenerator>()
     for (property in type.properties.values) {
-      val errors = mutableListOf<(IrDiagnosticReporter) -> Unit>()
-      val generator = property.generator(originalType, errors)
-      if (errors.isNotEmpty()) {
-        for (error in errors) {
-          error(pluginContext.diagnosticReporter)
-        }
-        return null
-      }
-      if (generator != null) {
+      property.generator()?.let { generator ->
         properties[property.name] = generator
-      }
-    }
-
-    for ((name, parameter) in type.constructor.parameters) {
-      if (type.properties[parameter.name] == null && !parameter.hasDefault) {
-        // TODO would be nice if we could pass the parameter node directly?
-        pluginContext.diagnosticReporter.error(originalType) {
-          "No property for required constructor parameter $name"
-        }
-        return null
       }
     }
 
@@ -112,9 +93,8 @@ internal class MoshiIrVisitor(
             adapterGenerator(declaration)
           }
 
-        val adapterGenerator = generator ?: return super.visitClassNew(declaration)
         try {
-          val adapterClass = adapterGenerator.prepare() ?: return super.visitClassNew(declaration)
+          val adapterClass = generator.prepare()
           if (generatedAnnotation != null) {
             // TODO add generated annotation
           }

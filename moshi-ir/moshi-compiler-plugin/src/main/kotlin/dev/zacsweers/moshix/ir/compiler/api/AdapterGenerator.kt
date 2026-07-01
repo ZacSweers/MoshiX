@@ -5,7 +5,7 @@ package dev.zacsweers.moshix.ir.compiler.api
 import org.jetbrains.kotlin.ir.declarations.IrClass
 
 internal interface AdapterGenerator {
-  fun prepare(): PreparedAdapter?
+  fun prepare(): PreparedAdapter
 }
 
 /** Represents a prepared adapter with its [adapterClass]. */

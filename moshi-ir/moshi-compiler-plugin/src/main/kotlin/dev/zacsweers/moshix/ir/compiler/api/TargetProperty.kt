@@ -3,7 +3,6 @@
 package dev.zacsweers.moshix.ir.compiler.api
 
 import dev.zacsweers.moshix.ir.compiler.util.type
-import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.types.IrType
 
@@ -11,7 +10,6 @@ import org.jetbrains.kotlin.ir.types.IrType
 internal data class TargetProperty(
   val property: IrProperty,
   val parameter: TargetParameter?,
-  val visibility: DescriptorVisibility,
   val jsonName: String?,
   val jsonIgnore: Boolean,
 ) {
