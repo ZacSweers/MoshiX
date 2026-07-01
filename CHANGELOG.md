@@ -6,6 +6,7 @@ Changelog
 
 - [moshi-ir] Migrate most diagnostic errors to FIR.
 - [moshi-ir] Remove usages of `MessageCollector`.
+- [moshi-adapters] Support kotlin `object` types from `@AdaptedBy`.
 
 0.36.0
 ------

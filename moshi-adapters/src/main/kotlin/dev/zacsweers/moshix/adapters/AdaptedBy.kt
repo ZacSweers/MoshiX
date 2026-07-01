@@ -6,6 +6,7 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonQualifier
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.rawType
+import java.lang.reflect.Modifier
 import java.lang.reflect.Type
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
@@ -13,9 +14,21 @@ import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.annotation.AnnotationTarget.PROPERTY
 import kotlin.reflect.KClass
 
+@Suppress("UNCHECKED_CAST")
+private val METADATA: Class<out Annotation>? =
+  try {
+    Class.forName(kotlinMetadataClassName) as Class<out Annotation>
+  } catch (_: ClassNotFoundException) {
+    null
+  }
+
+// Extracted as a method with a keep rule to prevent R8 from keeping Kotlin Metadata
+private val kotlinMetadataClassName: String
+  get() = "kotlin.Metadata"
+
 /**
  * An annotation that indicates the Moshi [JsonAdapter] or [JsonAdapter.Factory] to use with a class
- * or property. The adapter class must have a public default constructor.
+ * or property. The adapter class must be a Kotlin object or have a public default constructor.
  *
  * Here is an example of how this annotation is used:
  * ```
@@ -53,8 +66,9 @@ import kotlin.reflect.KClass
  * )
  * ```
  *
- * The class referenced by this annotation must be either a [JsonAdapter] or a [JsonAdapter.Factory]
- * . Using [JsonAdapter.Factory] makes it possible to delegate to the enclosing [Moshi] instance.
+ * The class referenced by this annotation must be either a [JsonAdapter] or a
+ * [JsonAdapter.Factory]. Using [JsonAdapter.Factory] makes it possible to delegate to the enclosing
+ * [Moshi] instance.
  *
  * @property adapter Either a [JsonAdapter] or [JsonAdapter.Factory].
  * @property nullSafe Set to false to be able to handle null values within the adapter, default
@@ -89,11 +103,14 @@ public annotation class AdaptedBy(val adapter: KClass<*>, val nullSafe: Boolean 
       val adapter =
         when {
           JsonAdapter.Factory::class.java.isAssignableFrom(javaClass) -> {
-            val factory = javaClass.getDeclaredConstructor().newInstance() as JsonAdapter.Factory
+            val factory =
+              javaClass.kotlinObjectInstance(JsonAdapter.Factory::class.java)
+                ?: javaClass.getDeclaredConstructor().newInstance() as JsonAdapter.Factory
             factory.create(type, nextAnnotations.orEmpty(), moshi)
           }
           JsonAdapter::class.java.isAssignableFrom(javaClass) -> {
-            javaClass.getDeclaredConstructor().newInstance() as JsonAdapter<*>
+            javaClass.kotlinObjectInstance(JsonAdapter::class.java)
+              ?: javaClass.getDeclaredConstructor().newInstance() as JsonAdapter<*>
           }
           else -> {
             error(
@@ -108,6 +125,26 @@ public annotation class AdaptedBy(val adapter: KClass<*>, val nullSafe: Boolean 
       } else {
         adapter
       }
+    }
+
+    private fun <T : Any> Class<*>.kotlinObjectInstance(expectedType: Class<T>): T? {
+      if (!isAnnotationPresent(METADATA)) return null
+      val instanceField =
+        try {
+          getDeclaredField("INSTANCE")
+        } catch (_: NoSuchFieldException) {
+          return null
+        }
+      val modifiers = instanceField.modifiers
+      if (
+        !Modifier.isPublic(modifiers) ||
+          !Modifier.isStatic(modifiers) ||
+          !Modifier.isFinal(modifiers) ||
+          instanceField.type != this
+      ) {
+        return null
+      }
+      return expectedType.cast(instanceField.get(null))
     }
   }
 }
