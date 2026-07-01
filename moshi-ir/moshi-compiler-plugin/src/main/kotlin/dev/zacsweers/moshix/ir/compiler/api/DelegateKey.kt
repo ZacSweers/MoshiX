@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.moshix.ir.compiler.api
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import dev.zacsweers.moshix.ir.compiler.MoshiSymbols
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.irType
@@ -49,7 +50,8 @@ import org.jetbrains.kotlin.types.Variance
 internal data class DelegateKey(
   private val delegateType: IrType,
   private val jsonQualifiers: List<IrConstructorCall>,
-) {
+  private val compatContext: CompatContext,
+) : CompatContext by compatContext {
   val nullable: Boolean
     get() = delegateType.isNullable()
 
@@ -90,23 +92,26 @@ internal data class DelegateKey(
         }
         .apply {
           initializer =
-            pluginContext
-              .createIrBuilder(symbol)
-              .moshiAdapterCall(
-                pluginContext,
-                moshiSymbols,
-                delegateType,
-                moshiParameter,
-                typesParameter,
-                genericIndex,
-                propertyName,
-                jsonQualifiers,
-              )
+            with(compatContext) {
+              pluginContext
+                .createIrBuilder(symbol)
+                .moshiAdapterCall(
+                  pluginContext = pluginContext,
+                  moshiSymbols = moshiSymbols,
+                  delegateType = delegateType,
+                  moshiParameter = moshiParameter,
+                  typesParameter = typesParameter,
+                  genericIndex = genericIndex,
+                  propertyName = propertyName,
+                  jsonQualifiers = jsonQualifiers,
+                )
+            }
         }
     return field
   }
 }
 
+context(compatContext: CompatContext)
 private fun IrBuilderWithScope.moshiAdapterCall(
   pluginContext: IrPluginContext,
   moshiSymbols: MoshiSymbols,
@@ -150,6 +155,7 @@ private fun IrBuilderWithScope.addTypeParam(
   }
 }
 
+context(compatContext: CompatContext)
 private fun IrBuilderWithScope.addAnnotationsParam(
   irCall: IrCall,
   pluginContext: IrPluginContext,

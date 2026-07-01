@@ -4,6 +4,7 @@
 
 package dev.zacsweers.moshix.ir.compiler
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import org.jetbrains.kotlin.DeprecatedForRemovalCompilerApi
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.ir.createExtensionReceiver
@@ -45,10 +46,11 @@ internal open class BaseSymbols(
   protected val irBuiltIns: IrBuiltIns,
   protected val moduleFragment: IrModuleFragment,
   val pluginContext: IrPluginContext,
-) {
+  protected val compatContext: CompatContext,
+) : CompatContext by compatContext {
   constructor(
     other: BaseSymbols
-  ) : this(other.irBuiltIns, other.moduleFragment, other.pluginContext)
+  ) : this(other.irBuiltIns, other.moduleFragment, other.pluginContext, other.compatContext)
 
   protected val irFactory: IrFactory = pluginContext.irFactory
   private val javaLang: IrPackageFragment by lazy { createPackage("java.lang") }
@@ -56,7 +58,7 @@ internal open class BaseSymbols(
 
   val emptySet by lazy {
     pluginContext
-      .finderForBuiltins()
+      .finderForBuiltinsCompat()
       .findFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("emptySet")))
       .first()
   }
@@ -69,7 +71,7 @@ internal open class BaseSymbols(
 
   val setOfVararg by lazy {
     pluginContext
-      .finderForBuiltins()
+      .finderForBuiltinsCompat()
       .findFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("setOf")))
       .first {
         it.owner.nonDispatchParameters.size == 1 &&
@@ -79,7 +81,7 @@ internal open class BaseSymbols(
 
   val setOfSingleton by lazy {
     pluginContext
-      .finderForBuiltins()
+      .finderForBuiltinsCompat()
       .findFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("setOf")))
       .first {
         it.owner.nonDispatchParameters.size == 1 &&
@@ -89,7 +91,7 @@ internal open class BaseSymbols(
 
   val setPlus by lazy {
     pluginContext
-      .finderForBuiltins()
+      .finderForBuiltinsCompat()
       .findFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("plus")))
       .single {
         val owner = it.owner
@@ -115,7 +117,7 @@ internal open class BaseSymbols(
 
   val iterableJoinToString by lazy {
     pluginContext
-      .finderForBuiltins()
+      .finderForBuiltinsCompat()
       .findFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("joinToString")))
       .single {
         it.owner.parameters

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.moshix.ir.compiler.sealed
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import dev.zacsweers.moshix.ir.compiler.MoshiSymbols
 import dev.zacsweers.moshix.ir.compiler.api.AdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PreparedAdapter
@@ -76,7 +77,8 @@ private constructor(
   private val moshiSealedSymbols: MoshiSealedSymbols,
   private val target: IrClass,
   private val labelKey: String,
-) : AdapterGenerator {
+  private val compatContext: CompatContext,
+) : AdapterGenerator, CompatContext by compatContext {
   @OptIn(UnsafeDuringIrConstructionAPI::class)
   override fun prepare(): PreparedAdapter {
     var fallbackStrategy: FallbackStrategy? = null
@@ -402,6 +404,7 @@ private constructor(
       moshiSealedSymbols: MoshiSealedSymbols,
       target: IrClass,
       labelKey: String,
+      compatContext: CompatContext,
     ): AdapterGenerator {
       return SealedAdapterGenerator(
         pluginContext = pluginContext,
@@ -409,6 +412,7 @@ private constructor(
         moshiSealedSymbols = moshiSealedSymbols,
         target = target,
         labelKey = labelKey,
+        compatContext = compatContext,
       )
     }
   }

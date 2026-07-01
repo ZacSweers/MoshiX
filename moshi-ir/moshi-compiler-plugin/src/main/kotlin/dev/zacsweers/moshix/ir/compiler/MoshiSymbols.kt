@@ -4,6 +4,7 @@
 
 package dev.zacsweers.moshix.ir.compiler
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality
@@ -37,7 +38,8 @@ internal class MoshiSymbols(
   irBuiltIns: IrBuiltIns,
   moduleFragment: IrModuleFragment,
   pluginContext: IrPluginContext,
-) : BaseSymbols(irBuiltIns, moduleFragment, pluginContext) {
+  compatContext: CompatContext,
+) : BaseSymbols(irBuiltIns, moduleFragment, pluginContext, compatContext) {
   private val moshiPackage: IrPackageFragment by lazy { createPackage("com.squareup.moshi") }
   private val moshiInternalPackage: IrPackageFragment by lazy {
     createPackage("com.squareup.moshi.internal")
@@ -130,7 +132,7 @@ internal class MoshiSymbols(
 
   val moshiBuilder by lazy {
     pluginContext
-      .finderForBuiltins()
+      .finderForBuiltinsCompat()
       .findClass(ClassId.fromString("com/squareup/moshi/Moshi.Builder"))!!
   }
 
@@ -177,7 +179,7 @@ internal class MoshiSymbols(
 
   val jsonAdapterFactoryCreate by lazy {
     pluginContext
-      .finderForBuiltins()
+      .finderForBuiltinsCompat()
       .findClass(ClassId.fromString("com/squareup/moshi/JsonAdapter.Factory"))!!
       .getSimpleFunction("create")!!
   }
@@ -214,14 +216,14 @@ internal class MoshiSymbols(
 
   val addAdapter by lazy {
     pluginContext
-      .finderForBuiltins()
+      .finderForBuiltinsCompat()
       .findFunctions(CallableId(FqName("com.squareup.moshi"), Name.identifier("addAdapter")))
       .first()
   }
 
   val jsonDataException: IrClassSymbol by lazy {
     pluginContext
-      .finderForBuiltins()
+      .finderForBuiltinsCompat()
       .findClass(ClassId.fromString("com/squareup/moshi/JsonDataException"))!!
   }
 
@@ -265,7 +267,9 @@ internal class MoshiSymbols(
   }
 
   val moshiTypes by lazy {
-    pluginContext.finderForBuiltins().findClass(ClassId.fromString("com/squareup/moshi/Types"))!!
+    pluginContext
+      .finderForBuiltinsCompat()
+      .findClass(ClassId.fromString("com/squareup/moshi/Types"))!!
   }
 
   val moshiTypesArrayOf by lazy { moshiTypes.getSimpleFunction("arrayOf")!! }

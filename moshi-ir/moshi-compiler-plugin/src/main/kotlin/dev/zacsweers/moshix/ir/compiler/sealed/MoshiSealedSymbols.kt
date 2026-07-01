@@ -97,7 +97,7 @@ internal class MoshiSealedSymbols(private val moshiSymbols: MoshiSymbols) :
 
   val objectJsonAdapterCtor by lazy {
     pluginContext
-      .finderForBuiltins()
+      .finderForBuiltinsCompat()
       .findClass(
         ClassId.fromString("dev/zacsweers/moshix/sealed/runtime/internal/ObjectJsonAdapter")
       )!!

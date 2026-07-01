@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.moshix.ir.compiler.api
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import dev.zacsweers.moshix.ir.compiler.MoshiSymbols
 import dev.zacsweers.moshix.ir.compiler.api.FromJsonComponent.ParameterOnly
 import dev.zacsweers.moshix.ir.compiler.api.FromJsonComponent.ParameterProperty
@@ -93,7 +94,8 @@ internal class MoshiAdapterGenerator(
   private val moshiSymbols: MoshiSymbols,
   private val target: TargetType,
   private val propertyList: List<PropertyGenerator>,
-) : AdapterGenerator {
+  private val compatContext: CompatContext,
+) : AdapterGenerator, CompatContext by compatContext {
   private val nonTransientProperties = propertyList.filterNot { it.isTransientOrIgnored }
   private val className = target.irType.rawType()
   private val visibility = target.visibility
@@ -313,7 +315,7 @@ internal class MoshiAdapterGenerator(
                 irCall(
                     // TODO why can't I use kotlin.NullPointerException here?
                     pluginContext
-                      .finderForBuiltins()
+                      .finderForBuiltinsCompat()
                       .findClass(ClassId.fromString("kotlin/KotlinNullPointerException"))!!
                       .constructors
                       .first { it.owner.nonDispatchParameters.size == 1 }
