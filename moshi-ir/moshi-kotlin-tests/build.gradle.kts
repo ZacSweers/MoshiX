@@ -50,7 +50,7 @@ configurations.configureEach {
 }
 
 // R8 test infrastructure
-val r8Configuration: Configuration by configurations.creating
+val r8Configuration: Configuration = configurations.create("r8Configuration")
 
 dependencies { r8Configuration("com.android.tools:r8:9.1.31") }
 

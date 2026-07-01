@@ -8,8 +8,6 @@ import org.gradle.api.provider.Property
 
 abstract class MoshiPluginExtension @Inject constructor(objects: ObjectFactory) {
   val enabled: Property<Boolean> = objects.property(Boolean::class.javaObjectType).convention(true)
-  /** Enables debug logging. Useful mostly for helping report bugs/issues. */
-  val debug: Property<Boolean> = objects.property(Boolean::class.javaObjectType).convention(false)
   /**
    * Define a custom generated annotation.
    *

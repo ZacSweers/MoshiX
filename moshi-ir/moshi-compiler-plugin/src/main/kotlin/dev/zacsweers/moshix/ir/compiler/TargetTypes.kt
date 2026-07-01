@@ -12,10 +12,10 @@ import dev.zacsweers.moshix.ir.compiler.util.isTransient
 import dev.zacsweers.moshix.ir.compiler.util.rawType
 import org.jetbrains.kotlin.DeprecatedForRemovalCompilerApi
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
@@ -34,40 +34,39 @@ import org.jetbrains.kotlin.ir.util.properties
 internal fun targetType(
   type: IrClass,
   pluginContext: IrPluginContext,
-  logger: MessageCollector,
 ): TargetType? {
   if (type.isEnumClass) {
-    logger.error(type) {
+    pluginContext.diagnosticReporter.error(type) {
       "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.fqNameWhenAvailable}: code gen for enums is not supported or necessary"
     }
     return null
   }
   if (type.kind != ClassKind.CLASS) {
-    logger.error(type) {
+    pluginContext.diagnosticReporter.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be a Kotlin class"
     }
     return null
   }
   if (type.isInner) {
-    logger.error(type) {
+    pluginContext.diagnosticReporter.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be an inner class"
     }
     return null
   }
   if (type.modality == Modality.SEALED) {
-    logger.error(type) {
+    pluginContext.diagnosticReporter.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be sealed"
     }
     return null
   }
   if (type.modality == Modality.ABSTRACT) {
-    logger.error(type) {
+    pluginContext.diagnosticReporter.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be abstract"
     }
     return null
   }
   if (type.isLocal) {
-    logger.error(type) {
+    pluginContext.diagnosticReporter.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be local"
     }
     return null
@@ -76,7 +75,7 @@ internal fun targetType(
     type.visibility != DescriptorVisibilities.PUBLIC &&
       type.visibility != DescriptorVisibilities.INTERNAL
   if (isNotPublicOrInternal) {
-    logger.error(type) {
+    pluginContext.diagnosticReporter.error(type) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be internal or public"
     }
     return null
@@ -88,7 +87,9 @@ internal fun targetType(
   val constructor =
     primaryConstructor(type)
       ?: run {
-        logger.error(type) { "No primary constructor found on ${type.fqNameWhenAvailable}" }
+        pluginContext.diagnosticReporter.error(type) {
+          "No primary constructor found on ${type.fqNameWhenAvailable}"
+        }
         return null
       }
 
@@ -96,7 +97,7 @@ internal fun targetType(
     constructor.visibility != DescriptorVisibilities.INTERNAL &&
       constructor.visibility != DescriptorVisibilities.PUBLIC
   ) {
-    logger.error(constructor.irConstructor) {
+    pluginContext.diagnosticReporter.error(constructor.irConstructor) {
       "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: primary constructor is not internal or public"
     }
     return null
@@ -106,7 +107,7 @@ internal fun targetType(
   for (superclass in appliedType.superclasses(pluginContext)) {
     val classDecl = superclass.type
     if (classDecl.isFromJava()) {
-      logger.error(type) {
+      pluginContext.diagnosticReporter.error(type) {
         """
           @JsonClass can't be applied to ${type.fqNameWhenAvailable}: supertype $superclass is not a Kotlin type.
           Origin=${classDecl.origin}
@@ -137,7 +138,7 @@ internal fun targetType(
       if (forceInternal) DescriptorVisibilities.INTERNAL else visibility
     }
   resolvedVisibility.checkIsVisible { message ->
-    logger.error(type) { message }
+    pluginContext.diagnosticReporter.error(type) { message }
     return null
   }
   return TargetType(

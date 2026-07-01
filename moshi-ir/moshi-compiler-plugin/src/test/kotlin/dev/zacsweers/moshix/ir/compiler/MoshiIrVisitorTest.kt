@@ -329,6 +329,30 @@ class MoshiIrVisitorTest {
   }
 
   @Test
+  fun ignoredConstructorDefaultsForUnitNothingAndVoid() {
+    val result =
+      compile(
+        kotlin(
+          "source.kt",
+          """
+          package test
+          import com.squareup.moshi.Json
+          import com.squareup.moshi.JsonClass
+
+          @JsonClass(generateAdapter = true)
+          data class IgnoredDefaults(
+            @Json(ignore = true) val unit: Unit = Unit,
+            @Json(ignore = true) val nothing: Nothing = error("unused"),
+            @Json(ignore = true) val void: java.lang.Void = error("unused"),
+            val value: String = "value",
+          )
+          """,
+        )
+      )
+    assertThat(result.exitCode).isEqualTo(OK)
+  }
+
+  @Test
   fun nonPropertyConstructorParameter() {
     val result =
       compile(
@@ -797,8 +821,6 @@ class MoshiIrVisitorTest {
       commandLineProcessors = listOf(processor)
       pluginOptions = buildList {
         add(processor.option(MoshiCommandLineProcessor.OPTION_ENABLED, "true"))
-        // Enable when needed for extra debugging
-        add(processor.option(MoshiCommandLineProcessor.OPTION_DEBUG, "false"))
         add(processor.option(MoshiCommandLineProcessor.OPTION_ENABLE_SEALED, "true"))
         if (generatedAnnotation != null) {
           processor.option(

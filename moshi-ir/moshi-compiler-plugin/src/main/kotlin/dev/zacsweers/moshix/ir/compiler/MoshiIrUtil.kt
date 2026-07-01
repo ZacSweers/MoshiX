@@ -7,9 +7,8 @@ import dev.zacsweers.moshix.ir.compiler.api.DelegateKey
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.api.TargetProperty
 import dev.zacsweers.moshix.ir.compiler.util.error
-import dev.zacsweers.moshix.ir.compiler.util.locationIn
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
+import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.ir.declarations.IrAnnotationContainer
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrProperty
@@ -85,7 +84,7 @@ private val TargetProperty.isVisible: Boolean
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun TargetProperty.generator(
   originalType: IrClass,
-  errors: MutableList<(logger: MessageCollector) -> Unit>,
+  errors: MutableList<(diagnosticReporter: IrDiagnosticReporter) -> Unit>,
 ): PropertyGenerator? {
   if (jsonIgnore) {
     if (!hasDefault) {
@@ -118,7 +117,7 @@ internal fun TargetProperty.generator(
     // Check Java types since that covers both Java and Kotlin annotations.
     if (retention != "RUNTIME") {
       errors += {
-        it.error({ jsonQualifier.locationIn(originalType.file) }) {
+        it.error(jsonQualifier, originalType.file) {
           "JsonQualifier @${qualifierRawType.name} must have RUNTIME retention"
         }
       }

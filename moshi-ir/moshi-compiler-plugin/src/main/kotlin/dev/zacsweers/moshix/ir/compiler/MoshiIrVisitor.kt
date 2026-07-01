@@ -9,8 +9,7 @@ import dev.zacsweers.moshix.ir.compiler.sealed.SealedAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
@@ -18,7 +17,6 @@ import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
-import org.jetbrains.kotlin.ir.util.dumpKotlinLike
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAnnotation
@@ -31,11 +29,9 @@ internal data class GeneratedAdapter(val adapterClass: IrDeclaration, val irFile
 internal class MoshiIrVisitor(
   moduleFragment: IrModuleFragment,
   private val pluginContext: IrPluginContext,
-  private val messageCollector: MessageCollector,
   private val generatedAnnotation: IrClassSymbol?,
   private val enableSealed: Boolean,
   private val deferredAddedClasses: MutableList<GeneratedAdapter>,
-  private val debug: Boolean,
 ) : IrElementTransformerVoidWithContext() {
 
   private val moshiSymbols by lazy {
@@ -45,15 +41,15 @@ internal class MoshiIrVisitor(
   private val moshiSealedSymbols by lazy { MoshiSealedSymbols(moshiSymbols) }
 
   private fun adapterGenerator(originalType: IrClass): MoshiAdapterGenerator? {
-    val type = targetType(originalType, pluginContext, messageCollector) ?: return null
+    val type = targetType(originalType, pluginContext) ?: return null
 
     val properties = mutableMapOf<String, PropertyGenerator>()
     for (property in type.properties.values) {
-      val errors = mutableListOf<(MessageCollector) -> Unit>()
+      val errors = mutableListOf<(IrDiagnosticReporter) -> Unit>()
       val generator = property.generator(originalType, errors)
       if (errors.isNotEmpty()) {
         for (error in errors) {
-          error(messageCollector)
+          error(pluginContext.diagnosticReporter)
         }
         return null
       }
@@ -65,7 +61,7 @@ internal class MoshiIrVisitor(
     for ((name, parameter) in type.constructor.parameters) {
       if (type.properties[parameter.name] == null && !parameter.hasDefault) {
         // TODO would be nice if we could pass the parameter node directly?
-        messageCollector.error(originalType) {
+        pluginContext.diagnosticReporter.error(originalType) {
           "No property for required constructor parameter $name"
         }
         return null
@@ -103,7 +99,6 @@ internal class MoshiIrVisitor(
             if (enableSealed && labelKey != null) {
               SealedAdapterGenerator(
                 pluginContext = pluginContext,
-                logger = messageCollector,
                 moshiSymbols = moshiSymbols,
                 moshiSealedSymbols = moshiSealedSymbols,
                 target = declaration,
@@ -123,16 +118,9 @@ internal class MoshiIrVisitor(
           if (generatedAnnotation != null) {
             // TODO add generated annotation
           }
-          if (debug) {
-            val irSrc = adapterClass.adapterClass.dumpKotlinLike()
-            messageCollector.report(
-              CompilerMessageSeverity.STRONG_WARNING,
-              "MOSHI: Dumping current IR src for ${adapterClass.adapterClass.name}\n$irSrc",
-            )
-          }
           deferredAddedClasses += GeneratedAdapter(adapterClass.adapterClass, declaration.file)
         } catch (e: Exception) {
-          messageCollector.error(declaration) {
+          pluginContext.diagnosticReporter.error(declaration) {
             "Error preparing adapter for ${declaration.fqNameWhenAvailable}"
           }
           throw e

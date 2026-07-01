@@ -2,16 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.moshix.ir.compiler.util
 
+import dev.zacsweers.moshix.ir.compiler.MoshiDiagnostics
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.builtins.PrimitiveType
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
@@ -22,6 +20,7 @@ import org.jetbrains.kotlin.ir.builders.irByte
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irChar
 import org.jetbrains.kotlin.ir.builders.irConcat
+import org.jetbrains.kotlin.ir.builders.irGetObject
 import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irLong
 import org.jetbrains.kotlin.ir.builders.irNull
@@ -48,11 +47,12 @@ import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.getPrimitiveType
+import org.jetbrains.kotlin.ir.types.isNothing
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
-import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.ir.types.isUnit
+import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.util.allOverridden
 import org.jetbrains.kotlin.ir.util.erasedUpperBound
-import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.hasAnnotation
@@ -65,42 +65,22 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
-/*
- * Adapted from Zipline: https://github.com/cashapp/zipline/blob/06f9f5d735/zipline-kotlin-plugin-hosted/src/main/kotlin/app/cash/zipline/kotlin/ir.kt
- */
+private val JAVA_LANG_VOID = FqName("java.lang.Void")
 
-/** Finds the line and column of [this] within its file. */
-internal fun IrDeclaration.location(): CompilerMessageSourceLocation {
-  return locationIn(file)
+internal inline fun IrDiagnosticReporter.error(message: () -> String) {
+  report(MoshiDiagnostics.SOURCELESS_MOSHI_ERROR, message())
 }
 
-/** Finds the line and column of [this] within this [file]. */
-internal fun IrElement?.locationIn(file: IrFile): CompilerMessageSourceLocation {
-  val sourceRangeInfo =
-    file.fileEntry.getSourceRangeInfo(
-      beginOffset = this?.startOffset ?: SYNTHETIC_OFFSET,
-      endOffset = this?.endOffset ?: SYNTHETIC_OFFSET,
-    )
-  return CompilerMessageLocationWithRange.create(
-    path = sourceRangeInfo.filePath,
-    lineStart = sourceRangeInfo.startLineNumber + 1,
-    columnStart = sourceRangeInfo.startColumnNumber + 1,
-    lineEnd = sourceRangeInfo.endLineNumber + 1,
-    columnEnd = sourceRangeInfo.endColumnNumber + 1,
-    lineContent = null,
-  )!!
+internal inline fun IrDiagnosticReporter.error(declaration: IrDeclaration, message: () -> String) {
+  at(declaration).report(MoshiDiagnostics.MOSHI_ERROR, message())
 }
 
-internal inline fun MessageCollector.error(message: () -> String) = error(null, message)
-
-internal inline fun MessageCollector.error(declaration: IrDeclaration, message: () -> String) =
-  error(declaration::location, message)
-
-internal inline fun MessageCollector.error(
-  noinline location: (() -> CompilerMessageSourceLocation)?,
+internal inline fun IrDiagnosticReporter.error(
+  element: IrElement,
+  file: IrFile,
   message: () -> String,
 ) {
-  report(CompilerMessageSeverity.ERROR, message(), location?.invoke())
+  at(element, file).report(MoshiDiagnostics.MOSHI_ERROR, message())
 }
 
 internal fun IrFunction.buildBlockBody(
@@ -132,29 +112,32 @@ internal fun IrPluginContext.irType(
     .findClass(classId)!!
     .createType(hasQuestionMark = nullable, arguments = arguments)
 
-// returns null: Any? for boxed types and 0: <number type> for primitives
+// Returns a type-compatible placeholder for constructor arguments that are ignored by default masks.
 internal fun IrBuilderWithScope.defaultPrimitiveValue(
   type: IrType,
   pluginContext: IrPluginContext,
 ): IrExpression {
-  // TODO check unit/void/nothing
-  val defaultPrimitive: IrExpression? =
-    if (type.isMarkedNullable()) {
-      null
-    } else {
-      when (type.getPrimitiveType()) {
-        PrimitiveType.BOOLEAN -> irBoolean(false)
-        PrimitiveType.CHAR -> irChar(0.toChar())
-        PrimitiveType.BYTE -> irByte(0)
-        PrimitiveType.SHORT -> irShort(0)
-        PrimitiveType.INT -> irInt(0)
-        PrimitiveType.FLOAT -> 0.0f.toIrConst(type)
-        PrimitiveType.LONG -> irLong(0L)
-        PrimitiveType.DOUBLE -> 0.0.toIrConst(type)
-        else -> null
-      }
-    }
-  return defaultPrimitive ?: irNull(pluginContext.irBuiltIns.anyNType)
+  if (type.isUnit()) return irGetObject(pluginContext.irBuiltIns.unitClass)
+  if (type.isMarkedNullable() || type.isNothing() || type.isJavaLangVoid()) {
+    return irNull(type.makeNullable())
+  }
+
+  return when (type.getPrimitiveType()) {
+    PrimitiveType.BOOLEAN -> irBoolean(false)
+    PrimitiveType.CHAR -> irChar(0.toChar())
+    PrimitiveType.BYTE -> irByte(0)
+    PrimitiveType.SHORT -> irShort(0)
+    PrimitiveType.INT -> irInt(0)
+    PrimitiveType.FLOAT -> 0.0f.toIrConst(type)
+    PrimitiveType.LONG -> irLong(0L)
+    PrimitiveType.DOUBLE -> 0.0.toIrConst(type)
+    else -> irNull(type.makeNullable())
+  }
+}
+
+@OptIn(UnsafeDuringIrConstructionAPI::class)
+private fun IrType.isJavaLangVoid(): Boolean {
+  return classOrNull?.owner?.fqNameWhenAvailable == JAVA_LANG_VOID
 }
 
 internal val IrProperty.type: IrType
