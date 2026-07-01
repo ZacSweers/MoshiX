@@ -3,13 +3,11 @@
 package dev.zacsweers.moshix.ir.compiler
 
 import com.google.auto.service.AutoService
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import dev.zacsweers.moshix.ir.compiler.fir.MoshiFirExtensionRegistrar
-import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
-import org.jetbrains.kotlin.compiler.plugin.registerExtension
 import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 import org.jetbrains.kotlin.name.ClassId
 
 @AutoService(CompilerPluginRegistrar::class)
@@ -25,10 +23,22 @@ public class MoshiComponentRegistrar : CompilerPluginRegistrar() {
     val enableSealed = configuration[KEY_ENABLE_SEALED] == true
 
     val fqGeneratedAnnotation = configuration[KEY_GENERATED_ANNOTATION]?.let(ClassId::fromString)
+    val compatContext =
+      try {
+        CompatContext.create()
+      } catch (t: Throwable) {
+        System.err.println(
+          "[MoshiX] Skipping enabling MoshiX extensions, unable to create CompatContext"
+        )
+        t.printStackTrace()
+        return
+      }
 
-    FirExtensionRegistrar.registerExtension(MoshiFirExtensionRegistrar(enableSealed))
-    IrGenerationExtension.registerExtension(
-      MoshiIrGenerationExtension(fqGeneratedAnnotation, enableSealed)
-    )
+    with(compatContext) {
+      registerFirExtensionCompat(MoshiFirExtensionRegistrar(enableSealed, compatContext))
+      registerIrExtensionCompat(
+        MoshiIrGenerationExtension(fqGeneratedAnnotation, enableSealed, compatContext)
+      )
+    }
   }
 }
