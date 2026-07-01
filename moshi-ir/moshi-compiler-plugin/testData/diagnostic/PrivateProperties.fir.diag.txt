@@ -1,0 +1,1 @@
+/PrivateProperties.kt:(84,198): error: property a is not visible

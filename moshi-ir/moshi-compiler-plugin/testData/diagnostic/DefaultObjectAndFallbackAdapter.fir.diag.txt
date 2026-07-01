@@ -1,0 +1,1 @@
+/DefaultObjectAndFallbackAdapter.kt:(570,794): error: Only one of @DefaultObject, @DefaultNull, or @FallbackJsonAdapter can be used at a time.

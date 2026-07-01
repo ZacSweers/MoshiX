@@ -4,6 +4,7 @@ Changelog
 **Unreleased**
 --------------
 
+- [moshi-ir] Migrate most diagnostic errors to FIR.
 - [moshi-ir] Remove usages of `MessageCollector`.
 
 0.36.0

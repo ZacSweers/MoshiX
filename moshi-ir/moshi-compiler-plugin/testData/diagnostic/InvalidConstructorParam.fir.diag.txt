@@ -1,0 +1,1 @@
+/InvalidConstructorParam.kt:(278,457): error: Fallback adapter type's primary constructor can only have a Moshi parameter

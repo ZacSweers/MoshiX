@@ -1,1 +1,0 @@
-/EnumClassesNotSupported.kt:(146,216): error: @JsonClass with 'generateAdapter = "true"' can't be applied to test.KotlinEnum: code gen for enums is not supported or necessary

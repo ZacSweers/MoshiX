@@ -1,1 +1,0 @@
-/NonRuntimeQualifier.kt:(551,561): error: JsonQualifier @UpperCase must have RUNTIME retention

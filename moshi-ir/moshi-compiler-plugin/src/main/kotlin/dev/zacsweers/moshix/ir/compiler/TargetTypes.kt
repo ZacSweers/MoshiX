@@ -6,116 +6,31 @@ import dev.zacsweers.moshix.ir.compiler.api.TargetConstructor
 import dev.zacsweers.moshix.ir.compiler.api.TargetParameter
 import dev.zacsweers.moshix.ir.compiler.api.TargetProperty
 import dev.zacsweers.moshix.ir.compiler.api.TargetType
-import dev.zacsweers.moshix.ir.compiler.util.checkIsVisible
-import dev.zacsweers.moshix.ir.compiler.util.error
 import dev.zacsweers.moshix.ir.compiler.util.isTransient
-import dev.zacsweers.moshix.ir.compiler.util.rawType
 import org.jetbrains.kotlin.DeprecatedForRemovalCompilerApi
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
-import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.util.defaultType
-import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.hasDefaultValue
-import org.jetbrains.kotlin.ir.util.isEnumClass
-import org.jetbrains.kotlin.ir.util.isFromJava
-import org.jetbrains.kotlin.ir.util.isLocal
 import org.jetbrains.kotlin.ir.util.nonDispatchParameters
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
 
-/** Returns a target type for [type] or null if it cannot be used with code gen. */
 internal fun targetType(
   type: IrClass,
   pluginContext: IrPluginContext,
-): TargetType? {
-  if (type.isEnumClass) {
-    pluginContext.diagnosticReporter.error(type) {
-      "@JsonClass with 'generateAdapter = \"true\"' can't be applied to ${type.fqNameWhenAvailable}: code gen for enums is not supported or necessary"
-    }
-    return null
-  }
-  if (type.kind != ClassKind.CLASS) {
-    pluginContext.diagnosticReporter.error(type) {
-      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be a Kotlin class"
-    }
-    return null
-  }
-  if (type.isInner) {
-    pluginContext.diagnosticReporter.error(type) {
-      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be an inner class"
-    }
-    return null
-  }
-  if (type.modality == Modality.SEALED) {
-    pluginContext.diagnosticReporter.error(type) {
-      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be sealed"
-    }
-    return null
-  }
-  if (type.modality == Modality.ABSTRACT) {
-    pluginContext.diagnosticReporter.error(type) {
-      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be abstract"
-    }
-    return null
-  }
-  if (type.isLocal) {
-    pluginContext.diagnosticReporter.error(type) {
-      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must not be local"
-    }
-    return null
-  }
-  val isNotPublicOrInternal =
-    type.visibility != DescriptorVisibilities.PUBLIC &&
-      type.visibility != DescriptorVisibilities.INTERNAL
-  if (isNotPublicOrInternal) {
-    pluginContext.diagnosticReporter.error(type) {
-      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: must be internal or public"
-    }
-    return null
-  }
-
+): TargetType {
   val typeVariables = type.typeParameters
   val appliedType = AppliedType(type)
-
-  val constructor =
-    primaryConstructor(type)
-      ?: run {
-        pluginContext.diagnosticReporter.error(type) {
-          "No primary constructor found on ${type.fqNameWhenAvailable}"
-        }
-        return null
-      }
-
-  if (
-    constructor.visibility != DescriptorVisibilities.INTERNAL &&
-      constructor.visibility != DescriptorVisibilities.PUBLIC
-  ) {
-    pluginContext.diagnosticReporter.error(constructor.irConstructor) {
-      "@JsonClass can't be applied to ${type.fqNameWhenAvailable}: primary constructor is not internal or public"
-    }
-    return null
-  }
+  val constructor = primaryConstructor(type)
 
   val properties = mutableMapOf<String, TargetProperty>()
   for (superclass in appliedType.superclasses(pluginContext)) {
     val classDecl = superclass.type
-    if (classDecl.isFromJava()) {
-      pluginContext.diagnosticReporter.error(type) {
-        """
-          @JsonClass can't be applied to ${type.fqNameWhenAvailable}: supertype $superclass is not a Kotlin type.
-          Origin=${classDecl.origin}
-          Annotations=${classDecl.annotations.joinToString(prefix = "[", postfix = "]") { it.type.rawType().name.identifier }}
-          """
-          .trimIndent()
-      }
-      return null
-    }
     val supertypeProperties = declaredProperties(constructor = constructor, classDecl = classDecl)
     for ((name, property) in supertypeProperties) {
       properties.putIfAbsent(name, property)
@@ -136,10 +51,6 @@ internal fun targetType(
           .any { it.visibility == DescriptorVisibilities.INTERNAL }
       if (forceInternal) DescriptorVisibilities.INTERNAL else visibility
     }
-  resolvedVisibility.checkIsVisible { message ->
-    pluginContext.diagnosticReporter.error(type) { message }
-    return null
-  }
   return TargetType(
     irClass = type,
     irType = type.defaultType,
@@ -152,8 +63,8 @@ internal fun targetType(
 }
 
 @OptIn(UnsafeDuringIrConstructionAPI::class, DeprecatedForRemovalCompilerApi::class)
-internal fun primaryConstructor(targetType: IrClass): TargetConstructor? {
-  val primaryConstructor = targetType.primaryConstructor ?: return null
+internal fun primaryConstructor(targetType: IrClass): TargetConstructor {
+  val primaryConstructor = targetType.primaryConstructor!!
 
   val parameters = LinkedHashMap<String, TargetParameter>()
   for (parameter in primaryConstructor.nonDispatchParameters) {
@@ -171,7 +82,7 @@ internal fun primaryConstructor(targetType: IrClass): TargetConstructor? {
       )
   }
 
-  return TargetConstructor(primaryConstructor, parameters, primaryConstructor.visibility)
+  return TargetConstructor(primaryConstructor, parameters)
 }
 
 @OptIn(UnsafeDuringIrConstructionAPI::class)
@@ -189,7 +100,6 @@ private fun declaredProperties(
       TargetProperty(
         property = property,
         parameter = parameter,
-        visibility = property.visibility,
         jsonName = property.jsonNameFromAnywhere() ?: parameter?.jsonName ?: name,
         jsonIgnore =
           isTransient || parameter?.jsonIgnore == true || property.jsonIgnoreFromAnywhere(),

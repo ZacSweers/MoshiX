@@ -1,0 +1,1 @@
+/InterfacesNotSupported.kt:(84,138): error: @JsonClass can't be applied to test.Interface: must be a Kotlin class

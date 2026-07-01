@@ -1,6 +1,4 @@
-// RUN_PIPELINE_TILL: FIR2IR
-// DISABLE_GENERATED_FIR_TAGS
-// RENDER_IR_DIAGNOSTICS_FULL_TEXT
+// RENDER_DIAGNOSTICS_FULL_TEXT
 
 package test
 
@@ -29,4 +27,3 @@ sealed class BaseType {
   @DefaultObject
   object TypeB : BaseType()
 }<!>
-

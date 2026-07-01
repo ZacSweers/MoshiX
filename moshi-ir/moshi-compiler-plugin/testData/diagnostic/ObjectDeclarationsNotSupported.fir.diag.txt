@@ -1,0 +1,1 @@
+/ObjectDeclarationsNotSupported.kt:(119,143): error: @JsonClass can't be applied to test.ObjectDeclaration: must be a Kotlin class
