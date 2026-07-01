@@ -95,6 +95,8 @@ val generateTests =
 
 tasks.compileTestKotlin { dependsOn(generateTests) }
 
+tasks.compileTestJava { dependsOn(generateTests) }
+
 tasks
   .matching { it.name == "lintAnalyzeJvmTest" || it.name == "generateJvmTestLintModel" }
   .configureEach { dependsOn(generateTests) }

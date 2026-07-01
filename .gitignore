@@ -39,6 +39,7 @@ Icon
 # Generated files
 bin/
 gen/
+moshi-ir/moshi-compiler-plugin/test-gen/
 
 # Gradle files
 .gradle/

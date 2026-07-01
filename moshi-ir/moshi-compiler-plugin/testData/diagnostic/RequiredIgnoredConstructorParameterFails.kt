@@ -1,5 +1,7 @@
-// Copyright (C) 2026 Zac Sweers
-// SPDX-License-Identifier: Apache-2.0
+// RUN_PIPELINE_TILL: FIR2IR
+// DISABLE_GENERATED_FIR_TAGS
+// RENDER_IR_DIAGNOSTICS_FULL_TEXT
+
 package test
 
 import com.squareup.moshi.Json

@@ -1,5 +1,7 @@
-// Copyright (C) 2026 Zac Sweers
-// SPDX-License-Identifier: Apache-2.0
+// RUN_PIPELINE_TILL: BACKEND
+// DISABLE_GENERATED_FIR_TAGS
+// RENDER_IR_DIAGNOSTICS_FULL_TEXT
+
 package test
 
 import com.squareup.moshi.Json
@@ -12,3 +14,4 @@ data class IgnoredDefaults(
   @Json(ignore = true) val void: java.lang.Void = error("unused"),
   val value: String = "value",
 )
+
