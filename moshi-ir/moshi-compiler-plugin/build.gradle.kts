@@ -91,7 +91,6 @@ tasks.named<ShadowJar>("shadowJar") {
 
   exclude("module-info.class")
   exclude("META-INF/versions/*/module-info.class")
-  exclude("META-INF/*.kotlin_module")
 
   relocate("dev.zacsweers.metro", "dev.zacsweers.moshix.shaded.metro")
 
