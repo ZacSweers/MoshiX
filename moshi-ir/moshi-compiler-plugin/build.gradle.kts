@@ -1,5 +1,7 @@
 // Copyright (C) 2026 Zac Sweers
 // SPDX-License-Identifier: Apache-2.0
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -9,6 +11,7 @@ plugins {
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.ksp)
   alias(libs.plugins.lint)
+  alias(libs.plugins.mavenShadow)
   idea
 }
 
@@ -24,14 +27,25 @@ idea { module.generatedSourceDirs.add(projectDir.resolve("test-gen/java")) }
 
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
+    jvmTarget.set(JvmTarget.JVM_21)
     freeCompilerArgs.addAll("-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
   }
 }
+
+tasks.withType<JavaCompile>().configureEach { options.release.set(21) }
 
 val moshiRuntime = configurations.dependencyScope("moshiRuntime")
 
 val moshiRuntimeClasspath =
   configurations.resolvable("moshiRuntimeClasspath") { extendsFrom(moshiRuntime.get()) }
+
+val embedded = configurations.dependencyScope("embedded")
+
+val embeddedClasspath = configurations.resolvable("embeddedClasspath") { extendsFrom(embedded) }
+
+configurations.named("compileOnly").configure { extendsFrom(embedded.get()) }
+
+configurations.named("testImplementation").configure { extendsFrom(embedded.get()) }
 
 dependencies {
   implementation(libs.moshi)
@@ -41,6 +55,8 @@ dependencies {
   compileOnly(libs.kotlin.compilerEmbeddable)
   compileOnly(libs.autoService)
   runtimeOnly(libs.moshi.kotlinCodegen)
+
+  add("embedded", libs.metro.compilerCompat.latest)
 
   testFixturesApi(libs.kotlin.testJunit5)
   testFixturesApi(libs.kotlin.compilerTestFramework)
@@ -55,6 +71,40 @@ dependencies {
   testRuntimeOnly(libs.kotlin.test)
   testRuntimeOnly(libs.kotlin.scriptRuntime)
   testRuntimeOnly(libs.kotlin.annotationsJvm)
+}
+
+tasks.jar.configure { enabled = false }
+
+tasks.named<ShadowJar>("shadowJar") {
+  archiveClassifier.set("")
+  from(sourceSets.main.map { it.output })
+  configurations = listOf(embeddedClasspath.get())
+
+  dependencies {
+    exclude(dependency("org.jetbrains:.*"))
+    exclude(dependency("org.intellij:.*"))
+    exclude(dependency("org.jetbrains.kotlin:.*"))
+  }
+
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+  mergeServiceFiles()
+
+  exclude("module-info.class")
+  exclude("META-INF/versions/*/module-info.class")
+  exclude("META-INF/*.kotlin_module")
+
+  relocate("dev.zacsweers.metro", "dev.zacsweers.moshix.shaded.metro")
+
+  // Ignore the test fixtures and test source sets
+  sourceSetsClassesDirs.setFrom(
+    java.sourceSets.main.map { it.output.classesDirs.filter { dir -> dir.isDirectory } }
+  )
+  minimize { exclude(dependency("dev.zacsweers.metro:compiler-compat.*:.*")) }
+}
+
+for (c in arrayOf("apiElements", "runtimeElements")) {
+  configurations.named(c) { artifacts.removeIf { true } }
+  artifacts.add(c, tasks.named("shadowJar"))
 }
 
 tasks.test {
