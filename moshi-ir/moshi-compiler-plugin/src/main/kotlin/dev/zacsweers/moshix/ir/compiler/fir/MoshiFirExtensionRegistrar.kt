@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.fir.analysis.checkers.declaration.FirClassChecker
 import org.jetbrains.kotlin.fir.analysis.extensions.FirAdditionalCheckersExtension
 import org.jetbrains.kotlin.fir.declarations.FirClass
 import org.jetbrains.kotlin.fir.declarations.FirDeclaration
+import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
 import org.jetbrains.kotlin.fir.declarations.FirRegularClass
 import org.jetbrains.kotlin.fir.declarations.extractEnumValueArgumentInfo
 import org.jetbrains.kotlin.fir.declarations.findArgumentByName
@@ -35,7 +36,6 @@ import org.jetbrains.kotlin.fir.declarations.utils.isAbstract
 import org.jetbrains.kotlin.fir.declarations.utils.isEnumClass
 import org.jetbrains.kotlin.fir.declarations.utils.isInner
 import org.jetbrains.kotlin.fir.declarations.utils.isJava
-import org.jetbrains.kotlin.fir.declarations.utils.isLocal
 import org.jetbrains.kotlin.fir.declarations.utils.isSealed
 import org.jetbrains.kotlin.fir.declarations.utils.visibility
 import org.jetbrains.kotlin.fir.expressions.FirAnnotation
@@ -157,7 +157,13 @@ private class FirMoshiDeclarationChecker(private val enableSealed: Boolean) :
         )
         return
       }
-      for (property in appliedClass.declaredProperties(context.session, constructorParameters)) {
+      for (property in
+        appliedClass.declaredProperties(
+          context.session,
+          constructorParameters,
+          skipPrivateLibraryProperties =
+            appliedClass !== declaration && appliedClass.origin == FirDeclarationOrigin.Library,
+        )) {
         properties.putIfAbsent(property.name, property)
       }
     }
@@ -465,10 +471,17 @@ private data class FirTargetProperty(
 private fun FirRegularClass.declaredProperties(
   session: FirSession,
   constructorParameters: Map<String, FirValueParameterSymbol>,
+  skipPrivateLibraryProperties: Boolean,
 ): List<FirTargetProperty> {
   val properties = mutableListOf<FirTargetProperty>()
   processAllDeclarations(session) { symbol ->
     if (symbol is FirPropertySymbol) {
+      // JVM transient is a field flag, not a metadata annotation, for compiled dependencies.
+      if (
+        skipPrivateLibraryProperties && symbol.resolvedStatus.visibility == Visibilities.Private
+      ) {
+        return@processAllDeclarations
+      }
       val parameter = constructorParameters[symbol.name.asString()]
       properties +=
         FirTargetProperty(
@@ -564,7 +577,10 @@ private fun FirValueParameterSymbol.jsonIgnore(session: FirSession): Boolean {
 }
 
 private fun FirPropertySymbol.isTransient(session: FirSession): Boolean {
-  return backingFieldSymbol?.hasAnnotation(StandardClassIds.Annotations.Transient, session) == true
+  return hasAnnotation(TRANSIENT, session) ||
+    backingFieldSymbol?.hasAnnotation(TRANSIENT, session) == true ||
+    hasAnnotation(StandardClassIds.Annotations.Transient, session) ||
+    backingFieldSymbol?.hasAnnotation(StandardClassIds.Annotations.Transient, session) == true
 }
 
 private fun FirPropertySymbol.jsonIgnoreFromAnywhere(session: FirSession): Boolean {
@@ -590,6 +606,7 @@ private val FirAnnotation.jsonIgnore: Boolean
 private val JSON = ClassId.topLevel(FqName("com.squareup.moshi.Json"))
 private val JSON_CLASS = ClassId.topLevel(FqName("com.squareup.moshi.JsonClass"))
 private val JSON_QUALIFIER = ClassId.topLevel(FqName("com.squareup.moshi.JsonQualifier"))
+private val TRANSIENT = ClassId.topLevel(FqName("kotlin.jvm.Transient"))
 private val MOSHI = ClassId.topLevel(FqName("com.squareup.moshi.Moshi"))
 private val DEFAULT_NULL =
   ClassId.topLevel(FqName("dev.zacsweers.moshix.sealed.annotations.DefaultNull"))
