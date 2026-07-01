@@ -17,6 +17,8 @@ exclude = [
   "**/build/**",
   "**/.gradle/**",
   "**/Dependencies.kt",
+  "**/testData/**/*.kt",
+  "**/test-gen/java/**/*.java",
 ]
 
 [ktfmt.paths]

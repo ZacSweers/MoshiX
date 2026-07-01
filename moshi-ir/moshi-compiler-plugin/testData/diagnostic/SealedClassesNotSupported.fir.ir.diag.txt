@@ -1,0 +1,1 @@
+/SealedClassesNotSupported.kt:(146,217): error: @JsonClass can't be applied to test.SealedClass: must not be sealed

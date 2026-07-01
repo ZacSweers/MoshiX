@@ -1,0 +1,1 @@
+/InnerClassesNotSupported.kt:(162,233): error: @JsonClass can't be applied to test.Outer.InnerClass: must not be an inner class

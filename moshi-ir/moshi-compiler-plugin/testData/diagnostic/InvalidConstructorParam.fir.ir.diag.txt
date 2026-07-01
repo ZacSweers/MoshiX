@@ -1,0 +1,1 @@
+/InvalidConstructorParam.kt:(340,519): error: Fallback adapter type's primary constructor can only have a Moshi parameter. Found TYPE_PARAMETER name:T index:0 variance: superTypes:[kotlin.Any] reified:false
