@@ -25,8 +25,12 @@ class MoshiExtensionRegistrarConfigurator(testServices: TestServices) :
     configuration: CompilerConfiguration,
   ) {
     val commandLineProcessor = MoshiCommandLineProcessor()
-    for ((name, value) in listOf("enabled" to "true", "enableSealed" to "true")) {
-      val option = commandLineProcessor.pluginOptions.single { it.optionName == name }
+    val options =
+      listOf(
+        MoshiCommandLineProcessor.OPTION_ENABLED to "true",
+        MoshiCommandLineProcessor.OPTION_ENABLE_SEALED to "true",
+      )
+    for ((option, value) in options) {
       commandLineProcessor.processOption(option, value, configuration)
     }
     with(MoshiComponentRegistrar()) { registerExtensions(configuration) }
