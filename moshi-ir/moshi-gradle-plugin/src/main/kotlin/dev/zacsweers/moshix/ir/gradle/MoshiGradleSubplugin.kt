@@ -73,7 +73,6 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     return project.provider {
       buildList {
         add(SubpluginOption(key = "enabled", value = extension.enabled.get().toString()))
-        add(SubpluginOption(key = "debug", value = extension.debug.get().toString()))
         add(SubpluginOption(key = "enableSealed", value = enableSealed.toString()))
         if (generatedAnnotation != null) {
           add(SubpluginOption(key = "generatedAnnotation", value = generatedAnnotation))

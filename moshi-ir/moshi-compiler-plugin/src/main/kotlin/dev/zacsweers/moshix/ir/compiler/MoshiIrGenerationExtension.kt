@@ -5,24 +5,22 @@ package dev.zacsweers.moshix.ir.compiler
 import dev.zacsweers.moshix.ir.compiler.util.error
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.name.ClassId
 
 internal class MoshiIrGenerationExtension(
-  private val messageCollector: MessageCollector,
   private val generatedAnnotationName: ClassId?,
   private val enableSealed: Boolean,
-  private val debug: Boolean,
 ) : IrGenerationExtension {
 
   @OptIn(UnsafeDuringIrConstructionAPI::class)
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
+    val diagnosticReporter = pluginContext.diagnosticReporter
     val generatedAnnotation = generatedAnnotationName?.let { name ->
       pluginContext.finderForBuiltins().findClass(name).also {
         if (it == null) {
-          messageCollector.error { "Unknown generated annotation $generatedAnnotationName" }
+          diagnosticReporter.error { "Unknown generated annotation $generatedAnnotationName" }
           return
         }
       }
@@ -32,11 +30,9 @@ internal class MoshiIrGenerationExtension(
       MoshiIrVisitor(
         moduleFragment,
         pluginContext,
-        messageCollector,
         generatedAnnotation,
         enableSealed,
         deferred,
-        debug,
       )
     moduleFragment.transform(moshiTransformer, null)
     for ((file, adapters) in deferred.groupBy { it.irFile }) {

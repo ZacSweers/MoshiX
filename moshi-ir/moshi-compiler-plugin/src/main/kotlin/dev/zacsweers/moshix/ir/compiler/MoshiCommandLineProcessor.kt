@@ -11,8 +11,6 @@ import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
 internal val KEY_ENABLED =
   CompilerConfigurationKey<Boolean>("Enable/disable MoshiX's plugins on the given compilation")
-internal val KEY_DEBUG =
-  CompilerConfigurationKey<Boolean>("Enable/disable debug logging on the given compilation")
 internal val KEY_GENERATED_ANNOTATION =
   CompilerConfigurationKey<String>(
     "The FQCN to a generated (i.e. javax/annotation/processing/Generated) annotation to include on generated code"
@@ -29,14 +27,6 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
         valueDescription = "<true | false>",
         description = KEY_ENABLED.toString(),
         required = true,
-        allowMultipleOccurrences = false,
-      )
-    val OPTION_DEBUG =
-      CliOption(
-        optionName = "debug",
-        valueDescription = "<true | false>",
-        description = KEY_DEBUG.toString(),
-        required = false,
         allowMultipleOccurrences = false,
       )
     val OPTION_ENABLE_SEALED =
@@ -60,7 +50,7 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
   override val pluginId: String = "dev.zacsweers.moshix.compiler"
 
   override val pluginOptions: Collection<AbstractCliOption> =
-    listOf(OPTION_DEBUG, OPTION_ENABLED, OPTION_ENABLE_SEALED, OPTION_GENERATED_ANNOTATION)
+    listOf(OPTION_ENABLED, OPTION_ENABLE_SEALED, OPTION_GENERATED_ANNOTATION)
 
   override fun processOption(
     option: AbstractCliOption,
@@ -69,7 +59,6 @@ public class MoshiCommandLineProcessor : CommandLineProcessor {
   ): Unit =
     when (option.optionName) {
       "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
-      "debug" -> configuration.put(KEY_DEBUG, value.toBoolean())
       "enableSealed" -> configuration.put(KEY_ENABLE_SEALED, value.toBoolean())
       "generatedAnnotation" -> configuration.put(KEY_GENERATED_ANNOTATION, value)
       else -> error("Unknown plugin option: ${option.optionName}")

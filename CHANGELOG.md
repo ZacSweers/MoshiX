@@ -4,6 +4,8 @@ Changelog
 **Unreleased**
 --------------
 
+- [moshi-ir] Remove usages of `MessageCollector`.
+
 0.36.0
 ------
 

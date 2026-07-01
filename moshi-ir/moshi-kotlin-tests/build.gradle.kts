@@ -15,15 +15,6 @@ kotlin.compilerOptions.optIn.add("kotlin.ExperimentalStdlibApi")
 
 moshi { enableSealed.set(true) }
 
-kotlin {
-  compilerOptions {
-    freeCompilerArgs.add(
-      // https://youtrack.jetbrains.com/issue/KT-73255
-      "-Xannotation-default-target=param-property"
-    )
-  }
-}
-
 val r8Test = gradle.startParameter.taskNames.any { it.contains("testR8", ignoreCase = true) }
 
 dependencyAnalysis {
@@ -59,7 +50,7 @@ configurations.configureEach {
 }
 
 // R8 test infrastructure
-val r8Configuration: Configuration by configurations.creating
+val r8Configuration: Configuration = configurations.create("r8Configuration")
 
 dependencies { r8Configuration("com.android.tools:r8:9.1.31") }
 

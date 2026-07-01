@@ -17,7 +17,6 @@ import dev.zacsweers.moshix.ir.compiler.util.irType
 import dev.zacsweers.moshix.ir.compiler.util.rawType
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
@@ -80,12 +79,13 @@ import org.jetbrains.kotlin.name.Name
 internal class SealedAdapterGenerator
 private constructor(
   private val pluginContext: IrPluginContext,
-  private val logger: MessageCollector,
   private val moshiSymbols: MoshiSymbols,
   private val moshiSealedSymbols: MoshiSealedSymbols,
   private val target: IrClass,
   private val labelKey: String,
 ) : AdapterGenerator {
+  private val diagnosticReporter = pluginContext.diagnosticReporter
+
   @OptIn(UnsafeDuringIrConstructionAPI::class)
   override fun prepare(): PreparedAdapter? {
     // If this is a nested sealed type of a moshi-sealed parent, defer to the parent
@@ -109,7 +109,7 @@ private constructor(
 
     sealedParent?.let { (_, parentLabelKey) ->
       if (parentLabelKey == labelKey) {
-        logger.error(target) {
+        diagnosticReporter.error(target) {
           "@NestedSealed-annotated subtype ${target.fqNameWhenAvailable} is inappropriately annotated with @JsonClass(generator = " +
             "\"sealed:$labelKey\")."
         }
@@ -126,7 +126,7 @@ private constructor(
       target.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.FallbackJsonAdapter"))
 
     if (useDefaultNull && (fallbackAdapterAnnotation != null)) {
-      logger.error(target) {
+      diagnosticReporter.error(target) {
         "Only one of @DefaultNull or @FallbackJsonAdapter can be used at a time"
       }
       return null
@@ -139,13 +139,13 @@ private constructor(
       val constructor =
         adapterDeclaration.primaryConstructor
           ?: run {
-            logger.error(adapterDeclaration) {
+            diagnosticReporter.error(adapterDeclaration) {
               "No primary constructor found for fallback adapter ${adapterDeclaration.fqNameWhenAvailable}"
             }
             return null
           }
       constructor.visibility.checkIsVisible { message ->
-        logger.error(adapterDeclaration) { message }
+        diagnosticReporter.error(adapterDeclaration) { message }
         return null
       }
       val hasMoshiParam =
@@ -164,7 +164,7 @@ private constructor(
                 FqNameUnsafe("com.squareup.moshi.Moshi")
               ) != true
             ) {
-              logger.error(target) {
+              diagnosticReporter.error(target) {
                 "Fallback adapter type's primary constructor can only have a Moshi parameter. Found ${moshiParam.type.classifierOrNull}"
               }
               return null
@@ -173,7 +173,7 @@ private constructor(
           }
 
           else -> {
-            logger.error(target) {
+            diagnosticReporter.error(target) {
               "Fallback adapter type's primary constructor can only have a Moshi parameter. Found ${constructor.nonDispatchParameters.joinToString()}"
             }
             return null
@@ -202,7 +202,7 @@ private constructor(
           ) {
             if (useDefaultNull) {
               // Print both for reference
-              logger.error(subtype) {
+              diagnosticReporter.error(subtype) {
                 """
                       Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type: ${target.fqNameWhenAvailable}
                       Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: ${subtype.fqNameWhenAvailable}
@@ -253,7 +253,7 @@ private constructor(
       if (nestedLabelKey != null) {
         // Redundant case
         if (labelKey == nestedLabelKey) {
-          logger.error(subtype) {
+          diagnosticReporter.error(subtype) {
             "Sealed subtype $subtype is redundantly annotated with @JsonClass(generator = " +
               "\"sealed:$nestedLabelKey\")."
           }
@@ -302,12 +302,12 @@ private constructor(
     val labelAnnotation =
       subtype.getAnnotation(FqName("dev.zacsweers.moshix.sealed.annotations.TypeLabel"))
         ?: run {
-          logger.error(subtype) { "Missing @TypeLabel" }
+          diagnosticReporter.error(subtype) { "Missing @TypeLabel" }
           return null
         }
 
     if (subtype.typeParameters.isNotEmpty()) {
-      logger.error(subtype) { "Moshi-sealed subtypes cannot be generic." }
+      diagnosticReporter.error(subtype) { "Moshi-sealed subtypes cannot be generic." }
       return null
     }
 
@@ -317,13 +317,13 @@ private constructor(
     val mainLabel =
       labelAnnotation.constArgumentOfTypeAt<String>(0)
         ?: run {
-          logger.error(subtype) { "No label member for TypeLabel annotation!" }
+          diagnosticReporter.error(subtype) { "No label member for TypeLabel annotation!" }
           return null
         }
 
     seenLabels.put(mainLabel, subtype)?.let { prev ->
       if (prev != subtype) {
-        logger.error(target) {
+        diagnosticReporter.error(target) {
           "Duplicate label '$mainLabel' defined for ${subtype.fqNameWhenAvailable} and ${prev.fqNameWhenAvailable}."
         }
       }
@@ -333,7 +333,7 @@ private constructor(
     if (!skipJsonClassCheck) {
       val labelKey = subtype.getAnnotation(FqName("com.squareup.moshi.JsonClass"))?.labelKey()
       if (labelKey != null) {
-        logger.error(subtype) {
+        diagnosticReporter.error(subtype) {
           "Sealed subtype $subtype is annotated with @JsonClass(generator = \"sealed:$labelKey\") and @TypeLabel."
         }
         return null
@@ -350,7 +350,7 @@ private constructor(
 
     for (alternate in alternates) {
       seenLabels.put(alternate, subtype)?.let { prev ->
-        logger.error(target) {
+        diagnosticReporter.error(target) {
           "Duplicate alternate label '$alternate' defined for ${subtype.fqNameWhenAvailable} and ${prev.fqNameWhenAvailable}."
         }
         return null
@@ -476,22 +476,20 @@ private constructor(
                     finalFallbackStrategy =
                       FallbackStrategy.DefaultObject(defaultObject.className.symbol)
                   } else {
-                    logger.error(target) {
+                    diagnosticReporter.error(target) {
                       "Only one of @DefaultObject, @DefaultNull, or @FallbackJsonAdapter can be used at a time."
                     }
                   }
                 }
 
                 val possiblyWithDefaultExpression =
-                  finalFallbackStrategy?.let {
-                    it.statement(
-                      builder = this,
-                      moshiSealedSymbols = moshiSealedSymbols,
-                      subtypesExpression = subtypesExpression,
-                      targetType = targetType.defaultType,
-                      moshiParam = moshiParam,
-                    )
-                  } ?: subtypesExpression
+                  finalFallbackStrategy?.statement(
+                    builder = this,
+                    moshiSealedSymbols = moshiSealedSymbols,
+                    subtypesExpression = subtypesExpression,
+                    targetType = targetType.defaultType,
+                    moshiParam = moshiParam,
+                  ) ?: subtypesExpression
 
                 // .create(Message::class.java, emptySet(), moshi) as JsonAdapter<Message>
                 irExprBody(
@@ -586,25 +584,23 @@ private constructor(
   companion object {
     operator fun invoke(
       pluginContext: IrPluginContext,
-      logger: MessageCollector,
       moshiSymbols: MoshiSymbols,
       moshiSealedSymbols: MoshiSealedSymbols,
       target: IrClass,
       labelKey: String,
     ): AdapterGenerator? {
       if (target.kind != ClassKind.CLASS && target.kind != ClassKind.INTERFACE) {
-        logger.error(target) {
+        pluginContext.diagnosticReporter.error(target) {
           "@JsonClass can't be applied to ${target.fqNameWhenAvailable}: must be a Kotlin class"
         }
         return null
       }
       if (target.modality != Modality.SEALED) {
-        logger.error(target) { "Must be a sealed class!" }
+        pluginContext.diagnosticReporter.error(target) { "Must be a sealed class!" }
         return null
       }
       return SealedAdapterGenerator(
         pluginContext = pluginContext,
-        logger = logger,
         moshiSymbols = moshiSymbols,
         moshiSealedSymbols = moshiSealedSymbols,
         target = target,

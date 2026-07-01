@@ -9,7 +9,6 @@ plugins {
 tasks.compileTestKotlin {
   compilerOptions {
     optIn.add("kotlin.ExperimentalStdlibApi")
-    freeCompilerArgs.add("-Xannotation-default-target=param-property")
   }
 }
 
