@@ -47,8 +47,8 @@ import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.getPrimitiveType
-import org.jetbrains.kotlin.ir.types.isNothing
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
+import org.jetbrains.kotlin.ir.types.isNothing
 import org.jetbrains.kotlin.ir.types.isUnit
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.util.allOverridden
@@ -112,7 +112,8 @@ internal fun IrPluginContext.irType(
     .findClass(classId)!!
     .createType(hasQuestionMark = nullable, arguments = arguments)
 
-// Returns a type-compatible placeholder for constructor arguments that are ignored by default masks.
+// Returns a type-compatible placeholder for constructor arguments that are ignored by default
+// masks.
 internal fun IrBuilderWithScope.defaultPrimitiveValue(
   type: IrType,
   pluginContext: IrPluginContext,
