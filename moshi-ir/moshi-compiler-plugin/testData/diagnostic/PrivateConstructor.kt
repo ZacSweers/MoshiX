@@ -1,6 +1,4 @@
-// RUN_PIPELINE_TILL: FIR2IR
-// DISABLE_GENERATED_FIR_TAGS
-// RENDER_IR_DIAGNOSTICS_FULL_TEXT
+// RENDER_DIAGNOSTICS_FULL_TEXT
 
 package test
 
@@ -15,4 +13,3 @@ class PrivateConstructor <!MOSHI_ERROR!>private constructor(var a: Int, var b: I
     fun newInstance(a: Int, b: Int) = PrivateConstructor(a, b)
   }
 }
-

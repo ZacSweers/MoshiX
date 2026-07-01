@@ -1,3 +1,0 @@
-/ExtendPlatformType.kt:(168,250): error: @JsonClass can't be applied to test.ExtendsPlatformClass: supertype java.util.Date is not a Kotlin type.
-Origin=IR_EXTERNAL_JAVA_DECLARATION_STUB
-Annotations=[]

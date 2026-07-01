@@ -1,6 +1,4 @@
-// RUN_PIPELINE_TILL: FIR2IR
-// DISABLE_GENERATED_FIR_TAGS
-// RENDER_IR_DIAGNOSTICS_FULL_TEXT
+// RENDER_DIAGNOSTICS_FULL_TEXT
 
 package test
 
@@ -11,4 +9,3 @@ class Class1(private var a: Int, private var b: Int)<!>
 
 <!MOSHI_ERROR!>@JsonClass(generateAdapter = true)
 class Class2(private var c: Int)<!>
-

@@ -1,2 +1,0 @@
-/NullAndDefaultObject.kt:(487,499): error: Cannot have both @DefaultNull and @DefaultObject. @DefaultObject type: test.BaseType
-Cannot have both @DefaultNull and @DefaultObject. @DefaultNull type: test.BaseType.TypeB

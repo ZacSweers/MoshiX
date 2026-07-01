@@ -1,0 +1,1 @@
+/PrivateConstructor.kt:(144,187): error: @JsonClass can't be applied to test.PrivateConstructor: primary constructor is not internal or public

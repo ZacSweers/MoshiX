@@ -6,8 +6,6 @@ import dev.zacsweers.moshix.ir.compiler.MoshiDiagnostics
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.builtins.PrimitiveType
-import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
-import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.ir.IrElement
@@ -147,12 +145,6 @@ internal val IrProperty.type: IrType
       ?: setter?.nonDispatchParameters?.first()?.type
       ?: backingField?.type
       ?: error("No type for property $name")
-
-internal inline fun DescriptorVisibility.checkIsVisible(onError: (String) -> Nothing) {
-  if (this != DescriptorVisibilities.PUBLIC && this != DescriptorVisibilities.INTERNAL) {
-    onError("Visibility must be one of public or internal. Is $name")
-  }
-}
 
 /** Returns the raw [IrClass] of this [IrType] or throws. */
 internal fun IrType.rawType(): IrClass {

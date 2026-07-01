@@ -1,1 +1,0 @@
-/PrivateClassesNotSupported.kt:(146,219): error: @JsonClass can't be applied to test.PrivateClass: must be internal or public

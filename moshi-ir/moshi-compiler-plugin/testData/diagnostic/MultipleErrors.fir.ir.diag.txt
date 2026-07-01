@@ -1,3 +1,0 @@
-/MultipleErrors.kt:(146,233): error: property a is not visible
-
-/MultipleErrors.kt:(235,302): error: property c is not visible
