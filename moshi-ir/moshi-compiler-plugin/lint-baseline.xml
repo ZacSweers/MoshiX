@@ -2,17 +2,6 @@
 <issues format="6" by="lint 8.11.0" type="baseline" client="gradle" dependencies="false" name="AGP (8.11.0)" variant="all" version="8.11.0">
 
     <issue
-        id="IgnoreWithoutReason"
-        message="Test is ignored without giving any explanation"
-        errorLine1="  @Ignore"
-        errorLine2="  ~~~~~~~">
-        <location
-            file="src/test/kotlin/dev/zacsweers/moshix/ir/compiler/MoshiIrVisitorTest.kt"
-            line="387"
-            column="3"/>
-    </issue>
-
-    <issue
         id="KotlincFE10"
         message="org.jetbrains.kotlin.descriptors.ClassKind appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
         errorLine1="      if (supertype.kind != ClassKind.CLASS) continue"
