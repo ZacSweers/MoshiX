@@ -4,6 +4,11 @@ Changelog
 **Unreleased**
 --------------
 
+0.37.0
+------
+
+_2026-07-02_
+
 - [moshi-ir] **Enhancement**: Migrate most diagnostic errors to FIR.
 - [moshi-ir] Remove usages of `MessageCollector`.
 - [moshi-adapters] **Enhancement**: Support kotlin `object` types from `@AdaptedBy`.
