@@ -33,10 +33,10 @@ class AdaptedByTest {
   }
 
   @Test
-  fun javaAdapterPropertyDoesNotUseInstanceField() {
+  fun javaAdapterPropertyUsesInstanceField() {
     val adapter = moshi.adapter<StringAliasHolderJavaInstanceAdapter>()
     val instance = adapter.fromJson("{\"alias\":\"value\"}")
-    assertThat(instance).isEqualTo(StringAliasHolderJavaInstanceAdapter(StringAlias("constructor")))
+    assertThat(instance).isEqualTo(StringAliasHolderJavaInstanceAdapter(StringAlias("instance")))
   }
 
   @Test

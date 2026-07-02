@@ -14,18 +14,6 @@ import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.annotation.AnnotationTarget.PROPERTY
 import kotlin.reflect.KClass
 
-@Suppress("UNCHECKED_CAST")
-private val METADATA: Class<out Annotation>? =
-  try {
-    Class.forName(kotlinMetadataClassName) as Class<out Annotation>
-  } catch (_: ClassNotFoundException) {
-    null
-  }
-
-// Extracted as a method with a keep rule to prevent R8 from keeping Kotlin Metadata
-private val kotlinMetadataClassName: String
-  get() = "kotlin.Metadata"
-
 /**
  * An annotation that indicates the Moshi [JsonAdapter] or [JsonAdapter.Factory] to use with a class
  * or property. The adapter class must be a Kotlin object or have a public default constructor.
@@ -128,7 +116,6 @@ public annotation class AdaptedBy(val adapter: KClass<*>, val nullSafe: Boolean 
     }
 
     private fun <T : Any> Class<*>.kotlinObjectInstance(expectedType: Class<T>): T? {
-      if (!isAnnotationPresent(METADATA)) return null
       val instanceField =
         try {
           getDeclaredField("INSTANCE")
