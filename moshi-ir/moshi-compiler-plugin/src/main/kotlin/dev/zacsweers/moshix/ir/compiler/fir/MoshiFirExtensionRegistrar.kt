@@ -4,6 +4,7 @@
 
 package dev.zacsweers.moshix.ir.compiler.fir
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import dev.zacsweers.moshix.ir.compiler.MoshiDiagnostics
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Visibilities
@@ -23,10 +24,8 @@ import org.jetbrains.kotlin.fir.declarations.FirRegularClass
 import org.jetbrains.kotlin.fir.declarations.extractEnumValueArgumentInfo
 import org.jetbrains.kotlin.fir.declarations.findArgumentByName
 import org.jetbrains.kotlin.fir.declarations.getAnnotationByClassId
-import org.jetbrains.kotlin.fir.declarations.getBooleanArgument
 import org.jetbrains.kotlin.fir.declarations.getKClassArgument
 import org.jetbrains.kotlin.fir.declarations.getSealedClassInheritors
-import org.jetbrains.kotlin.fir.declarations.getStringArgument
 import org.jetbrains.kotlin.fir.declarations.getStringArrayArgument
 import org.jetbrains.kotlin.fir.declarations.hasAnnotation
 import org.jetbrains.kotlin.fir.declarations.primaryConstructorIfAny
@@ -55,33 +54,40 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.StandardClassIds
 
-internal class MoshiFirExtensionRegistrar(private val enableSealed: Boolean) :
-  FirExtensionRegistrar() {
+internal class MoshiFirExtensionRegistrar(
+  private val enableSealed: Boolean,
+  private val compatContext: CompatContext,
+) : FirExtensionRegistrar() {
   override fun ExtensionRegistrarContext.configurePlugin() {
-    +{ session: FirSession -> FirMoshiCheckers(session, enableSealed) }
+    +{ session: FirSession -> FirMoshiCheckers(session, enableSealed, compatContext) }
     registerDiagnosticContainers(MoshiDiagnostics)
   }
 }
 
-private class FirMoshiCheckers(session: FirSession, private val enableSealed: Boolean) :
-  FirAdditionalCheckersExtension(session) {
+private class FirMoshiCheckers(
+  session: FirSession,
+  private val enableSealed: Boolean,
+  private val compatContext: CompatContext,
+) : FirAdditionalCheckersExtension(session) {
   override val declarationCheckers: DeclarationCheckers =
     object : DeclarationCheckers() {
       override val classCheckers: Set<FirClassChecker>
-        get() = setOf(FirMoshiDeclarationChecker(enableSealed))
+        get() = setOf(FirMoshiDeclarationChecker(enableSealed, compatContext))
     }
 }
 
-private class FirMoshiDeclarationChecker(private val enableSealed: Boolean) :
-  FirClassChecker(MppCheckerKind.Common) {
+private class FirMoshiDeclarationChecker(
+  private val enableSealed: Boolean,
+  private val compatContext: CompatContext,
+) : FirClassChecker(MppCheckerKind.Common), CompatContext by compatContext {
 
   context(context: CheckerContext, reporter: DiagnosticReporter)
   override fun check(declaration: FirClass) {
     if (declaration !is FirRegularClass) return
     val jsonClass = declaration.getAnnotationByClassId(JSON_CLASS, context.session) ?: return
-    if (jsonClass.getBooleanArgument(GENERATE_ADAPTER) != true) return
+    if (jsonClass.getBooleanArgumentCompat(GENERATE_ADAPTER, context.session) != true) return
 
-    val generator = jsonClass.getStringArgument(GENERATOR).orEmpty()
+    val generator = jsonClass.getStringArgumentCompat(GENERATOR, context.session).orEmpty()
     val labelKey = generator.labelKey()
     when {
       generator.isBlank() -> checkJsonClassTarget(declaration)
@@ -230,7 +236,7 @@ private class FirMoshiDeclarationChecker(private val enableSealed: Boolean) :
             ?.fullyExpandedType()
             ?.toRegularClassSymbol(context.session)
             ?.getAnnotationByClassId(JSON_CLASS, context.session)
-            ?.labelKey(checkGenerateAdapter = false)
+            ?.labelKey(context.session, checkGenerateAdapter = false)
         }
       if (parentLabelKey == null) {
         declaration.report(
@@ -351,7 +357,7 @@ private class FirMoshiDeclarationChecker(private val enableSealed: Boolean) :
       val nestedLabelKey =
         subtype
           .getAnnotationByClassId(JSON_CLASS, context.session)
-          ?.labelKey(checkGenerateAdapter = false)
+          ?.labelKey(context.session, checkGenerateAdapter = false)
       if (nestedLabelKey == labelKey) {
         subtype.report(
           "Sealed subtype ${subtype.nameForMessage} is redundantly annotated with @JsonClass(generator = \"sealed:$nestedLabelKey\")."
@@ -393,7 +399,7 @@ private class FirMoshiDeclarationChecker(private val enableSealed: Boolean) :
     }
 
     val mainLabel =
-      labelAnnotation.getStringArgument(LABEL)
+      labelAnnotation.getStringArgumentCompat(LABEL, context.session)
         ?: run {
           subtype.report("No label member for TypeLabel annotation!")
           return
@@ -409,7 +415,8 @@ private class FirMoshiDeclarationChecker(private val enableSealed: Boolean) :
     }
 
     if (!skipJsonClassCheck) {
-      val subtypeLabelKey = subtype.getAnnotationByClassId(JSON_CLASS, context.session)?.labelKey()
+      val subtypeLabelKey =
+        subtype.getAnnotationByClassId(JSON_CLASS, context.session)?.labelKey(context.session)
       if (subtypeLabelKey != null) {
         subtype.report(
           "Sealed subtype ${subtype.nameForMessage} is annotated with @JsonClass(generator = \"sealed:$subtypeLabelKey\") and @TypeLabel."
@@ -468,6 +475,7 @@ private data class FirTargetProperty(
     get() = symbol.resolvedStatus.visibility
 }
 
+context(compatContext: CompatContext)
 private fun FirRegularClass.declaredProperties(
   session: FirSession,
   constructorParameters: Map<String, FirValueParameterSymbol>,
@@ -521,9 +529,24 @@ private fun FirRegularClass.sealedSubclasses(session: FirSession): List<FirRegul
   }
 }
 
-private fun FirAnnotation.labelKey(checkGenerateAdapter: Boolean = true): String? {
-  if (checkGenerateAdapter && getBooleanArgument(GENERATE_ADAPTER) != true) return null
-  return getStringArgument(GENERATOR).orEmpty().labelKey()
+context(compatContext: CompatContext)
+private fun FirAnnotation.labelKey(
+  session: FirSession,
+  checkGenerateAdapter: Boolean = true,
+): String? {
+  if (
+    checkGenerateAdapter &&
+      with(compatContext) {
+        this@labelKey.getBooleanArgumentCompat(GENERATE_ADAPTER, session)
+      } != true
+  ) {
+    return null
+  }
+  return with(compatContext) {
+      this@labelKey.getStringArgumentCompat(GENERATOR, session)
+    }
+    .orEmpty()
+    .labelKey()
 }
 
 private fun String.labelKey(): String? {
@@ -572,8 +595,11 @@ private fun FirAnnotation.isJsonQualifier(session: FirSession): Boolean {
   return toAnnotationClass(session)?.hasAnnotation(JSON_QUALIFIER, session) == true
 }
 
+context(compatContext: CompatContext)
 private fun FirValueParameterSymbol.jsonIgnore(session: FirSession): Boolean {
-  return resolvedAnnotationsWithClassIds.getAnnotationByClassId(JSON, session)?.jsonIgnore == true
+  return resolvedAnnotationsWithClassIds
+    .getAnnotationByClassId(JSON, session)
+    ?.jsonIgnore(session) == true
 }
 
 private fun FirPropertySymbol.isTransient(session: FirSession): Boolean {
@@ -583,25 +609,29 @@ private fun FirPropertySymbol.isTransient(session: FirSession): Boolean {
     backingFieldSymbol?.hasAnnotation(StandardClassIds.Annotations.Transient, session) == true
 }
 
+context(compatContext: CompatContext)
 private fun FirPropertySymbol.jsonIgnoreFromAnywhere(session: FirSession): Boolean {
-  return resolvedAnnotationsWithClassIds.getAnnotationByClassId(JSON, session)?.jsonIgnore ==
-    true ||
+  return resolvedAnnotationsWithClassIds
+    .getAnnotationByClassId(JSON, session)
+    ?.jsonIgnore(session) == true ||
     backingFieldSymbol
       ?.resolvedAnnotationsWithClassIds
       ?.getAnnotationByClassId(JSON, session)
-      ?.jsonIgnore == true ||
+      ?.jsonIgnore(session) == true ||
     getterSymbol
       ?.resolvedAnnotationsWithClassIds
       ?.getAnnotationByClassId(JSON, session)
-      ?.jsonIgnore == true ||
+      ?.jsonIgnore(session) == true ||
     setterSymbol
       ?.resolvedAnnotationsWithClassIds
       ?.getAnnotationByClassId(JSON, session)
-      ?.jsonIgnore == true
+      ?.jsonIgnore(session) == true
 }
 
-private val FirAnnotation.jsonIgnore: Boolean
-  get() = getBooleanArgument(IGNORE) == true
+context(compatContext: CompatContext)
+private fun FirAnnotation.jsonIgnore(session: FirSession): Boolean {
+  return with(compatContext) { this@jsonIgnore.getBooleanArgumentCompat(IGNORE, session) } == true
+}
 
 private val JSON = ClassId.topLevel(FqName("com.squareup.moshi.Json"))
 private val JSON_CLASS = ClassId.topLevel(FqName("com.squareup.moshi.JsonClass"))

@@ -1,0 +1,1 @@
+/NestedSealedWithoutJsonClassSupertype.kt:11:1: error: No JsonClass-annotated sealed supertype found for test.Child

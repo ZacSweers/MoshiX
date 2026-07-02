@@ -1,0 +1,1 @@
+/InvisibleFallbackAdapterConstructor.kt:21:1: error: Visibility must be one of public or internal. Is private

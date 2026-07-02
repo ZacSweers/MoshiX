@@ -3,6 +3,7 @@
 package dev.zacsweers.moshix.ir.compiler
 
 import com.squareup.moshi.Json
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import dev.zacsweers.moshix.ir.compiler.api.DelegateKey
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.api.TargetProperty
@@ -66,9 +67,10 @@ private val TargetProperty.isSettable
   get() = property.isVar || parameter != null
 
 @OptIn(UnsafeDuringIrConstructionAPI::class)
+context(compatContext: CompatContext)
 internal fun TargetProperty.generator(): PropertyGenerator? {
   if (jsonIgnore) {
-    return PropertyGenerator(this, DelegateKey(type, emptyList()), true)
+    return PropertyGenerator(this, DelegateKey(type, emptyList(), compatContext), true)
   }
 
   if (!isSettable) {
@@ -77,5 +79,5 @@ internal fun TargetProperty.generator(): PropertyGenerator? {
 
   // Merge parameter and property annotations
   val qualifiers = parameter?.qualifiers.orEmpty() + property.jsonQualifiers()
-  return PropertyGenerator(this, DelegateKey(type, qualifiers.toList()))
+  return PropertyGenerator(this, DelegateKey(type, qualifiers.toList(), compatContext))
 }

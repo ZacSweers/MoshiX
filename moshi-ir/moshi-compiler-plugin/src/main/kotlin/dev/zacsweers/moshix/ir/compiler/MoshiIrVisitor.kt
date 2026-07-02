@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.moshix.ir.compiler
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import dev.zacsweers.moshix.ir.compiler.api.MoshiAdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PropertyGenerator
 import dev.zacsweers.moshix.ir.compiler.sealed.MoshiSealedSymbols
@@ -31,10 +32,11 @@ internal class MoshiIrVisitor(
   private val generatedAnnotation: IrClassSymbol?,
   private val enableSealed: Boolean,
   private val deferredAddedClasses: MutableList<GeneratedAdapter>,
-) : IrElementTransformerVoidWithContext() {
+  private val compatContext: CompatContext,
+) : IrElementTransformerVoidWithContext(), CompatContext by compatContext {
 
   private val moshiSymbols by lazy {
-    MoshiSymbols(pluginContext.irBuiltIns, moduleFragment, pluginContext)
+    MoshiSymbols(pluginContext.irBuiltIns, moduleFragment, pluginContext, compatContext)
   }
 
   private val moshiSealedSymbols by lazy { MoshiSealedSymbols(moshiSymbols) }
@@ -59,7 +61,7 @@ internal class MoshiIrVisitor(
         }
       }
 
-    return MoshiAdapterGenerator(pluginContext, moshiSymbols, type, sortedProperties)
+    return MoshiAdapterGenerator(pluginContext, moshiSymbols, type, sortedProperties, compatContext)
   }
 
   override fun visitClassNew(declaration: IrClass): IrStatement {
@@ -84,6 +86,7 @@ internal class MoshiIrVisitor(
                 moshiSealedSymbols = moshiSealedSymbols,
                 target = declaration,
                 labelKey = labelKey,
+                compatContext = compatContext,
               )
             } else {
               return super.visitClassNew(declaration)
