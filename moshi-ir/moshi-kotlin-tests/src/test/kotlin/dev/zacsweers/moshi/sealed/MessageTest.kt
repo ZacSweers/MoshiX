@@ -216,7 +216,7 @@ class MessageTest {
     sealed interface CustomDifferentType : NestedMessageTypes {
       object SingletonInstance : CustomDifferentType
 
-      class Adapter : JsonAdapter<CustomDifferentType>() {
+      object Adapter : JsonAdapter<CustomDifferentType>() {
         private val delegate = ObjectJsonAdapter<CustomDifferentType>(SingletonInstance)
 
         override fun fromJson(reader: JsonReader): CustomDifferentType {
