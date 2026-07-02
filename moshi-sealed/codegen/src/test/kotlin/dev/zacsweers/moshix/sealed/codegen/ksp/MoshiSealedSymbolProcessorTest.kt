@@ -394,6 +394,7 @@ class MoshiSealedSymbolProcessorProviderTest {
 
           init {
             val moshi_ = moshi.newBuilder()
+                    .add(BaseType::class.java, moshi.adapter(BaseType::class.java))
                     .add(BaseType.TypeA::class.java, ObjectJsonAdapter(BaseType.TypeA))
                 .add(BaseType.TypeB::class.java, ObjectJsonAdapter(BaseType.TypeB))
                 .build()
