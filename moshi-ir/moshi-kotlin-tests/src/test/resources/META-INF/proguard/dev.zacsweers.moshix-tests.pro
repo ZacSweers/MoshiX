@@ -9,16 +9,19 @@
 	@org.junit.* public void *(...);
 }
 
-# Gradle does A LOT of reflection to invoke JUnit. Just keep it all.
+# Gradle does A LOT of reflection to invoke JUnit, including fields like Description.TEST_MECHANISM.
 -keep,includedescriptorclasses class org.junit.** {
-	*** *(...);
+	*;
 }
 
 # Keep @Test, @Ignore annotations, etc.
 -keepattributes RuntimeVisibleAnnotations, AnnotationDefault
 
-# Temporarily work around a ProGuard bug. https://github.com/Guardsquare/proguard/issues/460
--optimizations !method/specialization/parametertype
+# This test app intentionally exercises @AdaptedBy with a Kotlin object adapter. MoshiX does not
+# ship a broad keep rule for this, so consumers who shrink this pattern must keep the singleton.
+-keep class dev.zacsweers.moshi.sealed.MessageTest$NestedMessageTypes$CustomDifferentType$Adapter {
+	public static final * INSTANCE;
+}
 
 # TODO These should be pulled from the jars, but for now this unblocks us.
 

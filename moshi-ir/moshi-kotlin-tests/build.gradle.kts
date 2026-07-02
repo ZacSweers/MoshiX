@@ -108,6 +108,9 @@ abstract class R8Task : BaseR8Task() {
   override fun computeArgs(): Iterable<String> {
     return buildList {
       add("--classfile")
+      // R8 receives the test jar and every runtime jar as program inputs. Their META-INF resources
+      // collide in the single output jar, and testR8 only needs executable classes.
+      add("--no-data-resources")
       add("--output")
       add(r8Jar.get().asFile.absolutePath)
       add("--pg-conf")

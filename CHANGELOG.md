@@ -4,9 +4,10 @@ Changelog
 **Unreleased**
 --------------
 
-- [moshi-ir] Migrate most diagnostic errors to FIR.
+- [moshi-ir] **Enhancement**: Migrate most diagnostic errors to FIR.
 - [moshi-ir] Remove usages of `MessageCollector`.
-- **Fix**: Avoid stack overflows in generated moshi-sealed adapters when an object subtype is paired
+- [moshi-adapters] **Enhancement**: Support kotlin `object` types from `@AdaptedBy`.
+- [moshi-ir/ksp] **Fix**: Avoid stack overflows in generated moshi-sealed adapters when an object subtype is paired
   with another subtype that recursively references the sealed type.
 
 0.36.0

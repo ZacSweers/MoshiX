@@ -26,15 +26,48 @@ class AdaptedByTest {
   }
 
   @Test
+  fun objectAdapterProperty() {
+    val adapter = moshi.adapter<StringAliasHolderObjectAdapter>()
+    val instance = adapter.fromJson("{\"alias\":\"value\"}")
+    assertThat(instance).isEqualTo(StringAliasHolderObjectAdapter(StringAlias("value")))
+  }
+
+  @Test
+  fun javaAdapterPropertyUsesInstanceField() {
+    val adapter = moshi.adapter<StringAliasHolderJavaInstanceAdapter>()
+    val instance = adapter.fromJson("{\"alias\":\"value\"}")
+    assertThat(instance).isEqualTo(StringAliasHolderJavaInstanceAdapter(StringAlias("instance")))
+  }
+
+  @Test
   fun factoryProperty() {
     val adapter = moshi.adapter<StringAliasHolderFactory>()
     val instance = adapter.fromJson("{\"alias\":\"value\"}")
     assertThat(instance).isEqualTo(StringAliasHolderFactory(StringAlias("value")))
   }
 
+  @Test
+  fun objectFactoryProperty() {
+    val adapter = moshi.adapter<StringAliasHolderObjectFactory>()
+    val instance = adapter.fromJson("{\"alias\":\"value\"}")
+    assertThat(instance).isEqualTo(StringAliasHolderObjectFactory(StringAlias("value")))
+  }
+
   data class StringAliasHolderAdapter(@AdaptedBy(StringAliasAdapter::class) val alias: StringAlias)
 
+  data class StringAliasHolderObjectAdapter(
+    @AdaptedBy(StringAliasObjectAdapter::class) val alias: StringAlias
+  )
+
+  data class StringAliasHolderJavaInstanceAdapter(
+    @AdaptedBy(JavaStringAliasAdapterWithInstance::class) val alias: StringAlias
+  )
+
   data class StringAliasHolderFactory(@AdaptedBy(StringAliasFactory::class) val alias: StringAlias)
+
+  data class StringAliasHolderObjectFactory(
+    @AdaptedBy(StringAliasObjectFactory::class) val alias: StringAlias
+  )
 
   data class StringAlias(val value: String)
 
@@ -42,6 +75,16 @@ class AdaptedByTest {
     override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
       return if (type.rawType == StringAlias::class.java) {
         StringAliasAdapter()
+      } else {
+        null
+      }
+    }
+  }
+
+  object StringAliasObjectFactory : JsonAdapter.Factory {
+    override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
+      return if (type.rawType == StringAlias::class.java) {
+        StringAliasObjectAdapter
       } else {
         null
       }
@@ -62,6 +105,20 @@ class AdaptedByTest {
     }
   }
 
+  object StringAliasObjectAdapter : JsonAdapter<StringAlias>() {
+    override fun fromJson(reader: JsonReader): StringAlias? {
+      return StringAlias(reader.nextString())
+    }
+
+    override fun toJson(writer: JsonWriter, value: StringAlias?) {
+      if (value == null) {
+        writer.nullValue()
+        return
+      }
+      writer.value(value.value)
+    }
+  }
+
   @Test
   fun annotatedAdapterClass() {
     val adapter = moshi.adapter<AnnotatedStringAlias>()
@@ -69,7 +126,17 @@ class AdaptedByTest {
     assertThat(instance).isEqualTo(AnnotatedStringAlias("value"))
   }
 
+  @Test
+  fun annotatedObjectAdapterClass() {
+    val adapter = moshi.adapter<AnnotatedObjectStringAlias>()
+    val instance = adapter.fromJson("\"value\"")
+    assertThat(instance).isEqualTo(AnnotatedObjectStringAlias("value"))
+  }
+
   @AdaptedBy(AnnotatedStringAliasAdapter::class) data class AnnotatedStringAlias(val value: String)
+
+  @AdaptedBy(AnnotatedObjectStringAliasAdapter::class)
+  data class AnnotatedObjectStringAlias(val value: String)
 
   class AnnotatedStringAliasAdapter : JsonAdapter<AnnotatedStringAlias>() {
     override fun fromJson(reader: JsonReader): AnnotatedStringAlias? {
@@ -77,6 +144,20 @@ class AdaptedByTest {
     }
 
     override fun toJson(writer: JsonWriter, value: AnnotatedStringAlias?) {
+      if (value == null) {
+        writer.nullValue()
+        return
+      }
+      writer.value(value.value)
+    }
+  }
+
+  object AnnotatedObjectStringAliasAdapter : JsonAdapter<AnnotatedObjectStringAlias>() {
+    override fun fromJson(reader: JsonReader): AnnotatedObjectStringAlias? {
+      return AnnotatedObjectStringAlias(reader.nextString())
+    }
+
+    override fun toJson(writer: JsonWriter, value: AnnotatedObjectStringAlias?) {
       if (value == null) {
         writer.nullValue()
         return
