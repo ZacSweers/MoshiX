@@ -43,6 +43,8 @@ val embedded = configurations.dependencyScope("embedded")
 
 val embeddedClasspath = configurations.resolvable("embeddedClasspath") { extendsFrom(embedded) }
 
+val testKotlinVersion = providers.gradleProperty("kotlinVersion").orElse(libs.versions.kotlin)
+
 configurations.named("compileOnly").configure { extendsFrom(embedded.get()) }
 
 configurations.named("testImplementation").configure { extendsFrom(embedded.get()) }
@@ -58,19 +60,19 @@ dependencies {
 
   add("embedded", libs.metro.compilerCompat.latest)
 
-  testFixturesApi(libs.kotlin.testJunit5)
-  testFixturesApi(libs.kotlin.compilerTestFramework)
-  testFixturesApi(libs.kotlin.compiler)
+  testKotlin("testFixturesApi", "kotlin-test-junit5")
+  testKotlin("testFixturesApi", "kotlin-compiler-internal-test-framework")
+  testKotlin("testFixturesApi", "kotlin-compiler")
 
   add("moshiRuntime", libs.moshi)
   add("moshiRuntime", project(":moshi-sealed:runtime"))
 
   // Dependencies required to run the internal test framework.
   testRuntimeOnly(libs.junit)
-  testRuntimeOnly(libs.kotlin.reflect)
-  testRuntimeOnly(libs.kotlin.test)
-  testRuntimeOnly(libs.kotlin.scriptRuntime)
-  testRuntimeOnly(libs.kotlin.annotationsJvm)
+  testKotlin("testRuntimeOnly", "kotlin-reflect")
+  testKotlin("testRuntimeOnly", "kotlin-test")
+  testKotlin("testRuntimeOnly", "kotlin-script-runtime")
+  testKotlin("testRuntimeOnly", "kotlin-annotations-jvm")
 }
 
 tasks.jar.configure { enabled = false }
@@ -158,4 +160,8 @@ fun Test.setLibraryProperty(propName: String, jarName: String) {
       .find { """$jarName-\d.*jar""".toRegex().matches(it.name) }
       ?.absolutePath ?: return
   systemProperty(propName, path)
+}
+
+fun DependencyHandler.testKotlin(configurationName: String, moduleName: String) {
+  addProvider(configurationName, testKotlinVersion.map { "org.jetbrains.kotlin:$moduleName:$it" })
 }

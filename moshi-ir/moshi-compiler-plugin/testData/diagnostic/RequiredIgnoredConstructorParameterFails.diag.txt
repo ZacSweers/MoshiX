@@ -1,0 +1,1 @@
+/RequiredIgnoredConstructorParameterFails.kt:8:1: error: No default value for transient/ignored property a

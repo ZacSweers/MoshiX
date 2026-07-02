@@ -1,0 +1,1 @@
+/AbstractClassesNotSupported.kt:7:1: error: @JsonClass can't be applied to test.AbstractClass: must not be abstract
