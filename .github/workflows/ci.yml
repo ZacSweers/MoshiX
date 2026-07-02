@@ -33,12 +33,25 @@ jobs:
         with:
           cache: true
 
+  generate-matrix:
+    name: generate build matrix
+    runs-on: ubuntu-slim
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Generate matrix
+        id: generate
+        run: ./scripts/generate-ci-matrix.sh
+
   build:
-    name: 'KSP ${{ matrix.ksp_enabled }}'
+    name: 'Kotlin ${{ matrix.kotlin }} / KSP ${{ matrix.ksp_enabled }}'
     runs-on: ubuntu-latest
+    needs: generate-matrix
     strategy:
-      matrix:
-        ksp_enabled: [ true, false ]
+      matrix: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
       fail-fast: false
 
     steps:
@@ -55,13 +68,30 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Check project
-        run: ./gradlew build check -Pmoshix.useKsp=${{ matrix.ksp_enabled }} --quiet
+        run: ./gradlew build check -PkotlinVersion=${{ matrix.kotlin }} -Pmoshix.useKsp=${{ matrix.ksp_enabled }} --quiet
 
       - name: Check R8 tests
         run: ./gradlew testR8 --quiet
 
+  # https://jakewharton.com/fan-in-to-a-single-required-github-action/
+  final-status:
+    if: always()
+    runs-on: ubuntu-slim
+    needs:
+      - format
+      - generate-matrix
+      - build
+    steps:
+      - name: Check
+        run: |
+          results=$(tr -d '\n' <<< '${{ toJSON(needs.*.result) }}')
+          if ! grep -q -v -E '(failure|cancelled)' <<< "$results"; then
+            echo "One or more required jobs failed"
+            exit 1
+          fi
+
   publish-snapshot:
-    needs: 'build'
+    needs: final-status
     name: 'Publish snapshot (main only)'
     runs-on: ubuntu-latest
     steps:

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.moshix.ir.compiler.util
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import dev.zacsweers.moshix.ir.compiler.MoshiDiagnostics
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -101,14 +102,17 @@ internal fun IrPluginContext.createIrBuilder(symbol: IrSymbol): DeclarationIrBui
   return DeclarationIrBuilder(this, symbol, symbol.owner.startOffset, symbol.owner.endOffset)
 }
 
+context(compatContext: CompatContext)
 internal fun IrPluginContext.irType(
   classId: ClassId,
   nullable: Boolean = false,
   arguments: List<IrTypeArgument> = emptyList(),
 ): IrType =
-  finderForBuiltins()
-    .findClass(classId)!!
-    .createType(hasQuestionMark = nullable, arguments = arguments)
+  with(compatContext) {
+    this@irType.finderForBuiltinsCompat()
+      .findClass(classId)!!
+      .createType(hasQuestionMark = nullable, arguments = arguments)
+  }
 
 // Returns a type-compatible placeholder for constructor arguments that are ignored by default
 // masks.
@@ -189,6 +193,7 @@ internal fun IrClass.addOverride(
   }
 
 @OptIn(UnsafeDuringIrConstructionAPI::class)
+context(compatContext: CompatContext)
 internal fun IrBuilderWithScope.irBinOp(
   pluginContext: IrPluginContext,
   name: Name,
@@ -197,10 +202,12 @@ internal fun IrBuilderWithScope.irBinOp(
 ): IrExpression {
   val classFqName = (lhs.type as IrSimpleType).classOrNull!!.owner.fqNameWhenAvailable!!
   val symbol =
-    pluginContext
-      .finderForBuiltins()
-      .findFunctions(CallableId(ClassId.topLevel(classFqName), name))
-      .single()
+    with(compatContext) {
+      pluginContext
+        .finderForBuiltinsCompat()
+        .findFunctions(CallableId(ClassId.topLevel(classFqName), name))
+        .single()
+    }
   return irInvoke(lhs, symbol, rhs)
 }
 
@@ -226,12 +233,14 @@ internal fun IrBuilderWithScope.irInvoke(
 internal val IrProperty.isTransient: Boolean
   get() = backingField?.hasAnnotation(FqName("kotlin.jvm.Transient")) == true
 
+context(compatContext: CompatContext)
 internal fun IrBuilderWithScope.irAnd(
   pluginContext: IrPluginContext,
   lhs: IrExpression,
   rhs: IrExpression,
 ): IrExpression = irBinOp(pluginContext, OperatorNameConventions.AND, lhs, rhs)
 
+context(compatContext: CompatContext)
 internal fun Sequence<IrExpression>.joinToIrAnd(
   scope: IrBuilderWithScope,
   pluginContext: IrPluginContext,

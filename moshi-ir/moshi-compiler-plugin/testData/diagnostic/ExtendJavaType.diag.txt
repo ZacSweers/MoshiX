@@ -1,0 +1,1 @@
+/source.kt:16:1: error: @JsonClass can't be applied to test.ExtendsJavaType: supertype com.squareup.moshi.kotlin.codegen.JavaSuperclass is not a Kotlin type

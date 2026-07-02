@@ -1,0 +1,1 @@
+/NonPropertyConstructorParameter.kt:7:1: error: No property for required constructor parameter a

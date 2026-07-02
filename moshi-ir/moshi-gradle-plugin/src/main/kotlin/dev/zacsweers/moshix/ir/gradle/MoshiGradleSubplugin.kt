@@ -14,6 +14,11 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
   private companion object {
+    const val COMPILER_PLUGIN_ID = "dev.zacsweers.moshix.compiler"
+    const val KEY_ENABLED = "enabled"
+    const val KEY_SEALED = "enableSealed"
+    const val KEY_GENERATED_ANNOTATION = "generatedAnnotation"
+
     val SUPPORTED_PLATFORMS = setOf(KotlinPlatformType.androidJvm, KotlinPlatformType.jvm)
   }
 
@@ -21,7 +26,7 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     target.extensions.create("moshi", MoshiPluginExtension::class.java)
   }
 
-  override fun getCompilerPluginId(): String = "dev.zacsweers.moshix.compiler"
+  override fun getCompilerPluginId(): String = COMPILER_PLUGIN_ID
 
   override fun getPluginArtifact(): SubpluginArtifact =
     SubpluginArtifact(
@@ -72,10 +77,10 @@ class MoshiGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
     return project.provider {
       buildList {
-        add(SubpluginOption(key = "enabled", value = extension.enabled.get().toString()))
-        add(SubpluginOption(key = "enableSealed", value = enableSealed.toString()))
+        add(SubpluginOption(key = KEY_ENABLED, value = extension.enabled.get().toString()))
+        add(SubpluginOption(key = KEY_SEALED, value = enableSealed.toString()))
         if (generatedAnnotation != null) {
-          add(SubpluginOption(key = "generatedAnnotation", value = generatedAnnotation))
+          add(SubpluginOption(key = KEY_GENERATED_ANNOTATION, value = generatedAnnotation))
         }
       }
     }
