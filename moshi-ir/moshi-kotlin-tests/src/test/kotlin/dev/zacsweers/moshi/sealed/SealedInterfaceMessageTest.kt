@@ -48,6 +48,17 @@ class SealedInterfaceMessageTest {
     )
   }
 
+  @Test
+  fun recursiveSealedInterfaceWithObjectSubtype() {
+    val adapter = moshi.adapter<RecursiveType>()
+    val pointer = RecursiveType.PointerType(RecursiveType.StringType("hello, world"))
+
+    assertThat(adapter.toJson(pointer))
+      .isEqualTo("""{"type":"pointer","targetType":{"type":"string","s":"hello, world"}}""")
+    assertThat(adapter.fromJson("""{"type":"pointer","targetType":{"type":"void"}}"""))
+      .isEqualTo(RecursiveType.PointerType(RecursiveType.VoidType))
+  }
+
   private fun <T> assertPolymorphicBehavior(
     adapter: JsonAdapter<T>,
     success: T,
@@ -87,6 +98,19 @@ class SealedInterfaceMessageTest {
     @TypeLabel("error")
     @JsonClass(generateAdapter = true)
     data class Error(val error_logs: Map<String, Any>) : MessageWithNoDefault
+  }
+
+  @JsonClass(generateAdapter = true, generator = "sealed:type")
+  sealed interface RecursiveType {
+    @TypeLabel("void") data object VoidType : RecursiveType
+
+    @TypeLabel("string")
+    @JsonClass(generateAdapter = true)
+    data class StringType(val s: String) : RecursiveType
+
+    @TypeLabel("pointer")
+    @JsonClass(generateAdapter = true)
+    data class PointerType(val targetType: RecursiveType) : RecursiveType
   }
 
   @DefaultNull

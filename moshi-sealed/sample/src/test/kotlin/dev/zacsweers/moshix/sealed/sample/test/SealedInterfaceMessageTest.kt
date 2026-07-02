@@ -13,6 +13,7 @@ import dev.zacsweers.moshix.sealed.annotations.TypeLabel
 import dev.zacsweers.moshix.sealed.reflect.MetadataMoshiSealedJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.reflect.MoshiSealedJsonAdapterFactory
 import dev.zacsweers.moshix.sealed.sample.SealedInterfaceMessage
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -20,7 +21,7 @@ import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)
 @ExperimentalStdlibApi
-class SealedInterfaceMessageTest(type: Type) {
+class SealedInterfaceMessageTest(private val type: Type) {
 
   enum class Type(val moshi: Moshi = Moshi.Builder().build()) {
     REFLECT(
@@ -83,6 +84,19 @@ class SealedInterfaceMessageTest(type: Type) {
     )
   }
 
+  @Test
+  fun recursiveCodegenSealedInterfaceWithObjectSubtype() {
+    assumeTrue(type == Type.CODEGEN)
+
+    val adapter = moshi.adapter<RecursiveType>()
+    val pointer = RecursiveType.PointerType(RecursiveType.StringType("hello, world"))
+
+    assertThat(adapter.toJson(pointer))
+      .isEqualTo("""{"type":"pointer","targetType":{"type":"string","s":"hello, world"}}""")
+    assertThat(adapter.fromJson("""{"type":"pointer","targetType":{"type":"void"}}"""))
+      .isEqualTo(RecursiveType.PointerType(RecursiveType.VoidType))
+  }
+
   private fun <T> assertPolymorphicBehavior(
     adapter: JsonAdapter<T>,
     success: T,
@@ -122,6 +136,19 @@ class SealedInterfaceMessageTest(type: Type) {
     @TypeLabel("error")
     @JsonClass(generateAdapter = true)
     data class Error(val error_logs: Map<String, Any>) : MessageWithNoDefault
+  }
+
+  @JsonClass(generateAdapter = true, generator = "sealed:type")
+  sealed interface RecursiveType {
+    @TypeLabel("void") data object VoidType : RecursiveType
+
+    @TypeLabel("string")
+    @JsonClass(generateAdapter = true)
+    data class StringType(val s: String) : RecursiveType
+
+    @TypeLabel("pointer")
+    @JsonClass(generateAdapter = true)
+    data class PointerType(val targetType: RecursiveType) : RecursiveType
   }
 
   @DefaultNull

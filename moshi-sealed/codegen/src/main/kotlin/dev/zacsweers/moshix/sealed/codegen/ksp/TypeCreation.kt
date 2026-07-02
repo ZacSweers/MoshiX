@@ -72,6 +72,12 @@ internal fun createType(
     intermediateMoshiInit =
       CodeBlock.builder()
         .add("%N.newBuilder()\n", moshiParam)
+        .add(
+          "    .add(%T::class.java,·%N.adapter(%T::class.java))\n",
+          targetType,
+          moshiParam,
+          targetType,
+        )
         .apply { add("%L\n", objectAdapters.joinToCode("\n", prefix = "    ")) }
         .add(".build()")
         .build()
@@ -123,21 +129,15 @@ internal fun createType(
     PropertySpec.builder(allocator.newName("runtimeAdapter"), jsonAdapterType, KModifier.PRIVATE)
       .apply {
         if (intermediateMoshiInit == null) {
-          // Initialize inline
           addAnnotation(suppressUncheckedCastAnnotation())
-          if (objectAdapters.isNotEmpty()) {
-            addAnnotation(optInExperimentalApiAnnotation())
-          }
           initializer(runtimeAdapterInitializer.build())
         }
       }
       .build()
 
-  // Must add this first!
   classBuilder.addProperty(runtimeAdapterProperty)
 
   if (intermediateMoshiInit != null) {
-    // Need to do a custom init block!
     classBuilder.addInitializerBlock(
       CodeBlock.builder()
         .addStatement("val·%L·=·%L", moshiArg, intermediateMoshiInit)

@@ -14,11 +14,13 @@ import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.declarations.addTypeParameter
 import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
+import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrPackageFragment
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
+import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.makeNullable
@@ -26,12 +28,11 @@ import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
 import org.jetbrains.kotlin.ir.util.defaultType
+import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
 import org.jetbrains.kotlin.ir.util.nonDispatchParameters
-import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 internal class MoshiSymbols(
@@ -136,6 +137,26 @@ internal class MoshiSymbols(
       .findClass(ClassId.fromString("com/squareup/moshi/Moshi.Builder"))!!
   }
 
+  val moshiBuilderAddTypeAdapter by lazy {
+    moshiBuilder.functions.single {
+      it.owner.name.asString() == "add" &&
+        it.owner.nonDispatchParameters.size == 2 &&
+        it.owner.nonDispatchParameters[0]
+          .type
+          .makeNotNull()
+          .classifierOrFail
+          .owner
+          .let { owner -> (owner as? IrClass)?.fqNameWhenAvailable }
+          ?.asString() == "java.lang.reflect.Type" &&
+        it.owner.nonDispatchParameters[1]
+          .type
+          .classifierOrFail
+          .owner
+          .let { owner -> (owner as? IrClass)?.fqNameWhenAvailable }
+          ?.asString() == "com.squareup.moshi.JsonAdapter"
+    }
+  }
+
   val moshiBuilderBuild by lazy { moshiBuilder.getSimpleFunction("build")!! }
 
   val moshi: IrClassSymbol by lazy {
@@ -212,13 +233,6 @@ internal class MoshiSymbols(
           }
       }
       .symbol
-  }
-
-  val addAdapter by lazy {
-    pluginContext
-      .finderForBuiltinsCompat()
-      .findFunctions(CallableId(FqName("com.squareup.moshi"), Name.identifier("addAdapter")))
-      .first()
   }
 
   val jsonDataException: IrClassSymbol by lazy {
