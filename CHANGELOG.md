@@ -4,6 +4,8 @@ Changelog
 **Unreleased**
 --------------
 
+- Build against Kotlin `2.4.10`.
+
 0.37.0
 ------
 
