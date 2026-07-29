@@ -4,6 +4,7 @@ package dev.zacsweers.moshix.ir.compiler.api
 
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.util.TypeRemapper
 
 /** A parameter in user code that should be populated by generated code. */
 internal data class TargetParameter(
@@ -14,4 +15,8 @@ internal data class TargetParameter(
   val jsonName: String? = null,
   val jsonIgnore: Boolean = false,
   val qualifiers: Set<IrConstructorCall>? = null,
-)
+) {
+  internal fun remapTypes(remapper: TypeRemapper): TargetParameter {
+    return copy(type = remapper.remapType(type))
+  }
+}

@@ -9,6 +9,7 @@ import dev.zacsweers.moshix.ir.compiler.api.PreparedAdapter
 import dev.zacsweers.moshix.ir.compiler.constArgumentOfTypeAt
 import dev.zacsweers.moshix.ir.compiler.labelKey
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
+import dev.zacsweers.moshix.ir.compiler.util.copyTypeParametersFrom
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.generateToStringFun
 import dev.zacsweers.moshix.ir.compiler.util.irInvoke
@@ -214,11 +215,13 @@ private constructor(
     }
       .apply {
         createThisReceiverParameter()
+        val typeRemapper = copyTypeParametersFrom(targetType.typeParameters)
+        val generatedTargetType = typeRemapper.remapType(targetType.defaultType)
         val jsonAdapterType =
           pluginContext
             .irType(ClassId.fromString("com/squareup/moshi/JsonAdapter"))
             .classifierOrFail
-            .typeWith(targetType.defaultType)
+            .typeWith(generatedTargetType)
         superTypes = listOf(jsonAdapterType)
         val hasObjectSubtypes = objectSubtypes.isNotEmpty()
         val ctor =
@@ -246,7 +249,7 @@ private constructor(
               pluginContext.createIrBuilder(symbol).run {
                 irExprBody(
                   createRuntimeAdapter(
-                    targetType = targetType,
+                    targetType = generatedTargetType,
                     labelKey = labelKey,
                     fallbackStrategy = fallbackStrategy,
                     subtypes = subtypes,
@@ -259,7 +262,7 @@ private constructor(
               }
           }
 
-        generateFromJsonFun(runtimeAdapter)
+        generateFromJsonFun(runtimeAdapter, generatedTargetType)
         generateToJsonFun(runtimeAdapter)
         generateToStringFun(
           pluginContext,
@@ -273,7 +276,7 @@ private constructor(
 
   @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrBuilderWithScope.createRuntimeAdapter(
-    targetType: IrClass,
+    targetType: IrType,
     labelKey: String,
     fallbackStrategy: FallbackStrategy?,
     subtypes: Set<Subtype>,
@@ -282,13 +285,24 @@ private constructor(
     hasObjectSubtypes: Boolean,
     moshiExpression: () -> IrExpression,
   ): IrExpression {
+    val polymorphicFactoryType = moshiSealedSymbols.pjaf.typeWith(targetType)
+    val annotationType = pluginContext.irType(ClassId.fromString("kotlin/Annotation"))
+    fun emptyAnnotations() =
+      irCall(
+        moshiSymbols.emptySet,
+        type = pluginContext.irBuiltIns.setClass.typeWith(annotationType),
+        typeArguments = listOf(annotationType),
+      )
     val ofCreatorExpression =
-      irCall(moshiSealedSymbols.pjafOf).apply {
-        typeArguments[0] = targetType.defaultType
-        arguments[0] =
-          moshiSymbols.javaClassReference(this@createRuntimeAdapter, targetType.defaultType)
-        arguments[1] = irString(labelKey)
-      }
+      irCall(
+          moshiSealedSymbols.pjafOf,
+          type = polymorphicFactoryType,
+          typeArguments = listOf(targetType),
+        )
+        .apply {
+          arguments[0] = moshiSymbols.javaClassReference(this@createRuntimeAdapter, targetType)
+          arguments[1] = irString(labelKey)
+        }
 
     val moshiAccess: IrExpression =
       if (hasObjectSubtypes) {
@@ -298,20 +312,16 @@ private constructor(
           }
         val seeded =
           irCall(moshiSymbols.moshiBuilderAddTypeAdapter).apply {
-            typeArguments[0] = targetType.defaultType
+            typeArguments[0] = targetType
             arguments[0] = initial
-            arguments[1] =
-              moshiSymbols.javaClassReference(this@createRuntimeAdapter, targetType.defaultType)
+            arguments[1] = moshiSymbols.javaClassReference(this@createRuntimeAdapter, targetType)
             arguments[2] =
               irCall(moshiSymbols.moshiThreeArgAdapter, jsonAdapterType).apply {
-                typeArguments[0] = targetType.defaultType
+                typeArguments[0] = targetType
                 arguments[0] = moshiExpression()
                 arguments[1] =
-                  moshiSymbols.javaClassReference(
-                    this@createRuntimeAdapter,
-                    targetType.defaultType,
-                  )
-                arguments[2] = irCall(moshiSymbols.emptySet)
+                  moshiSymbols.javaClassReference(this@createRuntimeAdapter, targetType)
+                arguments[2] = emptyAnnotations()
                 arguments[3] = irNull(pluginContext.irBuiltIns.stringType.makeNullable())
               }
           }
@@ -337,7 +347,7 @@ private constructor(
       subtypes.filterIsInstance<Subtype.ClassType>().fold(ofCreatorExpression) { receiver, subtype
         ->
         subtype.labels.fold(receiver) { nestedReceiver, label ->
-          irCall(moshiSealedSymbols.pjafWithSubtype).apply {
+          irCall(moshiSealedSymbols.pjafWithSubtype, type = polymorphicFactoryType).apply {
             arguments[0] = nestedReceiver
             arguments[1] =
               moshiSymbols.javaClassReference(
@@ -361,16 +371,16 @@ private constructor(
         builder = this,
         moshiSealedSymbols = moshiSealedSymbols,
         subtypesExpression = subtypesExpression,
-        targetType = targetType.defaultType,
+        targetType = targetType,
+        polymorphicFactoryType = polymorphicFactoryType,
         moshiExpression = moshiExpression(),
       ) ?: subtypesExpression
 
     return irAs(
       irCall(moshiSymbols.jsonAdapterFactoryCreate).apply {
         arguments[0] = possiblyWithDefaultExpression
-        arguments[1] =
-          moshiSymbols.javaClassReference(this@createRuntimeAdapter, targetType.defaultType)
-        arguments[2] = irCall(moshiSymbols.emptySet)
+        arguments[1] = moshiSymbols.javaClassReference(this@createRuntimeAdapter, targetType)
+        arguments[2] = emptyAnnotations()
         arguments[3] = moshiAccess
       },
       jsonAdapterType,
@@ -423,7 +433,10 @@ private constructor(
   }
 
   @OptIn(UnsafeDuringIrConstructionAPI::class)
-  private fun IrClass.generateFromJsonFun(runtimeAdapterField: IrField): IrFunction {
+  private fun IrClass.generateFromJsonFun(
+    runtimeAdapterField: IrField,
+    generatedTargetType: IrType,
+  ): IrFunction {
     return addOverride(
         FqName("com.squareup.moshi.JsonAdapter"),
         Name.identifier("fromJson").identifier,
@@ -441,14 +454,18 @@ private constructor(
         body =
           DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
             +irReturn(
-              irCall(moshiSymbols.jsonAdapter.getSimpleFunction("fromJson")!!).apply {
-                arguments[0] =
-                  runtimeAdapter(
-                    runtimeAdapterField = runtimeAdapterField,
-                    adapterThis = dispatchReceiverParameter!!,
-                  )
-                arguments[1] = irGet(readerParam)
-              }
+              irCall(
+                  moshiSymbols.jsonAdapter.getSimpleFunction("fromJson")!!,
+                  type = generatedTargetType.makeNullable(),
+                )
+                .apply {
+                  arguments[0] =
+                    runtimeAdapter(
+                      runtimeAdapterField = runtimeAdapterField,
+                      adapterThis = dispatchReceiverParameter!!,
+                    )
+                  arguments[1] = irGet(readerParam)
+                }
             )
           }
       }
@@ -487,6 +504,7 @@ private sealed interface FallbackStrategy {
     moshiSealedSymbols: MoshiSealedSymbols,
     subtypesExpression: IrExpression,
     targetType: IrType,
+    polymorphicFactoryType: IrType,
     moshiExpression: IrExpression,
   ): IrCall
 
@@ -496,10 +514,11 @@ private sealed interface FallbackStrategy {
       moshiSealedSymbols: MoshiSealedSymbols,
       subtypesExpression: IrExpression,
       targetType: IrType,
+      polymorphicFactoryType: IrType,
       moshiExpression: IrExpression,
     ) =
       with(builder) {
-        irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
+        irCall(moshiSealedSymbols.pjafWithDefaultValue, type = polymorphicFactoryType).apply {
           arguments[0] = subtypesExpression
           arguments[1] = irNull(targetType)
         }
@@ -513,20 +532,22 @@ private sealed interface FallbackStrategy {
       moshiSealedSymbols: MoshiSealedSymbols,
       subtypesExpression: IrExpression,
       targetType: IrType,
+      polymorphicFactoryType: IrType,
       moshiExpression: IrExpression,
     ): IrCall {
       return with(builder) {
-        irCall(moshiSealedSymbols.pjafWithFallbackJsonAdapter).apply {
-          arguments[0] = subtypesExpression
-          // TODO cast to JsonAdapter<Any>
-          val args =
-            if (hasMoshiParam) {
-              arrayOf(moshiExpression)
-            } else {
-              emptyArray()
-            }
-          arguments[1] = irInvoke(callee = targetConstructor, args = args)
-        }
+        irCall(moshiSealedSymbols.pjafWithFallbackJsonAdapter, type = polymorphicFactoryType)
+          .apply {
+            arguments[0] = subtypesExpression
+            // TODO cast to JsonAdapter<Any>
+            val args =
+              if (hasMoshiParam) {
+                arrayOf(moshiExpression)
+              } else {
+                emptyArray()
+              }
+            arguments[1] = irInvoke(callee = targetConstructor, args = args)
+          }
       }
     }
   }
@@ -537,10 +558,11 @@ private sealed interface FallbackStrategy {
       moshiSealedSymbols: MoshiSealedSymbols,
       subtypesExpression: IrExpression,
       targetType: IrType,
+      polymorphicFactoryType: IrType,
       moshiExpression: IrExpression,
     ): IrCall {
       return with(builder) {
-        irCall(moshiSealedSymbols.pjafWithDefaultValue).apply {
+        irCall(moshiSealedSymbols.pjafWithDefaultValue, type = polymorphicFactoryType).apply {
           arguments[0] = subtypesExpression
           arguments[1] = irGetObject(defaultObject)
         }
