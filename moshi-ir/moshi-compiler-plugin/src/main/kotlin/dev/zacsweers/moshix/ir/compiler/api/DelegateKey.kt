@@ -22,10 +22,10 @@ import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
-import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
+import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
@@ -38,6 +38,7 @@ import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.typeOrNull
 import org.jetbrains.kotlin.ir.types.typeWith
+import org.jetbrains.kotlin.ir.util.TypeRemapper
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.isNullable
@@ -54,6 +55,10 @@ internal data class DelegateKey(
 ) : CompatContext by compatContext {
   val nullable: Boolean
     get() = delegateType.isNullable()
+
+  internal fun remapTypes(remapper: TypeRemapper): DelegateKey {
+    return copy(delegateType = remapper.remapType(delegateType))
+  }
 
   /** Returns an adapter to use when encoding and decoding this property. */
   @OptIn(UnsafeDuringIrConstructionAPI::class)
@@ -123,19 +128,23 @@ private fun IrBuilderWithScope.moshiAdapterCall(
   jsonQualifiers: List<IrConstructorCall>,
 ): IrExpressionBody {
   return irExprBody(
-    irCall(moshiSymbols.moshiThreeArgAdapter).apply {
-      arguments[0] = irGet(moshiParameter)
+    irCall(
+        moshiSymbols.moshiThreeArgAdapter,
+        type = moshiSymbols.jsonAdapter.typeWith(delegateType),
+        typeArguments = listOf(delegateType),
+      )
+      .apply {
+        arguments[0] = irGet(moshiParameter)
 
-      addTypeParam(this, moshiSymbols, delegateType, genericIndex, typesParameter)
-      addAnnotationsParam(this, pluginContext, moshiSymbols, jsonQualifiers)
-      arguments[3] = irString(propertyName)
-      typeArguments[0] = delegateType
-    }
+        addTypeParam(this, moshiSymbols, delegateType, genericIndex, typesParameter)
+        addAnnotationsParam(this, pluginContext, moshiSymbols, jsonQualifiers)
+        arguments[3] = irString(propertyName)
+      }
   )
 }
 
 private fun IrBuilderWithScope.addTypeParam(
-  irCall: IrCall,
+  irCall: IrMemberAccessExpression<*>,
   moshiSymbols: MoshiSymbols,
   delegateType: IrType,
   genericIndex: Int,
@@ -157,16 +166,19 @@ private fun IrBuilderWithScope.addTypeParam(
 
 context(compatContext: CompatContext)
 private fun IrBuilderWithScope.addAnnotationsParam(
-  irCall: IrCall,
+  irCall: IrMemberAccessExpression<*>,
   pluginContext: IrPluginContext,
   moshiSymbols: MoshiSymbols,
   jsonQualifiers: List<IrConstructorCall>,
 ) = irCall.apply {
   val argumentExpression =
     if (jsonQualifiers.isEmpty()) {
-      irCall(moshiSymbols.emptySet).apply {
-        typeArguments[0] = pluginContext.irType(ClassId.fromString("kotlin/Annotation"))
-      }
+      val annotationType = pluginContext.irType(ClassId.fromString("kotlin/Annotation"))
+      irCall(
+        moshiSymbols.emptySet,
+        type = pluginContext.irBuiltIns.setClass.typeWith(annotationType),
+        typeArguments = listOf(annotationType),
+      )
     } else {
       val callee: IrFunctionSymbol
       val argExpression: IrExpression

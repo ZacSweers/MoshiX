@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
+import org.jetbrains.kotlin.ir.builders.declarations.addTypeParameter
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBoolean
 import org.jetbrains.kotlin.ir.builders.irByte
@@ -32,24 +33,33 @@ import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.IrTypeParameter
+import org.jetbrains.kotlin.ir.declarations.IrTypeParametersContainer
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
 import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
+import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.IrTypeArgument
+import org.jetbrains.kotlin.ir.types.IrTypeProjection
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.createType
+import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.getPrimitiveType
+import org.jetbrains.kotlin.ir.types.impl.buildSimpleType
+import org.jetbrains.kotlin.ir.types.impl.makeTypeProjection
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.types.isNothing
 import org.jetbrains.kotlin.ir.types.isUnit
 import org.jetbrains.kotlin.ir.types.makeNullable
+import org.jetbrains.kotlin.ir.types.mergeNullability
+import org.jetbrains.kotlin.ir.util.TypeRemapper
 import org.jetbrains.kotlin.ir.util.allOverridden
 import org.jetbrains.kotlin.ir.util.erasedUpperBound
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
@@ -92,6 +102,78 @@ internal fun IrFunction.buildBlockBody(
 internal fun IrClass.isSubclassOfFqName(fqName: String): Boolean =
   fqNameWhenAvailable?.asString() == fqName ||
     superTypes.any { it.erasedUpperBound.isSubclassOfFqName(fqName) }
+
+internal fun IrClass.copyTypeParametersFrom(typeParameters: List<IrTypeParameter>): TypeRemapper {
+  if (typeParameters.isEmpty()) return NOOP_TYPE_REMAPPER
+
+  val generatedTypeParameters = typeParameters.mapIndexed { index, typeParameter ->
+    addTypeParameter {
+      name = typeParameter.name
+      variance = typeParameter.variance
+      this.index = index
+    }
+  }
+
+  val remapper =
+    typeRemapperFor(
+      typeParameters.zip(generatedTypeParameters).associate { (original, generated) ->
+        original.symbol to generated.defaultType
+      }
+    )
+
+  typeParameters.zip(generatedTypeParameters).forEach { (original, generated) ->
+    generated.superTypes += original.superTypes.map(remapper::remapType)
+  }
+
+  return remapper
+}
+
+internal val NOOP_TYPE_REMAPPER =
+  object : TypeRemapper {
+    override fun enterScope(irTypeParametersContainer: IrTypeParametersContainer) {}
+
+    override fun leaveScope() {}
+
+    override fun remapType(type: IrType): IrType = type
+  }
+
+internal fun typeRemapperFor(substitutionMap: Map<IrTypeParameterSymbol, IrType>): TypeRemapper {
+  return object : TypeRemapper {
+    override fun enterScope(irTypeParametersContainer: IrTypeParametersContainer) {}
+
+    override fun leaveScope() {}
+
+    override fun remapType(type: IrType): IrType {
+      return when (type) {
+        is IrSimpleType -> {
+          substitutionMap[type.classifier]?.let { substitutedType ->
+            return when (val remapped = remapType(substitutedType)) {
+              is IrSimpleType -> remapped.mergeNullability(type)
+              else -> remapped
+            }
+          }
+
+          if (type.arguments.isEmpty()) {
+            type
+          } else {
+            type.buildSimpleType {
+              arguments =
+                type.arguments.map { argument ->
+                  when (argument) {
+                    is IrTypeProjection ->
+                      makeTypeProjection(remapType(argument.type), argument.variance)
+                    else -> argument
+                  }
+                }
+            }
+          }
+        }
+
+        else -> type
+      }
+    }
+  }
+}
 
 internal fun IrSimpleFunction.overridesFunctionIn(fqName: FqName): Boolean =
   parentClassOrNull?.fqNameWhenAvailable == fqName ||
