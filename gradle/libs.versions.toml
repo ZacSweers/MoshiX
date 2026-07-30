@@ -15,7 +15,7 @@
 [versions]
 agp = "9.2.1"
 autoService = "1.1.1"
-gjf = "1.35.0"
+gjf = "1.36.1"
 incap = "1.0.0"
 jdk = "23"
 jvmTarget = "11"
