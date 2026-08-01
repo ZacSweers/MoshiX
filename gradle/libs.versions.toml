@@ -91,7 +91,7 @@ moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.re
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
 moshi-kotlinCodegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
 
-metro-compilerCompat-latest = { module = "dev.zacsweers.metro:compiler-compat-k2420_beta2", version.ref = "metro" }
+metro-compilerCompat-latest = { module = "dev.zacsweers.metro:compiler-compat-k250_dev_498", version.ref = "metro" }
 
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
