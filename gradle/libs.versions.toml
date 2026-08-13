@@ -24,7 +24,7 @@ kotlinCompileTesting = "0.13.0"
 kotlinpoet = "2.3.0"
 ksp = "2.3.10"
 ktfmt = "0.64"
-metro = "1.4.0"
+metro = "1.4.1"
 moshi = "1.15.2"
 okio = "3.18.0"
 okhttp = "5.4.0"
@@ -91,7 +91,7 @@ moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.re
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
 moshi-kotlinCodegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
 
-metro-compilerCompat-latest = { module = "dev.zacsweers.metro:compiler-compat-k250_dev_498", version.ref = "metro" }
+metro-compilerCompat-latest = { module = "dev.zacsweers.metro:compiler-compat-latest", version.ref = "metro" }
 
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 

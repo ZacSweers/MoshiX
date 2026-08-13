@@ -4,10 +4,6 @@ pluginManagement {
   repositories {
     mavenCentral()
     google()
-    maven("https://central.sonatype.com/repository/maven-snapshots/") {
-      name = "central-portal-snapshots"
-      mavenContent { snapshotsOnly() }
-    }
     // Kotlin dev (previously bootstrap) repository, useful for testing against Kotlin dev builds.
     // Usually only tested on CI shadow jobs
     // https://kotlinlang.slack.com/archives/C0KLZSCHF/p1616514468003200?thread_ts=1616509748.001400&cid=C0KLZSCHF
@@ -39,10 +35,6 @@ dependencyResolutionManagement {
   repositories {
     mavenCentral()
     google()
-    maven("https://central.sonatype.com/repository/maven-snapshots/") {
-      name = "central-portal-snapshots"
-      mavenContent { snapshotsOnly() }
-    }
     // Kotlin dev (previously bootstrap) repository, useful for testing against Kotlin dev builds.
     // Usually only tested on CI shadow jobs
     // https://kotlinlang.slack.com/archives/C0KLZSCHF/p1616514468003200?thread_ts=1616509748.001400&cid=C0KLZSCHF
