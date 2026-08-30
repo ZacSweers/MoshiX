@@ -4,7 +4,7 @@ Changelog
 **Unreleased**
 --------------
 
-- Build against Kotlin `2.4.10`.
+- Build against Kotlin `2.4.20-RC`.
 
 0.37.0
 ------
@@ -13,7 +13,7 @@ _2026-07-02_
 
 - [moshi-ir] **Enhancement**: Migrate most diagnostic errors to FIR.
 - [moshi-ir] Remove usages of `MessageCollector`.
-- [moshi-ir] Support more versions of kotlinc, now `2.4.0` up to `2.4.20-Beta1`.
+- [moshi-ir] Support more versions of kotlinc, now `2.4.0` up to `2.4.20-RC`.
 - [moshi-adapters] **Enhancement**: Support kotlin `object` types from `@AdaptedBy`.
 - [moshi-ir/ksp] **Fix**: Avoid stack overflows in generated moshi-sealed adapters when an object subtype is paired
   with another subtype that recursively references the sealed type.

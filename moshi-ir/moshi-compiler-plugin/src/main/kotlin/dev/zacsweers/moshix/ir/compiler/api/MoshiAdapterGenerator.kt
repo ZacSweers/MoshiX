@@ -10,6 +10,7 @@ import dev.zacsweers.moshix.ir.compiler.api.FromJsonComponent.PropertyOnly
 import dev.zacsweers.moshix.ir.compiler.util.NameAllocator
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
 import dev.zacsweers.moshix.ir.compiler.util.buildBlockBody
+import dev.zacsweers.moshix.ir.compiler.util.copyTypeParametersFrom
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
 import dev.zacsweers.moshix.ir.compiler.util.defaultPrimitiveValue
 import dev.zacsweers.moshix.ir.compiler.util.generateToStringFun
@@ -29,7 +30,6 @@ import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.addField
-import org.jetbrains.kotlin.ir.builders.declarations.addTypeParameter
 import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.declarations.buildValueParameter
@@ -74,6 +74,7 @@ import org.jetbrains.kotlin.ir.types.IrTypeArgument
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.makeNotNull
+import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.addSimpleDelegatingConstructor
 import org.jetbrains.kotlin.ir.util.constructors
@@ -100,8 +101,6 @@ internal class MoshiAdapterGenerator(
   private val className = target.irType.rawType()
   private val visibility = target.visibility
   private val typeVariables = target.typeVariables
-  private val targetConstructorParams =
-    target.constructor.parameters.mapKeys { (_, param) -> param.index }
 
   private val nameAllocator = NameAllocator()
   private val packageName = className.packageFqName!!.asString()
@@ -146,14 +145,14 @@ internal class MoshiAdapterGenerator(
 
     adapterCls.origin = MoshiOrigin
     val isGeneric = typeVariables.isNotEmpty()
-    for ((i, typeVariable) in typeVariables.withIndex()) {
-      adapterCls.addTypeParameter {
-        name = typeVariable.name
-        variance = typeVariable.variance
-        superTypes += typeVariable.superTypes
-        index = i
-      }
-    }
+    val typeRemapper = adapterCls.copyTypeParametersFrom(typeVariables)
+    val generatedTargetType = typeRemapper.remapType(target.irType)
+    val propertyList = propertyList.map { it.remapTypes(typeRemapper) }
+    val nonTransientProperties = propertyList.filterNot { it.isTransientOrIgnored }
+    val targetConstructorParams =
+      target.constructor.parameters
+        .mapValues { (_, param) -> param.remapTypes(typeRemapper) }
+        .mapKeys { (_, param) -> param.index }
 
     val adapterReceiver =
       buildValueParameter(adapterCls) {
@@ -166,11 +165,11 @@ internal class MoshiAdapterGenerator(
       listOf(
         irType(ClassId.fromString("com/squareup/moshi/JsonAdapter"))
           .classifierOrFail
-          .typeWith(target.irType)
+          .typeWith(generatedTargetType)
       )
 
     val ctor = adapterCls.generateConstructor(isGeneric)
-    val optionsField = adapterCls.generateOptionsField()
+    val optionsField = adapterCls.generateOptionsField(nonTransientProperties)
 
     val adapterProperties = mutableMapOf<DelegateKey, IrField>()
     for (uniqueAdapter in nonTransientProperties.distinctBy { it.delegateKey }) {
@@ -186,8 +185,15 @@ internal class MoshiAdapterGenerator(
     }
 
     adapterCls.generateToStringFun(pluginContext, simpleNames.joinToString("."))
-    adapterCls.generateToJsonFun(adapterProperties)
-    adapterCls.generateFromJsonFun(adapterProperties, optionsField)
+    adapterCls.generateToJsonFun(generatedTargetType, nonTransientProperties, adapterProperties)
+    adapterCls.generateFromJsonFun(
+      generatedTargetType,
+      propertyList,
+      nonTransientProperties,
+      targetConstructorParams,
+      adapterProperties,
+      optionsField,
+    )
 
     return adapterCls
   }
@@ -266,7 +272,9 @@ internal class MoshiAdapterGenerator(
     return ctor
   }
 
-  private fun IrClass.generateOptionsField(): IrField {
+  private fun IrClass.generateOptionsField(
+    nonTransientProperties: List<PropertyGenerator>
+  ): IrField {
     return addField {
       name = Name.identifier("options")
       type = irType(ClassId.fromString("com/squareup/moshi/JsonReader.Options"))
@@ -287,7 +295,11 @@ internal class MoshiAdapterGenerator(
   }
 
   @OptIn(UnsafeDuringIrConstructionAPI::class)
-  private fun IrClass.generateToJsonFun(adapterProperties: Map<DelegateKey, IrField>): IrFunction {
+  private fun IrClass.generateToJsonFun(
+    generatedTargetType: IrType,
+    nonTransientProperties: List<PropertyGenerator>,
+    adapterProperties: Map<DelegateKey, IrField>,
+  ): IrFunction {
     return addOverride(
         FqName("com.squareup.moshi.JsonAdapter"),
         Name.identifier("toJson").identifier,
@@ -328,7 +340,10 @@ internal class MoshiAdapterGenerator(
             )
             // Cast it up to the actual type
             val castValue =
-              irTemporary(irImplicitCast(irGet(value), target.irType.makeNotNull()), "castValue")
+              irTemporary(
+                irImplicitCast(irGet(value), generatedTargetType.makeNotNull()),
+                "castValue",
+              )
             +irCall(moshiSymbols.jsonWriter.getSimpleFunction("beginObject")!!).apply {
               arguments[0] = irGet(writer)
             }
@@ -364,6 +379,10 @@ internal class MoshiAdapterGenerator(
 
   @OptIn(UnsafeDuringIrConstructionAPI::class)
   private fun IrClass.generateFromJsonFun(
+    generatedTargetType: IrType,
+    propertyList: List<PropertyGenerator>,
+    nonTransientProperties: List<PropertyGenerator>,
+    targetConstructorParams: Map<Int, TargetParameter>,
     adapterProperties: Map<DelegateKey, IrField>,
     optionsField: IrField,
   ): IrFunction {
@@ -395,15 +414,19 @@ internal class MoshiAdapterGenerator(
             }
 
             val errors =
-              irTemporary(
-                irCall(moshiSymbols.emptySet).apply {
-                  typeArguments[0] = pluginContext.irBuiltIns.stringType
-                },
-                "errors",
-                irType =
-                  pluginContext.irBuiltIns.setClass.typeWith(pluginContext.irBuiltIns.stringType),
-                isMutable = true,
-              )
+              pluginContext.irBuiltIns.stringType.let { stringType ->
+                val stringSetType = pluginContext.irBuiltIns.setClass.typeWith(stringType)
+                irTemporary(
+                  irCall(
+                    moshiSymbols.emptySet,
+                    type = stringSetType,
+                    typeArguments = listOf(stringType),
+                  ),
+                  "errors",
+                  irType = stringSetType,
+                  isMutable = true,
+                )
+              }
 
             val propertiesByIndex =
               propertyList
@@ -528,7 +551,7 @@ internal class MoshiAdapterGenerator(
                   val wasPresent = irEquals(irGet(mask), irInt(maskAllSetValues[0]))
 
                   irIfThenElse(
-                    type = target.irType,
+                    type = generatedTargetType,
                     condition = wasPresent,
                     // Value was present - invoke constructor with the value
                     thenPart = irCall(standardConstructor).apply { arguments[0] = irGet(localVar) },
@@ -588,7 +611,7 @@ internal class MoshiAdapterGenerator(
                         .joinToIrAnd(this, pluginContext)
 
                     irIfThenElse(
-                      type = target.irType,
+                      type = generatedTargetType,
                       condition = compositeExpression,
                       // Golden masks - invoke the standard constructor
                       thenPart =
@@ -626,7 +649,7 @@ internal class MoshiAdapterGenerator(
               irTemporary(
                 constructorInvocationExpression,
                 nameHint = "result",
-                irType = target.irType,
+                irType = generatedTargetType,
               )
 
             // Assign properties not present in the constructor.
@@ -734,14 +757,18 @@ internal class MoshiAdapterGenerator(
                   irBlock {
                     val result =
                       irTemporary(
-                        irCall(moshiSymbols.jsonAdapter.getSimpleFunction("fromJson")!!).apply {
-                          arguments[0] =
-                            irGetField(
-                              irGet(fieldsHolder),
-                              adapterProperties.getValue(property.delegateKey),
-                            )
-                          arguments[1] = irGet(readerParam)
-                        }
+                        irCall(
+                            moshiSymbols.jsonAdapter.getSimpleFunction("fromJson")!!,
+                            type = property.target.type.makeNullable(),
+                          )
+                          .apply {
+                            arguments[0] =
+                              irGetField(
+                                irGet(fieldsHolder),
+                                adapterProperties.getValue(property.delegateKey),
+                              )
+                            arguments[1] = irGet(readerParam)
+                          }
                       )
                     val setVarExpression =
                       irSet(localVars.getValue(property.localName), irGet(result))
@@ -826,18 +853,23 @@ internal class MoshiAdapterGenerator(
   ) =
     irSet(
       errors,
-      irCall(moshiSymbols.setPlus).apply {
-        arguments[0] = irGet(errors)
-        arguments[1] =
-          irCall(pluginContext.irBuiltIns.throwableClass.getPropertyGetter("message")!!).apply {
-            arguments[0] =
-              irCall(moshiSymbols.moshiUtil.getSimpleFunction(moshiUtilFunction)!!).apply {
-                arguments[0] = irString(property.localName)
-                arguments[1] = irString(property.jsonName)
-                arguments[2] = irGet(readerParam)
-              }
-          }
-      },
+      irCall(
+          moshiSymbols.setPlus,
+          type = pluginContext.irBuiltIns.setClass.typeWith(pluginContext.irBuiltIns.stringType),
+          typeArguments = listOf(pluginContext.irBuiltIns.stringType),
+        )
+        .apply {
+          arguments[0] = irGet(errors)
+          arguments[1] =
+            irCall(pluginContext.irBuiltIns.throwableClass.getPropertyGetter("message")!!).apply {
+              arguments[0] =
+                irCall(moshiSymbols.moshiUtil.getSimpleFunction(moshiUtilFunction)!!).apply {
+                  arguments[0] = irString(property.localName)
+                  arguments[1] = irString(property.jsonName)
+                  arguments[2] = irGet(readerParam)
+                }
+            }
+        },
     )
 
   private fun IrBuilderWithScope.constructorCall(
