@@ -68,7 +68,7 @@ kotlin-scriptRuntime = { module = "org.jetbrains.kotlin:kotlin-script-runtime", 
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
-kotlinx-immutable = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.5.1"
+kotlinx-immutable = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.5.2"
 
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-metadata = { module = "com.squareup:kotlinpoet-metadata", version.ref = "kotlinpoet" }
