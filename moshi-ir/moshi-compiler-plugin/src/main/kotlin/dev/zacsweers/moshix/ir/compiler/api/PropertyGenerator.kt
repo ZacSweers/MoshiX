@@ -11,6 +11,7 @@ import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.types.makeNullable
+import org.jetbrains.kotlin.ir.util.TypeRemapper
 
 /** Generates functions to encode and decode a property as JSON. */
 internal class PropertyGenerator(
@@ -50,6 +51,21 @@ internal class PropertyGenerator(
     localName = nameAllocator.newName(name)
     localIsPresentName = nameAllocator.newName("${name}Set")
     localHasErrorName = nameAllocator.newName("${name}HasError")
+  }
+
+  internal fun remapTypes(remapper: TypeRemapper): PropertyGenerator {
+    return PropertyGenerator(
+        target = target.remapTypes(remapper),
+        delegateKey = delegateKey.remapTypes(remapper),
+        isTransientOrIgnored = isTransientOrIgnored,
+      )
+      .also { remapped ->
+        if (::localName.isInitialized) {
+          remapped.localName = localName
+          remapped.localIsPresentName = localIsPresentName
+          remapped.localHasErrorName = localHasErrorName
+        }
+      }
   }
 
   internal fun generateLocalProperty(

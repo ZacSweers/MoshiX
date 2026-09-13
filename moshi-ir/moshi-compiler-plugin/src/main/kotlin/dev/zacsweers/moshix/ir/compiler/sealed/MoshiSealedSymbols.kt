@@ -53,6 +53,7 @@ internal class MoshiSealedSymbols(private val moshiSymbols: MoshiSymbols) :
         )
         .apply {
           val typeParameter = addTypeParameter("T", irBuiltIns.anyNType, Variance.INVARIANT)
+          returnType = typeWith(typeParameter.defaultType)
           addValueParameter("baseType", javaLangClass.typeWithParameters(listOf(typeParameter)))
           addValueParameter("labelKey", irBuiltIns.stringType)
         }
