@@ -22,17 +22,17 @@ jvmTarget = "11"
 kotlin = "2.4.20"
 kotlinCompileTesting = "0.13.0"
 kotlinpoet = "2.4.0"
-ksp = "2.3.11"
+ksp = "2.3.12"
 ktfmt = "0.64"
-metro = "1.4.1"
+metro = "1.4.3"
 moshi = "1.15.2"
-okio = "3.18.1"
+okio = "3.18.2"
 okhttp = "5.5.0"
 retrofit = "3.0.0"
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version = "2.2.0" }
-kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.18.1" }
+kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.18.2" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 lint = { id = "com.android.lint", version = "9.3.2" }
