@@ -4,6 +4,12 @@ Changelog
 **Unreleased**
 --------------
 
+0.38.0
+------
+
+_2026-10-025_
+
+- [moshi-ir] Fix support for Kotlin `2.5.0` previews.
 - Build against Kotlin `2.4.20`.
 
 0.37.0
@@ -15,8 +21,7 @@ _2026-07-02_
 - [moshi-ir] Remove usages of `MessageCollector`.
 - [moshi-ir] Support more versions of kotlinc, now `2.4.0` up to `2.4.20`.
 - [moshi-adapters] **Enhancement**: Support kotlin `object` types from `@AdaptedBy`.
-- [moshi-ir/ksp] **Fix**: Avoid stack overflows in generated moshi-sealed adapters when an object subtype is paired
-  with another subtype that recursively references the sealed type.
+- [moshi-ir/ksp] **Fix**: Avoid stack overflows in generated moshi-sealed adapters when an object subtype is paired with another subtype that recursively references the sealed type.
 
 0.36.0
 ------
