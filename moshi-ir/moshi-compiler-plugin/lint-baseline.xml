@@ -3,17 +3,6 @@
 
     <issue
         id="KotlincFE10"
-        message="org.jetbrains.kotlin.descriptors.ModuleDescriptor appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
-        errorLine1="    createEmptyExternalPackageFragment(moduleFragment.descriptor, FqName(packageName))"
-        errorLine2="                                                      ~~~~~~~~~~">
-        <location
-            file="src/main/kotlin/dev/zacsweers/moshix/ir/compiler/BaseSymbols.kt"
-            line="159"
-            column="55"/>
-    </issue>
-
-    <issue
-        id="KotlincFE10"
         message="org.jetbrains.kotlin.descriptors.DescriptorVisibilities appears to be part of the old K1 Kotlin compiler. Avoid using it if possible; K1 will be going away soon."
         errorLine1="          visibility = DescriptorVisibilities.PRIVATE"
         errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~">
