@@ -80,8 +80,9 @@ internal inline fun IrDiagnosticReporter.error(message: () -> String) {
   report(MoshiDiagnostics.SOURCELESS_MOSHI_ERROR, message())
 }
 
+context(compatContext: CompatContext)
 internal inline fun IrDiagnosticReporter.error(declaration: IrDeclaration, message: () -> String) {
-  at(declaration).report(MoshiDiagnostics.MOSHI_ERROR, message())
+  with(compatContext) { reportAt(declaration, MoshiDiagnostics.MOSHI_ERROR, message()) }
 }
 
 internal inline fun IrDiagnosticReporter.error(
