@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
+import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.declarations.addTypeParameter
 import org.jetbrains.kotlin.ir.builders.irBlockBody
@@ -20,6 +21,7 @@ import org.jetbrains.kotlin.ir.builders.irByte
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irChar
 import org.jetbrains.kotlin.ir.builders.irConcat
+import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.builders.irGetObject
 import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irLong
@@ -28,6 +30,7 @@ import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irShort
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrFunction
@@ -38,6 +41,7 @@ import org.jetbrains.kotlin.ir.declarations.IrTypeParametersContainer
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
 import org.jetbrains.kotlin.ir.expressions.addArgument
+import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
@@ -80,8 +84,9 @@ internal inline fun IrDiagnosticReporter.error(message: () -> String) {
   report(MoshiDiagnostics.SOURCELESS_MOSHI_ERROR, message())
 }
 
+context(compatContext: CompatContext)
 internal inline fun IrDiagnosticReporter.error(declaration: IrDeclaration, message: () -> String) {
-  at(declaration).report(MoshiDiagnostics.MOSHI_ERROR, message())
+  with(compatContext) { reportAt(declaration, MoshiDiagnostics.MOSHI_ERROR, message()) }
 }
 
 internal inline fun IrDiagnosticReporter.error(
@@ -90,6 +95,32 @@ internal inline fun IrDiagnosticReporter.error(
   message: () -> String,
 ) {
   at(element, file).report(MoshiDiagnostics.MOSHI_ERROR, message())
+}
+
+@OptIn(UnsafeDuringIrConstructionAPI::class)
+internal fun IrClass.addJsonAdapterConstructor(
+  superConstructor: IrConstructor,
+  context: IrPluginContext,
+): IrConstructor {
+  require(superConstructor.nonDispatchParameters.isEmpty())
+  val adapterClass = this
+  return addConstructor {
+    startOffset = adapterClass.startOffset
+    endOffset = adapterClass.endOffset
+    origin = adapterClass.origin
+    isPrimary = true
+  }
+    .apply {
+      buildBlockBody(context) {
+        +irDelegatingConstructorCall(superConstructor)
+        +IrInstanceInitializerCallImpl(
+          adapterClass.startOffset,
+          adapterClass.endOffset,
+          adapterClass.symbol,
+          context.irBuiltIns.unitType,
+        )
+      }
+    }
 }
 
 internal fun IrFunction.buildBlockBody(

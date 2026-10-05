@@ -24,7 +24,6 @@ import org.jetbrains.kotlin.ir.declarations.IrPackageFragment
 import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
-import org.jetbrains.kotlin.ir.declarations.createEmptyExternalPackageFragment
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrClassReferenceImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
@@ -158,7 +157,7 @@ internal open class BaseSymbols(
       .symbol
 
   protected fun createPackage(packageName: String): IrPackageFragment =
-    createEmptyExternalPackageFragment(moduleFragment.descriptor, FqName(packageName))
+    moduleFragment.createEmptyExternalPackageFragmentCompat(packageName)
 
   protected fun createClass(
     irParent: IrDeclarationParent,

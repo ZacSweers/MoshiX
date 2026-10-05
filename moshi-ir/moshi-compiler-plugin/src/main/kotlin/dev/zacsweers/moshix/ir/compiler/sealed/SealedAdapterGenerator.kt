@@ -8,6 +8,7 @@ import dev.zacsweers.moshix.ir.compiler.api.AdapterGenerator
 import dev.zacsweers.moshix.ir.compiler.api.PreparedAdapter
 import dev.zacsweers.moshix.ir.compiler.constArgumentOfTypeAt
 import dev.zacsweers.moshix.ir.compiler.labelKey
+import dev.zacsweers.moshix.ir.compiler.util.addJsonAdapterConstructor
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
 import dev.zacsweers.moshix.ir.compiler.util.copyTypeParametersFrom
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
@@ -46,7 +47,6 @@ import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrVararg
-import org.jetbrains.kotlin.ir.interpreter.hasAnnotation
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
@@ -56,13 +56,13 @@ import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
-import org.jetbrains.kotlin.ir.util.addSimpleDelegatingConstructor
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.getSimpleFunction
+import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.util.nonDispatchArguments
 import org.jetbrains.kotlin.ir.util.nonDispatchParameters
@@ -225,10 +225,9 @@ private constructor(
         superTypes = listOf(jsonAdapterType)
         val hasObjectSubtypes = objectSubtypes.isNotEmpty()
         val ctor =
-          addSimpleDelegatingConstructor(
+          addJsonAdapterConstructor(
               moshiSymbols.jsonAdapter.constructors.single().owner,
-              pluginContext.irBuiltIns,
-              isPrimary = true,
+              pluginContext,
             )
             .apply {
               addValueParameter {
