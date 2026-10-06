@@ -1,5 +1,14 @@
-// Copyright (C) 2026 Zac Sweers
-// SPDX-License-Identifier: Apache-2.0
+/*
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright (C) 2026 Zac Sweers
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Use of this source code is governed by the Apache 2.0 license in LICENSE.txt.
+ *
+ * Adapted from Kotlin 2.4.20's IrUtils.kt, with a local package and List.map:
+ * https://github.com/JetBrains/kotlin/blob/v2.4.20/compiler/ir/ir.tree/src/org/jetbrains/kotlin/ir/util/IrUtils.kt#L718-L750
+ * Kotlin 2.5 removed this helper, so MoshiX keeps its own copy.
+ */
 package dev.zacsweers.moshix.ir.compiler.util
 
 import org.jetbrains.kotlin.ir.IrBuiltIns
@@ -13,14 +22,6 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
 import org.jetbrains.kotlin.ir.util.copyTo
 
-/*
- * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
- * Use of this source code is governed by the Apache 2.0 license in LICENSE.txt.
- *
- * Adapted from Kotlin 2.4.20's IrUtils.kt, with a local package and List.map:
- * https://github.com/JetBrains/kotlin/blob/v2.4.20/compiler/ir/ir.tree/src/org/jetbrains/kotlin/ir/util/IrUtils.kt#L718-L750
- * Kotlin 2.5 removed this helper, so MoshiX keeps its own copy.
- */
 @Suppress("KotlincFE10") // IR constructor visibility still uses DescriptorVisibility.
 internal fun IrClass.addSimpleDelegatingConstructor(
   superConstructor: IrConstructor,
