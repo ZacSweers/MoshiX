@@ -9,6 +9,7 @@ import dev.zacsweers.moshix.ir.compiler.api.FromJsonComponent.ParameterProperty
 import dev.zacsweers.moshix.ir.compiler.api.FromJsonComponent.PropertyOnly
 import dev.zacsweers.moshix.ir.compiler.util.NameAllocator
 import dev.zacsweers.moshix.ir.compiler.util.addOverride
+import dev.zacsweers.moshix.ir.compiler.util.addSimpleDelegatingConstructor
 import dev.zacsweers.moshix.ir.compiler.util.buildBlockBody
 import dev.zacsweers.moshix.ir.compiler.util.copyTypeParametersFrom
 import dev.zacsweers.moshix.ir.compiler.util.createIrBuilder
@@ -76,7 +77,6 @@ import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
-import org.jetbrains.kotlin.ir.util.addSimpleDelegatingConstructor
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.deepCopyWithSymbols
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
