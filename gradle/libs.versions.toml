@@ -27,7 +27,7 @@ ktfmt = "0.64"
 metro = "1.4.5"
 moshi = "1.15.2"
 okio = "3.18.2"
-okhttp = "5.5.0"
+okhttp = "5.5.1"
 retrofit = "3.0.0"
 
 [plugins]
