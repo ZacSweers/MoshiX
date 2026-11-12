@@ -6,9 +6,8 @@ import java.io.File
 import java.io.File.pathSeparator
 import java.io.File.separator
 import org.jetbrains.kotlin.platform.wasm.WasmTarget
-import org.jetbrains.kotlin.test.services.KotlinStandardLibrariesPathProvider
 
-object ClasspathBasedStandardLibrariesPathProvider : KotlinStandardLibrariesPathProvider {
+object ClasspathBasedStandardLibrariesPathProvider : CompatibleStandardLibrariesPathProvider {
   private val SEP = "\\$separator"
 
   private val GRADLE_DEPENDENCY =
