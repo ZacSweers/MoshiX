@@ -35,6 +35,25 @@ open class AbstractMoshiDiagnosticTest : AbstractPhasedJvmDiagnosticLightTreeTes
         +DISABLE_GENERATED_FIR_TAGS
         RUN_PIPELINE_TILL with TestPhase.FRONTEND
       }
+
+      // Kotlin 2.5 renamed the final backend phase from BACKEND to CODEGEN.
+      forTestsMatching(
+        "CorrectConstructorParam.kt" or
+        "IgnoredConstructorDefaultsForUnitNothingAndVoid.kt" or
+        "InterfacesDoNotErrorWhenGeneratorNotSet.kt" or
+        "NestedSealedWithCommonSubtypes.kt" or
+        "NonFieldApplicableQualifier.kt" or
+        "RegularAdapterConstructor.kt" or
+        "SealedAdapterConstructor.kt" or
+        "TypeAliasesShareAdapter.kt"
+      ) {
+        defaultDirectives {
+          -RUN_PIPELINE_TILL
+          RUN_PIPELINE_TILL with
+            (TestPhase.entries.firstOrNull { it.name == "CODEGEN" }
+              ?: TestPhase.valueOf("BACKEND"))
+        }
+      }
     }
   }
 }
