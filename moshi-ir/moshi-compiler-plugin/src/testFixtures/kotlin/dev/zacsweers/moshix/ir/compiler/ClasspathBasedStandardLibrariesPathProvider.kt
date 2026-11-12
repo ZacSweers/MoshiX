@@ -51,6 +51,8 @@ object ClasspathBasedStandardLibrariesPathProvider : KotlinStandardLibrariesPath
 
   override fun scriptRuntimeJarForTests(): File = getFile("kotlin-script-runtime")
 
+  override fun scriptingCommonJarForTests(): File? = jars["kotlin-scripting-common"]
+
   override fun jvmAnnotationsForTests(): File = getFile("kotlin-annotations-jvm")
 
   override fun getAnnotationsJar(): File = getFile("kotlin-annotations-jvm")
