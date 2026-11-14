@@ -60,6 +60,7 @@ dependencies {
 
   add("embedded", libs.metro.compilerCompat.latest)
 
+  testFixturesApi(platform(libs.junit5.bom))
   testKotlin("testFixturesApi", "kotlin-test-junit5")
   testKotlin("testFixturesApi", "kotlin-compiler-internal-test-framework")
   testKotlin("testFixturesApi", "kotlin-compiler")
