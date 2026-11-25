@@ -7,14 +7,12 @@ import dev.zacsweers.moshix.ir.compiler.api.TargetParameter
 import dev.zacsweers.moshix.ir.compiler.api.TargetProperty
 import dev.zacsweers.moshix.ir.compiler.api.TargetType
 import dev.zacsweers.moshix.ir.compiler.util.isTransient
-import org.jetbrains.kotlin.DeprecatedForRemovalCompilerApi
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.util.defaultType
-import org.jetbrains.kotlin.ir.util.hasDefaultValue
 import org.jetbrains.kotlin.ir.util.nonDispatchParameters
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.primaryConstructor
@@ -62,7 +60,7 @@ internal fun targetType(
   )
 }
 
-@OptIn(UnsafeDuringIrConstructionAPI::class, DeprecatedForRemovalCompilerApi::class)
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 internal fun primaryConstructor(targetType: IrClass): TargetConstructor {
   val primaryConstructor = targetType.primaryConstructor!!
 
@@ -75,7 +73,7 @@ internal fun primaryConstructor(targetType: IrClass): TargetConstructor {
         name = name,
         index = index,
         type = parameter.type,
-        hasDefault = parameter.hasDefaultValue(),
+        hasDefault = parameter.defaultValue != null,
         qualifiers = parameter.jsonQualifiers(),
         jsonIgnore = parameter.jsonIgnore(),
         jsonName = parameter.jsonName(),

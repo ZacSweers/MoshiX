@@ -38,6 +38,7 @@ import org.jetbrains.kotlin.ir.declarations.IrTypeParametersContainer
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
 import org.jetbrains.kotlin.ir.expressions.addArgument
+import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
@@ -67,7 +68,6 @@ import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.nonDispatchParameters
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
-import org.jetbrains.kotlin.ir.util.toIrConst
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -80,8 +80,9 @@ internal inline fun IrDiagnosticReporter.error(message: () -> String) {
   report(MoshiDiagnostics.SOURCELESS_MOSHI_ERROR, message())
 }
 
+context(compatContext: CompatContext)
 internal inline fun IrDiagnosticReporter.error(declaration: IrDeclaration, message: () -> String) {
-  at(declaration).report(MoshiDiagnostics.MOSHI_ERROR, message())
+  with(compatContext) { reportAt(declaration, MoshiDiagnostics.MOSHI_ERROR, message()) }
 }
 
 internal inline fun IrDiagnosticReporter.error(
@@ -213,9 +214,9 @@ internal fun IrBuilderWithScope.defaultPrimitiveValue(
     PrimitiveType.BYTE -> irByte(0)
     PrimitiveType.SHORT -> irShort(0)
     PrimitiveType.INT -> irInt(0)
-    PrimitiveType.FLOAT -> 0.0f.toIrConst(type)
+    PrimitiveType.FLOAT -> IrConstImpl.float(startOffset, endOffset, type, 0.0f)
     PrimitiveType.LONG -> irLong(0L)
-    PrimitiveType.DOUBLE -> 0.0.toIrConst(type)
+    PrimitiveType.DOUBLE -> IrConstImpl.double(startOffset, endOffset, type, 0.0)
     else -> irNull(type.makeNullable())
   }
 }
