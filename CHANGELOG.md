@@ -4,7 +4,7 @@ Changelog
 **Unreleased**
 --------------
 
-- Build against Kotlin `2.5.0-RC`.
+- Build against Kotlin `2.5.0-RC2`.
 
 - [moshi-ir] Fix crashes when generating regular and sealed adapters with Kotlin `2.5.0` previews.
 
